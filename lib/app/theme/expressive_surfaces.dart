@@ -8,10 +8,9 @@ import 'app_radii.dart';
 abstract final class ExpressiveSurfaces {
   /// 页面画布底色（Scaffold、底部导航、侧边导航共用）。
   ///
-  /// 统一取 `colorScheme.surface`：默认种子色下约为 #F6FAFE，与早期固定的
-  /// #F7F9FC 肉眼无差；换成暖色/绿色等种子色时底栏与页面不再出现
-  /// “冷灰蓝底栏 + 带色调页面”的接缝。白色卡片（surfaceContainerLowest）
-  /// 仍在其上清晰浮起。
+  /// 统一取 `colorScheme.surface`：简约皮肤下表面已中性化（亮色 #EDEDED、
+  /// 暗色 #0F0F0F），底栏与页面同色不出现接缝；白色卡片
+  /// （surfaceContainerLowest）仍在其上清晰分层。
   static Color pageBackground(ColorScheme colors) => colors.surface;
 
   /// 卡片纯净表面底色：
@@ -66,8 +65,8 @@ abstract final class ExpressiveSurfaces {
               : Brightness.light,
         ),
         titleTextStyle: text.titleLarge?.copyWith(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+          fontSize: 17,
+          fontWeight: FontWeight.w500,
           color: colors.onSurface,
         ),
       ),
@@ -84,18 +83,18 @@ abstract final class ExpressiveSurfaces {
         shape: dialogShape,
         elevation: 0,
         titleTextStyle: text.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
         ),
         contentTextStyle: text.bodyMedium,
         actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       ),
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         iconColor: colors.onSurfaceVariant,
         textColor: colors.onSurface,
         titleTextStyle: text.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          fontSize: 16.5,
+          fontWeight: FontWeight.w400,
+          fontSize: 16,
           color: colors.onSurface,
         ),
         subtitleTextStyle: text.bodyMedium?.copyWith(
@@ -114,14 +113,14 @@ abstract final class ExpressiveSurfaces {
         showDragHandle: true,
         dragHandleColor: colors.onSurfaceVariant,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
         ),
         clipBehavior: Clip.antiAlias,
       ),
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
         fillColor: isLight
-            ? colors.surfaceContainerLow.withValues(alpha: 0.6)
+            ? colors.surfaceContainer
             : colors.surfaceContainerHighest,
         border: inputBorder,
         enabledBorder: inputBorder,
@@ -140,20 +139,30 @@ abstract final class ExpressiveSurfaces {
           vertical: 12,
         ),
       ),
+      // 底部导航不画 MD3 的胶囊选中指示器：选中态只靠图标/文字换主色区分。
       navigationBarTheme: NavigationBarThemeData(
         height: 80,
         backgroundColor: isLight
             ? pageBackground(colors)
             : colors.surfaceContainer,
         elevation: 0,
-        indicatorColor: colors.secondaryContainer,
+        indicatorColor: Colors.transparent,
         indicatorShape: const StadiumBorder(),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? colors.primary
+                : colors.onSurfaceVariant,
+          ),
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => text.labelMedium?.copyWith(
-            color: colors.onSurface,
+            color: states.contains(WidgetState.selected)
+                ? colors.primary
+                : colors.onSurfaceVariant,
             fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w700
-                : FontWeight.w500,
+                ? FontWeight.w500
+                : FontWeight.w400,
           ),
         ),
       ),
@@ -161,7 +170,7 @@ abstract final class ExpressiveSurfaces {
         backgroundColor: isLight
             ? pageBackground(colors)
             : colors.surfaceContainer,
-        indicatorColor: colors.secondaryContainer,
+        indicatorColor: Colors.transparent,
         indicatorShape: const StadiumBorder(),
       ),
       navigationDrawerTheme: NavigationDrawerThemeData(
@@ -169,7 +178,9 @@ abstract final class ExpressiveSurfaces {
             ? colors.surfaceContainerLowest
             : colors.surfaceContainerLow,
         indicatorColor: colors.secondaryContainer,
-        indicatorShape: const StadiumBorder(),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
       dividerTheme: DividerThemeData(
         color: colors.outlineVariant,
@@ -196,9 +207,11 @@ abstract final class ExpressiveSurfaces {
         ),
       ),
       searchBarTheme: SearchBarThemeData(
-        backgroundColor: WidgetStatePropertyAll(colors.surfaceContainerHigh),
+        backgroundColor: WidgetStatePropertyAll(colors.surfaceContainer),
         elevation: const WidgetStatePropertyAll(0),
-        shape: const WidgetStatePropertyAll(StadiumBorder()),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
       ),
       searchViewTheme: SearchViewThemeData(
         backgroundColor: colors.surfaceContainerHigh,
@@ -212,7 +225,7 @@ abstract final class ExpressiveSurfaces {
         ),
         actionTextColor: colors.inversePrimary,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         insetPadding: const EdgeInsets.all(16),
       ),
       datePickerTheme: DatePickerThemeData(
@@ -225,10 +238,10 @@ abstract final class ExpressiveSurfaces {
         backgroundColor: colors.surfaceContainerHigh,
         shape: dialogShape,
         hourMinuteShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
         ),
         dayPeriodShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
       tabBarTheme: TabBarThemeData(
@@ -241,7 +254,7 @@ abstract final class ExpressiveSurfaces {
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
           color: colors.inverseSurface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
         ),
         textStyle: text.bodySmall?.copyWith(color: colors.onInverseSurface),
       ),

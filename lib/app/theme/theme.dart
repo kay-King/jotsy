@@ -5,20 +5,24 @@ import 'expressive_surfaces.dart';
 
 part 'theme_color_schemes.dart';
 
-/// 由种子色装配应用的亮/暗主题：tonalSpot 动态配色 + Material 2021 字阶。
+/// 由种子色装配应用的亮/暗主题：种子色只决定强调色，表面一律中性灰阶。
 ///
 /// 应用外壳与设置页里的明暗预览共用同一装配，预览看到的就是切换主题后的
-/// 真实效果。
+/// 真实效果。从种子生成的配色会给表面染上种子色调（MD3 观感的主要来源），
+/// 故装配后统一经 [MaterialThemeSchemes.withNeutralSurfaces] 换成简约灰阶，
+/// 页面呈现“浅灰底 + 白卡片”的扁平效果，种子色只体现在按钮、开关等强调处。
 ThemeData buildSeededAppTheme(Color seedColor, Brightness brightness) {
   return MaterialTheme(
     brightness == Brightness.light
         ? Typography.material2021().black
         : Typography.material2021().white,
   ).theme(
-    ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-      dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+    MaterialThemeSchemes.withNeutralSurfaces(
+      ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: brightness,
+        dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+      ),
     ),
   );
 }
@@ -57,8 +61,8 @@ class MaterialTheme {
   ThemeData darkHighContrast() => theme(darkHighContrastScheme());
 
   ThemeData theme(ColorScheme colorScheme) {
-    // 页面画布统一取种子色派生的 surface：纯白卡片在其上清爽浮起，换主题色时
-    // 底色随之带上同一色调，不再与固定冷灰蓝底色产生色差。
+    // 页面画布统一取 colorScheme.surface：简约皮肤下它是中性浅灰，
+    // 纯白卡片在其上分层，换主题色时底色保持中性、只有强调色变化。
     final scaffoldBg = ExpressiveSurfaces.pageBackground(colorScheme);
     final baseTheme = ThemeData(
       useMaterial3: true,
@@ -75,26 +79,27 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );
-    // Expressive 是 M3 的扩展而非 Material 4；继续启用 useMaterial3，
-    // 用集中式组件主题补齐形状、强调字重与表面，第三方 Material 控件也会继承。
+    // 简约皮肤不做大号粗体标题：标题与标签统一收回到常规/中等字重，
+    // 靠大小与颜色分层级，而不是靠加粗。组件主题仍集中在这里装配，
+    // 第三方 Material 控件也会继承。
     final emphasizedTextTheme = resolvedTextTheme.copyWith(
       headlineLarge: resolvedTextTheme.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
       ),
       headlineMedium: resolvedTextTheme.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
       ),
       headlineSmall: resolvedTextTheme.headlineSmall?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
       ),
       titleLarge: resolvedTextTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-      ),
-      titleMedium: resolvedTextTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
       ),
+      titleMedium: resolvedTextTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w500,
+      ),
       labelLarge: resolvedTextTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w500,
       ),
     );
     return ExpressiveSurfaces.apply(

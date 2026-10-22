@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'expressive_motion.dart';
 
-/// 用原生控件承载 Expressive 的状态形状，保留焦点、键盘、禁用态和语义树。
+/// 控件形状与状态的集中定义，保留焦点、键盘、禁用态和语义树。
+/// 简约皮肤下按钮用固定小圆角，不再有 MD3 按压时圆角变形的胶囊形态；
 /// 不覆盖按钮的语义颜色：tonal、危险操作和第三方编辑器仍可使用自己的色彩角色。
 abstract final class ExpressiveControls {
   static final shape = WidgetStateProperty.resolveWith<OutlinedBorder>((
     states,
   ) {
-    return RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(
-        states.contains(WidgetState.pressed) ? 12 : 28,
-      ),
-    );
+    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(8));
   });
 
   static ButtonStyle button(TextTheme text) => ButtonStyle(
@@ -47,26 +44,22 @@ abstract final class ExpressiveControls {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: colors.primaryContainer,
-        foregroundColor: colors.onPrimaryContainer,
+        // 主操作按钮用实心主色（默认即微信绿）+ 白字，不用 MD3 的浅色容器底。
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
         elevation: 0,
         focusElevation: 1,
         hoverElevation: 2,
         highlightElevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         extendedTextStyle: theme.textTheme.titleMedium,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(style: style),
+      // 滑杆回到常规细轨 + 圆形滑块，不用 MD3 的断轨与竖柄造型。
       sliderTheme: SliderThemeData(
-        trackHeight: 16,
-        trackGap: 6,
-        trackShape: const GappedSliderTrackShape(),
-        thumbShape: const HandleThumbShape(),
-        thumbSize: WidgetStateProperty.resolveWith(
-          (states) => Size(states.contains(WidgetState.pressed) ? 2 : 4, 44),
-        ),
+        trackHeight: 4,
         activeTrackColor: colors.primary,
-        inactiveTrackColor: colors.secondaryContainer,
+        inactiveTrackColor: colors.surfaceContainerHighest,
         thumbColor: colors.primary,
         valueIndicatorColor: colors.inverseSurface,
         valueIndicatorTextStyle: theme.textTheme.labelLarge?.copyWith(
@@ -85,11 +78,18 @@ abstract final class ExpressiveControls {
         ),
         checkmarkColor: colors.onSecondaryContainer,
         side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       ),
+      // 开关按微信/iOS 观感：选中实心主色、未选浅灰轨、白圆钮、无描边。
       switchTheme: SwitchThemeData(
-        trackOutlineWidth: const WidgetStatePropertyAll(1),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.primary
+              : colors.surfaceContainerHighest,
+        ),
+        thumbColor: const WidgetStatePropertyAll(Colors.white),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
