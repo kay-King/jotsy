@@ -44,7 +44,7 @@ class HomeBarStyle {
     this.tintColorDark,
     this.border = true,
     this.borderLine = HomeBarLineStyle.borderDefaults,
-    this.topBarHairline = false,
+    this.topBarHairline = true,
     this.topBarLine = HomeBarLineStyle.topBarDefaults,
     this.shadow = true,
     this.barHeight = 60,

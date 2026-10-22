@@ -55,7 +55,8 @@ abstract final class ExpressiveControls {
         focusElevation: 1,
         hoverElevation: 2,
         highlightElevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        // 圆形悬浮按钮（照参考项目）：主色圆钮 + 白图标，不用胶囊形。
+        shape: const CircleBorder(),
         extendedTextStyle: theme.textTheme.titleMedium,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(style: style),

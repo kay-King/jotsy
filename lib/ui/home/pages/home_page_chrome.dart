@@ -128,16 +128,15 @@ extension _HomePageChrome on _HomePageState {
                   // “写进「旅行」”，新建的日记预先收进这本。
                   child: Consumer(
                     builder: (context, ref, _) {
-                      return FloatingActionButton.extended(
+                      return FloatingActionButton(
                         onPressed: () {
                           unawaited(_openCreateFromGlobalFab());
                         },
-                        icon: const FaIcon(FontAwesomeIcons.plus, size: 20),
-                        label: Text(
-                          _createLabel(context, ref),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        // 样式照参考项目的悬浮按钮：圆形绿钮 + 白色加号，
+                        // 不带文字胶囊；原动态文案（写进「某本」）保留为
+                        // 长按提示，信息不丢。
+                        tooltip: _createLabel(context, ref),
+                        child: const FaIcon(FontAwesomeIcons.plus, size: 22),
                       );
                     },
                   ),

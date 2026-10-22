@@ -95,8 +95,11 @@ class HomeBarResolvedStyle {
       // 描边、投影与并排的 FAB 只属于悬浮玻璃底栏；实色栏贴底铺满，
       // 这里直接给出“是否画”，渲染层不必再判断材质。
       border: isGlass && style.border,
-      // 顶栏分隔线有自己的开关，不跟底栏描边走；glassTopBars 已隐含玻璃材质。
-      topBarHairline: isGlass && style.glassTopBars && style.topBarHairline,
+      // 顶栏分隔线有自己的开关，不跟底栏描边走。简约皮肤下实色顶栏也画
+      // 细分隔线（微信导航栏式），故不再限定玻璃材质；玻璃时仍要求顶栏
+      // 本身启用玻璃（glassTopBars）。
+      topBarHairline:
+          style.topBarHairline && (!isGlass || style.glassTopBars),
       shadow: isGlass && style.shadow,
       fabPlacement: isGlass ? style.fabPlacement : HomeBarFabPlacement.above,
       labelMode: style.labelMode,
