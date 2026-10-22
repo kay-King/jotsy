@@ -11,7 +11,7 @@ class DiaryCardModeStyle {
     required this.coverPosition,
     this.coverSide = 116,
     this.coverShape = DiaryCardCoverShape.square,
-    this.coverRadius = 16,
+    this.coverRadius = 8,
     required this.coverHeight,
     this.coverInset = false,
     this.coverDivider = true,

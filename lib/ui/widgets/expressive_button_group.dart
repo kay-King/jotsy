@@ -56,7 +56,7 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
                   ExpressiveMotion.fast,
                 ),
                 minimumSize: WidgetStatePropertyAll(
-                  dense ? const Size(48, 36) : const Size(48, 48),
+                  dense ? const Size(48, 36) : const Size(48, 40),
                 ),
                 tapTargetSize: dense ? MaterialTapTargetSize.shrinkWrap : null,
                 padding: WidgetStatePropertyAll(
@@ -64,27 +64,28 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
                       ? const EdgeInsets.symmetric(horizontal: 12)
                       : const EdgeInsets.symmetric(
                           horizontal: 12,
-                          vertical: 12,
+                          vertical: 8,
                         ),
                 ),
                 backgroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.disabled)) return null;
+                  // 简约皮肤：选中为浅绿底+绿字，未选为中性浅灰，不用实心绿胶囊。
                   return isSelected
-                      ? colors.primary
-                      : colors.surfaceContainerHighest;
+                      ? colors.primaryContainer
+                      : colors.surfaceContainerHigh;
                 }),
                 foregroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.disabled)) return null;
-                  return isSelected ? colors.onPrimary : colors.onSurface;
+                  return isSelected ? colors.primary : colors.onSurface;
                 }),
                 shape: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.pressed) || isSelected) {
                     return RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(isSelected ? 24 : 12),
+                      borderRadius: BorderRadius.circular(8),
                     );
                   }
-                  const inner = Radius.circular(4);
-                  const outer = Radius.circular(24);
+                  const inner = Radius.circular(2);
+                  const outer = Radius.circular(8);
                   final first = index == 0;
                   final last = index == segments.length - 1;
                   final radius = stacked

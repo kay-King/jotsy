@@ -2,24 +2,27 @@ part of 'diary_card_style.dart';
 
 /// 卡片容器的外观：圆角、底色、渐变、描边、强调条与阴影。两种布局共用。
 ///
-/// 默认值即 DESIGN.md §5.1 的经典样式：圆角 24、主题卡片表面、0.8dp 主题
-/// 描边、置顶淡主色着色与改版前的多层投影。
+/// 上游默认是 DESIGN.md §5.1 的经典样式（圆角 24、多层投影）；本 fork 的
+/// 简约皮肤把默认值改成圆角 10、无投影、底色不叠着色、置顶不染色，
+/// 只保留 0.8dp 细描边分层（见构造函数处的说明）。
 @immutable
 class DiaryCardSurfaceStyle {
   const DiaryCardSurfaceStyle({
-    this.cornerRadius = 24,
-    this.background = const DiaryCardColorSpec(),
+    // 简约皮肤（fork 定制，偏离 DESIGN.md §5.1 经典样式）：小圆角、无投影、
+    // 底色不叠着色（纯卡片表面色）、置顶不染色，只留细描边分层。
+    this.cornerRadius = 10,
+    this.background = const DiaryCardColorSpec(strength: 0),
     this.opacity = 1,
     this.gradient = false,
     this.gradientEnd = _defaultGradientEnd,
     this.gradientDirection = DiaryCardGradientDirection.diagonal,
-    this.pinnedTint = true,
+    this.pinnedTint = false,
     this.borderWidth = 0.8,
     this.borderColor = _defaultBorderColor,
     this.accentBar = DiaryCardAccentBar.none,
     this.accentWidth = 4,
     this.accentColor = _defaultAccentColor,
-    this.shadow = DiaryCardShadowStyle.themed,
+    this.shadow = DiaryCardShadowStyle.none,
     this.shadowElevation = 8,
     this.shadowColor = _defaultShadowColor,
   });

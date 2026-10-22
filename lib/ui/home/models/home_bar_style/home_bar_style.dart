@@ -47,15 +47,16 @@ class HomeBarStyle {
     this.topBarHairline = false,
     this.topBarLine = HomeBarLineStyle.topBarDefaults,
     this.shadow = true,
-    this.barHeight = 64,
+    this.barHeight = 60,
     this.cornerRadius = 32,
     this.sideMargin = 16,
     this.bottomGap = 12,
     this.fabPlacement = HomeBarFabPlacement.above,
     this.labelMode = HomeBarLabelMode.always,
     this.iconSize = 20,
-    this.indicator = HomeBarIndicator.capsule,
-    this.labelGap = 4,
+    // 简约皮肤：默认无胶囊指示器，选中项只靠主色图标与文字区分（微信式）。
+    this.indicator = HomeBarIndicator.none,
+    this.labelGap = 2,
     this.blockPadding = 6,
   });
 

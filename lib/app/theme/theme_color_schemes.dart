@@ -4,8 +4,8 @@ part of 'theme.dart';
 ///
 /// 该文件只承载静态配色数据，不承载 ThemeData 组装逻辑。
 ///
-/// 简约扁平皮肤：表面色一律走无色相的中性灰阶（亮色页面底 #EDEDED、卡片纯白；
-/// 暗色页面底 #0F0F0F、卡片 #1C1C1E），强调色基调为绿色 + 链接蓝，
+/// 简约扁平皮肤：表面色一律走无色相的中性灰阶（亮色页面底纯白、卡片纯白
+/// 靠细描边分层；暗色页面底 #0F0F0F、卡片 #1C1C1E），强调色基调为绿色 + 链接蓝，
 /// 错误色 #FA5151。种子色动态生成的配色经 [withNeutralSurfaces]
 /// 做同样的表面中性化，保证两条装配路径观感一致。
 class MaterialThemeSchemes {
@@ -19,9 +19,9 @@ class MaterialThemeSchemes {
   static ColorScheme withNeutralSurfaces(ColorScheme scheme) {
     if (scheme.brightness == Brightness.light) {
       return scheme.copyWith(
-        surface: const Color(0xffededed),
-        surfaceDim: const Color(0xffdcdcdc),
-        surfaceBright: const Color(0xfff7f7f7),
+        surface: const Color(0xffffffff),
+        surfaceDim: const Color(0xffe8e8e8),
+        surfaceBright: const Color(0xffffffff),
         surfaceContainerLowest: const Color(0xffffffff),
         surfaceContainerLow: const Color(0xfff7f7f7),
         surfaceContainer: const Color(0xfff2f2f2),
@@ -33,6 +33,11 @@ class MaterialThemeSchemes {
         outlineVariant: const Color(0xffe5e5e5),
         inverseSurface: const Color(0xff191919),
         onInverseSurface: const Color(0xfff2f2f2),
+        // 次级容器（tonal 按钮底色）也去色调：种子生成的蓝灰会透出 MD3 感。
+        secondaryContainer: const Color(0xffefefef),
+        onSecondaryContainer: const Color(0xff191919),
+        tertiaryContainer: const Color(0xffe8e8ea),
+        onTertiaryContainer: const Color(0xff3a3a3c),
         surfaceTint: scheme.primary,
       );
     }
@@ -51,6 +56,8 @@ class MaterialThemeSchemes {
       outlineVariant: const Color(0xff2c2c2e),
       inverseSurface: const Color(0xffededed),
       onInverseSurface: const Color(0xff191919),
+      secondaryContainer: const Color(0xff2a2a2c),
+      onSecondaryContainer: const Color(0xffededed),
       surfaceTint: scheme.primary,
     );
   }
@@ -64,8 +71,8 @@ class MaterialThemeSchemes {
     onPrimaryContainer: Color(0xff034d27),
     secondary: Color(0xff576b95),
     onSecondary: Color(0xffffffff),
-    secondaryContainer: Color(0xffe8ecf2),
-    onSecondaryContainer: Color(0xff2e3a4e),
+    secondaryContainer: Color(0xffefefef),
+    onSecondaryContainer: Color(0xff191919),
     tertiary: Color(0xff6d6d72),
     onTertiary: Color(0xffffffff),
     tertiaryContainer: Color(0xffe8e8ea),
@@ -74,7 +81,7 @@ class MaterialThemeSchemes {
     onError: Color(0xffffffff),
     errorContainer: Color(0xffffe3e1),
     onErrorContainer: Color(0xff7a0e0d),
-    surface: Color(0xffededed),
+    surface: Color(0xffffffff),
     onSurface: Color(0xff191919),
     onSurfaceVariant: Color(0xff757575),
     outline: Color(0xffc7c7c7),
@@ -95,8 +102,8 @@ class MaterialThemeSchemes {
     onTertiaryFixed: Color(0xff1c1c1e),
     tertiaryFixedDim: Color(0xffc6c6c8),
     onTertiaryFixedVariant: Color(0xff3a3a3c),
-    surfaceDim: Color(0xffdcdcdc),
-    surfaceBright: Color(0xfff7f7f7),
+    surfaceDim: Color(0xffe8e8e8),
+    surfaceBright: Color(0xffffffff),
     surfaceContainerLowest: Color(0xffffffff),
     surfaceContainerLow: Color(0xfff7f7f7),
     surfaceContainer: Color(0xfff2f2f2),
@@ -123,7 +130,7 @@ class MaterialThemeSchemes {
     onError: Color(0xffffffff),
     errorContainer: Color(0xffd43a36),
     onErrorContainer: Color(0xffffffff),
-    surface: Color(0xffededed),
+    surface: Color(0xffffffff),
     onSurface: Color(0xff0d0d0d),
     onSurfaceVariant: Color(0xff3d3d3d),
     outline: Color(0xff595959),
@@ -172,7 +179,7 @@ class MaterialThemeSchemes {
     onError: Color(0xffffffff),
     errorContainer: Color(0xff98000a),
     onErrorContainer: Color(0xffffffff),
-    surface: Color(0xffededed),
+    surface: Color(0xffffffff),
     onSurface: Color(0xff000000),
     onSurfaceVariant: Color(0xff000000),
     outline: Color(0xff2b2b2b),
@@ -211,8 +218,8 @@ class MaterialThemeSchemes {
     onPrimaryContainer: Color(0xffa9ecc6),
     secondary: Color(0xff7d90b8),
     onSecondary: Color(0xff0e1626),
-    secondaryContainer: Color(0xff2c3850),
-    onSecondaryContainer: Color(0xffd3def2),
+    secondaryContainer: Color(0xff2a2a2c),
+    onSecondaryContainer: Color(0xffededed),
     tertiary: Color(0xffaeaeb2),
     onTertiary: Color(0xff2c2c2e),
     tertiaryContainer: Color(0xff48484a),

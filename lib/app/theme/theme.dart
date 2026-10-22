@@ -10,7 +10,7 @@ part 'theme_color_schemes.dart';
 /// 应用外壳与设置页里的明暗预览共用同一装配，预览看到的就是切换主题后的
 /// 真实效果。从种子生成的配色会给表面染上种子色调（MD3 观感的主要来源），
 /// 故装配后统一经 [MaterialThemeSchemes.withNeutralSurfaces] 换成简约灰阶，
-/// 页面呈现“浅灰底 + 白卡片”的扁平效果，种子色只体现在按钮、开关等强调处。
+/// 页面呈现“白底 + 白卡片细线分层”的扁平效果，种子色只体现在按钮、开关等强调处。
 ThemeData buildSeededAppTheme(Color seedColor, Brightness brightness) {
   return MaterialTheme(
     brightness == Brightness.light
@@ -79,28 +79,43 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );
-    // 简约皮肤不做大号粗体标题：标题与标签统一收回到常规/中等字重，
-    // 靠大小与颜色分层级，而不是靠加粗。组件主题仍集中在这里装配，
-    // 第三方 Material 控件也会继承。
+    // 简约皮肤不做大号粗体标题：整体字号比 MD3 规范收小一档，标题与标签
+    // 统一用常规/中等字重，靠大小与颜色分层级，而不是靠加粗加大。
+    // 组件主题仍集中在这里装配，第三方 Material 控件也会继承。
     final emphasizedTextTheme = resolvedTextTheme.copyWith(
       headlineLarge: resolvedTextTheme.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
+        fontSize: 26,
       ),
       headlineMedium: resolvedTextTheme.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
+        fontSize: 23,
       ),
       headlineSmall: resolvedTextTheme.headlineSmall?.copyWith(
         fontWeight: FontWeight.w500,
+        fontSize: 20,
       ),
       titleLarge: resolvedTextTheme.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
+        fontSize: 19,
       ),
       titleMedium: resolvedTextTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w500,
+        fontSize: 15,
       ),
+      titleSmall: resolvedTextTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w500,
+        fontSize: 13.5,
+      ),
+      bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(fontSize: 15.5),
+      bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(fontSize: 13.5),
+      bodySmall: resolvedTextTheme.bodySmall?.copyWith(fontSize: 11.5),
       labelLarge: resolvedTextTheme.labelLarge?.copyWith(
         fontWeight: FontWeight.w500,
+        fontSize: 13,
       ),
+      labelMedium: resolvedTextTheme.labelMedium?.copyWith(fontSize: 11.5),
+      labelSmall: resolvedTextTheme.labelSmall?.copyWith(fontSize: 10.5),
     );
     return ExpressiveSurfaces.apply(
       ExpressiveControls.apply(

@@ -8,9 +8,9 @@ import 'app_radii.dart';
 abstract final class ExpressiveSurfaces {
   /// 页面画布底色（Scaffold、底部导航、侧边导航共用）。
   ///
-  /// 统一取 `colorScheme.surface`：简约皮肤下表面已中性化（亮色 #EDEDED、
+  /// 统一取 `colorScheme.surface`：简约皮肤下表面已中性化（亮色纯白、
   /// 暗色 #0F0F0F），底栏与页面同色不出现接缝；白色卡片
-  /// （surfaceContainerLowest）仍在其上清晰分层。
+  /// （surfaceContainerLowest）靠细描边在其上分层。
   static Color pageBackground(ColorScheme colors) => colors.surface;
 
   /// 卡片纯净表面底色：

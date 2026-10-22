@@ -8,11 +8,12 @@ part of 'diary_card_style.dart';
 @immutable
 class DiaryCardTypography {
   const DiaryCardTypography({
-    this.titleScale = 1,
-    this.titleWeight = DiaryCardTitleWeight.bold,
-    this.previewScale = 1,
+    // 简约皮肤：标题收小且不用粗体（基础字号列表 18.5/瀑布流 16.5 偏大）。
+    this.titleScale = 0.9,
+    this.titleWeight = DiaryCardTitleWeight.medium,
+    this.previewScale = 0.95,
     this.lineHeight = DiaryCardLineHeight.standard,
-    this.metaScale = 1,
+    this.metaScale = 0.95,
     this.textAlign = DiaryCardTextAlign.start,
     this.titleColor = _defaultTextColor,
     this.bodyColor = _defaultTextColor,
