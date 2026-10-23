@@ -209,18 +209,18 @@ class _SettingsDestination extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Card.filled(
           margin: EdgeInsets.zero,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
           color: ExpressiveSurfaces.cardColor(colors),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 10,
+              vertical: 12,
             ),
             // 照 IdeaMemo 设置页：图标裸置、无底块，正文色单色线条感，
             // 固定 40 宽槽位保持各行标题对齐。
@@ -234,8 +234,8 @@ class _SettingsDestination extends StatelessWidget {
             title: Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 17,
-                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
               ),
             ),
             subtitle: Text(

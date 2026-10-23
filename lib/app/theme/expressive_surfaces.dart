@@ -94,17 +94,20 @@ abstract final class ExpressiveSurfaces {
         textColor: colors.onSurface,
         // 行高放宽（照 IdeaMemo 设置页的透气行距）：默认密度下列表行
         // 太挤，标题与副标题贴得太近。
-        minVerticalPadding: 10,
+        minVerticalPadding: 12,
         minTileHeight: 64,
         titleTextStyle: text.titleMedium?.copyWith(
           fontWeight: FontWeight.w400,
           fontSize: 16,
+          height: 1.3,
           color: colors.onSurface,
         ),
         // 副标题与图标间距照 SaltUI 源码原值：副标题 12sp、图标与文字 12dp。
+        // 副标题行高放开到 1.45，多行说明文字不再行行相贴。
         subtitleTextStyle: text.bodyMedium?.copyWith(
           color: colors.onSurfaceVariant,
           fontSize: 12,
+          height: 1.45,
         ),
         horizontalTitleGap: 12,
       ),

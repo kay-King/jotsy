@@ -44,8 +44,8 @@ class PageHeader extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 23,
+                      fontWeight: FontWeight.w400,
                       letterSpacing: -0.5,
                     ),
                   ),

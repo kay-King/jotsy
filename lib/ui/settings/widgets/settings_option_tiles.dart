@@ -32,7 +32,7 @@ class SettingsSwitchTile extends StatelessWidget {
   /// 开关、滑块、选择器与颜色行共用，同一组从属行读起来是同一层级。
   static const TextStyle nestedTitleStyle = TextStyle(
     fontSize: 15,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
   );
 
   final String title;

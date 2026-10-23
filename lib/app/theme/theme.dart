@@ -79,43 +79,66 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );
-    // Salt 风字阶（照 IdeaMemo 的观感）：标题一律中等字重不加粗，靠大小
-    // 与颜色分层级；正文与小字比 MD3 规范放大一点，读起来透气，不用
-    // 小号灰字堆密度。组件主题仍集中在这里装配，第三方控件也会继承。
+    // Salt 风字阶（照 IdeaMemo 的观感）：全部字重压到 w400 常规——用户
+    // 的系统字体在 w500 以上会切成粗书法面（或合成假粗），标题显得又
+    // 黑又挤；w400 时是干净的细面（设置页副标题即此效果）。层级靠大小
+    // 与颜色区分，不靠字重。行高一并放开（标题 1.3、正文 1.5），避免
+    // 书法体字面高、行距紧贴的拥挤感。
     final emphasizedTextTheme = resolvedTextTheme.copyWith(
       headlineLarge: resolvedTextTheme.headlineLarge?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 25,
+        height: 1.3,
       ),
       headlineMedium: resolvedTextTheme.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 22,
+        height: 1.3,
       ),
       headlineSmall: resolvedTextTheme.headlineSmall?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 20,
+        height: 1.3,
       ),
       titleLarge: resolvedTextTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 18.5,
+        height: 1.3,
       ),
       titleMedium: resolvedTextTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 16,
+        height: 1.35,
       ),
       titleSmall: resolvedTextTheme.titleSmall?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 14,
+        height: 1.35,
       ),
-      bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(fontSize: 16),
-      bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(fontSize: 14.5),
-      bodySmall: resolvedTextTheme.bodySmall?.copyWith(fontSize: 12.5),
+      bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(
+        fontSize: 16,
+        height: 1.5,
+      ),
+      bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(
+        fontSize: 14.5,
+        height: 1.5,
+      ),
+      bodySmall: resolvedTextTheme.bodySmall?.copyWith(
+        fontSize: 12.5,
+        height: 1.45,
+      ),
       labelLarge: resolvedTextTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         fontSize: 14,
       ),
-      labelMedium: resolvedTextTheme.labelMedium?.copyWith(fontSize: 12),
-      labelSmall: resolvedTextTheme.labelSmall?.copyWith(fontSize: 11),
+      labelMedium: resolvedTextTheme.labelMedium?.copyWith(
+        fontWeight: FontWeight.w400,
+        fontSize: 12,
+      ),
+      labelSmall: resolvedTextTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w400,
+        fontSize: 11,
+      ),
     );
     return ExpressiveSurfaces.apply(
       ExpressiveControls.apply(

@@ -64,7 +64,7 @@ class SettingsCardGroup extends StatelessWidget {
                           style: textTheme.titleMedium?.copyWith(
                             fontSize: 15,
                             color: colorScheme.primary,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                             letterSpacing: 0.1,
                           ),
                         ),
