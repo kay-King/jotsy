@@ -596,34 +596,35 @@ void main() {
     testWidgets(
       'both slices share one backdrop; by default only tags draw a line',
       (tester) async {
-      await _pumpHome(
-        tester,
-        diaryCount: 3,
-        statusBar: _statusBar,
-        homeBarRaw: _raw(_glass),
-      );
-      final filters = tester
-          .renderObjectList<RenderBackdropFilter>(
-            find.descendant(
-              of: find.byType(DiariesPage),
-              matching: find.byType(BackdropFilter),
-            ),
-          )
-          .toList();
-      expect(filters, hasLength(2));
-      expect(filters.every((filter) => filter.enabled), isTrue);
-      expect(filters.first.backdropKey, isNotNull);
-      expect(filters.last.backdropKey, same(filters.first.backdropKey));
-      expect(
-        tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
-        isNull,
-      );
-      expect(
-        tester.widget<GlassSurface>(_tagBarGlass).bottomHairline,
-        isNotNull,
-      );
-      await _unmount(tester);
-    });
+        await _pumpHome(
+          tester,
+          diaryCount: 3,
+          statusBar: _statusBar,
+          homeBarRaw: _raw(_glass),
+        );
+        final filters = tester
+            .renderObjectList<RenderBackdropFilter>(
+              find.descendant(
+                of: find.byType(DiariesPage),
+                matching: find.byType(BackdropFilter),
+              ),
+            )
+            .toList();
+        expect(filters, hasLength(2));
+        expect(filters.every((filter) => filter.enabled), isTrue);
+        expect(filters.first.backdropKey, isNotNull);
+        expect(filters.last.backdropKey, same(filters.first.backdropKey));
+        expect(
+          tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
+          isNull,
+        );
+        expect(
+          tester.widget<GlassSurface>(_tagBarGlass).bottomHairline,
+          isNotNull,
+        );
+        await _unmount(tester);
+      },
+    );
 
     testWidgets('the top bar hairline lands on the tag bar only', (
       tester,

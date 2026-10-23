@@ -61,10 +61,7 @@ void main() {
         _resolve(glass.copyWith(glassTopBars: false), _light).topBarHairline,
         isFalse,
       );
-      expect(
-        _resolve(HomeBarStyle.defaults, _light).topBarHairline,
-        isTrue,
-      );
+      expect(_resolve(HomeBarStyle.defaults, _light).topBarHairline, isTrue);
       expect(_resolve(glass, _light), isNot(_resolve(off, _light)));
     });
 

@@ -98,8 +98,7 @@ class HomeBarResolvedStyle {
       // 顶栏分隔线有自己的开关，不跟底栏描边走。简约皮肤下实色顶栏也画
       // 细分隔线（微信导航栏式），故不再限定玻璃材质；玻璃时仍要求顶栏
       // 本身启用玻璃（glassTopBars）。
-      topBarHairline:
-          style.topBarHairline && (!isGlass || style.glassTopBars),
+      topBarHairline: style.topBarHairline && (!isGlass || style.glassTopBars),
       shadow: isGlass && style.shadow,
       fabPlacement: isGlass ? style.fabPlacement : HomeBarFabPlacement.above,
       labelMode: style.labelMode,

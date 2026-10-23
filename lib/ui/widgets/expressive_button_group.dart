@@ -62,10 +62,7 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
                 padding: WidgetStatePropertyAll(
                   dense
                       ? const EdgeInsets.symmetric(horizontal: 12)
-                      : const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+                      : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 backgroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.disabled)) return null;
