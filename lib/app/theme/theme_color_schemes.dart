@@ -5,7 +5,8 @@ part of 'theme.dart';
 /// 该文件只承载静态配色数据，不承载 ThemeData 组装逻辑。
 ///
 /// Salt 风皮肤（照 IdeaMemo / SaltUI 的默认观感）：表面走无色相中性灰阶
-/// （亮色页面底 #F3F3F3、卡片纯白靠明度差分层；暗色页面底 #202020），
+/// （亮色页面底 #F8F9FB——实测 IdeaMemo 在用户手机上的底色原值、卡片纯白
+/// 靠明度差分层；暗色页面底 #202020），
 /// 强调色为 Salt 高亮蓝 #0470E6，容器色（悬浮按钮、底栏指示）固定为
 /// MD3 基线浅紫 #E8DEF8，文字暖黑 #1E1715、次级灰 #8C8C8C，
 /// 错误色 #FA5151。种子色动态生成的配色经 [withNeutralSurfaces]
@@ -21,14 +22,14 @@ class MaterialThemeSchemes {
   static ColorScheme withNeutralSurfaces(ColorScheme scheme) {
     if (scheme.brightness == Brightness.light) {
       return scheme.copyWith(
-        surface: const Color(0xfff3f3f3),
-        surfaceDim: const Color(0xffe2e2e2),
-        surfaceBright: const Color(0xfffbfbfb),
+        surface: const Color(0xfff8f9fb),
+        surfaceDim: const Color(0xffe8eaed),
+        surfaceBright: const Color(0xffffffff),
         surfaceContainerLowest: const Color(0xffffffff),
-        surfaceContainerLow: const Color(0xfffafafa),
-        surfaceContainer: const Color(0xfff5f5f5),
-        surfaceContainerHigh: const Color(0xffefefef),
-        surfaceContainerHighest: const Color(0xffe9e9e9),
+        surfaceContainerLow: const Color(0xfffcfcfd),
+        surfaceContainer: const Color(0xfff3f4f6),
+        surfaceContainerHigh: const Color(0xffedeef0),
+        surfaceContainerHighest: const Color(0xffe5e7ea),
         onSurface: const Color(0xff1e1715),
         onSurfaceVariant: const Color(0xff8c8c8c),
         outline: const Color(0xffc9c9c9),
@@ -89,7 +90,7 @@ class MaterialThemeSchemes {
     onError: Color(0xffffffff),
     errorContainer: Color(0xffffe3e1),
     onErrorContainer: Color(0xff7a0e0d),
-    surface: Color(0xfff3f3f3),
+    surface: Color(0xfff8f9fb),
     onSurface: Color(0xff1e1715),
     onSurfaceVariant: Color(0xff8c8c8c),
     outline: Color(0xffc9c9c9),
@@ -110,13 +111,13 @@ class MaterialThemeSchemes {
     onTertiaryFixed: Color(0xff1c1c1e),
     tertiaryFixedDim: Color(0xffc6c6c8),
     onTertiaryFixedVariant: Color(0xff3a3a3c),
-    surfaceDim: Color(0xffe2e2e2),
-    surfaceBright: Color(0xfffbfbfb),
+    surfaceDim: Color(0xffe8eaed),
+    surfaceBright: Color(0xffffffff),
     surfaceContainerLowest: Color(0xffffffff),
-    surfaceContainerLow: Color(0xfffafafa),
-    surfaceContainer: Color(0xfff5f5f5),
-    surfaceContainerHigh: Color(0xffefefef),
-    surfaceContainerHighest: Color(0xffe9e9e9),
+    surfaceContainerLow: Color(0xfffcfcfd),
+    surfaceContainer: Color(0xfff3f4f6),
+    surfaceContainerHigh: Color(0xffedeef0),
+    surfaceContainerHighest: Color(0xffe5e7ea),
   );
 
   static const ColorScheme lightMediumContrastScheme = ColorScheme(

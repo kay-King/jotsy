@@ -220,7 +220,7 @@ class _SettingsDestination extends StatelessWidget {
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 6,
+              vertical: 10,
             ),
             // 照 IdeaMemo 设置页：图标裸置、无底块，正文色单色线条感，
             // 固定 40 宽槽位保持各行标题对齐。
@@ -228,14 +228,14 @@ class _SettingsDestination extends StatelessWidget {
               width: 40,
               height: 40,
               child: Center(
-                child: FaIcon(icon, size: 22, color: colors.onSurface),
+                child: FaIcon(icon, size: 24, color: colors.onSurface),
               ),
             ),
             title: Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: 16.5,
-                fontWeight: FontWeight.w600,
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
               ),
             ),
             subtitle: Text(

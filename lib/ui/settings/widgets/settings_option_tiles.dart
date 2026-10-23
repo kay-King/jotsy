@@ -54,8 +54,8 @@ class SettingsSwitchTile extends StatelessWidget {
       contentPadding: EdgeInsetsDirectional.only(
         start: indentFor(nested: nested, deep: deep),
         end: 16,
-        top: 2,
-        bottom: 2,
+        top: 10,
+        bottom: 10,
       ),
       value: value,
       // 与 listTileTheme 的标题样式合并，只改字号与字重。

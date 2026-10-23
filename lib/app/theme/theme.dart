@@ -79,43 +79,43 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );
-    // 简约皮肤不做大号粗体标题：整体字号比 MD3 规范收小一档，标题与标签
-    // 统一用常规/中等字重，靠大小与颜色分层级，而不是靠加粗加大。
-    // 组件主题仍集中在这里装配，第三方 Material 控件也会继承。
+    // Salt 风字阶（照 IdeaMemo 的观感）：标题一律中等字重不加粗，靠大小
+    // 与颜色分层级；正文与小字比 MD3 规范放大一点，读起来透气，不用
+    // 小号灰字堆密度。组件主题仍集中在这里装配，第三方控件也会继承。
     final emphasizedTextTheme = resolvedTextTheme.copyWith(
       headlineLarge: resolvedTextTheme.headlineLarge?.copyWith(
         fontWeight: FontWeight.w500,
-        fontSize: 26,
+        fontSize: 25,
       ),
       headlineMedium: resolvedTextTheme.headlineMedium?.copyWith(
         fontWeight: FontWeight.w500,
-        fontSize: 23,
+        fontSize: 22,
       ),
       headlineSmall: resolvedTextTheme.headlineSmall?.copyWith(
         fontWeight: FontWeight.w500,
         fontSize: 20,
       ),
       titleLarge: resolvedTextTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 19,
+        fontWeight: FontWeight.w500,
+        fontSize: 18.5,
       ),
       titleMedium: resolvedTextTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w500,
-        fontSize: 15,
+        fontSize: 16,
       ),
       titleSmall: resolvedTextTheme.titleSmall?.copyWith(
         fontWeight: FontWeight.w500,
-        fontSize: 13.5,
+        fontSize: 14,
       ),
       bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(fontSize: 16),
-      bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(fontSize: 13.5),
-      bodySmall: resolvedTextTheme.bodySmall?.copyWith(fontSize: 11.5),
+      bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(fontSize: 14.5),
+      bodySmall: resolvedTextTheme.bodySmall?.copyWith(fontSize: 12.5),
       labelLarge: resolvedTextTheme.labelLarge?.copyWith(
         fontWeight: FontWeight.w500,
-        fontSize: 13,
+        fontSize: 14,
       ),
-      labelMedium: resolvedTextTheme.labelMedium?.copyWith(fontSize: 11.5),
-      labelSmall: resolvedTextTheme.labelSmall?.copyWith(fontSize: 10.5),
+      labelMedium: resolvedTextTheme.labelMedium?.copyWith(fontSize: 12),
+      labelSmall: resolvedTextTheme.labelSmall?.copyWith(fontSize: 11),
     );
     return ExpressiveSurfaces.apply(
       ExpressiveControls.apply(

@@ -38,20 +38,6 @@ class SettingsCardGroup extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          if (title != null) ...[
-            Padding(
-              padding: const EdgeInsets.only(left: 12, bottom: 8),
-              child: Text(
-                title!,
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 16,
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ],
           Container(
             // Salt 风分组卡：无描边、无投影，白卡靠页面底色的明度差分层。
             decoration: BoxDecoration(
@@ -61,15 +47,35 @@ class SettingsCardGroup extends StatelessWidget {
               color: ExpressiveSurfaces.cardColor(colorScheme),
               borderRadius: BorderRadius.circular(AppRadii.card),
               clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  for (var i = 0; i < children.length; i++) ...[
-                    children[i],
-                    if (i < children.length - 1)
-                      const SettingsCardGroupDivider(),
+              // 卡内上下留白，首尾行不贴卡边（照 IdeaMemo 分组卡的透气感）。
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    // 分组标题在卡内顶部（照 IdeaMemo 设置页）：蓝色小标题，
+                    // 与下方第一行之间不画线，靠留白分层。
+                    if (title != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        child: Text(
+                          title!,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontSize: 15,
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                    for (var i = 0; i < children.length; i++) ...[
+                      children[i],
+                      if (i < children.length - 1)
+                        const SettingsCardGroupDivider(),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

@@ -92,9 +92,13 @@ abstract final class ExpressiveSurfaces {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         iconColor: colors.onSurfaceVariant,
         textColor: colors.onSurface,
+        // 行高放宽（照 IdeaMemo 设置页的透气行距）：默认密度下列表行
+        // 太挤，标题与副标题贴得太近。
+        minVerticalPadding: 10,
+        minTileHeight: 64,
         titleTextStyle: text.titleMedium?.copyWith(
           fontWeight: FontWeight.w400,
-          fontSize: 16,
+          fontSize: 17,
           color: colors.onSurface,
         ),
         subtitleTextStyle: text.bodyMedium?.copyWith(
