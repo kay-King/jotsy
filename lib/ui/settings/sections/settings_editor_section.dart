@@ -18,6 +18,7 @@ import 'package:node_diary/ui/settings/pages/mood_options_page.dart';
 import 'package:node_diary/ui/settings/providers/app_features_provider.dart';
 import '../widgets/settings_card_group.dart';
 import 'settings_code_block_style_tile.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 设置页编辑器配置区块。
 class SettingsEditorSection extends ConsumerWidget {
@@ -248,12 +249,15 @@ class _DayPhotoSuggestionsSwitch extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: settings.dayPhotoSuggestionsEnabledNotifier,
       builder: (BuildContext context, bool enabled, Widget? child) {
-        return SwitchListTile(
+        return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          value: enabled,
           title: Text(l10n.settingsDayPhotoSuggestions),
           subtitle: Text(l10n.settingsDayPhotoSuggestionsSubtitle),
-          onChanged: settings.setDayPhotoSuggestionsEnabled,
+          trailing: SaltSwitch(
+            value: enabled,
+            onChanged: settings.setDayPhotoSuggestionsEnabled,
+          ),
+          onTap: () => settings.setDayPhotoSuggestionsEnabled(!enabled),
         );
       },
     );
@@ -273,12 +277,15 @@ class _ToolbarAlwaysVisibleSwitch extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: settings.diaryToolbarAlwaysVisibleNotifier,
       builder: (BuildContext context, bool enabled, Widget? child) {
-        return SwitchListTile(
+        return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          value: enabled,
           title: Text(l10n.settingsToolbarAlwaysVisible),
           subtitle: Text(l10n.settingsToolbarAlwaysVisibleSubtitle),
-          onChanged: settings.setDiaryToolbarAlwaysVisible,
+          trailing: SaltSwitch(
+            value: enabled,
+            onChanged: settings.setDiaryToolbarAlwaysVisible,
+          ),
+          onTap: () => settings.setDiaryToolbarAlwaysVisible(!enabled),
         );
       },
     );

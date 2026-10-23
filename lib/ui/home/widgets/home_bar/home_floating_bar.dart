@@ -264,6 +264,11 @@ class HomeInlineCreateButton extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   onTap: onPressed,
+                  // 与悬浮钮一致：去 MD3 水波纹与状态层。
+                  splashFactory: NoSplash.splashFactory,
+                  highlightColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  focusColor: Colors.transparent,
                   child: Center(
                     child: FaIcon(
                       FontAwesomeIcons.plus,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../app/theme/app_spacing.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 日记模块底部面板（分享、导出）共用的分组标题：主色小图标 + 粗体标题。
 class DiarySheetSectionHeader extends StatelessWidget {
@@ -70,9 +71,9 @@ class DiarySheetSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final description = this.description;
-    return SwitchListTile(
+    // B 档：开关换自绘 SaltSwitch，行结构与原 SwitchListTile 一致。
+    return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      value: value,
       title: Text(label, style: theme.textTheme.bodyLarge),
       subtitle: description == null
           ? null
@@ -82,7 +83,8 @@ class DiarySheetSwitch extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-      onChanged: onChanged,
+      trailing: SaltSwitch(value: value, onChanged: onChanged),
+      onTap: () => onChanged(!value),
     );
   }
 }

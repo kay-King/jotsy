@@ -7,6 +7,8 @@ import 'package:node_diary/ui/diaries/sections/diary_export_sheet.dart';
 import 'package:node_diary/ui/widgets/expressive_choice_tile.dart';
 
 import '../../../support/expressive_test_theme.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_sheet_controls.dart';
 
 Future<DiaryExportRequest? Function()> _open(
   WidgetTester tester, {
@@ -177,7 +179,12 @@ void main() {
     expect(find.text('从旧到新'), findsNothing);
     expect(
       tester
-          .widget<SwitchListTile>(find.widgetWithText(SwitchListTile, '书籍结构'))
+          .widget<SaltSwitch>(
+            find.descendant(
+              of: find.widgetWithText(DiarySheetSwitch, '书籍结构'),
+              matching: find.byType(SaltSwitch),
+            ),
+          )
           .value,
       isTrue,
     );

@@ -12,6 +12,7 @@ import '../../../core/services/settings_service.dart';
 import '../../home/widgets/home_hint_visibility_scope.dart';
 import '../widgets/settings_card_group.dart';
 import 'data_management_page.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 设置-数据与隐私二级页。
 ///
@@ -118,16 +119,26 @@ class DataPrivacyPage extends ConsumerWidget {
                     valueListenable: settingsService.appLockEnabledNotifier,
                     builder:
                         (BuildContext context, bool enabled, Widget? child) {
-                          return SwitchListTile(
+                          return ListTile(
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 4,
                             ),
-                            value: enabled,
                             title: Text(l10n.settingsAppLock),
                             subtitle: Text(l10n.settingsAppLockSubtitle),
-                            onChanged: (bool value) =>
-                                _toggleAppLock(context, settingsService, value),
+                            trailing: SaltSwitch(
+                              value: enabled,
+                              onChanged: (bool value) => _toggleAppLock(
+                                context,
+                                settingsService,
+                                value,
+                              ),
+                            ),
+                            onTap: () => _toggleAppLock(
+                              context,
+                              settingsService,
+                              !enabled,
+                            ),
                           );
                         },
                   );

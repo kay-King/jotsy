@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 日历显示选项面板的通用行组件：分组标题、字段标签、开关行与淡入说明。
 /// 只负责排版，状态与保存由面板处理。
@@ -81,10 +82,10 @@ class CalendarOptionSwitch extends StatelessWidget {
     final description = this.description;
     final theme = Theme.of(context);
     // 与面板里的单选项同一字阶（bodyMedium w500），开关行不比分组标题更抢眼。
-    return SwitchListTile(
+    // B 档：开关换自绘 SaltSwitch，行结构与原 SwitchListTile 一致。
+    return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      value: value,
       title: Text(
         label,
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -101,7 +102,8 @@ class CalendarOptionSwitch extends StatelessWidget {
                 height: 1.35,
               ),
             ),
-      onChanged: onChanged,
+      trailing: SaltSwitch(value: value, onChanged: onChanged),
+      onTap: () => onChanged(!value),
     );
   }
 }

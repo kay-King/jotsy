@@ -20,6 +20,7 @@ import '../../../app/theme/expressive_surfaces.dart';
 import '../../widgets/expressive_reorder_proxy.dart';
 import '../../widgets/list_item_presence.dart';
 import '../widgets/tag_management_tile.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 标签管理页：
 /// 1. 标签排序（拖拽）；
@@ -448,12 +449,12 @@ class _TagFilterMemorySwitch extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: settings.tagFilterMemoryEnabledNotifier,
       builder: (BuildContext context, bool enabled, Widget? child) {
-        return SwitchListTile(
+        return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          value: enabled,
           title: Text(l10n.settingsTagMemory),
           subtitle: Text(l10n.settingsTagMemorySubtitle),
-          onChanged: onChanged,
+          trailing: SaltSwitch(value: enabled, onChanged: onChanged),
+          onTap: () => onChanged(!enabled),
         );
       },
     );

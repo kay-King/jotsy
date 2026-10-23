@@ -21,6 +21,7 @@ import 'package:node_diary/ui/home/providers/home_bar_settings_provider.dart';
 import 'package:node_diary/ui/home/providers/home_tab_request_provider.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_bottom_bar.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_chrome_scope.dart';
+import 'package:node_diary/ui/home/widgets/home_bar/home_create_fab.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_floating_bar.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/notebooks/providers/home_notebook_scope_provider.dart';

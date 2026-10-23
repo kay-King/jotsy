@@ -84,7 +84,8 @@ abstract final class ExpressiveSurfaces {
         shape: dialogShape,
         elevation: 0,
         titleTextStyle: text.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w500,
+          // 与全 App 标题一致的 w400（用户系统书法字体 w500 起显粗）。
+          fontWeight: FontWeight.w400,
         ),
         contentTextStyle: text.bodyMedium,
         actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -123,7 +124,7 @@ abstract final class ExpressiveSurfaces {
         showDragHandle: true,
         dragHandleColor: colors.onSurfaceVariant,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         clipBehavior: Clip.antiAlias,
       ),

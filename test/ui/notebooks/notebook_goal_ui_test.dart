@@ -8,6 +8,7 @@ import 'package:node_diary/ui/notebooks/widgets/notebook_header_sliver.dart';
 
 import '../../support/diary_drafts_harness.dart';
 import 'notebook_test_support.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
 
 /// 写作目标的界面：编辑页“写作目标”分组读写 payload.goal（开关、周期、
 /// 篇数，参与未保存确认）；首页头部卡片的目标行文字与达成后的变化、点按
@@ -60,10 +61,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<SwitchListTile>(
+          .widget<SaltSwitch>(
             find.descendant(
               of: find.byKey(const ValueKey<String>('notebook_goal_switch')),
-              matching: find.byType(SwitchListTile),
+              matching: find.byType(SaltSwitch),
             ),
           )
           .value,

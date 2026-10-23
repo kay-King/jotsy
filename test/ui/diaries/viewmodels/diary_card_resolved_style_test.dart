@@ -134,23 +134,13 @@ void main() {
         // fork 默认无投影（DiaryCardShadowStyle.none）。
         expect(plain.surface.shadows, isEmpty);
         expect(plain.titleColor, scheme.onSurface);
-        expect(plain.bodyColor, scheme.onSurfaceVariant);
-        expect(
-          plain.eyebrowColor,
-          scheme.onSurfaceVariant.withValues(alpha: 0.82),
-        );
-        expect(
-          plain.previewColor,
-          scheme.onSurfaceVariant.withValues(alpha: 0.88),
-        );
-        expect(
-          plain.footerColor,
-          scheme.onSurfaceVariant.withValues(alpha: 0.72),
-        );
-        expect(
-          plain.mutedColor,
-          scheme.onSurfaceVariant.withValues(alpha: 0.6),
-        );
+        // fork 默认：正文基色与标题同取近黑 onSurface（对比度），
+        // 层级只靠透明度档区分，不再取 onSurfaceVariant 次级灰。
+        expect(plain.bodyColor, scheme.onSurface);
+        expect(plain.eyebrowColor, scheme.onSurface.withValues(alpha: 0.82));
+        expect(plain.previewColor, scheme.onSurface.withValues(alpha: 0.88));
+        expect(plain.footerColor, scheme.onSurface.withValues(alpha: 0.72));
+        expect(plain.mutedColor, scheme.onSurface.withValues(alpha: 0.6));
         expect(plain.accentColor, scheme.primary);
         expect(
           plain.chipFill,
@@ -174,10 +164,7 @@ void main() {
           ExpressiveSurfaces.cardBorderColor(scheme),
         );
         // 置顶染色关闭时，置顶卡眉线与普通卡一致（不再用主色）。
-        expect(
-          pinned.eyebrowColor,
-          scheme.onSurfaceVariant.withValues(alpha: 0.82),
-        );
+        expect(pinned.eyebrowColor, scheme.onSurface.withValues(alpha: 0.82));
         expect(pinned.surface.shadows, isEmpty);
       });
     }

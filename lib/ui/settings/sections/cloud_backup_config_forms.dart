@@ -8,6 +8,7 @@ import '../../../core/services/cloud_backup_s3.dart';
 import '../../../core/services/webdav_models.dart';
 import '../../../l10n/app_localizations.dart';
 import '../widgets/cloud_backup_config_field.dart';
+import '../../widgets/salt_switch.dart';
 
 /// 填写式备份位置（WebDAV / S3）的表单状态：持有输入控制器，从配置载入、
 /// 校验后导出配置。页面负责 [dispose]。
@@ -232,17 +233,23 @@ class _S3Form extends StatelessWidget {
         ValueListenableBuilder<bool>(
           valueListenable: fields.pathStyle,
           builder: (BuildContext context, bool value, Widget? child) {
-            return SwitchListTile(
+            // B 档：开关换自绘 SaltSwitch，行结构与原 SwitchListTile 一致。
+            return ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.s3PathStyle),
               subtitle: Text(
                 locked ? l10n.s3PathStyleLocked : l10n.s3PathStyleSubtitle,
               ),
               // 只支持虚拟主机寻址的服务锁定为关闭。
-              value: locked ? false : value,
-              onChanged: locked
+              trailing: SaltSwitch(
+                value: locked ? false : value,
+                onChanged: locked
+                    ? null
+                    : (bool next) => fields.pathStyle.value = next,
+              ),
+              onTap: locked
                   ? null
-                  : (bool next) => fields.pathStyle.value = next,
+                  : () => fields.pathStyle.value = !(locked ? false : value),
             );
           },
         ),

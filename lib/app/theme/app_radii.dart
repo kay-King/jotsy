@@ -5,6 +5,7 @@ class AppRadii {
 
   static const double card = 16;
   static const double nav = 12;
-  static const double dialog = 16;
+  // 弹窗比卡片再圆一档（Salt 弹窗观感），与底部弹层顶角 20 对齐。
+  static const double dialog = 20;
   static const double input = 10;
 }

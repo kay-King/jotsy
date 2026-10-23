@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/app/node_diary_app.dart';
+import 'package:node_diary/ui/home/widgets/home_bar/home_create_fab.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
@@ -275,7 +276,7 @@ void main() {
     expect(_homeScaffold(tester).extendBody, isFalse);
     expect(find.byType(BottomNav), findsOneWidget);
     expect(find.byType(HomeFloatingBar), findsNothing);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(HomeCreateFab), findsOneWidget);
     await _unmount(tester);
   });
 
@@ -323,7 +324,7 @@ void main() {
 
   testWidgets('the FAB sits 10dp above the floating pill', (tester) async {
     await _pumpHome(tester, homeBarRaw: _raw(_glass));
-    final fab = tester.getRect(find.byType(FloatingActionButton));
+    final fab = tester.getRect(find.byType(HomeCreateFab));
     final pill = tester.getRect(_pill);
     expect(fab.bottom, lessThanOrEqualTo(pill.top - 10 + 0.01));
     expect(fab.bottom, closeTo(pill.top - 10, 0.01));
@@ -340,7 +341,7 @@ void main() {
       ),
     );
     final l10n = _l10n(tester);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byType(HomeCreateFab), findsNothing);
     expect(
       find.descendant(
         of: find.byType(HomeFloatingBar),
@@ -390,7 +391,7 @@ void main() {
     final fabPositioned = tester.widget<AnimatedPositioned>(
       find
           .ancestor(
-            of: find.byType(FloatingActionButton),
+            of: find.byType(HomeCreateFab),
             matching: find.byType(AnimatedPositioned),
           )
           .first,

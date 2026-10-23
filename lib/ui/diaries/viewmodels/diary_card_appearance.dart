@@ -141,9 +141,11 @@ class DiaryCardAppearanceResolver {
         DiaryCardColors.contrastOver(scheme.onInverseSurface, effective) >
             DiaryCardColors.contrastOver(scheme.onSurface, effective);
     final autoTitle = inverted ? scheme.onInverseSurface : scheme.onSurface;
-    final autoBody = inverted
-        ? scheme.onInverseSurface
-        : scheme.onSurfaceVariant;
+    // 正文默认也取近黑（与标题同源）：早期取 onSurfaceVariant 次级灰，
+    // 再经预览 0.88 / 眉题 0.82 / 页脚 0.72 的透明度推导后整卡发灰、
+    // 对比度不足（用户实测反馈「文字发糊」）。层级改由透明度档区分，
+    // 基色统一近黑。
+    final autoBody = inverted ? scheme.onInverseSurface : scheme.onSurface;
 
     final typography = style.typography;
     final titleColor = _textColor(

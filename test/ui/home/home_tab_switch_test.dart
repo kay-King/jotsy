@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/app/node_diary_app.dart';
+import 'package:node_diary/ui/home/widgets/home_bar/home_create_fab.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
@@ -103,7 +104,7 @@ Future<void> _unmount(WidgetTester tester) async {
 /// 全局“新建”FAB 是否可见且可点（显隐由外层 AnimatedOpacity 与
 /// IgnorePointer 决定，FAB 本身一直挂在树上）。
 bool _createFabShown(WidgetTester tester) {
-  final fab = find.byType(FloatingActionButton);
+  final fab = find.byType(HomeCreateFab);
   final opacity = tester.widget<AnimatedOpacity>(
     find.ancestor(of: fab, matching: find.byType(AnimatedOpacity)).first,
   );

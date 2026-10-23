@@ -159,7 +159,10 @@ void main() {
     await _openTab(tester, l10n.diaryPreviewStyleTabMeta);
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryPreviewStyleShowLocation),
+      find.widgetWithText(
+        SettingsSwitchTile,
+        l10n.diaryPreviewStyleShowLocation,
+      ),
     );
     expect(_stored(settings).current.meta.showLocation, isFalse);
     expect(find.text(l10n.diaryCardStyleSampleLocation), findsNothing);
@@ -172,7 +175,10 @@ void main() {
     await _openTab(tester, l10n.diaryPreviewStyleTabPaging);
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryPreviewStyleHapticOnPage),
+      find.widgetWithText(
+        SettingsSwitchTile,
+        l10n.diaryPreviewStyleHapticOnPage,
+      ),
     );
     await _tapVisible(
       tester,
@@ -181,7 +187,10 @@ void main() {
     await _tapVisible(tester, find.text(l10n.diaryPreviewStyleTransitionStack));
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryPreviewStyleNeighborCards),
+      find.widgetWithText(
+        SettingsSwitchTile,
+        l10n.diaryPreviewStyleNeighborCards,
+      ),
     );
     var stored = _stored(settings);
     expect(stored.behavior.hapticOnPage, isTrue);
@@ -198,7 +207,7 @@ void main() {
     // 关掉滑动后灵敏度与轻震随之收起。
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryPreviewStyleSwipe),
+      find.widgetWithText(SettingsSwitchTile, l10n.diaryPreviewStyleSwipe),
     );
     stored = _stored(settings);
     expect(stored.behavior.swipeBetweenDiaries, isFalse);
@@ -272,7 +281,7 @@ void main() {
     await _openTab(tester, l10n.diaryPreviewStyleTabBody);
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryPreviewStyleTodoToggle),
+      find.widgetWithText(SettingsSwitchTile, l10n.diaryPreviewStyleTodoToggle),
     );
     expect(_stored(settings).behavior.todoToggle, isFalse);
 

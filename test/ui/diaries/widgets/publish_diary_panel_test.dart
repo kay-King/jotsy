@@ -12,6 +12,7 @@ import 'package:node_diary/ui/diaries/widgets/publish_panel/publish_panel_tile.d
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
 
 import '../../../support/publish_panel_driver.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
 
 /// 表头双箭头的纵向缩放：1 = 上指，-1 = 下指。
 double _arrowFlip(WidgetTester tester) => tester
@@ -363,12 +364,12 @@ void main() {
     await tester.tap(PublishPanelDriver(tester).collapsedHeader);
     await tester.pumpAndSettle();
 
-    final energySwitchFinder = find.byType(Switch);
+    final energySwitchFinder = find.byType(SaltSwitch);
     expect(energySwitchFinder, findsOneWidget);
     await tester.ensureVisible(energySwitchFinder);
     await tester.pumpAndSettle();
 
-    final switchWidgetOn = tester.widget<Switch>(energySwitchFinder);
+    final switchWidgetOn = tester.widget<SaltSwitch>(energySwitchFinder);
     expect(switchWidgetOn.value, isTrue);
     expect(find.byType(Slider), findsOneWidget);
     // 五格电量：滑块按整档 1–5 移动。
@@ -382,7 +383,7 @@ void main() {
 
     // 2. Disabled state
 
-    final switchWidgetOff = tester.widget<Switch>(energySwitchFinder);
+    final switchWidgetOff = tester.widget<SaltSwitch>(energySwitchFinder);
     expect(switchWidgetOff.value, isFalse);
     expect(find.byType(Slider), findsNothing);
     expect(find.text('Not recorded'), findsOneWidget);

@@ -4,6 +4,7 @@ import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/diary_meta_draft.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_meta_draft_controller.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
 import 'package:node_diary/ui/widgets/value_listenable_selector.dart';
 
 import '../energy_battery_indicator.dart';
@@ -157,7 +158,7 @@ class _PublishEnergySectionState extends State<PublishEnergySection> {
                 const SizedBox(width: 8),
                 Tooltip(
                   message: l10n.diaryEnergySwitchTooltip,
-                  child: Switch(
+                  child: SaltSwitch(
                     value: enabled,
                     onChanged: (on) =>
                         widget.draft.setEnergy(on ? _lastLevel : null),

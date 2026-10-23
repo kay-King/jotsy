@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/salt_switch.dart';
+
 // 设置分组卡片里的通用行：开关、行内滑块与“标题 + 选择器”。与设置页
 // 既有的 ListTile 同一字阶与内边距（标题取 listTileTheme，左右 16）。
 
@@ -50,18 +52,20 @@ class SettingsSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = this.subtitle;
-    return SwitchListTile(
+    // 自绘 Salt 开关（B 档）：行结构、内边距与标题样式与原
+    // SwitchListTile 一致，点整行或点开关都切换同一个值。
+    return ListTile(
       contentPadding: EdgeInsetsDirectional.only(
         start: indentFor(nested: nested, deep: deep),
         end: 16,
         top: 10,
         bottom: 10,
       ),
-      value: value,
       // 与 listTileTheme 的标题样式合并，只改字号与字重。
       title: Text(title, style: nested ? nestedTitleStyle : null),
       subtitle: subtitle == null ? null : Text(subtitle),
-      onChanged: onChanged,
+      trailing: SaltSwitch(value: value, onChanged: onChanged),
+      onTap: onChanged == null ? null : () => onChanged!(!value),
     );
   }
 }

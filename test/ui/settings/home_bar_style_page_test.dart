@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/services/settings_service.dart';
+import 'package:node_diary/ui/home/widgets/home_bar/home_create_fab.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_presets.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_settings.dart';
@@ -287,7 +288,7 @@ void main() {
       HomeBarFabPlacement.inline,
     );
     expect(find.byType(HomeInlineCreateButton), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byType(HomeCreateFab), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -307,7 +308,10 @@ void main() {
 
     await tapHomeBarOption(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.homeBarStyleIndicatorFollows),
+      find.widgetWithText(
+        SettingsSwitchTile,
+        l10n.homeBarStyleIndicatorFollows,
+      ),
     );
     expect(
       storedHomeBarSettings(settings).behavior.indicatorFollowsSwipe,
@@ -323,7 +327,7 @@ void main() {
     await tester.pumpAndSettle();
     await tapHomeBarOption(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.homeBarStyleHideOnScroll),
+      find.widgetWithText(SettingsSwitchTile, l10n.homeBarStyleHideOnScroll),
     );
     expect(storedHomeBarSettings(settings).behavior.hideOnScroll, isTrue);
     expect(

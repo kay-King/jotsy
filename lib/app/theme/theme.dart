@@ -71,6 +71,9 @@ class MaterialTheme {
     final scaffoldBg = ExpressiveSurfaces.pageBackground(colorScheme);
     final baseTheme = ThemeData(
       useMaterial3: true,
+      // B 档去 MD3 化：全局关掉水波纹扩散，按压反馈只剩各控件自己的
+      // 状态层（透明度/缩放），与 SaltUI 的无涟漪按压一致。
+      splashFactory: NoSplash.splashFactory,
       // 不再强制内置 HarmonyOSSansSC：UI 字体走系统默认，与参照应用
       // （IdeaMemo 等原生应用）同源，用户换系统字体时界面随之而变。
       // 日记正文字体是 DiaryTypography 的独立设置，不受影响。

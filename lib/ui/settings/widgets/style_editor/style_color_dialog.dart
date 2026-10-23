@@ -7,6 +7,7 @@ import '../../../widgets/color_palette_families.dart';
 import '../../../widgets/color_swatch_button.dart';
 import '../../../widgets/expressive_button_group.dart';
 import '../../../widgets/palette_color_picker.dart';
+import '../../../widgets/salt_switch.dart';
 
 /// 自定义颜色对话框的结果：浅色值与可选的深色值（null 表示自动推导）。
 class StyleCustomColor {
@@ -134,6 +135,17 @@ class _StyleColorDialogState extends State<_StyleColorDialog> {
     );
   }
 
+  /// 「深色自动推导」开关切换：开时深色值回到自动推导（清空手调值）。
+  /// 开关本体与整行点按共用同一份逻辑（B 档换自绘开关后保持不变）。
+  void _applyDarkAuto(bool auto) {
+    setState(() {
+      _dark = auto ? null : _derivedDark;
+      _familyIndex = _selectionFor(_currentValue).familyIndex;
+      _hexController.text = _hex(_currentValue);
+      _hexInvalid = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -161,19 +173,15 @@ class _StyleColorDialogState extends State<_StyleColorDialog> {
             ),
             const SizedBox(height: 12),
             if (_editingDark) ...<Widget>[
-              SwitchListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                value: _darkAuto,
                 title: Text(l10n.styleEditorColorDarkAuto),
                 subtitle: Text(l10n.styleEditorColorDarkAutoSubtitle),
-                onChanged: (bool auto) {
-                  setState(() {
-                    _dark = auto ? null : _derivedDark;
-                    _familyIndex = _selectionFor(_currentValue).familyIndex;
-                    _hexController.text = _hex(_currentValue);
-                    _hexInvalid = false;
-                  });
-                },
+                trailing: SaltSwitch(
+                  value: _darkAuto,
+                  onChanged: _applyDarkAuto,
+                ),
+                onTap: () => _applyDarkAuto(!_darkAuto),
               ),
               if (_darkAuto)
                 Padding(

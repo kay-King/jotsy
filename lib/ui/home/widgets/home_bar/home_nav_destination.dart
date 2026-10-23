@@ -281,7 +281,12 @@ class _IndicatorInkResponse extends InkResponse {
     super.customBorder,
     super.onTap,
     super.child,
-  }) : super(containedInkWell: true, highlightColor: Colors.transparent);
+  }) : super(
+         containedInkWell: true,
+         highlightColor: Colors.transparent,
+         // 去 MD3 水波纹：按下反馈只靠指示器滑动与图标/文字变色。
+         splashFactory: NoSplash.splashFactory,
+       );
 
   final Rect Function(RenderBox referenceBox) rectOf;
 

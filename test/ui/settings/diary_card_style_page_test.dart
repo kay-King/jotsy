@@ -138,7 +138,7 @@ void main() {
     await _openTab(tester, l10n.diaryCardStyleTabContent);
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryCardStyleShowPreview),
+      find.widgetWithText(SettingsSwitchTile, l10n.diaryCardStyleShowPreview),
     );
     expect(_stored(settings).current.content.showPreview, isFalse);
     expect(find.text(l10n.diaryCardStyleSampleBody1), findsNothing);
@@ -163,7 +163,7 @@ void main() {
 
     await _openTab(tester, l10n.diaryCardStyleTabContent);
     final untitledSwitch = find.widgetWithText(
-      SwitchListTile,
+      SettingsSwitchTile,
       l10n.diaryCardStyleShowUntitled,
     );
     await _tapVisible(tester, untitledSwitch);
@@ -174,7 +174,7 @@ void main() {
     // 标题整体关闭后这个开关没有意义，随之收起。
     await _tapVisible(
       tester,
-      find.widgetWithText(SwitchListTile, l10n.diaryCardStyleShowTitle),
+      find.widgetWithText(SettingsSwitchTile, l10n.diaryCardStyleShowTitle),
     );
     expect(_stored(settings).current.content.showTitle, isFalse);
     expect(untitledSwitch, findsNothing);
@@ -242,7 +242,7 @@ void main() {
     expect(stop(), l10n.styleEditorPanelHalf);
     expect(tabBarTop(), closeTo(halfTop, 0.01));
     expect(
-      find.widgetWithText(SwitchListTile, l10n.diaryCardStyleShowTitle),
+      find.widgetWithText(SettingsSwitchTile, l10n.diaryCardStyleShowTitle),
       findsOneWidget,
     );
     semantics.dispose();

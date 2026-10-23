@@ -2,6 +2,48 @@ import 'package:flutter/material.dart';
 
 import 'expressive_motion.dart';
 
+/// 自绘滑杆拇指（Salt 风，B 档去 MD3 化）：白色圆钮 + 柔和投影 + 一丝
+/// 描边，替代 MD3 的主色实心圆。只改绘制，Slider 本体的手势、取值、
+/// 语义（可调焦点/方向键）全部不变。
+class SaltSliderThumbShape extends SliderComponentShape {
+  const SaltSliderThumbShape({this.radius = 10});
+
+  final double radius;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      Size.fromRadius(radius);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final canvas = context.canvas;
+    final circle = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawShadow(circle, const Color(0x40000000), 2, false);
+    canvas.drawPath(circle, Paint()..color = Colors.white);
+    canvas.drawPath(
+      circle,
+      Paint()
+        ..color = const Color(0x14000000)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5,
+    );
+  }
+}
+
 /// 控件形状与状态的集中定义，保留焦点、键盘、禁用态和语义树。
 /// 简约皮肤下按钮用固定小圆角，不再有 MD3 按压时圆角变形的胶囊形态；
 /// 不覆盖按钮的语义颜色：tonal、危险操作和第三方编辑器仍可使用自己的色彩角色。
@@ -61,12 +103,15 @@ abstract final class ExpressiveControls {
         extendedTextStyle: theme.textTheme.titleMedium,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(style: style),
-      // 滑杆回到常规细轨 + 圆形滑块，不用 MD3 的断轨与竖柄造型。
+      // 滑杆细轨 + 自绘白色圆钮（Salt 风），不用 MD3 的断轨与竖柄造型。
       sliderTheme: SliderThemeData(
         trackHeight: 4,
         activeTrackColor: colors.primary,
         inactiveTrackColor: colors.surfaceContainerHighest,
-        thumbColor: colors.primary,
+        thumbColor: Colors.white,
+        thumbShape: const SaltSliderThumbShape(),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+        overlayColor: colors.primary.withValues(alpha: 0.10),
         valueIndicatorColor: colors.inverseSurface,
         valueIndicatorTextStyle: theme.textTheme.labelLarge?.copyWith(
           color: colors.onInverseSurface,

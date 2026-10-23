@@ -173,7 +173,7 @@ void main() {
     final settings = await _pump(tester);
     await _openTab(tester, _l10n.codeBlockStyleTabDisplay);
     final tile = find.widgetWithText(
-      SwitchListTile,
+      SettingsSwitchTile,
       _l10n.codeBlockLineNumbersTitle,
     );
     await _reveal(tester, tile);

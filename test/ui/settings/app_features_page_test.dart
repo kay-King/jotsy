@@ -15,14 +15,21 @@ import 'package:node_diary/core/services/settings_service.dart';
 import '../../support/diary_drafts_harness.dart';
 import '../../support/expressive_test_theme.dart';
 import '../notebooks/notebook_test_support.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
 
 /// 功能管理页：每个开关立即写入设置；纪念日在日历下方、随日历显隐；关闭日记本时若有
 /// 隐藏 / 上锁的本子先确认。
 void main() {
-  Finder switchTile(String title) => find.widgetWithText(SwitchListTile, title);
+  Finder switchTile(String title) =>
+      find.widgetWithText(SettingsSwitchTile, title);
 
-  SwitchListTile tile(WidgetTester tester, String title) =>
-      tester.widget<SwitchListTile>(switchTile(title));
+  SaltSwitch tile(WidgetTester tester, String title) =>
+      tester.widget<SaltSwitch>(
+        find.descendant(
+          of: switchTile(title),
+          matching: find.byType(SaltSwitch),
+        ),
+      );
 
   AppFeatures stored(DiaryDraftsHarness h) =>
       AppFeatures.decode(h.settings.appFeaturesRaw);
@@ -263,7 +270,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.byType(SwitchListTile), findsNWidgets(6));
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(6));
     });
   }
 }

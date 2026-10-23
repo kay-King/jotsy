@@ -16,6 +16,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/settings/pages/cloud_backup_page.dart';
 import 'package:node_diary/ui/settings/pages/cloud_backup_target_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:node_diary/ui/widgets/salt_switch.dart';
 
 /// 网盘备份页面的交互回归：表单对齐、草稿在保存前不落盘、寻址锁定、
 /// 位置列表与添加面板。
@@ -148,7 +149,7 @@ void main() {
       CloudBackupTargetPage(target: draft(oss), isNew: true),
     );
 
-    final locked = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+    final locked = tester.widget<SaltSwitch>(find.byType(SaltSwitch));
     expect(locked.value, isFalse);
     expect(locked.onChanged, isNull);
     expect(find.text(l10n.s3PathStyleLocked), findsOneWidget);
@@ -163,12 +164,12 @@ void main() {
       CloudBackupTargetPage(target: draft(customS3Preset), isNew: true),
     );
 
-    final toggle = find.byType(SwitchListTile);
-    expect(tester.widget<SwitchListTile>(toggle).onChanged, isNotNull);
+    final toggle = find.byType(SaltSwitch);
+    expect(tester.widget<SaltSwitch>(toggle).onChanged, isNotNull);
     await tester.ensureVisible(toggle);
     await tester.tap(toggle);
     await tester.pumpAndSettle();
-    expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+    expect(tester.widget<SaltSwitch>(toggle).value, isTrue);
   });
 
   testWidgets('location list shows saved targets and hides unkeyed drives', (

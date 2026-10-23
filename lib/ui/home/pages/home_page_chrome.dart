@@ -128,14 +128,13 @@ extension _HomePageChrome on _HomePageState {
                   // “写进「旅行」”，新建的日记预先收进这本。
                   child: Consumer(
                     builder: (context, ref, _) {
-                      return FloatingActionButton(
+                      return HomeCreateFab(
                         onPressed: () {
                           unawaited(_openCreateFromGlobalFab());
                         },
                         // 样式照 IdeaMemo 的悬浮按钮：浅紫圆角方钮 +
-                        // 深紫铅笔图标（形状配色在主题里），不带文字
-                        // 胶囊；原动态文案（写进「某本」）保留为长按
-                        // 提示，信息不丢。
+                        // 深紫铅笔图标，不带文字胶囊；原动态文案
+                        // （写进「某本」）保留为长按提示，信息不丢。
                         tooltip: _createLabel(context, ref),
                         child: const FaIcon(FontAwesomeIcons.pen, size: 20),
                       );

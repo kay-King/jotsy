@@ -194,6 +194,15 @@ void main() {
       ),
     );
     await tester.tap(find.text('export'));
+    // 读库在后台 isolate 里完成（真实异步），结果靠帧推进投递：交替让出
+    // 真实时间与推进假时钟等面板打开。只靠 pumpAndSettle 会在读库返回
+    // 前因无帧而停住（全局去水波纹后，被点按钮不再有动画帧托底）。
+    for (var i = 0; i < 50 && find.text('共 5 篇').evaluate().isEmpty; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
     await tester.pumpAndSettle();
 
     // a、b、s、d、c：含归档与胶囊（胶囊在生成时跳过），不含回收站。

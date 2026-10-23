@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import '../../app/theme/expressive_motion.dart';
 
 /// 单选连接按钮组：输入选项/当前值，输出用户选择，不保存业务状态。
-/// 利用原生按钮保留键盘、焦点与 disabled 行为；窄屏和大字体时改为纵向连接，
-/// 避免 SegmentedButton 固定横排挤掉标签。方向圆角同时适配 RTL。
+/// 利用原生按钮保留键盘、焦点与 disabled 行为；窄屏和大字体时改为纵向
+/// 排列，避免固定横排挤掉标签。
+///
+/// 外观为 Salt 轨道式（B 档去 MD3 化）：一条浅灰轨道，选中段是轨道内
+/// 浮起的白色圆角片（带一层柔和投影），未选段透明底、灰字；不用 MD3
+/// 分段按钮的描边、选中勾与独立胶囊。
 class ExpressiveButtonGroup<T> extends StatelessWidget {
   const ExpressiveButtonGroup({
     super.key,
@@ -33,6 +37,14 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final isLight = colors.brightness == Brightness.light;
+    // 轨道取中性浅灰，选中片在浅色下为纯白、深色下为抬升一档的容器色。
+    final trackColor = isLight
+        ? colors.surfaceContainerHigh
+        : colors.surfaceContainerLow;
+    final selectedColor = isLight
+        ? colors.surfaceContainerLowest
+        : colors.surfaceContainerHighest;
     return LayoutBuilder(
       builder: (context, constraints) {
         final stacked =
@@ -46,7 +58,7 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
           final button = Semantics(
             selected: isSelected,
             inMutuallyExclusiveGroup: true,
-            child: FilledButton.tonal(
+            child: FilledButton(
               onPressed: onSelectionChanged != null && segment.enabled
                   ? () => onSelectionChanged!({segment.value})
                   : null,
@@ -65,37 +77,26 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
                       : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.disabled)) return null;
-                  // 简约皮肤：选中为浅绿底+绿字，未选为中性浅灰，不用实心绿胶囊。
-                  return isSelected
-                      ? colors.primaryContainer
-                      : colors.surfaceContainerHigh;
+                  if (states.contains(WidgetState.disabled)) {
+                    return Colors.transparent;
+                  }
+                  return isSelected ? selectedColor : Colors.transparent;
                 }),
                 foregroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.disabled)) return null;
-                  return isSelected ? colors.primary : colors.onSurface;
+                  return isSelected
+                      ? colors.onSurface
+                      : colors.onSurfaceVariant;
                 }),
-                shape: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.pressed) || isSelected) {
-                    return RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    );
-                  }
-                  const inner = Radius.circular(2);
-                  const outer = Radius.circular(8);
-                  final first = index == 0;
-                  final last = index == segments.length - 1;
-                  final radius = stacked
-                      ? BorderRadius.vertical(
-                          top: first ? outer : inner,
-                          bottom: last ? outer : inner,
-                        )
-                      : BorderRadiusDirectional.horizontal(
-                          start: first ? outer : inner,
-                          end: last ? outer : inner,
-                        );
-                  return RoundedRectangleBorder(borderRadius: radius);
-                }),
+                // 状态层透明：按压不再有 MD3 的色调罩，只剩按钮自身动效。
+                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+                elevation: WidgetStatePropertyAll(isSelected ? 1 : 0),
+                shadowColor: const WidgetStatePropertyAll(Color(0x24000000)),
+                shape: const WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -112,24 +113,26 @@ class ExpressiveButtonGroup<T> extends StatelessWidget {
               ),
             ),
           );
-          if (index > 0) {
-            children.add(
-              SizedBox(width: stacked ? 0 : 4, height: stacked ? 4 : 0),
-            );
-          }
           children.add(stacked || dense ? button : Expanded(child: button));
         }
+        final inner = stacked
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: children,
+              )
+            : Row(
+                mainAxisSize: dense ? MainAxisSize.min : MainAxisSize.max,
+                children: children,
+              );
         return FocusTraversalGroup(
-          child: stacked
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: children,
-                )
-              : Row(
-                  mainAxisSize: dense ? MainAxisSize.min : MainAxisSize.max,
-                  children: children,
-                ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: trackColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(padding: const EdgeInsets.all(2), child: inner),
+          ),
         );
       },
     );
