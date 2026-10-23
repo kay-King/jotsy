@@ -94,10 +94,17 @@ void main() {
     expect(styles.sizeHuge!.fontSize, 30);
   });
 
-  testWidgets('the bundled font keeps the theme font family', (tester) async {
+  testWidgets('the bundled font resolves to the bundled family', (
+    tester,
+  ) async {
+    // 走生产路径解析：内置正文字体与 UI 字体已解耦（UI 走系统字体），
+    // 内置字体显式落到随包的 HarmonyOSSansSC，既有日记排版不变。
     final (defaults, styles) = await _buildStyles(
       tester,
-      const DiaryTextAppearance(typography: DiaryTypography()),
+      DiaryTextAppearance.resolve(
+        const DiaryTypography(),
+        platform: TargetPlatform.android,
+      ),
     );
 
     expect(styles.paragraph!.style.fontFamily, 'HarmonyOSSansSC');

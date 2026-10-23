@@ -159,7 +159,8 @@ void main() {
     final l10n = tester.element(find.byType(DiaryTypographyPage)).l10n;
 
     expect(find.text(l10n.diaryTypographyFontMissing), findsOneWidget);
-    // 正文回落到主题字体（不覆盖字族）。
-    expect(_previewParagraphStyle(tester).fontFamily, 'HarmonyOSSansSC');
+    // 正文回落到环境主题字体（不覆盖字族）：测试主题是 material2021
+    // 的平台字体 Roboto，真机上即系统字体。
+    expect(_previewParagraphStyle(tester).fontFamily, 'Roboto');
   });
 }

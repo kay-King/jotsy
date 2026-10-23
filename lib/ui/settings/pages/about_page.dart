@@ -9,13 +9,13 @@ import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_surfaces.dart';
 import '../../home/widgets/home_hint_visibility_scope.dart';
-import '../../../app/theme/app_effects.dart';
 import '../../widgets/expressive_image_frame.dart';
 import '../controllers/app_update_controller.dart';
 import '../models/app_update_state.dart';
 import '../widgets/app_update_badge.dart';
 import '../widgets/external_link.dart';
 import '../widgets/support_developer_sheet.dart';
+import '../widgets/settings_card_group.dart';
 import 'app_update_page.dart';
 
 /// 关于页面：以阅读化卡片布局展示应用信息、核心入口与协议信息。
@@ -189,30 +189,30 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                             onTap: () =>
                                 openExternalLink(context, AboutPage._repoUrl),
                           ),
-                          const Divider(height: 1),
+                          const SettingsCardGroupDivider(),
                           const _CheckUpdateTile(),
-                          const Divider(height: 1),
+                          const SettingsCardGroupDivider(),
                           _AboutActionTile(
                             icon: FontAwesomeIcons.bug,
                             title: l10n.aboutSubmitIssue,
                             onTap: () =>
                                 openExternalLink(context, AboutPage._issueUrl),
                           ),
-                          const Divider(height: 1),
+                          const SettingsCardGroupDivider(),
                           _AboutActionTile(
                             icon: FontAwesomeIcons.qq,
                             title: l10n.aboutQqFeedbackGroup,
                             subtitle: l10n.aboutQqFeedbackGroupSubtitle,
                             onTap: () => _copyQqFeedbackGroup(context),
                           ),
-                          const Divider(height: 1),
+                          const SettingsCardGroupDivider(),
                           _AboutActionTile(
                             icon: FontAwesomeIcons.mugHot,
                             title: l10n.supportDeveloperTitle,
                             subtitle: l10n.supportDeveloperEntrySubtitle,
                             onTap: () => showSupportDeveloperSheet(context),
                           ),
-                          const Divider(height: 1),
+                          const SettingsCardGroupDivider(),
                           _AboutActionTile(
                             icon: FontAwesomeIcons.shieldHalved,
                             title: l10n.aboutPrivacyAndData,
@@ -350,21 +350,12 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadii.card),
-        boxShadow: AppEffects.restingCardShadow(colorScheme),
-      ),
-      child: Card(
-        margin: EdgeInsets.zero,
-        elevation: 0,
-        color: ExpressiveSurfaces.cardColor(colorScheme),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadii.card),
-          side: ExpressiveSurfaces.cardBorderSide(colorScheme),
-        ),
-        child: Padding(padding: padding, child: child),
-      ),
+    // 与设置分组卡一致：纯白扁平卡，无描边、无投影，靠底色明度差分层。
+    return Material(
+      color: ExpressiveSurfaces.cardColor(colorScheme),
+      borderRadius: BorderRadius.circular(AppRadii.card),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: padding, child: child),
     );
   }
 }

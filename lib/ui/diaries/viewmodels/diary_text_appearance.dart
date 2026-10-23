@@ -4,9 +4,11 @@ import '../../../core/services/diary_typography.dart';
 
 /// 正文排版的可渲染形态：用户偏好 + 实际使用的字族名。
 ///
-/// [fontFamily] 为 null 表示沿用主题字体（内置 HarmonyOS Sans SC）：不在这里
-/// 重复写主题字体名，换主题字体时这里自动跟随。导入字体尚未注册完成或文件
-/// 缺失时同样为 null，正文先按主题字体显示。
+/// 内置字体显式解析为随包的 HarmonyOS Sans SC，与 UI 字体解耦：
+/// UI 字体已改走系统字体（fork 的 Salt 风改造），但正文渲染不随之
+/// 改变——既有日记的排版观感保持原样，用户想让正文跟随系统字体
+/// 时可在字体设置里选「系统字体」。[fontFamily] 为 null 仅剩一种
+/// 情况：导入字体尚未注册完成或文件缺失，正文先按主题字体显示。
 @immutable
 class DiaryTextAppearance {
   const DiaryTextAppearance({required this.typography, this.fontFamily});
@@ -19,7 +21,7 @@ class DiaryTextAppearance {
     return DiaryTextAppearance(
       typography: typography,
       fontFamily: switch (typography.fontId) {
-        DiaryTypography.bundledFontId => null,
+        DiaryTypography.bundledFontId => 'HarmonyOSSansSC',
         DiaryTypography.systemFontId => systemFontFamily(platform),
         _ => importedFontFamily,
       },

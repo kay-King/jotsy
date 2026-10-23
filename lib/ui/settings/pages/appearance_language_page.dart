@@ -102,10 +102,17 @@ class AppearanceLanguagePage extends ConsumerWidget {
           SettingsThemeSection(settingsAsync: settingsAsync),
           const SizedBox(height: 16),
           SettingsCardGroup(
+            title: l10n.settingsGroupInterfaceStyle,
             children: <Widget>[
               SettingsHomeBarStyleTile(settingsAsync: settingsAsync),
               SettingsDiaryCardStyleTile(settingsAsync: settingsAsync),
               SettingsDiaryPreviewStyleTile(settingsAsync: settingsAsync),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SettingsCardGroup(
+            title: l10n.settingsLanguage,
+            children: <Widget>[
               settingsAsync.when(
                 data: (settingsService) {
                   return ListTile(
@@ -116,7 +123,7 @@ class AppearanceLanguagePage extends ConsumerWidget {
                     title: Text(
                       l10n.settingsLanguage,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     subtitle: Text(l10n.settingsLanguageSubtitle),

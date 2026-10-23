@@ -111,7 +111,8 @@ void main() {
       storedHomeBarSettings(settings).current.material,
       HomeBarMaterial.solid,
     );
-    expect(storedHomeBarSettings(settings).current.labelGap, 4);
+    // fork 的间距默认值已与玻璃一致（同为 2），切材质不再改间距。
+    expect(storedHomeBarSettings(settings).current.labelGap, 2);
     expect(inHomeBarOptions(l10n.homeBarStyleGlassTopBars), findsNothing);
     expect(inHomeBarOptions(l10n.homeBarStyleTintColor), findsNothing);
     expect(find.byType(BottomNav), findsOneWidget);
@@ -146,17 +147,19 @@ void main() {
       ),
     );
 
+    // fork 默认值：顶栏分隔线默认开着，点一下关掉；底栏描边不受影响。
+    expect(storedHomeBarSettings(settings).current.topBarHairline, isTrue);
     await tapHomeBarOption(
       tester,
       inHomeBarOptions(l10n.homeBarStyleTopBarHairline),
     );
-    expect(storedHomeBarSettings(settings).current.topBarHairline, isTrue);
+    expect(storedHomeBarSettings(settings).current.topBarHairline, isFalse);
     expect(storedHomeBarSettings(settings).current.border, isTrue);
 
     // 底栏描边只写 border，不动顶栏分隔线。
     await tapHomeBarOption(tester, inHomeBarOptions(l10n.homeBarStyleBorder));
     expect(storedHomeBarSettings(settings).current.border, isFalse);
-    expect(storedHomeBarSettings(settings).current.topBarHairline, isTrue);
+    expect(storedHomeBarSettings(settings).current.topBarHairline, isFalse);
 
     // 顶栏不用玻璃时分隔线这一行收起。
     await tapHomeBarOption(

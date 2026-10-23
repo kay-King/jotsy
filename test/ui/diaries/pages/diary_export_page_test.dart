@@ -75,10 +75,25 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('将导出 2 篇日记'), findsOneWidget);
 
+        // 行距放宽后这一行超出懒加载列表的构建范围（不在树里，
+        // ensureVisible 找不到），用 scrollUntilVisible 边滚边找。
+        await tester.scrollUntilVisible(
+          find.text('包含已归档的日记'),
+          120,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
         await tester.tap(find.text('包含已归档的日记'));
         await tester.pumpAndSettle();
         expect(find.text('将导出 1 篇日记'), findsOneWidget);
 
+        // 列表已滚到底部，顶部的范围选项被懒加载列表回收，先滚回去。
+        await tester.scrollUntilVisible(
+          find.text('全部日记'),
+          -120,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
         await tester.tap(find.text('全部日记'));
         await tester.tap(find.widgetWithText(FilterChip, '# 旅行'));
         await tester.pumpAndSettle();

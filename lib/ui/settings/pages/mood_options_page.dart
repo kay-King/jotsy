@@ -4,6 +4,7 @@ import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/widgets/app_top_bar.dart';
+import '../widgets/settings_card_group.dart';
 
 /// 心情符号自定义页。
 ///
@@ -103,20 +104,21 @@ class _MoodOptionsPageState extends State<MoodOptionsPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
         children: <Widget>[
-          for (
-            var index = 0;
-            index < _controllers.length;
-            index += 1
-          ) ...<Widget>[
-            _MoodOptionField(
-              controller: _controllers[index],
-              index: index,
-              enabled: !_saving,
-            ),
-            if (index != _controllers.length - 1) const SizedBox(height: 10),
-          ],
+          // 10 个心情槽位收进一张分组白卡（与其他设置页统一），输入框
+          // 去边框，只剩标签与表情本身。
+          SettingsCardGroup(
+            title: l10n.settingsMoodOptionsTitle,
+            children: <Widget>[
+              for (var index = 0; index < _controllers.length; index += 1)
+                _MoodOptionField(
+                  controller: _controllers[index],
+                  index: index,
+                  enabled: !_saving,
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -139,16 +141,55 @@ class _MoodOptionField extends StatelessWidget {
     final l10n = context.l10n;
     final label = l10n.settingsMoodOptionsSlotLabel((index + 1).toString());
     final defaultEmoji = SettingsService.defaultMoodOptions[index];
-    return TextField(
-      controller: controller,
-      enabled: enabled,
-      textAlign: TextAlign.center,
-      maxLength: 8,
-      style: Theme.of(context).textTheme.headlineSmall,
-      decoration: InputDecoration(
-        labelText: label,
-        helperText: l10n.settingsMoodOptionsSlotHelper(defaultEmoji),
-        counterText: '',
+    // 行式布局（与其他设置行一致）：左侧标签 + 默认值提示，右侧是
+    // 表情输入位；不再用整块输入框把每行撑高。
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.settingsMoodOptionsSlotHelper(defaultEmoji),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 72,
+            child: TextField(
+              controller: controller,
+              enabled: enabled,
+              textAlign: TextAlign.center,
+              maxLength: 8,
+              style: textTheme.headlineSmall,
+              decoration: const InputDecoration(
+                counterText: '',
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

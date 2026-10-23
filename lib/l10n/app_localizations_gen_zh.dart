@@ -115,6 +115,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTitle => '设置';
 
   @override
+  String get settingsGroupInterface => '界面与编辑';
+
+  @override
+  String get settingsGroupContent => '内容与数据';
+
+  @override
+  String get settingsGroupInterfaceStyle => '界面样式';
+
+  @override
   String get settingsThemeMode => '主题模式';
 
   @override

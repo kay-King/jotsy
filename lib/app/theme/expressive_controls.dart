@@ -31,9 +31,9 @@ abstract final class ExpressiveControls {
       padding: const WidgetStatePropertyAll(
         EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       ),
-      // 文字按钮（对话框操作、导航绿字按钮）照参考项目用 15–16 档字号，
-      // 不跟填充按钮共用 13 的标签字号。
-      textStyle: WidgetStatePropertyAll(theme.textTheme.titleMedium),
+      // 文字按钮字号与填充按钮同档（labelLarge 14）：曾试过 titleMedium
+      // 16 档，长文案行（如照片条的“设为封面/Set as cover”）在窄宽下
+      // 会把同行按钮挤溢出（上游测试实测 4–12px），故回退同档。
     );
     return theme.copyWith(
       filledButtonTheme: FilledButtonThemeData(style: style),

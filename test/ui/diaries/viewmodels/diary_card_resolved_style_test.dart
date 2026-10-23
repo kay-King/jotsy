@@ -35,10 +35,12 @@ void main() {
           screenWidth: 320,
         );
         final text = theme.textTheme;
+        // fork 默认排版：metaScale 0.95、titleScale 0.9、标题 medium、
+        // 行高 relaxed（+0.16）。
         expect(
           resolved.eyebrowStyle,
           text.labelMedium?.copyWith(
-            fontSize: 13,
+            fontSize: 13 * 0.95,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.15,
           ),
@@ -46,17 +48,26 @@ void main() {
         expect(
           resolved.titleStyle,
           text.titleLarge?.copyWith(
-            fontSize: 18.5,
-            fontWeight: FontWeight.w700,
+            fontSize: 18.5 * 0.9,
+            fontWeight: FontWeight.w500,
             letterSpacing: -0.2,
             height: 1.25,
           ),
         );
-        expect(resolved.previewStyle, text.bodyMedium?.copyWith(height: 1.42));
-        expect(resolved.footerStyle, text.bodySmall?.copyWith(fontSize: 11.5));
+        expect(
+          resolved.previewStyle,
+          text.bodyMedium?.copyWith(
+            fontSize: text.bodyMedium!.fontSize! * 0.95,
+            height: 1.42 + 0.16,
+          ),
+        );
+        expect(
+          resolved.footerStyle,
+          text.bodySmall?.copyWith(fontSize: 11.5 * 0.95),
+        );
         expect(resolved.sideCoverSize, const Size(116, 116));
         expect(resolved.footerGap, 8);
-        expect(resolved.cornerRadius, 24);
+        expect(resolved.cornerRadius, 16);
         expect(resolved.accentStartInset, 0);
         expect(resolved.accentTopInset, 0);
       });
@@ -74,7 +85,7 @@ void main() {
         expect(
           resolved.eyebrowStyle,
           text.labelSmall?.copyWith(
-            fontSize: 12,
+            fontSize: 12 * 0.95,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.1,
           ),
@@ -82,14 +93,23 @@ void main() {
         expect(
           resolved.titleStyle,
           text.titleMedium?.copyWith(
-            fontSize: 16.5,
-            fontWeight: FontWeight.w700,
+            fontSize: 16.5 * 0.9,
+            fontWeight: FontWeight.w500,
             letterSpacing: -0.15,
             height: 1.3,
           ),
         );
-        expect(resolved.previewStyle, text.bodySmall?.copyWith(height: 1.36));
-        expect(resolved.footerStyle, text.bodySmall?.copyWith(fontSize: 11));
+        expect(
+          resolved.previewStyle,
+          text.bodySmall?.copyWith(
+            fontSize: text.bodySmall!.fontSize! * 0.95,
+            height: 1.36 + 0.16,
+          ),
+        );
+        expect(
+          resolved.footerStyle,
+          text.bodySmall?.copyWith(fontSize: 11 * 0.95),
+        );
         expect(resolved.columns, 2);
         expect(resolved.footerGap, 8);
       });
@@ -105,35 +125,14 @@ void main() {
         final plain = resolved.appearanceFor(pinned: false, locked: false);
         expect(plain.surface.color, ExpressiveSurfaces.cardColor(scheme));
         expect(plain.surface.gradientColors, isNull);
-        expect(plain.surface.radius, 24);
-        expect(plain.surface.borderWidth, 0.8);
+        expect(plain.surface.radius, 16);
+        expect(plain.surface.borderWidth, 0);
         expect(
           plain.surface.borderColor,
           ExpressiveSurfaces.cardBorderColor(scheme),
         );
-        expect(
-          plain.surface.shadows,
-          isLight
-              ? <BoxShadow>[
-                  BoxShadow(
-                    color: scheme.shadow.withValues(alpha: 0.03),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1.5),
-                  ),
-                  BoxShadow(
-                    color: scheme.shadow.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : <BoxShadow>[
-                  BoxShadow(
-                    color: scheme.shadow.withValues(alpha: 0.32),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        );
+        // fork 默认无投影（DiaryCardShadowStyle.none）。
+        expect(plain.surface.shadows, isEmpty);
         expect(plain.titleColor, scheme.onSurface);
         expect(plain.bodyColor, scheme.onSurfaceVariant);
         expect(
@@ -167,19 +166,19 @@ void main() {
         expect(plain.accentBarColor, isNull);
 
         final pinned = resolved.appearanceFor(pinned: true, locked: false);
-        expect(
-          pinned.surface.color,
-          Color.alphaBlend(
-            scheme.primary.withAlpha(14),
-            ExpressiveSurfaces.cardColor(scheme),
-          ),
-        );
+        // fork 默认 pinnedTint 关闭：置顶卡底色不再混入主色。
+        expect(pinned.surface.color, ExpressiveSurfaces.cardColor(scheme));
+        // 置顶染色关闭时，置顶卡边框与普通卡一致（不再用主色描边）。
         expect(
           pinned.surface.borderColor,
-          scheme.primary.withValues(alpha: isLight ? 0.35 : 0.45),
+          ExpressiveSurfaces.cardBorderColor(scheme),
         );
-        expect(pinned.eyebrowColor, scheme.primary);
-        expect(pinned.surface.shadows, hasLength(isLight ? 3 : 1));
+        // 置顶染色关闭时，置顶卡眉线与普通卡一致（不再用主色）。
+        expect(
+          pinned.eyebrowColor,
+          scheme.onSurfaceVariant.withValues(alpha: 0.82),
+        );
+        expect(pinned.surface.shadows, isEmpty);
       });
     }
   });

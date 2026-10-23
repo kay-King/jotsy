@@ -75,16 +75,21 @@ quill.QuillController colorPanelController([String text = 'hello']) {
 
 /// 用应用的真实字体排版：表头放不放得下标题取决于字宽，测试默认的 Ahem 每个
 /// 字都是满格方块，比真实文字宽得多。在 `setUpAll` 里调用。
+/// 同一份字体注册两个名字：正文的内置字族 HarmonyOSSansSC，以及主题
+/// 不指定字族时回落到的默认字族 Roboto（UI 字体已改走系统默认，测试
+/// 环境里由它承接真实度量）。
 Future<void> loadColorPanelFonts() async {
-  final loader = FontLoader('HarmonyOSSansSC');
-  for (final weight in <String>['Regular', 'Medium', 'Bold']) {
-    loader.addFont(
-      rootBundle.load(
-        'assets/fonts/harmonyos_sans_sc/HarmonyOS_Sans_SC_$weight.ttf',
-      ),
-    );
+  for (final family in <String>['HarmonyOSSansSC', 'Roboto']) {
+    final loader = FontLoader(family);
+    for (final weight in <String>['Regular', 'Medium', 'Bold']) {
+      loader.addFont(
+        rootBundle.load(
+          'assets/fonts/harmonyos_sans_sc/HarmonyOS_Sans_SC_$weight.ttf',
+        ),
+      );
+    }
+    await loader.load();
   }
-  await loader.load();
 }
 
 Future<ColorPanelHarness> pumpColorPanel(

@@ -163,7 +163,7 @@ void main() {
           matching: find.byType(ClipRRect),
         ),
       );
-      expect(clip.borderRadius, BorderRadius.circular(16));
+      expect(clip.borderRadius, BorderRadius.circular(10));
 
       await tester.tap(image);
       await tester.pump();
@@ -171,10 +171,10 @@ void main() {
       // 点按时抓取已绘制的画面作为看图页飞入画面，比例与原图一致。
       expect(hero, isNotNull);
       expect(hero!.aspectRatio, 2);
-      // 圆角挂在来源 Hero 上：飞行中从 16 补间到看图页的 0。
+      // 圆角挂在来源 Hero 上：飞行中从 10 补间到看图页的 0。
       expect(
         tester.widget<ImageHero>(find.byType(ImageHero)).borderRadius,
-        BorderRadius.circular(16),
+        BorderRadius.circular(10),
       );
       hero!.dispose();
       expect(tester.takeException(), isNull);

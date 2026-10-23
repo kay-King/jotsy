@@ -287,26 +287,30 @@ void main() {
       expect(_tagsTop(tester), _statusBar);
     });
 
-    testWidgets('both slices share one backdrop and draw no line by default', (
-      tester,
-    ) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(_glassHost(controller, pinned: false));
-      final filters = tester
-          .renderObjectList<RenderBackdropFilter>(find.byType(BackdropFilter))
-          .toList();
-      expect(filters, hasLength(2));
-      expect(filters.every((filter) => filter.enabled), isTrue);
-      final key = filters.first.backdropKey;
-      expect(key, isNotNull);
-      expect(filters.last.backdropKey, same(key));
-      expect(
-        tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
-        isNull,
-      );
-      expect(tester.widget<GlassSurface>(_tagsGlass).bottomHairline, isNull);
-    });
+    testWidgets(
+      'both slices share one backdrop; by default only tags draw a line',
+      (tester) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(_glassHost(controller, pinned: false));
+        final filters = tester
+            .renderObjectList<RenderBackdropFilter>(find.byType(BackdropFilter))
+            .toList();
+        expect(filters, hasLength(2));
+        expect(filters.every((filter) => filter.enabled), isTrue);
+        final key = filters.first.backdropKey;
+        expect(key, isNotNull);
+        expect(filters.last.backdropKey, same(key));
+        expect(
+          tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
+          isNull,
+        );
+        expect(
+          tester.widget<GlassSurface>(_tagsGlass).bottomHairline,
+          isNotNull,
+        );
+      },
+    );
 
     testWidgets('with the hairline on, only the tags get a line', (
       tester,

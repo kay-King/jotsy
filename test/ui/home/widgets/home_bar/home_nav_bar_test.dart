@@ -273,10 +273,12 @@ void main() {
     expect(icon(0).color, style.unselectedForeground);
     final selectedText = tester.widget<Text>(find.text('Calendar'));
     expect(selectedText.style!.color, style.selectedForeground);
-    expect(selectedText.style!.fontWeight, FontWeight.w700);
+    // 标签字重由导航栏主题决定：选中 w500、未选 w400（fork 设计，
+    // 见 expressive_surfaces 的 navigationBarTheme.labelTextStyle）。
+    expect(selectedText.style!.fontWeight, FontWeight.w500);
     final otherText = tester.widget<Text>(find.text('Diaries'));
     expect(otherText.style!.color, style.unselectedForeground);
-    expect(otherText.style!.fontWeight, FontWeight.w500);
+    expect(otherText.style!.fontWeight, FontWeight.w400);
     final ink = tester.widget<Ink>(
       find.descendant(of: _indicator(1), matching: find.byType(Ink)),
     );

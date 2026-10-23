@@ -206,7 +206,7 @@ class _NodeDiaryAppState extends ConsumerState<NodeDiaryApp> {
       );
     }
 
-    return _buildAppShell(home: home);
+    return _buildAppShell(home: home, preSettings: true);
   }
 
   /// 按种子色缓存明暗 ThemeData。
@@ -227,6 +227,13 @@ class _NodeDiaryAppState extends ConsumerState<NodeDiaryApp> {
     return themes;
   }
 
+  /// 设置加载完成前的首帧主题：用静态配色，其底色与主色与原生启动资源
+  /// （launch_background / launch_brand_mark）逐值对齐，闪屏移除时画面不变。
+  static final (ThemeData, ThemeData) _splashThemes = (
+    MaterialTheme(Typography.material2021().black).light(),
+    MaterialTheme(Typography.material2021().white).dark(),
+  );
+
   MaterialApp _buildAppShell({
     required Widget home,
     ThemeMode themeMode = ThemeMode.system,
@@ -235,8 +242,11 @@ class _NodeDiaryAppState extends ConsumerState<NodeDiaryApp> {
       SettingsService.defaultThemeSeedColorValue,
     ),
     double fontScale = SettingsService.defaultFontScale,
+    bool preSettings = false,
   }) {
-    final (lightTheme, darkTheme) = _themesForSeed(themeSeedColor);
+    final (lightTheme, darkTheme) = preSettings
+        ? _splashThemes
+        : _themesForSeed(themeSeedColor);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // 切换明暗/主题色时 AnimatedTheme 会逐帧 lerp 整份 ThemeData；减少动画时

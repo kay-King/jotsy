@@ -153,6 +153,18 @@
   "@settingsTitle": {
     "description": "Auto-generated metadata for settingsTitle."
   },
+  "settingsGroupInterface": "Interface & editing",
+  "@settingsGroupInterface": {
+    "description": "Settings home group title for appearance, editor and feature entries."
+  },
+  "settingsGroupContent": "Content & data",
+  "@settingsGroupContent": {
+    "description": "Settings home group title for tags, notebooks, data/privacy and about entries."
+  },
+  "settingsGroupInterfaceStyle": "Interface style",
+  "@settingsGroupInterfaceStyle": {
+    "description": "Appearance page group title for home bar, diary card and preview style entries."
+  },
   "settingsThemeMode": "Theme",
   "@settingsThemeMode": {
     "description": "Auto-generated metadata for settingsThemeMode."

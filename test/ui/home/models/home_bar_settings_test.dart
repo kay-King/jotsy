@@ -119,7 +119,8 @@ void main() {
     });
 
     test('glass-based presets use the tighter glass label gap', () {
-      expect(HomeBarPreset.classic.style.labelGap, 4);
+      // fork 的经典预设标签间距已与玻璃紧间距同为 2。
+      expect(HomeBarPreset.classic.style.labelGap, 2);
       for (final preset in HomeBarPreset.values.skip(1)) {
         expect(preset.style.labelGap, HomeBarStyle.glassLabelGap);
         expect(HomeBarPreset.matching(preset.style), preset);

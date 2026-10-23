@@ -290,6 +290,24 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// Settings home group title for appearance, editor and feature entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface & editing'**
+  String get settingsGroupInterface;
+
+  /// Settings home group title for tags, notebooks, data/privacy and about entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Content & data'**
+  String get settingsGroupContent;
+
+  /// Appearance page group title for home bar, diary card and preview style entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface style'**
+  String get settingsGroupInterfaceStyle;
+
   /// Auto-generated metadata for settingsThemeMode.
   ///
   /// In en, this message translates to:

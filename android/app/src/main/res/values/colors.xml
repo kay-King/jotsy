@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Matches the default light Flutter scaffold surface to avoid a white flash before the first Flutter frame. -->
-    <color name="launch_background">#FFFFFF</color>
-    <!-- Default seed light primary: the first Flutter frame paints the launch brand mark in this
-         colour before settings load, so the native splash icon must match it. -->
+    <!-- Matches the default light Flutter scaffold surface to avoid a flash before the first Flutter frame. -->
+    <color name="launch_background">#FAFBFC</color>
+    <!-- Static light scheme primary: the first Flutter frame paints the launch brand mark in
+         the static scheme's primary before settings load, so the native splash icon must match it. -->
     <color name="launch_brand_mark">#0470E6</color>
 </resources>

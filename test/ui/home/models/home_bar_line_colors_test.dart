@@ -128,12 +128,13 @@ void main() {
       final glass = HomeBarPreset.glass.style;
       expect(_resolve(glass, _light).border, isTrue);
       expect(_resolve(glass.copyWith(border: false), _light).border, isFalse);
-      expect(_resolve(glass, _light).topBarHairline, isFalse);
+      // fork：发丝线默认开启，关掉开关才不画。
+      expect(_resolve(glass, _light).topBarHairline, isTrue);
       expect(
-        _resolve(glass.copyWith(topBarHairline: true), _light).topBarHairline,
-        isTrue,
+        _resolve(glass.copyWith(topBarHairline: false), _light).topBarHairline,
+        isFalse,
       );
-      // 实色栏没有这两条线，改了线条样式也一样。
+      // 底栏描边仍只属于玻璃栏；顶栏发丝线在实色栏上同样绘制（fork）。
       final solid = _resolve(
         HomeBarStyle.defaults.copyWith(
           topBarHairline: true,
@@ -142,7 +143,7 @@ void main() {
         _light,
       );
       expect(solid.border, isFalse);
-      expect(solid.topBarHairline, isFalse);
+      expect(solid.topBarHairline, isTrue);
     });
 
     test('the clear preset resolves to a highlight rim', () {

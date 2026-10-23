@@ -20,6 +20,7 @@ import '../sections/cloud_backup_account_section.dart';
 import '../sections/cloud_backup_config_forms.dart';
 import '../sections/cloud_backup_remote_list.dart';
 import '../widgets/cloud_backup_labels.dart';
+import '../widgets/settings_card_group.dart';
 
 /// 单个备份位置的页面：连接配置（或授权账号）、上传、远程备份列表与恢复。
 ///
@@ -220,7 +221,7 @@ class _CloudBackupTargetPageState extends ConsumerState<CloudBackupTargetPage>
               ),
               children: <Widget>[
                 ..._buildConfigSection(context),
-                const Divider(height: 32),
+                const SizedBox(height: AppSpacing.xl),
                 Wrap(
                   spacing: AppSpacing.s,
                   runSpacing: AppSpacing.s,
@@ -285,15 +286,25 @@ class _CloudBackupTargetPageState extends ConsumerState<CloudBackupTargetPage>
       ];
     }
     return <Widget>[
-      Text(l10n.cloudBackupConfigSection, style: theme.textTheme.titleMedium),
-      const SizedBox(height: AppSpacing.m),
-      CloudBackupConfigForm(fields: form, preset: _preset),
-      const SizedBox(height: AppSpacing.m),
-      Text(
-        cloudBackupPresetHint(l10n, _preset),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
+      // 配置表单收进分组白卡，蓝色组标题在卡内（与其他设置页统一）。
+      SettingsCardGroup(
+        title: l10n.cloudBackupConfigSection,
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: CloudBackupConfigForm(fields: form, preset: _preset),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Text(
+              cloudBackupPresetHint(l10n, _preset),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
       const SizedBox(height: AppSpacing.l),
       Wrap(

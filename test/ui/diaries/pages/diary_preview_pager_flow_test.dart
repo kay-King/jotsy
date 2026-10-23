@@ -147,6 +147,10 @@ const DiaryPreviewStyle _positionTitle = DiaryPreviewStyle(
 );
 
 void main() {
+  // 操作表的行高取决于真实字宽，先给默认字族注册真实字体度量，
+  // 否则假字体（一字一格）会把表撑出屏幕、末项点不到。
+  setUpAll(loadExpressiveTestFontMetrics);
+
   late AppDatabase database;
   setUp(() => database = AppDatabase.forTesting(NativeDatabase.memory()));
   tearDown(() => database.close());
@@ -205,6 +209,10 @@ void main() {
     await _swipe(tester);
     final l10n = _l10n(tester);
     await tester.tap(find.byTooltip(l10n.autoT0125));
+    await tester.pumpAndSettle();
+    // 操作表项数多、行距放宽后总高超过面板上限，「删除」在折叠线
+    // 以下：先在表内滚到位再点（与真机操作一致）。
+    await tester.ensureVisible(find.text(l10n.commonDelete));
     await tester.pumpAndSettle();
     await tester.tap(find.text(l10n.commonDelete));
     await tester.pumpAndSettle();

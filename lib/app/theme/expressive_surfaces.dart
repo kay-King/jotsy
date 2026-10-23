@@ -14,12 +14,12 @@ abstract final class ExpressiveSurfaces {
   static Color pageBackground(ColorScheme colors) => colors.surface;
 
   /// 卡片表面底色：
-  /// - 亮色模式下页面底已是纯白，卡片改用近白浅灰 #F8F9FB，靠明度差
-  ///   与白底分层（白底白卡会糊成一片）；
+  /// - 亮色模式下页面底是近白浅灰 #FAFBFC，卡片用纯白，靠明度差分层
+  ///   （照 IdeaMemo 设置页：浅灰底 + 白卡）；
   /// - 暗色模式下使用温和深灰 (surfaceContainerLow)，与深色底形成舒适层次。
   static Color cardColor(ColorScheme colors) =>
       colors.brightness == Brightness.light
-      ? const Color(0xfff8f9fb)
+      ? const Color(0xffffffff)
       : colors.surfaceContainerLow;
 
   /// 卡片边框颜色：带有细腻的低不透明度，在明暗主题下均显轻盈精致。

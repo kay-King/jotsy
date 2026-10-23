@@ -14,7 +14,9 @@ import 'package:node_diary/ui/diaries/widgets/create_tag_dialog.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/widgets/app_top_bar.dart';
+import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/expressive_motion.dart';
+import '../../../app/theme/expressive_surfaces.dart';
 import '../../widgets/expressive_reorder_proxy.dart';
 import '../../widgets/list_item_presence.dart';
 import '../widgets/tag_management_tile.dart';
@@ -203,38 +205,47 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
       context,
       ExpressiveMotion.medium,
     );
-    return ReorderableListView.builder(
-      key: const ValueKey<String>('tags_list'),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      buildDefaultDragHandles: false,
-      proxyDecorator: expressiveReorderProxyDecorator,
-      itemCount: displayTags.length,
-      // 拿起条目即生效的瞬间给一次触觉：拖拽手柄是立即拖动，不经过长按，系统
-      // 不会自动反馈。
-      onReorderStart: (_) => unawaited(HapticFeedback.mediumImpact()),
-      onReorderItem: (oldIndex, newIndex) {
-        _reorderTags(displayTags, oldIndex, newIndex);
-      },
-      itemBuilder: (BuildContext context, int index) {
-        final tag = displayTags[index];
-        final removing = _pendingRemovalTagIds.contains(tag.id);
-        // 可排序列表要求每项最外层带稳定 key；进出场容器结构恒定，删除收起、
-        // 新建展开都不会重新挂载整行。
-        return ListItemPresence(
-          key: ValueKey<int>(tag.id),
-          visible: !removing,
-          appearing: _appearingTagIds.contains(tag.id),
-          duration: itemDuration,
-          child: TagManagementTile(
-            tag: tag,
-            index: index,
-            deleteTooltip: l10n.autoT0038,
-            dragEnabled: !removing,
-            onEdit: () => _editTag(tag),
-            onDelete: () => _deleteTag(tag),
-          ),
-        );
-      },
+    // 标签列表整体装进一张分组白卡（与其他设置页统一），拖拽机制不变。
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      child: Material(
+        color: ExpressiveSurfaces.cardColor(Theme.of(context).colorScheme),
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        clipBehavior: Clip.antiAlias,
+        child: ReorderableListView.builder(
+          key: const ValueKey<String>('tags_list'),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          buildDefaultDragHandles: false,
+          proxyDecorator: expressiveReorderProxyDecorator,
+          itemCount: displayTags.length,
+          // 拿起条目即生效的瞬间给一次触觉：拖拽手柄是立即拖动，不经过长按，系统
+          // 不会自动反馈。
+          onReorderStart: (_) => unawaited(HapticFeedback.mediumImpact()),
+          onReorderItem: (oldIndex, newIndex) {
+            _reorderTags(displayTags, oldIndex, newIndex);
+          },
+          itemBuilder: (BuildContext context, int index) {
+            final tag = displayTags[index];
+            final removing = _pendingRemovalTagIds.contains(tag.id);
+            // 可排序列表要求每项最外层带稳定 key；进出场容器结构恒定，删除收起、
+            // 新建展开都不会重新挂载整行。
+            return ListItemPresence(
+              key: ValueKey<int>(tag.id),
+              visible: !removing,
+              appearing: _appearingTagIds.contains(tag.id),
+              duration: itemDuration,
+              child: TagManagementTile(
+                tag: tag,
+                index: index,
+                deleteTooltip: l10n.autoT0038,
+                dragEnabled: !removing,
+                onEdit: () => _editTag(tag),
+                onDelete: () => _deleteTag(tag),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

@@ -12,19 +12,24 @@ part 'theme_color_schemes.dart';
 /// 故装配后统一经 [MaterialThemeSchemes.withNeutralSurfaces] 换成简约灰阶，
 /// 页面呈现“白底 + 白卡片细线分层”的扁平效果，种子色只体现在按钮、开关等强调处。
 ThemeData buildSeededAppTheme(Color seedColor, Brightness brightness) {
+  final generated = MaterialThemeSchemes.withNeutralSurfaces(
+    ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+    ),
+  );
+  // 主色钉回种子色本身：tonalSpot 生成的主色会被稀释成发闷的灰钢蓝
+  // （#0470E6 → #435E91），开关、分组标题都跟着发灰，与参照的鲜蓝对不上。
+  // 亮色直接用种子色；暗色把种子色提到可在深底上读的明度，色相不变。
+  final primary = brightness == Brightness.light
+      ? seedColor
+      : HSLColor.fromColor(seedColor).withLightness(0.68).toColor();
   return MaterialTheme(
     brightness == Brightness.light
         ? Typography.material2021().black
         : Typography.material2021().white,
-  ).theme(
-    MaterialThemeSchemes.withNeutralSurfaces(
-      ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: brightness,
-        dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
-      ),
-    ),
-  );
+  ).theme(generated.copyWith(primary: primary));
 }
 
 /// 应用 Material 3 Expressive 主题装配器。
@@ -66,7 +71,9 @@ class MaterialTheme {
     final scaffoldBg = ExpressiveSurfaces.pageBackground(colorScheme);
     final baseTheme = ThemeData(
       useMaterial3: true,
-      fontFamily: 'HarmonyOSSansSC',
+      // 不再强制内置 HarmonyOSSansSC：UI 字体走系统默认，与参照应用
+      // （IdeaMemo 等原生应用）同源，用户换系统字体时界面随之而变。
+      // 日记正文字体是 DiaryTypography 的独立设置，不受影响。
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBg,
@@ -75,7 +82,6 @@ class MaterialTheme {
     final resolvedTextTheme = baseTheme.textTheme
         .merge(textTheme)
         .apply(
-          fontFamily: 'HarmonyOSSansSC',
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         );

@@ -119,22 +119,24 @@ const _everyField = DiaryCardStyle(
 
 void main() {
   group('DiaryCardStyle defaults', () {
-    test('match the pre-customization card exactly', () {
+    test('match the fork Salt-style card defaults', () {
       const style = DiaryCardStyle.defaults;
-      expect(style.surface.cornerRadius, 24);
+      // fork 默认：圆角 16、无边框、无投影；排版收小一档（标题 0.9、
+      // 摘要/辅助 0.95）、标题 medium、行高 relaxed。
+      expect(style.surface.cornerRadius, 16);
       expect(style.surface.background.source, DiaryCardColorSource.theme);
       expect(style.surface.opacity, 1);
       expect(style.surface.gradient, isFalse);
-      expect(style.surface.pinnedTint, isTrue);
-      expect(style.surface.borderWidth, 0.8);
+      expect(style.surface.pinnedTint, isFalse);
+      expect(style.surface.borderWidth, 0);
       expect(style.surface.borderColor.source, DiaryCardColorSource.theme);
       expect(style.surface.accentBar, DiaryCardAccentBar.none);
-      expect(style.surface.shadow, DiaryCardShadowStyle.themed);
-      expect(style.typography.titleScale, 1);
-      expect(style.typography.titleWeight, DiaryCardTitleWeight.bold);
-      expect(style.typography.previewScale, 1);
-      expect(style.typography.lineHeight, DiaryCardLineHeight.standard);
-      expect(style.typography.metaScale, 1);
+      expect(style.surface.shadow, DiaryCardShadowStyle.none);
+      expect(style.typography.titleScale, 0.9);
+      expect(style.typography.titleWeight, DiaryCardTitleWeight.medium);
+      expect(style.typography.previewScale, 0.95);
+      expect(style.typography.lineHeight, DiaryCardLineHeight.relaxed);
+      expect(style.typography.metaScale, 0.95);
       expect(style.typography.textAlign, DiaryCardTextAlign.start);
       expect(style.typography.titleColor.isThemed, isTrue);
       expect(style.typography.bodyColor.isThemed, isTrue);
@@ -161,7 +163,7 @@ void main() {
       expect(list.coverPosition, DiaryCardCoverPosition.start);
       expect(list.coverSide, 116);
       expect(list.coverShape, DiaryCardCoverShape.square);
-      expect(list.coverRadius, 16);
+      expect(list.coverRadius, 10);
       expect(list.coverGap, 14);
       expect(list.paddingH, 16);
       expect(list.paddingV, 14);
@@ -236,7 +238,7 @@ void main() {
       (json['meta'] as Map<String, dynamic>)['dateFormat'] = 'lunar';
       (json['list'] as Map<String, dynamic>)['coverShape'] = 42;
       final decoded = DiaryCardStyle.fromJson(json);
-      expect(decoded.surface.cornerRadius, 24);
+      expect(decoded.surface.cornerRadius, 16);
       expect(decoded.meta.dateFormat, DiaryCardDateFormat.eyebrow);
       expect(decoded.list.coverShape, DiaryCardCoverShape.square);
       // 同一对象里的其他字段不受影响。
@@ -280,7 +282,7 @@ void main() {
       final nan = DiaryCardStyle.fromJson(<String, Object>{
         'surface': <String, Object>{'cornerRadius': double.nan},
       });
-      expect(nan.surface.cornerRadius, 24);
+      expect(nan.surface.cornerRadius, 16);
     });
 
     test('waterfall ignores side cover positions', () {

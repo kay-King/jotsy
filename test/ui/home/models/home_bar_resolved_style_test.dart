@@ -43,31 +43,29 @@ void main() {
       );
     });
 
-    test('the top bar hairline needs glass top bars and its own switch', () {
-      expect(_resolve(glass, _light).topBarHairline, isFalse);
-      final on = glass.copyWith(topBarHairline: true);
-      expect(_resolve(on, _light).topBarHairline, isTrue);
+    test('the top bar hairline follows its switch on both materials', () {
+      // fork：发丝线默认开启、实色顶栏同样绘制；玻璃时还要求顶栏用玻璃。
+      expect(_resolve(glass, _light).topBarHairline, isTrue);
+      final off = glass.copyWith(topBarHairline: false);
+      expect(_resolve(off, _light).topBarHairline, isFalse);
       // 底栏描边不再牵动顶栏分隔线。
       expect(
-        _resolve(on.copyWith(border: false), _light).topBarHairline,
+        _resolve(glass.copyWith(border: false), _light).topBarHairline,
         isTrue,
       );
       expect(
-        _resolve(glass.copyWith(border: true), _light).topBarHairline,
+        _resolve(off.copyWith(border: true), _light).topBarHairline,
         isFalse,
       );
       expect(
-        _resolve(on.copyWith(glassTopBars: false), _light).topBarHairline,
+        _resolve(glass.copyWith(glassTopBars: false), _light).topBarHairline,
         isFalse,
       );
       expect(
-        _resolve(
-          HomeBarStyle.defaults.copyWith(topBarHairline: true),
-          _light,
-        ).topBarHairline,
-        isFalse,
+        _resolve(HomeBarStyle.defaults, _light).topBarHairline,
+        isTrue,
       );
-      expect(_resolve(on, _light), isNot(_resolve(glass, _light)));
+      expect(_resolve(glass, _light), isNot(_resolve(off, _light)));
     });
 
     test('high contrast keeps the glass layout but turns translucency off', () {

@@ -60,30 +60,43 @@ void main() {
     await openHomeBarStyleTab(tester, l10n.homeBarStyleTabMaterial);
     await scrollToHomeBarOption(
       tester,
-      inHomeBarOptions(l10n.homeBarStyleLineWidth),
+      // fork 默认两组线条行都在，取第一组（底栏描边）滚动定位。
+      inHomeBarOptions(l10n.homeBarStyleLineWidth).first,
     );
-    // 底栏描边默认打开：一组从属行；顶栏分隔线默认关闭：没有第二组。
-    expect(inHomeBarOptions(l10n.homeBarStyleLineColor), findsOneWidget);
-    expect(inHomeBarOptions(l10n.homeBarStyleLineWidth), findsOneWidget);
+    // fork 默认：底栏描边与顶栏分隔线都打开，两组从属行都在
+    // （上游默认顶栏分隔线关闭，只有一组）。
+    expect(inHomeBarOptions(l10n.homeBarStyleLineColor), findsNWidgets(2));
+    expect(inHomeBarOptions(l10n.homeBarStyleLineWidth), findsNWidgets(2));
     final colorRow = find.widgetWithText(
       SettingsChoiceTile,
       l10n.homeBarStyleLineColor,
     );
-    expect(tester.widget<SettingsChoiceTile>(colorRow).nested, isTrue);
+    expect(tester.widget<SettingsChoiceTile>(colorRow.first).nested, isTrue);
     expect(
       tester
-          .widget<SettingsSliderTile>(_slider(l10n.homeBarStyleLineWidth))
+          .widget<SettingsSliderTile>(_slider(l10n.homeBarStyleLineWidth).first)
           .nested,
       isTrue,
     );
     // 没选自定义时不出现取色行。
     expect(inHomeBarOptions(l10n.homeBarStyleLineCustomColor), findsNothing);
 
+    // 关掉底栏描边：只剩顶栏分隔线的一组从属行。
     await tapHomeBarOption(tester, inHomeBarOptions(l10n.homeBarStyleBorder));
     expect(storedHomeBarSettings(settings).current.border, isFalse);
+    expect(inHomeBarOptions(l10n.homeBarStyleLineColor), findsOneWidget);
+    expect(inHomeBarOptions(l10n.homeBarStyleLineWidth), findsOneWidget);
+
+    // 再关掉顶栏分隔线：两组从属行都收起。
+    await tapHomeBarOption(
+      tester,
+      inHomeBarOptions(l10n.homeBarStyleTopBarHairline),
+    );
+    expect(storedHomeBarSettings(settings).current.topBarHairline, isFalse);
     expect(inHomeBarOptions(l10n.homeBarStyleLineColor), findsNothing);
     expect(inHomeBarOptions(l10n.homeBarStyleLineWidth), findsNothing);
 
+    // 重新打开顶栏分隔线：它的一组从属行回来。
     await tapHomeBarOption(
       tester,
       inHomeBarOptions(l10n.homeBarStyleTopBarHairline),
@@ -91,7 +104,8 @@ void main() {
     expect(storedHomeBarSettings(settings).current.topBarHairline, isTrue);
     await scrollToHomeBarOption(
       tester,
-      inHomeBarOptions(l10n.homeBarStyleLineWidth),
+      // fork 默认两组线条行都在，取第一组（底栏描边）滚动定位。
+      inHomeBarOptions(l10n.homeBarStyleLineWidth).first,
     );
     expect(inHomeBarOptions(l10n.homeBarStyleLineColor), findsOneWidget);
     // 关掉开关不清除调整：底栏描边的线条样式仍是默认值，没被改写。

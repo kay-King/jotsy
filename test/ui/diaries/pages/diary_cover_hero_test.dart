@@ -213,7 +213,7 @@ void main() {
     // 封面贴着卡片顶边：上方两角被卡片裁圆、下方是直角，飞行从同样的形状起步。
     expect(
       tester.widget<ImageHero>(find.byType(ImageHero)).borderRadius,
-      const BorderRadius.vertical(top: Radius.circular(24)),
+      const BorderRadius.vertical(top: Radius.circular(16)),
     );
   });
 }

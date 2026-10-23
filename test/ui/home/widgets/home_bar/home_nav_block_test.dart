@@ -95,7 +95,8 @@ void main() {
     expect(block.center.dy, closeTo(bar.center.dy, 0.01));
     expect(block.center.dx, closeTo(icon.center.dx, 0.01));
 
-    // 圆角与栏同心：栏圆角 32 减去块到栏上下边缘的距离。
+    // 圆角与栏同心：栏圆角（默认栏高 60 把 32 夹到 30）减去块到栏上下
+    // 边缘的距离。
     final ink = tester.widget<Ink>(
       find.descendant(of: _destination(0), matching: find.byType(Ink)),
     );
@@ -104,7 +105,7 @@ void main() {
     final radius = (shape as HomeNavBlockBorder).radiusFor(block.height);
     expect(
       radius,
-      closeTo((32 - (64 - block.height) / 2).clamp(0, block.height / 2), 0.001),
+      closeTo((30 - (64 - block.height) / 2).clamp(0, block.height / 2), 0.001),
     );
   });
 

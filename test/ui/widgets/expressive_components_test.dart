@@ -36,7 +36,8 @@ void main() {
 
   for (final brightness in Brightness.values) {
     testWidgets(
-      'buttons morph on press and keep disabled actions inert in $brightness',
+      'buttons keep their shape on press and keep disabled actions inert '
+      'in $brightness',
       (tester) async {
         var calls = 0;
         await tester.pumpWidget(
@@ -58,11 +59,16 @@ void main() {
           of: button,
           matching: find.byType(Material),
         );
+        // 简约皮肤：按钮是固定 8 圆角，按压时不再有 MD3 的圆角变形。
         final before = tester.widget<Material>(ink).shape;
+        expect(
+          (before! as RoundedRectangleBorder).borderRadius,
+          BorderRadius.circular(8),
+        );
         final gesture = await tester.startGesture(tester.getCenter(button));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 200));
-        expect(tester.widget<Material>(ink).shape, isNot(before));
+        expect(tester.widget<Material>(ink).shape, before);
         await gesture.up();
         await tester.pumpAndSettle();
         expect(calls, 1);

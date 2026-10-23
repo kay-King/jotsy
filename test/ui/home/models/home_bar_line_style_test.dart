@@ -152,7 +152,7 @@ void main() {
           'opacity': 0.8,
           'width': 2.2,
         },
-        'topBarHairline': true,
+        // topBarHairline 在 fork 里默认开启，与默认值相同故不写入。
         'topBarLine': <String, Object>{'color': 'primary', 'width': 1.5},
       });
     });

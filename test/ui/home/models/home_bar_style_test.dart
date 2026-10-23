@@ -6,7 +6,7 @@ import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
 
 void main() {
   group('HomeBarStyle defaults', () {
-    test('match the solid bar before the redesign', () {
+    test('match the fork Salt-style solid bar defaults', () {
       const d = HomeBarStyle.defaults;
       expect(d.material, HomeBarMaterial.solid);
       expect(d.glassTopBars, isTrue);
@@ -16,9 +16,10 @@ void main() {
       expect(d.tintColor, isNull);
       expect(d.tintColorDark, isNull);
       expect(d.border, isTrue);
-      expect(d.topBarHairline, isFalse);
+      // fork 默认：顶栏发丝线开启（实色顶栏也画），标签间距 2，栏高 60。
+      expect(d.topBarHairline, isTrue);
       expect(d.shadow, isTrue);
-      expect(d.barHeight, 64);
+      expect(d.barHeight, 60);
       expect(d.cornerRadius, 32);
       expect(d.sideMargin, 16);
       expect(d.bottomGap, 12);
@@ -26,7 +27,7 @@ void main() {
       expect(d.labelMode, HomeBarLabelMode.always);
       expect(d.iconSize, 20);
       expect(d.indicator, HomeBarIndicator.capsule);
-      expect(d.labelGap, 4);
+      expect(d.labelGap, 2);
       expect(d.blockPadding, 6);
       expect(d.isDefault, isTrue);
       expect(d.toJson(), isEmpty);
@@ -65,7 +66,7 @@ void main() {
       expect(style.tintColor, 0xFF336699);
       expect(style.tintColorDark, isNull);
       expect(style.border, isFalse);
-      expect(style.topBarHairline, isFalse);
+      expect(style.topBarHairline, isTrue);
       expect(style.shadow, isTrue);
       expect(style.barHeight, 70);
       expect(style.cornerRadius, 32);
@@ -203,22 +204,24 @@ void main() {
       expect(decoded.hashCode, style.hashCode);
     });
 
-    test('writes the top bar hairline only when it is turned on', () {
-      const style = HomeBarStyle(topBarHairline: true);
-      expect(style.toJson(), <String, Object>{'topBarHairline': true});
+    test('writes the top bar hairline only when it is turned off', () {
+      // fork 默认开启顶栏发丝线：稀疏编码只在关掉时才写该字段。
+      const style = HomeBarStyle(topBarHairline: false);
+      expect(style.toJson(), <String, Object>{'topBarHairline': false});
       expect(HomeBarStyle.fromJson(style.toJson()), style);
       expect(style, isNot(HomeBarStyle.defaults));
-      expect(HomeBarStyle.defaults.copyWith(topBarHairline: true), style);
+      expect(HomeBarStyle.defaults.copyWith(topBarHairline: false), style);
+      expect(const HomeBarStyle(topBarHairline: true).toJson(), isEmpty);
     });
 
     test('omits default spacing and writes changed spacing', () {
       expect(
-        const HomeBarStyle(labelGap: 4, blockPadding: 6).toJson(),
+        const HomeBarStyle(labelGap: 2, blockPadding: 6).toJson(),
         isEmpty,
       );
       expect(
-        const HomeBarStyle(labelGap: 2, blockPadding: 10).toJson(),
-        <String, Object>{'labelGap': 2.0, 'blockPadding': 10.0},
+        const HomeBarStyle(labelGap: 4, blockPadding: 10).toJson(),
+        <String, Object>{'labelGap': 4.0, 'blockPadding': 10.0},
       );
     });
 
@@ -230,12 +233,13 @@ void main() {
   });
 
   group('HomeBarStyle.withMaterial', () {
-    test('tightens the default label gap for glass and restores it', () {
+    test('keeps the fork default label gap across materials', () {
+      // fork 的默认间距已与玻璃紧间距同为 2：换材质不再联动改间距。
       final glass = HomeBarStyle.defaults.withMaterial(HomeBarMaterial.glass);
       expect(glass.material, HomeBarMaterial.glass);
       expect(glass.labelGap, HomeBarStyle.glassLabelGap);
       final solid = glass.withMaterial(HomeBarMaterial.solid);
-      expect(solid.labelGap, 4);
+      expect(solid.labelGap, HomeBarStyle.glassLabelGap);
       expect(solid, HomeBarStyle.defaults);
     });
 

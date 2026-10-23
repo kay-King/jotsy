@@ -32,6 +32,7 @@ import 'package:node_diary/ui/home/widgets/home_bar/home_top_bar_surface.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_nav_indicator.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/settings/pages/settings_page.dart';
+import 'package:node_diary/ui/settings/widgets/settings_card_group.dart';
 import 'package:node_diary/ui/widgets/bottom_nav.dart';
 import 'package:node_diary/ui/widgets/glass/glass_surface.dart';
 import 'package:node_diary/ui/widgets/page_header.dart';
@@ -261,7 +262,8 @@ double _tagBarBottom(WidgetTester tester) => tester
 Finder _firstSettingsCard(WidgetTester tester) => find
     .ancestor(
       of: find.text(_l10n(tester).settingsAppearanceLanguage),
-      matching: find.byType(Card),
+      // fork 的设置主页改用分组卡容器（SettingsCardGroup），不再是 Card。
+      matching: find.byType(SettingsCardGroup),
     )
     .first;
 
@@ -591,9 +593,9 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('both slices share one backdrop and draw no line by default', (
-      tester,
-    ) async {
+    testWidgets(
+      'both slices share one backdrop; by default only tags draw a line',
+      (tester) async {
       await _pumpHome(
         tester,
         diaryCount: 3,
@@ -616,7 +618,10 @@ void main() {
         tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
         isNull,
       );
-      expect(tester.widget<GlassSurface>(_tagBarGlass).bottomHairline, isNull);
+      expect(
+        tester.widget<GlassSurface>(_tagBarGlass).bottomHairline,
+        isNotNull,
+      );
       await _unmount(tester);
     });
 

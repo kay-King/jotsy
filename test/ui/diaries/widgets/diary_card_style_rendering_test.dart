@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/app/theme/expressive_surfaces.dart';
 import 'package:node_diary/ui/diaries/models/diary_card_style/diary_card_style.dart';
 import 'package:node_diary/ui/diaries/sections/diaries_list_section.dart';
 import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
@@ -112,7 +113,7 @@ void main() {
       expect(image.left, greaterThan(title.right));
       expect(
         tester.widget<ImageHero>(find.byType(ImageHero)).borderRadius,
-        BorderRadius.circular(16),
+        BorderRadius.circular(10),
       );
     });
 
@@ -133,7 +134,7 @@ void main() {
       expect(image.bottom, lessThanOrEqualTo(title.top));
       expect(
         tester.widget<ImageHero>(find.byType(ImageHero)).borderRadius,
-        const BorderRadius.vertical(top: Radius.circular(24)),
+        const BorderRadius.vertical(top: Radius.circular(16)),
       );
     });
 
@@ -518,7 +519,7 @@ void main() {
       final context = tester.element(find.byType(DiariesListSection));
       expect(
         surfaceDecoration(tester, diary).color,
-        Theme.of(context).colorScheme.surfaceContainerLowest,
+        ExpressiveSurfaces.cardColor(Theme.of(context).colorScheme),
       );
     });
 

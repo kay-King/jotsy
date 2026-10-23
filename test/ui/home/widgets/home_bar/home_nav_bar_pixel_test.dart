@@ -172,6 +172,10 @@ void main() {
             }
             expect(differing, 0, reason: '$differing bytes differ');
           },
+          // fork 已有意重做默认底栏样式（发丝线分隔、无胶囊指示、标签
+          // 字重 w500、栏高 60），与此处冻结的原版 NavigationBar 像素
+          // 基线不再一致，前提已不存在；基线代码保留作历史参照。
+          skip: true,
         );
       }
     }

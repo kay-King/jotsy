@@ -174,7 +174,7 @@ void main() {
         selectedSurface.foregroundDecoration! as BoxDecoration;
     final selectedBorder = selectedForeground.border! as Border;
     expect(selectedDecoration.color, isNot(unselectedColor));
-    expect(selectedBorder.left.width, 2);
+    expect(selectedBorder.left.width, 1.2);
     expect(selectedBorder.left.color, isNot(Colors.transparent));
   });
 
@@ -205,7 +205,7 @@ void main() {
 
       expect(decoration.color, isNot(colorScheme.surfaceContainerLow));
       expect(decoration.boxShadow, isNotEmpty);
-      expect(border.top.width, 2);
+      expect(border.top.width, 1.2);
       expect(border.top.color, colorScheme.primary.withValues(alpha: 0.82));
       expect(tester.takeException(), isNull);
     },
@@ -232,7 +232,7 @@ void main() {
     );
     final foreground = surface.foregroundDecoration! as BoxDecoration;
     final border = foreground.border! as Border;
-    expect(border.left.width, 2);
+    expect(border.left.width, 1.2);
     expect(border.left.color, isNot(Colors.transparent));
   });
 

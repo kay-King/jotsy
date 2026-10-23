@@ -49,3 +49,6 @@ app.*.map.json
 
 # 网盘备份的应用密钥（--dart-define-from-file），不入库
 cloud_backup_keys.json
+
+# 预览渲染产物（本地截图台生成，不入库）
+test/preview/goldens/
