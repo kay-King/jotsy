@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/expressive_surfaces.dart';
-import '../../../app/theme/app_effects.dart';
 
 /// 设置页统一分组卡片组件。
 ///
@@ -54,13 +53,9 @@ class SettingsCardGroup extends StatelessWidget {
             ),
           ],
           Container(
+            // Salt 风分组卡：无描边、无投影，白卡靠页面底色的明度差分层。
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadii.card),
-              border: Border.all(
-                color: ExpressiveSurfaces.cardBorderColor(colorScheme),
-                width: 0.8,
-              ),
-              boxShadow: AppEffects.restingCardShadow(colorScheme),
             ),
             child: Material(
               color: ExpressiveSurfaces.cardColor(colorScheme),
@@ -109,15 +104,14 @@ class SettingsCardGroupDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isLight = colorScheme.brightness == Brightness.light;
+    // Salt 风分组内不画分割线（照 IdeaMemo 设置页），只保留 1px 的
+    // 节奏间距。
     return Padding(
       padding: EdgeInsetsDirectional.only(start: indent, end: 16),
       child: Divider(
         height: 1,
         thickness: 0.6,
-        color: colorScheme.outlineVariant.withValues(
-          alpha: isLight ? 0.35 : 0.18,
-        ),
+        color: colorScheme.outlineVariant.withValues(alpha: 0),
       ),
     );
   }

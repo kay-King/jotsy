@@ -8,16 +8,17 @@ part of 'diary_card_style.dart';
 @immutable
 class DiaryCardSurfaceStyle {
   const DiaryCardSurfaceStyle({
-    // 简约皮肤（fork 定制，偏离 DESIGN.md §5.1 经典样式）：小圆角、无投影、
-    // 底色不叠着色（纯卡片表面色）、置顶不染色，只留细描边分层。
-    this.cornerRadius = 10,
+    // Salt 风皮肤（fork 定制，偏离 DESIGN.md §5.1 经典样式）：圆角 16、
+    // 无投影、无描边、底色不叠着色（纯卡片表面色）、置顶不染色，
+    // 靠页面底色与卡片的明度差分层（照 IdeaMemo 卡片观感）。
+    this.cornerRadius = 16,
     this.background = const DiaryCardColorSpec(strength: 0),
     this.opacity = 1,
     this.gradient = false,
     this.gradientEnd = _defaultGradientEnd,
     this.gradientDirection = DiaryCardGradientDirection.diagonal,
     this.pinnedTint = false,
-    this.borderWidth = 0.8,
+    this.borderWidth = 0,
     this.borderColor = _defaultBorderColor,
     this.accentBar = DiaryCardAccentBar.none,
     this.accentWidth = 4,

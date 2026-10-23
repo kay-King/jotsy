@@ -28,7 +28,7 @@ extension HomeTabSwitchCurveTypeX on HomeTabSwitchCurveType {
 }
 
 class SettingsService {
-  static const int defaultThemeSeedColorValue = 0xFF07C160;
+  static const int defaultThemeSeedColorValue = 0xFF0470E6;
   static const HomeTabSwitchCurveType defaultHomeTabSwitchCurveType =
       HomeTabSwitchCurveType.easeOutCirc;
   static const double defaultFontScale = 1.0;

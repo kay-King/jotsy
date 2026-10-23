@@ -132,11 +132,12 @@ extension _HomePageChrome on _HomePageState {
                         onPressed: () {
                           unawaited(_openCreateFromGlobalFab());
                         },
-                        // 样式照参考项目的悬浮按钮：圆形绿钮 + 白色加号，
-                        // 不带文字胶囊；原动态文案（写进「某本」）保留为
-                        // 长按提示，信息不丢。
+                        // 样式照 IdeaMemo 的悬浮按钮：浅紫圆角方钮 +
+                        // 深紫铅笔图标（形状配色在主题里），不带文字
+                        // 胶囊；原动态文案（写进「某本」）保留为长按
+                        // 提示，信息不丢。
                         tooltip: _createLabel(context, ref),
-                        child: const FaIcon(FontAwesomeIcons.plus, size: 22),
+                        child: const FaIcon(FontAwesomeIcons.pen, size: 20),
                       );
                     },
                   ),

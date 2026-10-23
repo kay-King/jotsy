@@ -54,8 +54,9 @@ class HomeBarStyle {
     this.fabPlacement = HomeBarFabPlacement.above,
     this.labelMode = HomeBarLabelMode.always,
     this.iconSize = 20,
-    // 简约皮肤：默认无胶囊指示器，选中项只靠主色图标与文字区分（微信式）。
-    this.indicator = HomeBarIndicator.none,
+    // Salt 风皮肤：默认胶囊指示器（浅紫容器底）+ 主色选中项，照 IdeaMemo
+    // 底栏的选中观感。
+    this.indicator = HomeBarIndicator.capsule,
     this.labelGap = 2,
     this.blockPadding = 6,
   });

@@ -12,7 +12,7 @@ class DiaryCardTypography {
     this.titleScale = 0.9,
     this.titleWeight = DiaryCardTitleWeight.medium,
     this.previewScale = 0.95,
-    this.lineHeight = DiaryCardLineHeight.standard,
+    this.lineHeight = DiaryCardLineHeight.relaxed,
     this.metaScale = 0.95,
     this.textAlign = DiaryCardTextAlign.start,
     this.titleColor = _defaultTextColor,

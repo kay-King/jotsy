@@ -48,15 +48,16 @@ abstract final class ExpressiveControls {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        // 主操作按钮用实心主色（默认即微信绿）+ 白字，不用 MD3 的浅色容器底。
-        backgroundColor: colors.primary,
-        foregroundColor: colors.onPrimary,
-        elevation: 0,
-        focusElevation: 1,
-        hoverElevation: 2,
-        highlightElevation: 0,
-        // 圆形悬浮按钮（照参考项目）：主色圆钮 + 白图标，不用胶囊形。
-        shape: const CircleBorder(),
+        // 悬浮按钮照 IdeaMemo/Salt 风：浅紫容器底 + 深紫图标的圆角方钮，
+        // 带一点柔和投影。颜色取 primaryContainer 角色（皮肤里固定为基线
+        // 浅紫），是少数允许容器色出现的位置。
+        backgroundColor: colors.primaryContainer,
+        foregroundColor: colors.onPrimaryContainer,
+        elevation: 3,
+        focusElevation: 4,
+        hoverElevation: 5,
+        highlightElevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         extendedTextStyle: theme.textTheme.titleMedium,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(style: style),

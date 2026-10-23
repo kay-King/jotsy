@@ -107,7 +107,7 @@ class MaterialTheme {
         fontWeight: FontWeight.w500,
         fontSize: 13.5,
       ),
-      bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(fontSize: 15.5),
+      bodyLarge: resolvedTextTheme.bodyLarge?.copyWith(fontSize: 16),
       bodyMedium: resolvedTextTheme.bodyMedium?.copyWith(fontSize: 13.5),
       bodySmall: resolvedTextTheme.bodySmall?.copyWith(fontSize: 11.5),
       labelLarge: resolvedTextTheme.labelLarge?.copyWith(

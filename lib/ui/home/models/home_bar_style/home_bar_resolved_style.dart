@@ -112,7 +112,9 @@ class HomeBarResolvedStyle {
       hairlineColor: HomeBarLineColors.color(style.topBarLine, scheme),
       hairlineWidth: HomeBarLineColors.width(style.topBarLine),
       shadowColor: scheme.shadow.withValues(alpha: dark ? 0.32 : 0.12),
-      indicatorColor: scheme.primary.withValues(alpha: dark ? 0.22 : 0.14),
+      // 指示器用容器色本身（皮肤里是浅紫），不用主色透明叠色——后者在
+      // 白底上发灰发脏，照 IdeaMemo 底栏的胶囊观感取实色容器。
+      indicatorColor: scheme.primaryContainer,
       selectedForeground: selected,
       unselectedForeground: unselected,
     );

@@ -13,7 +13,6 @@ import '../../../app/theme/expressive_surfaces.dart';
 import '../../home/widgets/home_bar/home_chrome_scope.dart';
 import '../../notebooks/pages/notebooks_page.dart';
 import '../../widgets/page_header.dart';
-import '../../../app/theme/app_effects.dart';
 import '../controllers/app_update_controller.dart';
 import '../providers/app_features_provider.dart';
 import '../widgets/app_update_badge.dart';
@@ -211,13 +210,11 @@ class _SettingsDestination extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          boxShadow: AppEffects.restingCardShadow(colors),
         ),
         child: Card.filled(
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: ExpressiveSurfaces.cardBorderSide(colors),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
           ),
           color: ExpressiveSurfaces.cardColor(colors),
           child: ListTile(
@@ -225,15 +222,14 @@ class _SettingsDestination extends StatelessWidget {
               horizontal: 16,
               vertical: 6,
             ),
-            leading: Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.primaryContainer.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(14),
+            // 照 IdeaMemo 设置页：图标裸置、无底块，正文色单色线条感，
+            // 固定 40 宽槽位保持各行标题对齐。
+            leading: SizedBox(
+              width: 40,
+              height: 40,
+              child: Center(
+                child: FaIcon(icon, size: 22, color: colors.onSurface),
               ),
-              child: FaIcon(icon, size: 18, color: colors.onPrimaryContainer),
             ),
             title: Text(
               title,
