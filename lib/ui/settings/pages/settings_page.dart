@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/settings/pages/appearance_language_page.dart';
 import 'package:node_diary/ui/settings/pages/about_page.dart';
@@ -49,7 +48,7 @@ class SettingsPage extends StatelessWidget {
           ),
           children: <Widget>[
             _SettingsDestination(
-              icon: FontAwesomeIcons.palette,
+              icon: Icons.palette_outlined,
               title: l10n.settingsAppearanceLanguage,
               subtitle: l10n.settingsLanguageSubtitle,
               onTap: () {
@@ -64,7 +63,7 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _SettingsDestination(
-              icon: FontAwesomeIcons.penNib,
+              icon: Icons.mode_edit_outlined,
               title: l10n.settingsEditorTitle,
               subtitle: l10n.settingsEditorSubtitle,
               onTap: () {
@@ -79,7 +78,7 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _SettingsDestination(
-              icon: FontAwesomeIcons.toggleOn,
+              icon: Icons.toggle_on_outlined,
               title: l10n.settingsFeaturesTitle,
               subtitle: l10n.settingsFeaturesSubtitle,
               onTap: () {
@@ -94,7 +93,7 @@ class SettingsPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _SettingsDestination(
-              icon: FontAwesomeIcons.tags,
+              icon: Icons.label_outlined,
               title: l10n.settingsTagManagement,
               subtitle: l10n.settingsTagManagementSubtitle,
               onTap: () {
@@ -119,7 +118,7 @@ class SettingsPage extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     _SettingsDestination(
-                      icon: FontAwesomeIcons.book,
+                      icon: Icons.book_outlined,
                       title: l10n.notebookTitle,
                       subtitle: l10n.notebookSettingsSubtitle,
                       onTap: () {
@@ -138,7 +137,7 @@ class SettingsPage extends StatelessWidget {
               },
             ),
             _SettingsDestination(
-              icon: FontAwesomeIcons.shieldHalved,
+              icon: Icons.shield_outlined,
               title: l10n.settingsDataPrivacy,
               subtitle: l10n.settingsDataPrivacySubtitle,
               onTap: () {
@@ -161,7 +160,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                 );
                 return _SettingsDestination(
-                  icon: FontAwesomeIcons.circleInfo,
+                  icon: Icons.info_outlined,
                   title: l10n.settingsAbout,
                   subtitle: l10n.settingsAboutSubtitle,
                   badge: hasUpdate ? const AppUpdateBadge() : null,
@@ -194,7 +193,7 @@ class _SettingsDestination extends StatelessWidget {
     this.badge,
   });
 
-  final FaIconData icon;
+  final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -228,7 +227,7 @@ class _SettingsDestination extends StatelessWidget {
               width: 40,
               height: 40,
               child: Center(
-                child: FaIcon(icon, size: 24, color: colors.onSurface),
+                child: Icon(icon, size: 24, color: colors.onSurface),
               ),
             ),
             title: Text(
@@ -251,9 +250,9 @@ class _SettingsDestination extends StatelessWidget {
                   badge!,
                   const SizedBox(width: 8),
                 ],
-                FaIcon(
-                  FontAwesomeIcons.angleRight,
-                  size: 14,
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
                   color: colors.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ],

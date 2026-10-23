@@ -5,8 +5,8 @@ part of 'theme.dart';
 /// 该文件只承载静态配色数据，不承载 ThemeData 组装逻辑。
 ///
 /// Salt 风皮肤（照 IdeaMemo / SaltUI 的默认观感）：表面走无色相中性灰阶
-/// （亮色页面底 #F8F9FB——实测 IdeaMemo 在用户手机上的底色原值、卡片纯白
-/// 靠明度差分层；暗色页面底 #202020），
+/// （亮色页面底纯白 #FFFFFF、卡片 #F8F9FB 靠明度差分层——用户实测对比
+/// 后明确要比 IdeaMemo 的 #F8F9FB 底更白；暗色页面底 #202020），
 /// 强调色为 Salt 高亮蓝 #0470E6，容器色（悬浮按钮、底栏指示）固定为
 /// MD3 基线浅紫 #E8DEF8，文字暖黑 #1E1715、次级灰 #8C8C8C，
 /// 错误色 #FA5151。种子色动态生成的配色经 [withNeutralSurfaces]
@@ -22,7 +22,7 @@ class MaterialThemeSchemes {
   static ColorScheme withNeutralSurfaces(ColorScheme scheme) {
     if (scheme.brightness == Brightness.light) {
       return scheme.copyWith(
-        surface: const Color(0xfff8f9fb),
+        surface: const Color(0xffffffff),
         surfaceDim: const Color(0xffe8eaed),
         surfaceBright: const Color(0xffffffff),
         surfaceContainerLowest: const Color(0xffffffff),
@@ -90,7 +90,7 @@ class MaterialThemeSchemes {
     onError: Color(0xffffffff),
     errorContainer: Color(0xffffe3e1),
     onErrorContainer: Color(0xff7a0e0d),
-    surface: Color(0xfff8f9fb),
+    surface: Color(0xffffffff),
     onSurface: Color(0xff1e1715),
     onSurfaceVariant: Color(0xff8c8c8c),
     outline: Color(0xffc9c9c9),
