@@ -245,8 +245,10 @@ class SettingsService {
   static Future<SettingsService> create() async {
     final prefs = await SharedPreferences.getInstance();
     final mode = _parseMode(prefs.getString(_keyThemeMode));
-    final themeSeedColorValue =
-        prefs.getInt(_keyThemeSeedColorValue) ?? defaultThemeSeedColorValue;
+    // 主题色固定为默认 Salt 蓝（fork 定制）：不再读存盘种子。旧存盘值
+    // （早期默认绿、误触色板存下的 #FAFAFA 等）会把整套配色带偏，且设置
+    // 里的主题色切换已按用户要求移除，默认即最佳观感。
+    final themeSeedColorValue = defaultThemeSeedColorValue;
     final homeTabSwitchCurveType = _parseHomeTabSwitchCurveType(
       prefs.getString(_keyHomeTabSwitchCurve),
     );

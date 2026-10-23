@@ -98,13 +98,15 @@ abstract final class ExpressiveSurfaces {
         minTileHeight: 64,
         titleTextStyle: text.titleMedium?.copyWith(
           fontWeight: FontWeight.w400,
-          fontSize: 17,
+          fontSize: 16,
           color: colors.onSurface,
         ),
+        // 副标题与图标间距照 SaltUI 源码原值：副标题 12sp、图标与文字 12dp。
         subtitleTextStyle: text.bodyMedium?.copyWith(
           color: colors.onSurfaceVariant,
-          fontSize: 13.5,
+          fontSize: 12,
         ),
+        horizontalTitleGap: 12,
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: isLight

@@ -5,18 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
-import 'package:node_diary/ui/widgets/color_palette_families.dart';
 import '../widgets/settings_card_group.dart';
-import '../../widgets/palette_color_picker.dart';
 
 /// 设置页主题模式区块。
 ///
 /// 仅负责主题切换 UI，不耦合标签或编辑器设置。
 class SettingsThemeSection extends StatelessWidget {
   const SettingsThemeSection({super.key, required this.settingsAsync});
-
-  static const int _fallbackFamilyIndex = 6;
-  static const int _fallbackColorIndex = 5;
 
   final AsyncValue<SettingsService> settingsAsync;
 
@@ -47,15 +42,8 @@ class SettingsThemeSection extends StatelessWidget {
                                 double fontScale,
                                 Widget? child,
                               ) {
-                                final selection = resolveColorPaletteSelection(
-                                  initialColor: themeSeedColor.toARGB32(),
-                                  fallbackFamilyIndex: _fallbackFamilyIndex,
-                                  fallbackColorIndex: _fallbackColorIndex,
-                                  preserveUnknownColor: false,
-                                );
-                                final selectedFamily =
-                                    kColorPaletteFamilies[selection
-                                        .familyIndex];
+                                // 主题色切换已按用户要求移除（fork 定制）：
+                                // 种子色固定为默认 Salt 蓝，见 SettingsService。
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -121,31 +109,6 @@ class SettingsThemeSection extends StatelessWidget {
                                           selectedScale: fontScale,
                                           onChanged:
                                               settingsService.setFontScale,
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    SettingsCardGroup(
-                                      title: l10n.settingsThemeColor,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: PaletteColorPicker(
-                                            selectedColor: themeSeedColor,
-                                            selectedFamilyIndex:
-                                                selection.familyIndex,
-                                            selectedColorIndex:
-                                                selection.colorIndex,
-                                            selectedFamily: selectedFamily,
-                                            onSelectFamily: (int familyIndex) {
-                                              settingsService.setThemeSeedColor(
-                                                kColorPaletteFamilies[familyIndex]
-                                                    .colors[0],
-                                              );
-                                            },
-                                            onSelectColor: settingsService
-                                                .setThemeSeedColor,
-                                          ),
                                         ),
                                       ],
                                     ),
