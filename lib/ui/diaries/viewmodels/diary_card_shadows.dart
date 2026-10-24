@@ -56,7 +56,9 @@ List<BoxShadow> diaryCardShadows({
     DiaryCardShadowStyle.none => const <BoxShadow>[],
     DiaryCardShadowStyle.soft => <BoxShadow>[
       BoxShadow(
-        color: shade(strength * (isLight ? 0.6 : 1.4)),
+        // 浓度系数 2026-10-24 按用户反馈压到几乎没有（原亮 0.6 / 暗
+        // 1.4）：分层主要靠卡片浅描边，投影只留一丝。
+        color: shade(strength * (isLight ? 0.15 : 0.35)),
         blurRadius: 14,
         offset: const Offset(0, 4),
       ),

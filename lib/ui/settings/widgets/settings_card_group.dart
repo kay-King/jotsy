@@ -39,9 +39,28 @@ class SettingsCardGroup extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            // Salt 风分组卡：无描边、无投影，白卡靠页面底色的明度差分层。
+            // Salt 风分组卡：只靠明度差分层在真机上几乎糊成一片
+            // （用户 2026-10-24 反馈），改由浅描边勾形、投影压到几乎
+            // 没有。暗色卡与底色差足够，不加投影。
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadii.card),
+              // 浅描边勾出卡形（用户 2026-10-24：带一点浅浅的边框）；
+              // 与日记卡共用同一支卡片边框色，明暗各一份低透明度。
+              border: Border.all(
+                color: ExpressiveSurfaces.cardBorderColor(colorScheme),
+                width: 1,
+              ),
+              boxShadow: colorScheme.brightness == Brightness.light
+                  ? const <BoxShadow>[
+                      // 投影压到几乎没有（用户 2026-10-24）：分层主要靠
+                      // 上面的浅描边，这里只留一丝浮感。
+                      BoxShadow(
+                        color: Color(0x06000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Material(
               color: ExpressiveSurfaces.cardColor(colorScheme),

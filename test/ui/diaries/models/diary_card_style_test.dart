@@ -128,10 +128,10 @@ void main() {
       expect(style.surface.opacity, 1);
       expect(style.surface.gradient, isFalse);
       expect(style.surface.pinnedTint, isFalse);
-      expect(style.surface.borderWidth, 0);
+      expect(style.surface.borderWidth, 1);
       expect(style.surface.borderColor.source, DiaryCardColorSource.theme);
       expect(style.surface.accentBar, DiaryCardAccentBar.none);
-      expect(style.surface.shadow, DiaryCardShadowStyle.none);
+      expect(style.surface.shadow, DiaryCardShadowStyle.soft);
       expect(style.typography.titleScale, 0.9);
       expect(style.typography.titleWeight, DiaryCardTitleWeight.medium);
       expect(style.typography.previewScale, 0.95);

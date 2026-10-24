@@ -126,13 +126,18 @@ void main() {
         expect(plain.surface.color, ExpressiveSurfaces.cardColor(scheme));
         expect(plain.surface.gradientColors, isNull);
         expect(plain.surface.radius, 16);
-        expect(plain.surface.borderWidth, 0);
+        expect(plain.surface.borderWidth, 1);
         expect(
           plain.surface.borderColor,
           ExpressiveSurfaces.cardBorderColor(scheme),
         );
-        // fork 默认无投影（DiaryCardShadowStyle.none）。
-        expect(plain.surface.shadows, isEmpty);
+        // fork 默认 soft 投影（2026-10-24 用户反馈白卡与近白底糊成一片）：
+        // 一条柔和投影，浓度按明暗主题缩放（默认阴影色强度 0.18）。
+        expect(plain.surface.shadows, hasLength(1));
+        final defaultShadow = plain.surface.shadows.single;
+        expect(defaultShadow.blurRadius, 14);
+        expect(defaultShadow.offset, const Offset(0, 4));
+        expect(defaultShadow.color.a, closeTo(isLight ? 0.027 : 0.063, 0.002));
         expect(plain.titleColor, scheme.onSurface);
         // fork 默认：正文基色与标题同取近黑 onSurface（对比度），
         // 层级只靠透明度档区分，不再取 onSurfaceVariant 次级灰。
@@ -165,7 +170,8 @@ void main() {
         );
         // 置顶染色关闭时，置顶卡眉线与普通卡一致（不再用主色）。
         expect(pinned.eyebrowColor, scheme.onSurface.withValues(alpha: 0.82));
-        expect(pinned.surface.shadows, isEmpty);
+        // soft 投影不区分置顶：置顶卡与普通卡同一条投影。
+        expect(pinned.surface.shadows, plain.surface.shadows);
       });
     }
   });
