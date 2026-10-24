@@ -96,9 +96,10 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      leading: const FaIcon(
+                      leading: FaIcon(
                         FontAwesomeIcons.fileExport,
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       title: Text(context.l10n.dataMgmtExport),
                       subtitle: Text(context.l10n.dataMgmtExportSubtitle),
@@ -113,9 +114,10 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      leading: const FaIcon(
+                      leading: FaIcon(
                         FontAwesomeIcons.bookOpen,
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       title: Text(context.l10n.dataMgmtExportDiaries),
                       subtitle: Text(
@@ -143,9 +145,10 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      leading: const FaIcon(
+                      leading: FaIcon(
                         FontAwesomeIcons.fileImport,
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       title: Text(context.l10n.dataMgmtImport),
                       subtitle: Text(context.l10n.dataMgmtImportSubtitle),
@@ -160,9 +163,10 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      leading: const FaIcon(
+                      leading: FaIcon(
                         FontAwesomeIcons.rightToBracket,
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       title: Text(context.l10n.dataMgmtImportJournal),
                       subtitle: Text(
@@ -179,9 +183,10 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                         horizontal: 16,
                         vertical: 4,
                       ),
-                      leading: const FaIcon(
+                      leading: FaIcon(
                         FontAwesomeIcons.cloudArrowUp,
                         size: 20,
+                        color: colorScheme.onSurface,
                       ),
                       title: Text(context.l10n.dataMgmtCloudBackup),
                       subtitle: Text(context.l10n.dataMgmtCloudBackupSubtitle),

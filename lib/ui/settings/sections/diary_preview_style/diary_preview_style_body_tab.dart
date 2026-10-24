@@ -34,7 +34,11 @@ class DiaryPreviewStyleBodyTab extends StatelessWidget {
           children: <Widget>[
             ListTile(
               contentPadding: padding,
-              leading: const FaIcon(FontAwesomeIcons.font, size: 20),
+              leading: FaIcon(
+                FontAwesomeIcons.font,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
               title: Text(l10n.diaryPreviewStyleTypographyEntry),
               subtitle: Text(l10n.diaryPreviewStyleTypographyEntrySubtitle),
               trailing: const FaIcon(FontAwesomeIcons.angleRight, size: 14),

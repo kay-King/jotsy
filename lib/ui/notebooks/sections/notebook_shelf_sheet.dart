@@ -160,7 +160,11 @@ class _NotebookShelfState extends ConsumerState<NotebookShelf> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              leading: const FaIcon(FontAwesomeIcons.layerGroup, size: 20),
+              leading: FaIcon(
+                FontAwesomeIcons.layerGroup,
+                size: 20,
+                color: theme.colorScheme.onSurface,
+              ),
               title: Text(l10n.notebookAllDiaries),
               onTap: () => _select(const NotebookShelfResult.selectAll()),
             ),

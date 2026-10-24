@@ -94,7 +94,11 @@ class DiaryCardStyleOrderTab extends StatelessWidget {
                 start: 16,
                 end: 4,
               ),
-              leading: FaIcon(diaryCardBlockIcon(block), size: 20),
+              leading: FaIcon(
+                diaryCardBlockIcon(block),
+                size: 20,
+                color: scheme.onSurface,
+              ),
               title: Text(label),
               trailing: Semantics(
                 label: l10n.diaryCardStyleDragHandle(label),

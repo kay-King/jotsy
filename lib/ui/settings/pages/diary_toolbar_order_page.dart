@@ -350,7 +350,7 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
                               item.iconData,
                               size: 20,
                               color: enabled
-                                  ? null
+                                  ? Theme.of(context).colorScheme.onSurface
                                   : Theme.of(
                                       context,
                                     ).colorScheme.onSurfaceVariant,

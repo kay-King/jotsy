@@ -66,7 +66,7 @@ class _HomeCreateFabState extends State<HomeCreateFab> {
               child: SizedBox.square(
                 dimension: HomeCreateFab.dimension,
                 child: Material(
-                  color: scheme.primaryContainer,
+                  color: scheme.primary,
                   shape: const RoundedRectangleBorder(borderRadius: radius),
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
@@ -76,7 +76,7 @@ class _HomeCreateFabState extends State<HomeCreateFab> {
                     hoverColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     child: IconTheme(
-                      data: IconThemeData(color: scheme.onPrimaryContainer),
+                      data: IconThemeData(color: scheme.onPrimary),
                       child: Center(child: widget.child),
                     ),
                   ),

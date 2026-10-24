@@ -198,7 +198,11 @@ class _DiaryShareSheetState extends State<DiaryShareSheet> {
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.s,
               ),
-              leading: const FaIcon(FontAwesomeIcons.image, size: 20),
+              leading: FaIcon(
+                FontAwesomeIcons.image,
+                size: 20,
+                color: theme.colorScheme.onSurface,
+              ),
               title: Text(l10n.diaryShareLongImage),
               subtitle: Text(l10n.diaryShareLongImageSubtitle),
               onTap: () => Navigator.of(

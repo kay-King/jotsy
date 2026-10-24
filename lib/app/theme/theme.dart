@@ -81,6 +81,15 @@ class MaterialTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBg,
       canvasColor: scaffoldBg,
+      // Android 返回转场收尾压到 fast：默认 450ms 的重叠帧是返回残影的主因；
+      // 其余平台沿用系统默认转场（从默认主题的 map 继承，只换安卓一项）。
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          ...ThemeData().pageTransitionsTheme.builders,
+          TargetPlatform.android:
+              const ShortPredictiveBackPageTransitionsBuilder(),
+        },
+      ),
     );
     final resolvedTextTheme = baseTheme.textTheme
         .merge(textTheme)

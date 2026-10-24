@@ -134,9 +134,10 @@ class _DiaryTypographyPageState extends ConsumerState<DiaryTypographyPage> {
                           ),
                         ),
                         ListTile(
-                          leading: const FaIcon(
+                          leading: FaIcon(
                             FontAwesomeIcons.fileImport,
                             size: 20,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           title: Text(l10n.diaryTypographyImportFont),
                           subtitle: Text(l10n.diaryTypographyImportFontHint),
@@ -167,9 +168,10 @@ class _DiaryTypographyPageState extends ConsumerState<DiaryTypographyPage> {
                           ),
                         ),
                         ListTile(
-                          leading: const FaIcon(
+                          leading: FaIcon(
                             FontAwesomeIcons.arrowRotateLeft,
                             size: 20,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           title: Text(l10n.diaryTypographyReset),
                           enabled: !typography.hasDefaultMetrics,

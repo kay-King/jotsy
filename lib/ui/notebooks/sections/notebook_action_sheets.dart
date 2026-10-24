@@ -124,7 +124,11 @@ Future<NotebookAction?> showNotebookActionsSheet(
               ),
               iconColor: action == NotebookAction.delete ? scheme.error : null,
               textColor: action == NotebookAction.delete ? scheme.error : null,
-              leading: FaIcon(notebookActionIcon(action), size: 20),
+              leading: FaIcon(
+                notebookActionIcon(action),
+                size: 20,
+                color: scheme.onSurface,
+              ),
               title: Text(notebookActionLabel(l10n, action)),
               subtitle: subtitle == null ? null : Text(subtitle),
               onTap: () => Navigator.of(sheetContext).pop(action),

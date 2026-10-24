@@ -120,7 +120,7 @@ class ExploreStatTile extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            FaIcon(icon, size: 11, color: colorScheme.onSurfaceVariant),
+            FaIcon(icon, size: 16, color: colorScheme.onSurface),
             const SizedBox(width: 6),
             Expanded(
               child: Text(

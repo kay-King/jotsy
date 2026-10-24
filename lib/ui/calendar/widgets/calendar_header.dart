@@ -112,7 +112,11 @@ class CalendarHeader extends StatelessWidget {
                     IconButton(
                       tooltip: l10n.anniversaryListTitle,
                       onPressed: onOpenAnniversaries,
-                      icon: const FaIcon(FontAwesomeIcons.heart, size: 17),
+                      icon: FaIcon(
+                        FontAwesomeIcons.heart,
+                        size: 20,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   if (onOpenFilter != null)
                     IconButton(
@@ -124,21 +128,31 @@ class CalendarHeader extends StatelessWidget {
                         smallSize: 7,
                         // 选中态图标已是 primary，圆点用 tertiary 才分得开。
                         backgroundColor: theme.colorScheme.tertiary,
-                        child: const FaIcon(FontAwesomeIcons.filter, size: 17),
+                        child: FaIcon(
+                          FontAwesomeIcons.filter,
+                          size: 20,
+                          color: filterActive
+                              ? null
+                              : theme.colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   if (onOpenDisplayOptions != null) ...[
                     IconButton(
                       tooltip: l10n.calendarDisplayOptionsTooltip,
                       onPressed: onOpenDisplayOptions,
-                      icon: const FaIcon(FontAwesomeIcons.sliders, size: 18),
+                      icon: FaIcon(
+                        FontAwesomeIcons.sliders,
+                        size: 20,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                     const SizedBox(width: 4),
                   ],
                   IconButton.filledTonal(
                     tooltip: l10n.autoT0180,
                     onPressed: onJumpToToday,
-                    icon: const FaIcon(FontAwesomeIcons.calendarDay, size: 18),
+                    icon: const FaIcon(FontAwesomeIcons.calendarDay, size: 20),
                   ),
                 ],
               ),

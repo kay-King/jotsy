@@ -193,6 +193,21 @@ abstract final class ExpressiveControls {
   }
 }
 
+/// Android 页面转场：沿用系统预测性返回效果（手势跟手预览不变），只把
+/// 收尾动画时长从默认 450ms 压到 [ExpressiveMotion.fast]：返回时新旧两页
+/// 重叠的帧数变少，残影感随之减轻；进入动画同步变快。
+///
+/// 直接继承 [PredictiveBackPageTransitionsBuilder] 而非委托：转场实现全部
+/// 沿用父类，只改时长；且类型断言（android_predictive_back_test）仍认
+/// 它是预测性返回 builder。
+class ShortPredictiveBackPageTransitionsBuilder
+    extends PredictiveBackPageTransitionsBuilder {
+  const ShortPredictiveBackPageTransitionsBuilder({super.fallbackColor});
+
+  @override
+  Duration get transitionDuration => ExpressiveMotion.fast;
+}
+
 /// 减少动画模式下的页面转场：不做任何位移/缩放/淡入，直接显示目标页。
 class _NoMotionPageTransitionsBuilder extends PageTransitionsBuilder {
   const _NoMotionPageTransitionsBuilder();
