@@ -426,7 +426,10 @@ class _AboutActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final iconColor = colorScheme.onSurfaceVariant;
+    // 行首图标用近黑、稍大一档（用户 2026-10-24：关于页图标不要浅
+    // 灰，要像数据页那样深黑色；图标也可以稍微大一点点）；右侧箭头
+    // 仍用次级灰，作导航提示。
+    final iconColor = colorScheme.onSurface;
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
@@ -436,7 +439,7 @@ class _AboutActionTile extends StatelessWidget {
           children: <Widget>[
             SizedBox(
               width: 34,
-              child: FaIcon(icon, size: 18, color: iconColor),
+              child: FaIcon(icon, size: 20, color: iconColor),
             ),
             const SizedBox(width: 10),
             Expanded(

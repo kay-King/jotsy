@@ -212,7 +212,7 @@ class _NotebookEditorRulesSectionState
             titleAlignment: ListTileTitleAlignment.center,
             leading: FaIcon(
               FontAwesomeIcons.plus,
-              size: 16,
+              size: 20,
               color: scheme.primary,
             ),
             title: Text(
@@ -226,8 +226,8 @@ class _NotebookEditorRulesSectionState
             titleAlignment: ListTileTitleAlignment.center,
             leading: FaIcon(
               FontAwesomeIcons.circleInfo,
-              size: 16,
-              color: scheme.onSurfaceVariant,
+              size: 20,
+              color: scheme.onSurface,
             ),
             title: Text(
               l10n.notebookRulesLimit(NotebookRuleSet.maxRules),
@@ -299,8 +299,8 @@ class _NotebookEditorRulesSectionState
       titleAlignment: ListTileTitleAlignment.center,
       leading: FaIcon(
         notebookRuleTypeIcon(type),
-        size: 16,
-        color: type == null ? scheme.onSurfaceVariant : scheme.primary,
+        size: 20,
+        color: type == null ? scheme.onSurface : scheme.primary,
       ),
       title: Text(
         notebookRuleSummary(l10n, rule, now: now),

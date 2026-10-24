@@ -61,7 +61,7 @@ Future<CalendarDayAction?> showCalendarDayActionsSheet(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          leading: FaIcon(icon, size: 18, color: theme.colorScheme.primary),
+          leading: FaIcon(icon, size: 20, color: theme.colorScheme.primary),
           title: Text(label),
           subtitle: description == null ? null : Text(description),
           onTap: () => Navigator.of(sheetContext).pop(value),

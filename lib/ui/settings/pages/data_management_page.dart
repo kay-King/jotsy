@@ -98,7 +98,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                       ),
                       leading: const FaIcon(
                         FontAwesomeIcons.fileExport,
-                        size: 16,
+                        size: 20,
                       ),
                       title: Text(context.l10n.dataMgmtExport),
                       subtitle: Text(context.l10n.dataMgmtExportSubtitle),
@@ -115,7 +115,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                       ),
                       leading: const FaIcon(
                         FontAwesomeIcons.bookOpen,
-                        size: 16,
+                        size: 20,
                       ),
                       title: Text(context.l10n.dataMgmtExportDiaries),
                       subtitle: Text(
@@ -145,7 +145,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                       ),
                       leading: const FaIcon(
                         FontAwesomeIcons.fileImport,
-                        size: 16,
+                        size: 20,
                       ),
                       title: Text(context.l10n.dataMgmtImport),
                       subtitle: Text(context.l10n.dataMgmtImportSubtitle),
@@ -162,7 +162,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                       ),
                       leading: const FaIcon(
                         FontAwesomeIcons.rightToBracket,
-                        size: 16,
+                        size: 20,
                       ),
                       title: Text(context.l10n.dataMgmtImportJournal),
                       subtitle: Text(
@@ -181,7 +181,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                       ),
                       leading: const FaIcon(
                         FontAwesomeIcons.cloudArrowUp,
-                        size: 16,
+                        size: 20,
                       ),
                       title: Text(context.l10n.dataMgmtCloudBackup),
                       subtitle: Text(context.l10n.dataMgmtCloudBackupSubtitle),

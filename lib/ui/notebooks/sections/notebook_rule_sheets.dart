@@ -53,7 +53,7 @@ Future<NotebookRuleType?> showNotebookRuleTypeSheet(BuildContext context) {
               ),
               leading: FaIcon(
                 notebookRuleTypeIcon(type),
-                size: 18,
+                size: 20,
                 color: scheme.primary,
               ),
               title: Text(notebookRuleTypeLabel(l10n, type)),

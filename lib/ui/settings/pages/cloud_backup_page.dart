@@ -170,7 +170,7 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage>
                     horizontal: AppSpacing.l,
                     vertical: AppSpacing.xs,
                   ),
-                  leading: FaIcon(cloudBackupTargetIcon(target), size: 16),
+                  leading: FaIcon(cloudBackupTargetIcon(target), size: 20),
                   title: Text(cloudBackupTargetName(l10n, target)),
                   subtitle: Text(
                     cloudBackupTargetSummary(l10n, target),

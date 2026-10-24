@@ -348,7 +348,7 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
                             const SizedBox(width: 8),
                             FaIcon(
                               item.iconData,
-                              size: 16,
+                              size: 20,
                               color: enabled
                                   ? null
                                   : Theme.of(

@@ -204,6 +204,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pump(const Duration(milliseconds: 400));
 
+    // 功能管理页（纪念日行对齐验证）
+    await tester.ensureVisible(find.text('功能管理'));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('功能管理'));
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 400));
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/app_features$suffix.png'),
+    );
+    await tester.tap(find.byType(IconButton).first);
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 400));
+
     // 编辑器设置 → 心情符号页（最后拍：该页返回可能带确认弹窗）
     await tester.ensureVisible(find.text('编辑器设置'));
     await tester.pump(const Duration(milliseconds: 400));

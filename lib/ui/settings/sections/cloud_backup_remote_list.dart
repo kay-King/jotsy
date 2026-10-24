@@ -82,7 +82,7 @@ class CloudBackupRemoteList extends StatelessWidget {
     ];
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: const FaIcon(FontAwesomeIcons.fileZipper, size: 16),
+      leading: const FaIcon(FontAwesomeIcons.fileZipper, size: 20),
       title: Text(entry.fileName),
       subtitle: subtitle.isEmpty ? null : Text(subtitle.join(' · ')),
       trailing: Wrap(

@@ -204,7 +204,7 @@ class StyleLibraryTab<S, L extends StyleLibrary<S, L>, P>
                   start: 16,
                   end: 4,
                 ),
-                leading: const FaIcon(FontAwesomeIcons.swatchbook, size: 16),
+                leading: const FaIcon(FontAwesomeIcons.swatchbook, size: 20),
                 title: Text(item.name),
                 selected: identical(item, matchingSaved),
                 onTap: () => _applySaved(context, item),
@@ -232,7 +232,7 @@ class StyleLibraryTab<S, L extends StyleLibrary<S, L>, P>
             ListTile(
               contentPadding: tilePadding,
               enabled: controller.canSaveMore,
-              leading: const FaIcon(FontAwesomeIcons.plus, size: 16),
+              leading: const FaIcon(FontAwesomeIcons.plus, size: 20),
               title: Text(l10n.styleEditorSaveCurrent),
               onTap: () => _saveCurrent(context),
             ),
@@ -243,14 +243,14 @@ class StyleLibraryTab<S, L extends StyleLibrary<S, L>, P>
           children: <Widget>[
             ListTile(
               contentPadding: tilePadding,
-              leading: const FaIcon(FontAwesomeIcons.copy, size: 16),
+              leading: const FaIcon(FontAwesomeIcons.copy, size: 20),
               title: Text(l10n.styleEditorCopyCode),
               subtitle: Text(l10n.styleEditorCopyCodeSubtitle),
               onTap: () => _copyCode(context),
             ),
             ListTile(
               contentPadding: tilePadding,
-              leading: const FaIcon(FontAwesomeIcons.paste, size: 16),
+              leading: const FaIcon(FontAwesomeIcons.paste, size: 20),
               title: Text(l10n.styleEditorImportCode),
               subtitle: Text(l10n.styleEditorImportCodeSubtitle),
               onTap: () => _importCode(context),

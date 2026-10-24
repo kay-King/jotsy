@@ -41,7 +41,7 @@ class DiaryTemplateAutoRulesGroup extends StatelessWidget {
         ListTile(
           key: const ValueKey<String>('auto_rule_add'),
           enabled: canAdd,
-          leading: FaIcon(FontAwesomeIcons.plus, size: 16, color: addColor),
+          leading: FaIcon(FontAwesomeIcons.plus, size: 20, color: addColor),
           title: Text(
             l10n.diaryTemplatesAutoApplyAddRule,
             style: TextStyle(color: addColor),

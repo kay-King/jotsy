@@ -153,7 +153,7 @@ Future<({String? chapterId})?> showNotebookChapterPickerSheet(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xl,
             ),
-            leading: FaIcon(icon, size: 16, color: scheme.onSurfaceVariant),
+            leading: FaIcon(icon, size: 20, color: scheme.onSurface),
             title: Text(label, maxLines: 2, overflow: TextOverflow.ellipsis),
             onTap: () => Navigator.of(sheetContext).pop((chapterId: chapterId)),
           );

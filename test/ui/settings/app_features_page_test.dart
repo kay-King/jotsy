@@ -89,16 +89,14 @@ void main() {
     expect(anniversaryY, lessThan(exploreY));
     expect(exploreY, lessThan(notebooksY));
 
-    // 视觉上从属于日历：标题比日历、探索都缩进一级。
+    // 与日历、探索平齐（用户 2026-10-24：从属缩进在卡里读起来像
+    // 没对齐，副标题“标在日历上”已说明它和日历的关系）。
     final calendarTitleX = tester.getTopLeft(find.text(l10n.navCalendar)).dx;
     final anniversaryTitleX = tester
         .getTopLeft(find.text(l10n.settingsFeaturesAnniversaries))
         .dx;
     expect(tester.getTopLeft(find.text(l10n.navExplore)).dx, calendarTitleX);
-    expect(
-      anniversaryTitleX - calendarTitleX,
-      SettingsSwitchTile.nestedIndent - 16,
-    );
+    expect(anniversaryTitleX, calendarTitleX);
 
     final anniversaries = tile(tester, l10n.settingsFeaturesAnniversaries);
     expect(anniversaries.value, isTrue);

@@ -138,7 +138,7 @@ class _TagPickerBody extends ConsumerWidget {
               ),
               leading: FaIcon(
                 FontAwesomeIcons.plus,
-                size: 16,
+                size: 20,
                 color: theme.colorScheme.primary,
               ),
               title: Text(l10n.diaryTemplateEditorNewTag),

@@ -122,8 +122,8 @@ class _DiaryPickerSheet extends ConsumerWidget {
                     ),
                     leading: FaIcon(
                       FontAwesomeIcons.linkSlash,
-                      size: 16,
-                      color: colorScheme.onSurfaceVariant,
+                      size: 20,
+                      color: colorScheme.onSurface,
                     ),
                     title: Text(l10n.anniversaryLinkNone),
                     trailing: check(selectedDiaryId == null),

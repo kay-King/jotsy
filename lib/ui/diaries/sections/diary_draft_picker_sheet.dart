@@ -133,7 +133,7 @@ class _DiaryDraftPickerBody extends StatelessWidget {
               ),
               leading: FaIcon(
                 FontAwesomeIcons.filePen,
-                size: 16,
+                size: 20,
                 color: theme.colorScheme.primary,
               ),
               title: Text(l10n.diaryDraftPickerViewAll(total)),
@@ -150,7 +150,7 @@ class _DiaryDraftPickerBody extends StatelessWidget {
                 ),
                 leading: FaIcon(
                   FontAwesomeIcons.layerGroup,
-                  size: 16,
+                  size: 20,
                   color: theme.colorScheme.primary,
                 ),
                 title: Text(l10n.diaryDraftPickerFromTemplate),

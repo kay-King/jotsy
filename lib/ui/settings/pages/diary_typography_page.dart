@@ -136,7 +136,7 @@ class _DiaryTypographyPageState extends ConsumerState<DiaryTypographyPage> {
                         ListTile(
                           leading: const FaIcon(
                             FontAwesomeIcons.fileImport,
-                            size: 18,
+                            size: 20,
                           ),
                           title: Text(l10n.diaryTypographyImportFont),
                           subtitle: Text(l10n.diaryTypographyImportFontHint),
@@ -169,7 +169,7 @@ class _DiaryTypographyPageState extends ConsumerState<DiaryTypographyPage> {
                         ListTile(
                           leading: const FaIcon(
                             FontAwesomeIcons.arrowRotateLeft,
-                            size: 18,
+                            size: 20,
                           ),
                           title: Text(l10n.diaryTypographyReset),
                           enabled: !typography.hasDefaultMetrics,

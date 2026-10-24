@@ -158,7 +158,7 @@ class NotebookEditorTemplateSection extends ConsumerWidget {
           titleAlignment: ListTileTitleAlignment.center,
           leading: FaIcon(
             FontAwesomeIcons.layerGroup,
-            size: 16,
+            size: 20,
             color: Theme.of(context).colorScheme.primary,
           ),
           title: Text(l10n.notebookTemplateLabel),

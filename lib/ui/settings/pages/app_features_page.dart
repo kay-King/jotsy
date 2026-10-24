@@ -91,11 +91,12 @@ class AppFeaturesPage extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        settingsNestedDivider,
+                        // 纪念日与日历、探索平齐（用户 2026-10-24：从属缩进
+                        // 在卡里读起来像没对齐）：不再用从属缩进与分隔线。
+                        const SettingsCardGroupDivider(),
                         SettingsSwitchTile(
                           title: l10n.settingsFeaturesAnniversaries,
                           subtitle: l10n.settingsFeaturesAnniversariesSubtitle,
-                          nested: true,
                           value: features.anniversaries,
                           onChanged: writer(
                             (v) => features.copyWith(anniversaries: v),
