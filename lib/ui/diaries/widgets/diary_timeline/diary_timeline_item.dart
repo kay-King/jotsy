@@ -242,9 +242,7 @@ class DiaryTimelineItem extends StatelessWidget {
     final hours = capsuleState.remainingDuration.inHours;
     final countdown = hours > 0 && hours < 24
         ? l10n.timeCapsuleCountdownHours(hours.toString())
-        : l10n.timeCapsuleCountdownDays(
-            capsuleState.remainingDays.toString(),
-          );
+        : l10n.timeCapsuleCountdownDays(capsuleState.remainingDays.toString());
     return Row(
       children: <Widget>[
         FaIcon(FontAwesomeIcons.lock, size: 12, color: colors.onSurfaceVariant),
@@ -263,9 +261,9 @@ class DiaryTimelineItem extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           countdown,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
         ),
       ],
     );

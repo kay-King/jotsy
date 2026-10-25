@@ -97,7 +97,9 @@ void main() {
       find.byType(SimpleComposerPage),
       matchesGoldenFile('goldens/simple_composer.png'),
     );
-  });
+    // 预览图只在本地拍（goldens/ 不进 git，CI 里没有对照图）：
+    // 与其他预览测试一样，没设 JOTSY_PREVIEW=1 时跳过。
+  }, skip: Platform.environment['JOTSY_PREVIEW'] != '1');
 
   testWidgets('simple composer resumed draft preview', (tester) async {
     tester.view.physicalSize = const Size(936, 2048);
@@ -140,7 +142,7 @@ void main() {
       find.byType(SimpleComposerPage),
       matchesGoldenFile('goldens/simple_composer_resumed.png'),
     );
-  });
+  }, skip: Platform.environment['JOTSY_PREVIEW'] != '1');
 
   testWidgets('simple composer edit mode preview', (tester) async {
     tester.view.physicalSize = const Size(936, 2048);
@@ -176,5 +178,5 @@ void main() {
       find.byType(SimpleComposerPage),
       matchesGoldenFile('goldens/simple_composer_edit.png'),
     );
-  });
+  }, skip: Platform.environment['JOTSY_PREVIEW'] != '1');
 }
