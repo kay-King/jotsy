@@ -46,6 +46,7 @@ import '../../settings/pages/diary_card_style_page.dart';
 import '../../settings/providers/app_features_provider.dart';
 import '../models/diary_card_style/diary_card_style.dart';
 import '../providers/diary_card_style_provider.dart';
+import '../providers/diary_profile_provider.dart';
 import '../viewmodels/diary_view_preferences.dart';
 import '../sections/diaries_list_section.dart';
 import '../sections/diary_view_options_sheet.dart';
@@ -646,6 +647,9 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                         cardStyle: cardStyle,
                                         moodOptions: ref.watch(
                                           diaryCardMoodOptionsProvider,
+                                        ),
+                                        profile: ref.watch(
+                                          diaryProfileProvider,
                                         ),
                                         pendingHideDiaryIds:
                                             _pendingHideDiaryIds,

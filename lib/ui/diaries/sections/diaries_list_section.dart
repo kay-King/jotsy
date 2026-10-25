@@ -5,6 +5,7 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/settings_service.dart';
 import '../models/diary_card_style/diary_card_style.dart';
+import '../providers/diary_profile_provider.dart';
 import '../viewmodels/diary_card_resolved_style.dart';
 import '../widgets/diaries_empty_state.dart';
 import '../widgets/diary_card/diary_card.dart';
@@ -53,6 +54,7 @@ class DiariesListSection extends StatelessWidget {
     this.enableCoverHero = true,
     this.opensLockedCapsulePage = true,
     this.sectionHeaderBuilder,
+    this.profile = const DiaryProfile(nickname: '', avatarPath: null),
   });
 
   /// 视图层已过滤/排序后的日记数据。
@@ -106,6 +108,11 @@ class DiariesListSection extends StatelessWidget {
   /// 返回 null 表示这篇上方没有。只在列表布局生效，瀑布流忽略；默认 null，
   /// 其他列表（归档、搜索、全部日记）不受影响。
   final Widget? Function(BuildContext context, int index)? sectionHeaderBuilder;
+
+  /// 时间线视图用的个人资料（昵称 + 头像）。调用方从 diaryProfileProvider
+  /// 取了传进来；不传时用默认资料（昵称显示“我”）。不在这里读 provider，
+  /// 否则样式预览与矩阵测试拼装本区块时树里没有 ProviderScope 会直接抛错。
+  final DiaryProfile profile;
 
   @override
   Widget build(BuildContext context) {
@@ -266,6 +273,7 @@ class DiariesListSection extends StatelessWidget {
     final diaryId = diary.diary.diaryId;
     final item = DiaryTimelineItem(
       diary: diary,
+      profile: profile,
       selected: selectedDiaryIds.contains(diaryId),
       isSelectionMode: isSelectionMode,
       maxVisibleTags: maxVisibleTags,

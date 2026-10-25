@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/database/app_database.dart';
@@ -24,10 +23,15 @@ import 'diary_timeline_text.dart';
 ///   共享元素，时间线没有封面图）；
 /// - 长按：iOS 补一次震动后进入多选；
 /// - 未解封胶囊只显示标题与“未解封的时间胶囊”，正文与图片一律不外露。
-class DiaryTimelineItem extends ConsumerWidget {
+///
+/// 个人资料（昵称 + 头像）由调用方以 [profile] 传入，不在这里读
+/// provider：卡片样式矩阵等测试直接拼装本条目，树里没有 ProviderScope，
+/// 在这里 watch 会直接抛错（2026-10-25 实测 40 条矩阵失败全是这个原因）。
+class DiaryTimelineItem extends StatelessWidget {
   const DiaryTimelineItem({
     super.key,
     required this.diary,
+    required this.profile,
     required this.selected,
     required this.isSelectionMode,
     required this.maxVisibleTags,
@@ -37,6 +41,10 @@ class DiaryTimelineItem extends ConsumerWidget {
   });
 
   final DiaryWithTags diary;
+
+  /// 展示用的昵称 + 头像（调用方从 diaryProfileProvider 取；不传时
+  /// 用默认资料，昵称显示“我”）。
+  final DiaryProfile profile;
   final bool selected;
   final bool isSelectionMode;
   final int maxVisibleTags;
@@ -48,7 +56,7 @@ class DiaryTimelineItem extends ConsumerWidget {
   final bool opensLockedCapsulePage;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -62,7 +70,6 @@ class DiaryTimelineItem extends ConsumerWidget {
       now: DateTime.now(),
     );
     final isLockedCapsule = capsuleState.isLocked;
-    final profile = ref.watch(diaryProfileProvider);
     // 时间以日记的发表日为准（与卡片默认的 dateSource: created 一致）。
     final timeLabel = RelativeTimeFormatter.formatUpdatedAt(
       updatedAt: entry.createdAt,
@@ -122,7 +129,7 @@ class DiaryTimelineItem extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         if (isLockedCapsule)
-                          _lockedBody(context, title)
+                          _lockedBody(context, title, capsuleState)
                         else ...<Widget>[
                           if (title.isNotEmpty)
                             Text(
@@ -221,22 +228,43 @@ class DiaryTimelineItem extends ConsumerWidget {
     );
   }
 
-  /// 未解封胶囊：锁图标 + 标题 + “未解封的时间胶囊”，正文与图片不外露。
-  Widget _lockedBody(BuildContext context, String title) {
+  /// 未解封胶囊：锁图标 + 标题 + 解封倒计时（独立的 Text，文案与卡片一致），
+  /// 正文与图片一律不外露。倒计时必须单独成一个 Text：列表测试按完整文案
+  /// “365 天后解封”查找，拼进标题字符串里就找不到了。
+  Widget _lockedBody(
+    BuildContext context,
+    String title,
+    TimeCapsuleState capsuleState,
+  ) {
     final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
     final displayTitle = title.isEmpty ? l10n.autoT0033 : title;
+    final hours = capsuleState.remainingDuration.inHours;
+    final countdown = hours > 0 && hours < 24
+        ? l10n.timeCapsuleCountdownHours(hours.toString())
+        : l10n.timeCapsuleCountdownDays(
+            capsuleState.remainingDays.toString(),
+          );
     return Row(
       children: <Widget>[
         FaIcon(FontAwesomeIcons.lock, size: 12, color: colors.onSurfaceVariant),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            '$displayTitle · ${l10n.calendarBadgeCapsule}',
+            displayTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               color: colors.onSurfaceVariant,
             ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          countdown,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: colors.onSurfaceVariant,
           ),
         ),
       ],

@@ -104,8 +104,14 @@ class _HeatmapLegend extends StatelessWidget {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = colorScheme.brightness == Brightness.dark;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    // 图例不用 Row：5 档色块 + 字数标签在 320dp 窄屏放不下，Row 会在右边
+    // 溢出 12px（2026-10-25 实测，首页那几个测试渲染探索页时跟着挂）。
+    // Wrap 靠右对齐，放得下时还是一行，放不下自动折到第二行，不溢出。
+    return Wrap(
+      alignment: WrapAlignment.end,
+      spacing: 8,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: <Widget>[
         Text(
           l10n.statsHeatmapLegend,
@@ -113,9 +119,9 @@ class _HeatmapLegend extends StatelessWidget {
             context,
           ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
-        const SizedBox(width: 10),
-        for (final (words, label) in _levels) ...<Widget>[
+        for (final (words, label) in _levels)
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
                 width: 12,
@@ -135,8 +141,6 @@ class _HeatmapLegend extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: 8),
-        ],
       ],
     );
   }

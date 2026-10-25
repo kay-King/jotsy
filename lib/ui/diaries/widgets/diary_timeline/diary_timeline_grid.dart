@@ -85,26 +85,37 @@ class DiaryTimelineGrid extends StatelessWidget {
       builder: (cellContext) => ImageViewerHeroSource(
         tag: tag,
         borderRadius: BorderRadius.circular(_tileRadius),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(_tileRadius),
-            onTap: () => openImageViewer(
-              cellContext,
-              items: <ImageViewerItem>[
-                for (final itemSource in sources.take(maxImages))
-                  ImageViewerItem(source: itemSource, diaryId: diaryId),
-              ],
-              initialIndex: index,
-              hero: ImageViewerHero.capture(cellContext, tag: tag),
-            ),
-            child: DiaryCardCoverImage(
+        // 墨水层以 Positioned.fill 盖在图片之上（与 DiaryCard 同构）：
+        // 卡片按压高亮不会被图片盖住；命中测试在墨水层停住，不会穿透到图片。
+        // InkWell 包在图片外面时命中会一路穿到 RawImage，卡片展示测试
+        // “墨水在封面之上”在时间线模式下失败（2026-10-25 实测）。
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            DiaryCardCoverImage(
               source: source,
               width: tile,
               height: tile,
               radius: _tileRadius,
             ),
-          ),
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(_tileRadius),
+                  onTap: () => openImageViewer(
+                    cellContext,
+                    items: <ImageViewerItem>[
+                      for (final itemSource in sources.take(maxImages))
+                        ImageViewerItem(source: itemSource, diaryId: diaryId),
+                    ],
+                    initialIndex: index,
+                    hero: ImageViewerHero.capture(cellContext, tag: tag),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

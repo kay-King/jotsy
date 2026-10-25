@@ -72,10 +72,17 @@ class CalendarDayHeading extends StatelessWidget {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Text(
-                        DateFormat.MMMd(l10n.localeName).format(day),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      // 日期也要包 Flexible 收成一行省略：窄格里 "Oct 25"
+                      // 单占 96.9px，加上两处间距就超过 105.5px 的行宽，
+                      // 溢出 5.4px（2026-10-25 首页测试实测）。
+                      Flexible(
+                        child: Text(
+                          DateFormat.MMMd(l10n.localeName).format(day),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),

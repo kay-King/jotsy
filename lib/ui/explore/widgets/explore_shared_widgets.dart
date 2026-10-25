@@ -276,11 +276,19 @@ class ExploreChartTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: <Widget>[
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
+        // 标题也要包 Flexible 收成一行省略：英文标题很长（实测
+        // "Words per entry over the last 6 months" 524px），不包的话
+        // 340 宽的卡片里直接溢出 192px（2026-10-25 首页测试）。
+        // Flexible 先拿自己要的宽度，副标题拿剩下的，两边都不溢出。
+        Flexible(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
           ),
         ),
         if (subtitle != null) ...<Widget>[
