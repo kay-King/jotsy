@@ -12,6 +12,7 @@ import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_create_entry_flow.dart';
 import 'package:node_diary/ui/explore/pages/explore_page.dart';
 import 'package:node_diary/ui/home/controllers/home_bar_scroll_hider.dart';
+import 'package:node_diary/ui/home/pages/desktop_page.dart';
 import 'package:node_diary/ui/home/controllers/page_position_listenable.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_behavior.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_resolved_style.dart';
@@ -38,9 +39,9 @@ import '../../widgets/launch_reveal.dart';
 part '../controllers/home_page_controller.dart';
 part 'home_page_chrome.dart';
 
-/// 主框架页：承载底部 Tab 导航（日记 / 日历 / 探索 / 设置）。
+/// 主框架页：承载底部 Tab 导航（桌面 / 日记 / 日历 / 探索 / 设置）。
 ///
-/// 日历与探索可在设置 → 功能管理中关闭，底栏随之变为 2–4 项（见
+/// 桌面、日历与探索可在设置 → 功能管理中关闭，底栏随之变为 2–5 项（见
 /// [visibleHomeTabs]）；当前页、目标页、FAB 与返回键一律按 [HomeTab] 身份判断，
 /// 可见集合变化时由 `_HomePageController.syncVisibleTabs` 重新对齐下标。
 class HomePage extends ConsumerStatefulWidget {
@@ -244,6 +245,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       () => _buildTabPage(
         tab,
         (context) => switch (tab) {
+          HomeTab.desktop => DesktopPage(
+            key: const PageStorageKey<String>('tab_desktop'),
+            pageBackgroundColor: Theme.of(context).colorScheme.surface,
+          ),
           HomeTab.diaries => DiariesPage(
             key: const PageStorageKey<String>('tab_diaries'),
             pageBackgroundColor: Theme.of(context).colorScheme.surface,
@@ -328,9 +333,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       _barScrollHider.reset();
     }
 
-    // 别的页面请求回到日记 Tab（预览页里点日记本胶囊）。
-    ref.listen<int>(homeDiariesTabRequestProvider, (_, _) {
-      unawaited(_controller.switchToDiariesTab());
+    // 别的页面请求切到某个 Tab（预览页里点日记本胶囊、桌面页点快捷入口）。
+    ref.listen<(int, HomeTab)?>(homeTabRequestProvider, (_, request) {
+      final tab = request?.$2;
+      if (tab != null) {
+        unawaited(_controller.switchToTab(tab));
+      }
     });
 
     final settingsService = ref.watch(settingsServiceProvider).asData?.value;
@@ -384,13 +392,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         data: baseTheme.copyWith(snackBarTheme: snackBarTheme),
         child: PopScope(
           // 目标 tab 会在点击时立即更新，返回键跟随目标态而不是动画前旧页。
-          canPop: _effectiveTab == HomeTab.diaries,
+          canPop: _effectiveTab == _tabs.first,
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) {
               return;
             }
-            // 其他 tab 按返回时先切回日记页，避免直接退出应用。
-            unawaited(_controller.switchToDiariesTab());
+            // 其他 tab 按返回时先切回首页第一个 Tab，避免直接退出应用。
+            unawaited(_controller.switchToTab(_tabs.first));
           },
           child: Scaffold(
             backgroundColor: Theme.of(context).colorScheme.surface,

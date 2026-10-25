@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
+  String get navDesktop => 'Desktop';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override
@@ -3348,6 +3351,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Card colors follow the mood of each entry';
 
   @override
+  String get diaryCardStylePresetMemo => 'Memo';
+
+  @override
+  String get diaryCardStylePresetMemoDesc =>
+      'Text first, images below, like a memo';
+
+  @override
   String styleEditorApplied(String name) {
     return 'Applied “$name”';
   }
@@ -3487,6 +3497,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryCardStyleCoverTop => 'Top';
+
+  @override
+  String get diaryCardStyleCoverBottom => 'Bottom';
 
   @override
   String get diaryCardStyleCoverBackground => 'Background';
@@ -3709,6 +3722,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryCardStyleFooterCreated => 'Written time';
+
+  @override
+  String get diaryCardStyleFooterDateTime => 'Date and time';
 
   @override
   String get diaryCardStyleFooterHidden => 'Hidden';
@@ -5160,6 +5176,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get galleryFilterColumns => 'Photos per row';
+
+  @override
+  String get desktopGreetingLateNight => 'It\'s late';
+
+  @override
+  String get desktopGreetingMorning => 'Good morning';
+
+  @override
+  String get desktopGreetingNoon => 'Good afternoon';
+
+  @override
+  String get desktopGreetingAfternoon => 'Good afternoon';
+
+  @override
+  String get desktopGreetingEvening => 'Good evening';
+
+  @override
+  String desktopStatsLine(int count, int days, String time) {
+    return 'Recorded $count entries · $days-day streak · Updated $time';
+  }
+
+  @override
+  String get desktopStatsLineEmpty => 'Nothing yet — start today.';
+
+  @override
+  String get desktopTimeline => 'Timeline';
+
+  @override
+  String get desktopGallery => 'Gallery';
+
+  @override
+  String get desktopMine => 'Mine';
+
+  @override
+  String get desktopLatestTitle => 'Latest entry';
+
+  @override
+  String get desktopViewAll => 'View all';
+
+  @override
+  String get desktopOnlyMe => 'Only you can see this';
+
+  @override
+  String desktopImagesCount(int count) {
+    return '$count photos';
+  }
+
+  @override
+  String get desktopWriteTitle => 'Write something';
+
+  @override
+  String get desktopWriteSubtitle => 'Capture this moment';
+
+  @override
+  String get desktopDiary => 'Diary';
+
+  @override
+  String get desktopBackup => 'Backup';
+
+  @override
+  String get simpleComposerTitle => 'Write a diary';
+
+  @override
+  String get simpleComposerHint => 'What\'s on your mind...';
+
+  @override
+  String get simpleComposerPublish => 'Publish';
+
+  @override
+  String get simpleComposerMaxImages => 'Up to 9 photos';
+
+  @override
+  String get simpleComposerTipPrefix => 'Your diary stays on this device. ';
+
+  @override
+  String get simpleComposerTipBold =>
+      'It is never uploaded, and no one else can see it';
+
+  @override
+  String get simpleComposerTipSuffix =>
+      '. Photos are compressed before being saved locally, and you can export a backup in Settings anytime.';
+
+  @override
+  String get simpleComposerEmpty => 'Write something first';
+
+  @override
+  String get simpleComposerSaveFailed => 'Save failed. Please try again.';
+
+  @override
+  String get simpleComposerEditTitle => 'Edit entry';
+
+  @override
+  String get simpleComposerSave => 'Save';
+
+  @override
+  String get simpleComposerEditChoiceTitle => 'Choose how to edit';
+
+  @override
+  String get simpleComposerEditChoiceSimple => 'Simple edit';
+
+  @override
+  String get simpleComposerEditChoiceSimpleDesc =>
+      'Plain text and photos, for quick notes';
+
+  @override
+  String get simpleComposerEditChoiceFull => 'Full edit';
+
+  @override
+  String get simpleComposerEditChoiceFullDesc =>
+      'Rich text with formatting, colors and more';
 
   @override
   String get publishCoverImportFailed =>
@@ -8003,6 +8129,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsFeaturesExploreSubtitle =>
       'Stats, on this day, mood trends and photo wall';
+
+  @override
+  String get settingsFeaturesDesktopSubtitle =>
+      'Greeting, stats and shortcuts at a glance';
 
   @override
   String get settingsFeaturesFeaturesGroup => 'Diary features';

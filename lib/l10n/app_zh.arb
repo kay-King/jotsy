@@ -20,6 +20,8 @@
   "@navSettings": {
     "description": "Auto-generated metadata for navSettings."
   },
+  "navDesktop": "桌面",
+  "@navDesktop": {"description": "Bottom bar label for the Desktop tab."},
   "commonCancel": "取消",
   "@commonCancel": {
     "description": "Auto-generated metadata for commonCancel."
@@ -4285,6 +4287,14 @@
   "@diaryCardStylePresetMoodDesc": {
     "description": "日记卡片样式设置页：内置预设“心情色”的一句话说明。"
   },
+  "diaryCardStylePresetMemo": "备忘",
+  "@diaryCardStylePresetMemo": {
+    "description": "日记卡片样式设置页：内置预设“备忘”的名称。"
+  },
+  "diaryCardStylePresetMemoDesc": "文字在先、图片在后，像写备忘一样",
+  "@diaryCardStylePresetMemoDesc": {
+    "description": "日记卡片样式设置页：内置预设“备忘”的一句话说明。"
+  },
   "styleEditorApplied": "已套用「{name}」",
   "@styleEditorApplied": {
     "description": "日记卡片样式设置页：套用预设或我的样式后的提示（可撤销）。",
@@ -4484,6 +4494,10 @@
   "diaryCardStyleCoverTop": "顶部",
   "@diaryCardStyleCoverTop": {
     "description": "日记卡片样式设置页：封面在顶部。"
+  },
+  "diaryCardStyleCoverBottom": "底部",
+  "@diaryCardStyleCoverBottom": {
+    "description": "日记卡片样式设置页：封面在正文下面。"
   },
   "diaryCardStyleCoverBackground": "背景",
   "@diaryCardStyleCoverBackground": {
@@ -4765,6 +4779,10 @@
   "diaryCardStyleFooterCreated": "写下时间",
   "@diaryCardStyleFooterCreated": {
     "description": "日记卡片样式设置页：底栏时间：写下的具体时间。"
+  },
+  "diaryCardStyleFooterDateTime": "日期时间",
+  "@diaryCardStyleFooterDateTime": {
+    "description": "日记卡片样式设置页：底栏时间：不带前缀的“几月几日 几时几分”。"
   },
   "diaryCardStyleFooterHidden": "不显示",
   "@diaryCardStyleFooterHidden": {
@@ -6545,6 +6563,114 @@
   "@galleryViewDay": {"description": "Media gallery view option: group photos by day."},
   "galleryFilterColumns": "每行数量",
   "@galleryFilterColumns": {"description": "Media gallery layout sheet section: photos per row (2-6)."},
+  "desktopGreetingLateNight": "夜深了",
+  "@desktopGreetingLateNight": {"description": "Desktop greeting before 6 AM."},
+  "desktopGreetingMorning": "早上好",
+  "@desktopGreetingMorning": {"description": "Desktop greeting in the morning."},
+  "desktopGreetingNoon": "中午好",
+  "@desktopGreetingNoon": {"description": "Desktop greeting around noon."},
+  "desktopGreetingAfternoon": "下午好",
+  "@desktopGreetingAfternoon": {"description": "Desktop greeting in the afternoon."},
+  "desktopGreetingEvening": "晚上好",
+  "@desktopGreetingEvening": {"description": "Desktop greeting in the evening."},
+  "desktopStatsLine": "已记录 {count} 篇 · 连续记录 {days} 天 · 最近更新 {time}",
+  "@desktopStatsLine": {"description": "Desktop stats line: total entries, streak days and last update.", "placeholders": {"count": {"type": "int"}, "days": {"type": "int"}, "time": {"type": "String"}}},
+  "desktopStatsLineEmpty": "还没有记录，从今天开始吧。",
+  "@desktopStatsLineEmpty": {"description": "Desktop stats line when there are no entries."},
+  "desktopTimeline": "时间线",
+  "@desktopTimeline": {"description": "Desktop tile: open the diary timeline."},
+  "desktopGallery": "相册",
+  "@desktopGallery": {"description": "Desktop tile: open the photo gallery."},
+  "desktopMine": "我的",
+  "@desktopMine": {"description": "Desktop tile: open settings."},
+  "desktopLatestTitle": "最近记录",
+  "@desktopLatestTitle": {"description": "Desktop section title for the latest diary."},
+  "desktopViewAll": "查看全部",
+  "@desktopViewAll": {"description": "Desktop latest entry button: open the full diary."},
+  "desktopOnlyMe": "仅自己可见",
+  "@desktopOnlyMe": {"description": "Desktop latest entry meta: the diary is private to the user."},
+  "desktopImagesCount": "{count} 张图片",
+  "@desktopImagesCount": {"description": "Desktop latest entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
+  "desktopWriteTitle": "写点什么",
+  "@desktopWriteTitle": {
+    "description": "桌面页“写点什么”主按钮标题"
+  },
+  "desktopWriteSubtitle": "记录此刻的想法",
+  "@desktopWriteSubtitle": {
+    "description": "桌面页“写点什么”主按钮副标题"
+  },
+  "desktopDiary": "日记",
+  "@desktopDiary": {
+    "description": "桌面页快捷入口：日记"
+  },
+  "desktopBackup": "备份",
+  "@desktopBackup": {
+    "description": "桌面页快捷入口：备份"
+  },
+  "simpleComposerTitle": "写日记",
+  "@simpleComposerTitle": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTitle"
+  },
+  "simpleComposerHint": "这一刻的想法...",
+  "@simpleComposerHint": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerHint"
+  },
+  "simpleComposerPublish": "发表",
+  "@simpleComposerPublish": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerPublish"
+  },
+  "simpleComposerMaxImages": "最多可附 9 张图片",
+  "@simpleComposerMaxImages": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerMaxImages"
+  },
+  "simpleComposerTipPrefix": "日记仅保存在本机，",
+  "@simpleComposerTipPrefix": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipPrefix"
+  },
+  "simpleComposerTipBold": "不会上传服务器、他人无法查看",
+  "@simpleComposerTipBold": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipBold"
+  },
+  "simpleComposerTipSuffix": "。图片会先压缩再存入本地，可随时在设置里导出备份。",
+  "@simpleComposerTipSuffix": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipSuffix"
+  },
+  "simpleComposerEmpty": "写点什么再发表吧",
+  "@simpleComposerEmpty": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerEmpty"
+  },
+  "simpleComposerSaveFailed": "保存失败，请再试一次",
+  "@simpleComposerSaveFailed": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerSaveFailed"
+  },
+  "simpleComposerEditTitle": "编辑日记",
+  "@simpleComposerEditTitle": {
+    "description": "简洁编辑器编辑已有文章时的标题。"
+  },
+  "simpleComposerSave": "保存",
+  "@simpleComposerSave": {
+    "description": "简洁编辑器编辑已有文章时右上角的保存按钮。"
+  },
+  "simpleComposerEditChoiceTitle": "选择编辑方式",
+  "@simpleComposerEditChoiceTitle": {
+    "description": "简洁模式写的日记重新编辑时弹出的选择框标题。"
+  },
+  "simpleComposerEditChoiceSimple": "简洁编辑",
+  "@simpleComposerEditChoiceSimple": {
+    "description": "重新编辑时的选择：用简洁编辑器改这篇。"
+  },
+  "simpleComposerEditChoiceSimpleDesc": "纯文本 + 图片，适合随手记",
+  "@simpleComposerEditChoiceSimpleDesc": {
+    "description": "重新编辑时的选择：简洁编辑的说明。"
+  },
+  "simpleComposerEditChoiceFull": "完整编辑",
+  "@simpleComposerEditChoiceFull": {
+    "description": "重新编辑时的选择：用富文本编辑器改这篇。"
+  },
+  "simpleComposerEditChoiceFullDesc": "富文本，支持格式、颜色等",
+  "@simpleComposerEditChoiceFullDesc": {
+    "description": "重新编辑时的选择：完整编辑的说明。"
+  },
   "publishCoverImportFailed": "这张图片无法设为封面，请换一张再试",
   "@publishCoverImportFailed": {
     "description": "日记元数据面板提示：复制所选封面图片失败。"
@@ -10253,6 +10379,8 @@
   "@settingsFeaturesExploreSubtitle": {
     "description": "功能管理页：探索开关的说明。"
   },
+  "settingsFeaturesDesktopSubtitle": "问候、统计与快捷入口，一目了然",
+  "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},
   "settingsFeaturesFeaturesGroup": "功能",
   "@settingsFeaturesFeaturesGroup": {
     "description": "功能管理页：可关闭的日记功能分组标题。"

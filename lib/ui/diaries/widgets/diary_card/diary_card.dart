@@ -127,6 +127,9 @@ class DiaryCard extends StatelessWidget {
         maxVisibleTags: maxVisibleTags,
         metaPosition: metaPosition,
         selectionMarkDuration: transitionDuration,
+        // 封面在底部（备忘预设）时底栏拆到封面下面，正文里不画底栏。
+        includeFooter:
+            resolved.modeStyle.coverPosition != DiaryCardCoverPosition.bottom,
       );
       final indicators = blocks.buildIndicators(onCover: true);
       content = DiaryCardContent(
@@ -139,6 +142,10 @@ class DiaryCard extends StatelessWidget {
         coverIndicators:
             metaPosition == DiaryCardMetaPosition.cover && !indicators.isEmpty
             ? indicators
+            : null,
+        footer:
+            resolved.modeStyle.coverPosition == DiaryCardCoverPosition.bottom
+            ? blocks.buildFooter(context)
             : null,
       );
       markOverlay =

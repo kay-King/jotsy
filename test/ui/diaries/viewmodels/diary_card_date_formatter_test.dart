@@ -118,6 +118,21 @@ void main() {
           footer(DiaryCardFooterTime.created),
           l10n.diaryCardFooterCreated(l10n.formatPreciseDateTime(written, now)),
         );
+        // 备忘预设：不带前缀的“几月几日 周X 几时几分”，当天也带日期。
+        expect(
+          footer(DiaryCardFooterTime.dateTime),
+          locale == 'zh' ? '10月13日 周二 09:05' : 'Oct 13 Tue 09:05',
+        );
+        expect(
+          DiaryCardDateFormatter.footer(
+            l10n: l10n,
+            mode: DiaryCardFooterTime.dateTime,
+            createdAt: edited,
+            updatedAt: edited,
+            now: now,
+          ),
+          locale == 'zh' ? '10月16日 周五 18:00' : 'Oct 16 Fri 18:00',
+        );
         expect(footer(DiaryCardFooterTime.hidden), isNull);
       });
     });

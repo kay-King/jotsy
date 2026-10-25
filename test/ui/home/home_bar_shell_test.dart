@@ -192,6 +192,11 @@ Future<void> _openTab(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
+/// 切到日记页（首个 Tab 是桌面，日记页相关测试先切过去）。
+Future<void> _openDiaries(WidgetTester tester) async {
+  await _openTab(tester, _l10n(tester).navDiaries);
+}
+
 /// [page] 里的主纵向滚动视图。
 Finder _mainScrollable(Finder page) => find
     .descendant(
@@ -324,6 +329,7 @@ void main() {
 
   testWidgets('the FAB sits 10dp above the floating pill', (tester) async {
     await _pumpHome(tester, homeBarRaw: _raw(_glass));
+    await _openDiaries(tester);
     final fab = tester.getRect(find.byType(HomeCreateFab));
     final pill = tester.getRect(_pill);
     expect(fab.bottom, lessThanOrEqualTo(pill.top - 10 + 0.01));
@@ -340,6 +346,8 @@ void main() {
         _glass.copyWith(fabPlacement: HomeBarFabPlacement.inline),
       ),
     );
+    // 并排新建按钮只属于日记页，首个 Tab 是桌面，先切到日记页。
+    await _openDiaries(tester);
     final l10n = _l10n(tester);
     expect(find.byType(HomeCreateFab), findsNothing);
     expect(
@@ -382,6 +390,7 @@ void main() {
       diaryCount: 18,
       homeBarRaw: _raw(_glass, const HomeBarBehavior(hideOnScroll: true)),
     );
+    await _openDiaries(tester);
     final restingTop = tester.getRect(_pill).top;
 
     await tester.drag(_diariesList(), const Offset(0, -300));
@@ -410,6 +419,7 @@ void main() {
       diaryCount: 18,
       homeBarRaw: _raw(_glass, const HomeBarBehavior(hideOnScroll: true)),
     );
+    await _openDiaries(tester);
     final restingTop = tester.getRect(_pill).top;
     await tester.drag(_diariesList(), const Offset(0, -300));
     await tester.pumpAndSettle();
@@ -433,6 +443,7 @@ void main() {
 
   testWidgets('without hide on scroll the bar never moves', (tester) async {
     await _pumpHome(tester, diaryCount: 18, homeBarRaw: _raw(_glass));
+    await _openDiaries(tester);
     final restingTop = tester.getRect(_pill).top;
     await tester.drag(_diariesList(), const Offset(0, -300));
     await tester.pumpAndSettle();
@@ -503,6 +514,7 @@ void main() {
     tester,
   ) async {
     final settings = await _pumpHome(tester, diaryCount: 3);
+    await _openDiaries(tester);
     expect(find.byType(BottomNav), findsOneWidget);
 
     unawaited(settings.setHomeBarStyleRaw(_raw(_glass)));
@@ -531,6 +543,7 @@ void main() {
         statusBar: _statusBar,
         homeBarRaw: _raw(_glass),
       );
+      await _openDiaries(tester);
       final masthead = tester.getRect(_mastheadGlass);
       expect(masthead.top, 0);
       expect(masthead.height, _statusBar + _mastheadHeight);
@@ -548,6 +561,7 @@ void main() {
         statusBar: _statusBar,
         homeBarRaw: _raw(_glass),
       );
+      await _openDiaries(tester);
       await tester.drag(_diariesList(), const Offset(0, -600));
       await tester.pumpAndSettle();
       expect(tester.getRect(_mastheadGlass).top, 0);
@@ -581,6 +595,7 @@ void main() {
         statusBar: _statusBar,
         homeBarRaw: _raw(_glass),
       );
+      await _openDiaries(tester);
       await tester.longPress(find.byType(DiaryCard).first);
       await tester.pumpAndSettle();
       await tester.drag(_diariesList(), const Offset(0, -600));
@@ -603,6 +618,7 @@ void main() {
           statusBar: _statusBar,
           homeBarRaw: _raw(_glass),
         );
+        await _openDiaries(tester);
         final filters = tester
             .renderObjectList<RenderBackdropFilter>(
               find.descendant(
@@ -637,6 +653,7 @@ void main() {
         statusBar: _statusBar,
         homeBarRaw: _raw(_glass.copyWith(topBarHairline: true, border: false)),
       );
+      await _openDiaries(tester);
       expect(
         tester.widget<GlassSurface>(_mastheadGlass).bottomHairline,
         isNull,
@@ -657,6 +674,7 @@ void main() {
         statusBar: _statusBar,
         homeBarRaw: _raw(_glass),
       );
+      await _openDiaries(tester);
       final gap = _listCardGap(tester);
       expect(gap, greaterThan(0));
       final tagBarBottom = _tagBarBottom(tester);
@@ -677,6 +695,7 @@ void main() {
       tester,
     ) async {
       await _pumpHome(tester, diaryCount: 3, statusBar: _statusBar);
+      await _openDiaries(tester);
       expect(
         find.byKey(const ValueKey<String>('diaries_glass_top_gap')),
         findsNothing,
@@ -692,6 +711,7 @@ void main() {
       tester,
     ) async {
       await _pumpHome(tester, diaryCount: 3, statusBar: _statusBar);
+      await _openDiaries(tester);
       expect(
         find.descendant(
           of: find.byType(DiariesPage),
@@ -745,6 +765,7 @@ void main() {
         homeBarRaw: _raw(_glass),
         width: wide,
       );
+      await _openDiaries(tester);
       final l10n = _l10n(tester);
       final pillTop = tester.getRect(_pill).top;
 
@@ -785,6 +806,7 @@ void main() {
 
     testWidgets('solid: the trailing space stays as before', (tester) async {
       await _pumpHome(tester, diaryCount: 18, width: wide);
+      await _openDiaries(tester);
       final l10n = _l10n(tester);
       final diaries = find.byType(DiariesPage);
       expect(_slotHeight(tester, diaries), 0);

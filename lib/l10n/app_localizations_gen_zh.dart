@@ -24,6 +24,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navSettings => '设置';
 
   @override
+  String get navDesktop => '桌面';
+
+  @override
   String get commonCancel => '取消';
 
   @override
@@ -2978,6 +2981,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryCardStylePresetMoodDesc => '卡片底色与描边随当天心情变化';
 
   @override
+  String get diaryCardStylePresetMemo => '备忘';
+
+  @override
+  String get diaryCardStylePresetMemoDesc => '文字在先、图片在后，像写备忘一样';
+
+  @override
   String styleEditorApplied(String name) {
     return '已套用「$name」';
   }
@@ -3112,6 +3121,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryCardStyleCoverTop => '顶部';
+
+  @override
+  String get diaryCardStyleCoverBottom => '底部';
 
   @override
   String get diaryCardStyleCoverBackground => '背景';
@@ -3321,6 +3333,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryCardStyleFooterCreated => '写下时间';
+
+  @override
+  String get diaryCardStyleFooterDateTime => '日期时间';
 
   @override
   String get diaryCardStyleFooterHidden => '不显示';
@@ -4675,6 +4690,112 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get galleryFilterColumns => '每行数量';
+
+  @override
+  String get desktopGreetingLateNight => '夜深了';
+
+  @override
+  String get desktopGreetingMorning => '早上好';
+
+  @override
+  String get desktopGreetingNoon => '中午好';
+
+  @override
+  String get desktopGreetingAfternoon => '下午好';
+
+  @override
+  String get desktopGreetingEvening => '晚上好';
+
+  @override
+  String desktopStatsLine(int count, int days, String time) {
+    return '已记录 $count 篇 · 连续记录 $days 天 · 最近更新 $time';
+  }
+
+  @override
+  String get desktopStatsLineEmpty => '还没有记录，从今天开始吧。';
+
+  @override
+  String get desktopTimeline => '时间线';
+
+  @override
+  String get desktopGallery => '相册';
+
+  @override
+  String get desktopMine => '我的';
+
+  @override
+  String get desktopLatestTitle => '最近记录';
+
+  @override
+  String get desktopViewAll => '查看全部';
+
+  @override
+  String get desktopOnlyMe => '仅自己可见';
+
+  @override
+  String desktopImagesCount(int count) {
+    return '$count 张图片';
+  }
+
+  @override
+  String get desktopWriteTitle => '写点什么';
+
+  @override
+  String get desktopWriteSubtitle => '记录此刻的想法';
+
+  @override
+  String get desktopDiary => '日记';
+
+  @override
+  String get desktopBackup => '备份';
+
+  @override
+  String get simpleComposerTitle => '写日记';
+
+  @override
+  String get simpleComposerHint => '这一刻的想法...';
+
+  @override
+  String get simpleComposerPublish => '发表';
+
+  @override
+  String get simpleComposerMaxImages => '最多可附 9 张图片';
+
+  @override
+  String get simpleComposerTipPrefix => '日记仅保存在本机，';
+
+  @override
+  String get simpleComposerTipBold => '不会上传服务器、他人无法查看';
+
+  @override
+  String get simpleComposerTipSuffix => '。图片会先压缩再存入本地，可随时在设置里导出备份。';
+
+  @override
+  String get simpleComposerEmpty => '写点什么再发表吧';
+
+  @override
+  String get simpleComposerSaveFailed => '保存失败，请再试一次';
+
+  @override
+  String get simpleComposerEditTitle => '编辑日记';
+
+  @override
+  String get simpleComposerSave => '保存';
+
+  @override
+  String get simpleComposerEditChoiceTitle => '选择编辑方式';
+
+  @override
+  String get simpleComposerEditChoiceSimple => '简洁编辑';
+
+  @override
+  String get simpleComposerEditChoiceSimpleDesc => '纯文本 + 图片，适合随手记';
+
+  @override
+  String get simpleComposerEditChoiceFull => '完整编辑';
+
+  @override
+  String get simpleComposerEditChoiceFullDesc => '富文本，支持格式、颜色等';
 
   @override
   String get publishCoverImportFailed => '这张图片无法设为封面，请换一张再试';
@@ -7170,6 +7291,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsFeaturesExploreSubtitle => '统计、那年今日、心情趋势与照片墙';
+
+  @override
+  String get settingsFeaturesDesktopSubtitle => '问候、统计与快捷入口，一目了然';
 
   @override
   String get settingsFeaturesFeaturesGroup => '功能';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../home/models/home_tab.dart';
 import '../../home/providers/home_tab_request_provider.dart';
 import '../providers/home_notebook_scope_provider.dart';
 import '../viewmodels/notebook_view.dart';
@@ -28,8 +29,8 @@ Future<void> openNotebookFromAnywhere(
     return;
   }
   final scope = ref.read(homeNotebookScopeProvider.notifier);
-  final tabs = ref.read(homeDiariesTabRequestProvider.notifier);
+  final tabs = ref.read(homeTabRequestProvider.notifier);
   Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
   scope.enter(notebook.id);
-  tabs.request();
+  tabs.request(HomeTab.diaries);
 }

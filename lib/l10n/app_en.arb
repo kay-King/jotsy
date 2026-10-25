@@ -20,6 +20,8 @@
   "@navSettings": {
     "description": "Auto-generated metadata for navSettings."
   },
+  "navDesktop": "Desktop",
+  "@navDesktop": {"description": "Bottom bar label for the Desktop tab."},
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Auto-generated metadata for commonCancel."
@@ -4285,6 +4287,14 @@
   "@diaryCardStylePresetMoodDesc": {
     "description": "Diary card style settings: one-line description of the “Mood colors” preset."
   },
+  "diaryCardStylePresetMemo": "Memo",
+  "@diaryCardStylePresetMemo": {
+    "description": "Diary card style settings: name of the “Memo” preset."
+  },
+  "diaryCardStylePresetMemoDesc": "Text first, images below, like a memo",
+  "@diaryCardStylePresetMemoDesc": {
+    "description": "Diary card style settings: one-line description of the “Memo” preset."
+  },
   "styleEditorApplied": "Applied “{name}”",
   "@styleEditorApplied": {
     "description": "Diary card style settings: message after applying a preset or saved style (can be undone).",
@@ -4484,6 +4494,10 @@
   "diaryCardStyleCoverTop": "Top",
   "@diaryCardStyleCoverTop": {
     "description": "Diary card style settings: cover on top."
+  },
+  "diaryCardStyleCoverBottom": "Bottom",
+  "@diaryCardStyleCoverBottom": {
+    "description": "Diary card style settings: cover below the text."
   },
   "diaryCardStyleCoverBackground": "Background",
   "@diaryCardStyleCoverBackground": {
@@ -4765,6 +4779,10 @@
   "diaryCardStyleFooterCreated": "Written time",
   "@diaryCardStyleFooterCreated": {
     "description": "Diary card style settings: footer time: exact time the entry was written."
+  },
+  "diaryCardStyleFooterDateTime": "Date and time",
+  "@diaryCardStyleFooterDateTime": {
+    "description": "Diary card style settings: footer time: plain date and time without a prefix, e.g. \"Oct 26 10:26\"."
   },
   "diaryCardStyleFooterHidden": "Hidden",
   "@diaryCardStyleFooterHidden": {
@@ -6545,6 +6563,114 @@
   "@galleryViewDay": {"description": "Media gallery view option: group photos by day."},
   "galleryFilterColumns": "Photos per row",
   "@galleryFilterColumns": {"description": "Media gallery layout sheet section: photos per row (2-6)."},
+  "desktopGreetingLateNight": "It's late",
+  "@desktopGreetingLateNight": {"description": "Desktop greeting before 6 AM."},
+  "desktopGreetingMorning": "Good morning",
+  "@desktopGreetingMorning": {"description": "Desktop greeting in the morning."},
+  "desktopGreetingNoon": "Good afternoon",
+  "@desktopGreetingNoon": {"description": "Desktop greeting around noon."},
+  "desktopGreetingAfternoon": "Good afternoon",
+  "@desktopGreetingAfternoon": {"description": "Desktop greeting in the afternoon."},
+  "desktopGreetingEvening": "Good evening",
+  "@desktopGreetingEvening": {"description": "Desktop greeting in the evening."},
+  "desktopStatsLine": "Recorded {count} entries · {days}-day streak · Updated {time}",
+  "@desktopStatsLine": {"description": "Desktop stats line: total entries, streak days and last update.", "placeholders": {"count": {"type": "int"}, "days": {"type": "int"}, "time": {"type": "String"}}},
+  "desktopStatsLineEmpty": "Nothing yet — start today.",
+  "@desktopStatsLineEmpty": {"description": "Desktop stats line when there are no entries."},
+  "desktopTimeline": "Timeline",
+  "@desktopTimeline": {"description": "Desktop tile: open the diary timeline."},
+  "desktopGallery": "Gallery",
+  "@desktopGallery": {"description": "Desktop tile: open the photo gallery."},
+  "desktopMine": "Mine",
+  "@desktopMine": {"description": "Desktop tile: open settings."},
+  "desktopLatestTitle": "Latest entry",
+  "@desktopLatestTitle": {"description": "Desktop section title for the latest diary."},
+  "desktopViewAll": "View all",
+  "@desktopViewAll": {"description": "Desktop latest entry button: open the full diary."},
+  "desktopOnlyMe": "Only you can see this",
+  "@desktopOnlyMe": {"description": "Desktop latest entry meta: the diary is private to the user."},
+  "desktopImagesCount": "{count} photos",
+  "@desktopImagesCount": {"description": "Desktop latest entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
+  "desktopWriteTitle": "Write something",
+  "@desktopWriteTitle": {
+    "description": "桌面页“写点什么”主按钮标题"
+  },
+  "desktopWriteSubtitle": "Capture this moment",
+  "@desktopWriteSubtitle": {
+    "description": "桌面页“写点什么”主按钮副标题"
+  },
+  "desktopDiary": "Diary",
+  "@desktopDiary": {
+    "description": "桌面页快捷入口：日记"
+  },
+  "desktopBackup": "Backup",
+  "@desktopBackup": {
+    "description": "桌面页快捷入口：备份"
+  },
+  "simpleComposerTitle": "Write a diary",
+  "@simpleComposerTitle": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTitle"
+  },
+  "simpleComposerHint": "What's on your mind...",
+  "@simpleComposerHint": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerHint"
+  },
+  "simpleComposerPublish": "Publish",
+  "@simpleComposerPublish": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerPublish"
+  },
+  "simpleComposerMaxImages": "Up to 9 photos",
+  "@simpleComposerMaxImages": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerMaxImages"
+  },
+  "simpleComposerTipPrefix": "Your diary stays on this device. ",
+  "@simpleComposerTipPrefix": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipPrefix"
+  },
+  "simpleComposerTipBold": "It is never uploaded, and no one else can see it",
+  "@simpleComposerTipBold": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipBold"
+  },
+  "simpleComposerTipSuffix": ". Photos are compressed before being saved locally, and you can export a backup in Settings anytime.",
+  "@simpleComposerTipSuffix": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerTipSuffix"
+  },
+  "simpleComposerEmpty": "Write something first",
+  "@simpleComposerEmpty": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerEmpty"
+  },
+  "simpleComposerSaveFailed": "Save failed. Please try again.",
+  "@simpleComposerSaveFailed": {
+    "description": "简洁编辑器 / 写点什么选择：simpleComposerSaveFailed"
+  },
+  "simpleComposerEditTitle": "Edit entry",
+  "@simpleComposerEditTitle": {
+    "description": "Title of the simple composer when editing an existing entry."
+  },
+  "simpleComposerSave": "Save",
+  "@simpleComposerSave": {
+    "description": "Save button in the simple composer when editing an existing entry."
+  },
+  "simpleComposerEditChoiceTitle": "Choose how to edit",
+  "@simpleComposerEditChoiceTitle": {
+    "description": "Title of the dialog shown when re-editing an entry written in simple mode."
+  },
+  "simpleComposerEditChoiceSimple": "Simple edit",
+  "@simpleComposerEditChoiceSimple": {
+    "description": "Re-edit choice: edit this entry in the simple composer."
+  },
+  "simpleComposerEditChoiceSimpleDesc": "Plain text and photos, for quick notes",
+  "@simpleComposerEditChoiceSimpleDesc": {
+    "description": "Re-edit choice: description of the simple edit option."
+  },
+  "simpleComposerEditChoiceFull": "Full edit",
+  "@simpleComposerEditChoiceFull": {
+    "description": "Re-edit choice: edit this entry in the rich text editor."
+  },
+  "simpleComposerEditChoiceFullDesc": "Rich text with formatting, colors and more",
+  "@simpleComposerEditChoiceFullDesc": {
+    "description": "Re-edit choice: description of the full edit option."
+  },
   "publishCoverImportFailed": "Couldn't import this picture as the cover. Please try another one.",
   "@publishCoverImportFailed": {
     "description": "Diary metadata panel hint: copying the picked cover image failed."
@@ -10253,6 +10379,8 @@
   "@settingsFeaturesExploreSubtitle": {
     "description": "Features page: subtitle of the explore switch."
   },
+  "settingsFeaturesDesktopSubtitle": "Greeting, stats and shortcuts at a glance",
+  "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},
   "settingsFeaturesFeaturesGroup": "Diary features",
   "@settingsFeaturesFeaturesGroup": {
     "description": "Features page: group title for diary features that can be turned off."

@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navSettings;
 
+  /// Bottom bar label for the Desktop tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop'**
+  String get navDesktop;
+
   /// Auto-generated metadata for commonCancel.
   ///
   /// In en, this message translates to:
@@ -5426,6 +5432,18 @@ abstract class AppLocalizations {
   /// **'Card colors follow the mood of each entry'**
   String get diaryCardStylePresetMoodDesc;
 
+  /// Diary card style settings: name of the “Memo” preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Memo'**
+  String get diaryCardStylePresetMemo;
+
+  /// Diary card style settings: one-line description of the “Memo” preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Text first, images below, like a memo'**
+  String get diaryCardStylePresetMemoDesc;
+
   /// Diary card style settings: message after applying a preset or saved style (can be undone).
   ///
   /// In en, this message translates to:
@@ -5665,6 +5683,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Top'**
   String get diaryCardStyleCoverTop;
+
+  /// Diary card style settings: cover below the text.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get diaryCardStyleCoverBottom;
 
   /// Diary card style settings: cover as the card background.
   ///
@@ -6079,6 +6103,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Written time'**
   String get diaryCardStyleFooterCreated;
+
+  /// Diary card style settings: footer time: plain date and time without a prefix, e.g. "Oct 26 10:26".
+  ///
+  /// In en, this message translates to:
+  /// **'Date and time'**
+  String get diaryCardStyleFooterDateTime;
 
   /// Diary card style settings: no time in the footer.
   ///
@@ -8635,6 +8665,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photos per row'**
   String get galleryFilterColumns;
+
+  /// Desktop greeting before 6 AM.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s late'**
+  String get desktopGreetingLateNight;
+
+  /// Desktop greeting in the morning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get desktopGreetingMorning;
+
+  /// Desktop greeting around noon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get desktopGreetingNoon;
+
+  /// Desktop greeting in the afternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get desktopGreetingAfternoon;
+
+  /// Desktop greeting in the evening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get desktopGreetingEvening;
+
+  /// Desktop stats line: total entries, streak days and last update.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded {count} entries · {days}-day streak · Updated {time}'**
+  String desktopStatsLine(int count, int days, String time);
+
+  /// Desktop stats line when there are no entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet — start today.'**
+  String get desktopStatsLineEmpty;
+
+  /// Desktop tile: open the diary timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get desktopTimeline;
+
+  /// Desktop tile: open the photo gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get desktopGallery;
+
+  /// Desktop tile: open settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get desktopMine;
+
+  /// Desktop section title for the latest diary.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest entry'**
+  String get desktopLatestTitle;
+
+  /// Desktop latest entry button: open the full diary.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get desktopViewAll;
+
+  /// Desktop latest entry meta: the diary is private to the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can see this'**
+  String get desktopOnlyMe;
+
+  /// Desktop latest entry meta: number of images.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} photos'**
+  String desktopImagesCount(int count);
+
+  /// 桌面页“写点什么”主按钮标题
+  ///
+  /// In en, this message translates to:
+  /// **'Write something'**
+  String get desktopWriteTitle;
+
+  /// 桌面页“写点什么”主按钮副标题
+  ///
+  /// In en, this message translates to:
+  /// **'Capture this moment'**
+  String get desktopWriteSubtitle;
+
+  /// 桌面页快捷入口：日记
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get desktopDiary;
+
+  /// 桌面页快捷入口：备份
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get desktopBackup;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Write a diary'**
+  String get simpleComposerTitle;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerHint
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s on your mind...'**
+  String get simpleComposerHint;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerPublish
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get simpleComposerPublish;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerMaxImages
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 9 photos'**
+  String get simpleComposerMaxImages;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerTipPrefix
+  ///
+  /// In en, this message translates to:
+  /// **'Your diary stays on this device. '**
+  String get simpleComposerTipPrefix;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerTipBold
+  ///
+  /// In en, this message translates to:
+  /// **'It is never uploaded, and no one else can see it'**
+  String get simpleComposerTipBold;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerTipSuffix
+  ///
+  /// In en, this message translates to:
+  /// **'. Photos are compressed before being saved locally, and you can export a backup in Settings anytime.'**
+  String get simpleComposerTipSuffix;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerEmpty
+  ///
+  /// In en, this message translates to:
+  /// **'Write something first'**
+  String get simpleComposerEmpty;
+
+  /// 简洁编辑器 / 写点什么选择：simpleComposerSaveFailed
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed. Please try again.'**
+  String get simpleComposerSaveFailed;
+
+  /// Title of the simple composer when editing an existing entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit entry'**
+  String get simpleComposerEditTitle;
+
+  /// Save button in the simple composer when editing an existing entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get simpleComposerSave;
+
+  /// Title of the dialog shown when re-editing an entry written in simple mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how to edit'**
+  String get simpleComposerEditChoiceTitle;
+
+  /// Re-edit choice: edit this entry in the simple composer.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple edit'**
+  String get simpleComposerEditChoiceSimple;
+
+  /// Re-edit choice: description of the simple edit option.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain text and photos, for quick notes'**
+  String get simpleComposerEditChoiceSimpleDesc;
+
+  /// Re-edit choice: edit this entry in the rich text editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Full edit'**
+  String get simpleComposerEditChoiceFull;
+
+  /// Re-edit choice: description of the full edit option.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich text with formatting, colors and more'**
+  String get simpleComposerEditChoiceFullDesc;
 
   /// Diary metadata panel hint: copying the picked cover image failed.
   ///
@@ -13075,6 +13309,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stats, on this day, mood trends and photo wall'**
   String get settingsFeaturesExploreSubtitle;
+
+  /// Feature management subtitle for the Desktop page.
+  ///
+  /// In en, this message translates to:
+  /// **'Greeting, stats and shortcuts at a glance'**
+  String get settingsFeaturesDesktopSubtitle;
 
   /// Features page: group title for diary features that can be turned off.
   ///

@@ -20,10 +20,12 @@ import '../../../widgets/delayed_loading_indicator.dart';
 import '../../../widgets/image_viewer_hero.dart';
 import '../../controllers/diary_preview_export_controller.dart';
 import '../../controllers/diary_todo_autosave_controller.dart';
+import '../../controllers/simple_composer_controller.dart';
 import '../../models/diary_preview_result.dart';
 import '../../models/time_capsule.dart';
 import '../../pages/edit_diary_page.dart';
 import '../../pages/locked_diary_page.dart';
+import '../../pages/simple_composer_page.dart';
 import '../../providers/diary_card_style_provider.dart';
 import '../../providers/diary_detail_provider.dart';
 import '../../providers/diary_preview_style_provider.dart';
@@ -201,6 +203,39 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
   }
 
   Future<void> _openEditor() async {
+    // 简洁模式写过的、内容还是纯文本的，重新编辑时给选择（简洁 / 完整）；
+    // 其余（标准模式写的，或标准模式改过后带了格式、超长、超图）直进
+    // 标准编辑器。简洁模式存成功后以 true 返回，只刷新详情不退出预览。
+    final detail = _currentDetail;
+    final simpleContent =
+        detail != null &&
+            SimpleComposerController.isSimpleComposerEntry(
+              detail.diary.metadata,
+            )
+        ? SimpleComposerController.tryExtractSimpleContent(detail.diary.content)
+        : null;
+    if (simpleContent != null && mounted) {
+      final choice = await _showEditChoice();
+      if (!mounted || choice == null) return;
+      if (choice == _EditChoice.simple) {
+        final saved = await Navigator.of(context).push<bool>(
+          MaterialPageRoute<bool>(
+            builder: (_) => SimpleComposerPage(
+              editDiaryId: detail!.diary.diaryId,
+              editTagIds: detail.tags.map((tag) => tag.id).toList(),
+              initialText: simpleContent.text,
+              initialImages: simpleContent.images,
+            ),
+          ),
+        );
+        if (!mounted) return;
+        if (saved == true) {
+          ref.invalidate(diaryDetailProvider(widget.diaryId));
+        }
+        return;
+      }
+      // 选了完整编辑，往下走标准编辑器。
+    }
     // 编辑页里删除日记后以 true 返回：按“已删除”退出，入口给出撤销。经发布
     // 页保存时编辑页以日记 id（String）结束，所以结果类型放宽为 Object?。
     final result = await Navigator.of(context).push<Object?>(
@@ -221,6 +256,58 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
       return;
     }
     ref.invalidate(diaryDetailProvider(widget.diaryId));
+  }
+
+  /// 重新编辑时的选择框（只在简洁模式写过的那篇上出现）：简洁 / 完整。
+  /// 点外面或返回即取消（null），不打开编辑器。
+  Future<_EditChoice?> _showEditChoice() {
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
+    Widget option({
+      required _EditChoice value,
+      required String title,
+      required String desc,
+    }) {
+      return SimpleDialogOption(
+        onPressed: () => Navigator.of(context).pop(value),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(title, style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 2),
+              Text(
+                desc,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return showDialog<_EditChoice>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(l10n.simpleComposerEditChoiceTitle),
+        children: <Widget>[
+          option(
+            value: _EditChoice.simple,
+            title: l10n.simpleComposerEditChoiceSimple,
+            desc: l10n.simpleComposerEditChoiceSimpleDesc,
+          ),
+          option(
+            value: _EditChoice.full,
+            title: l10n.simpleComposerEditChoiceFull,
+            desc: l10n.simpleComposerEditChoiceFullDesc,
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _deleteDiary() async {
@@ -381,3 +468,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
     );
   }
 }
+
+/// 重新编辑时的选择：简洁编辑器还是富文本编辑器。
+/// 只在简洁模式写过的那篇上出现。
+enum _EditChoice { simple, full }

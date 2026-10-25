@@ -51,6 +51,7 @@ void main() {
 
       expect(raw, isNotNull);
       expect((jsonDecode(raw!) as Map).keys, <String>[
+        'desktop',
         'calendar',
         'explore',
         'notebooks',

@@ -95,7 +95,33 @@ abstract final class DiaryCardDateFormatter {
       DiaryCardFooterTime.created => l10n.diaryCardFooterCreated(
         l10n.formatPreciseDateTime(createdAt, now),
       ),
+      // 不带前缀的“几月几日 几时几分”，当天也带日期（与
+      // formatPreciseDateTime 的区别：当天不只剩 HH:mm）。
+      DiaryCardFooterTime.dateTime => _dateTime(l10n, createdAt, now),
       DiaryCardFooterTime.hidden => null,
     };
+  }
+
+  /// “M月d日 周X HH:mm”（跨年带年份），英文 “MMM d E HH:mm” /
+  /// “yMMMd E HH:mm”。
+  static String _dateTime(
+    AppLocalizations l10n,
+    DateTime target,
+    DateTime now,
+  ) {
+    final localTarget = target.toLocal();
+    final localNow = now.toLocal();
+    final timePart = DateFormat.Hm(l10n.localeName).format(localTarget);
+    final weekday = DateFormat.E(l10n.localeName).format(localTarget);
+    if (localTarget.year == localNow.year) {
+      if (l10n.isZh) {
+        return '${localTarget.month}月${localTarget.day}日 $weekday $timePart';
+      }
+      return '${DateFormat('MMM d', l10n.localeName).format(localTarget)} $weekday $timePart';
+    }
+    if (l10n.isZh) {
+      return '${localTarget.year}年${localTarget.month}月${localTarget.day}日 $weekday $timePart';
+    }
+    return '${DateFormat.yMMMd(l10n.localeName).format(localTarget)} $weekday $timePart';
   }
 }

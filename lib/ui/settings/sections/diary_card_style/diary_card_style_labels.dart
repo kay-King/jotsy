@@ -20,6 +20,7 @@ String diaryCardPresetName(AppLocalizations l10n, DiaryCardPresetId id) =>
       DiaryCardPresetId.sticky => l10n.diaryCardStylePresetSticky,
       DiaryCardPresetId.journal => l10n.diaryCardStylePresetJournal,
       DiaryCardPresetId.mood => l10n.diaryCardStylePresetMood,
+      DiaryCardPresetId.memo => l10n.diaryCardStylePresetMemo,
     };
 
 String diaryCardPresetDescription(
@@ -34,6 +35,7 @@ String diaryCardPresetDescription(
   DiaryCardPresetId.sticky => l10n.diaryCardStylePresetStickyDesc,
   DiaryCardPresetId.journal => l10n.diaryCardStylePresetJournalDesc,
   DiaryCardPresetId.mood => l10n.diaryCardStylePresetMoodDesc,
+  DiaryCardPresetId.memo => l10n.diaryCardStylePresetMemoDesc,
 };
 
 FaIconData diaryCardPresetIcon(DiaryCardPresetId id) => switch (id) {
@@ -45,6 +47,7 @@ FaIconData diaryCardPresetIcon(DiaryCardPresetId id) => switch (id) {
   DiaryCardPresetId.sticky => FontAwesomeIcons.noteSticky,
   DiaryCardPresetId.journal => FontAwesomeIcons.bookBookmark,
   DiaryCardPresetId.mood => FontAwesomeIcons.faceSmile,
+  DiaryCardPresetId.memo => FontAwesomeIcons.lightbulb,
 };
 
 /// 当前样式的显示名：内置预设名、我的样式名，或“自定义”。
@@ -74,6 +77,7 @@ diaryCardCoverPositionChoices(AppLocalizations l10n, DiaryCardMode mode) {
           DiaryCardCoverPosition.start => FontAwesomeIcons.tableColumns,
           DiaryCardCoverPosition.end => FontAwesomeIcons.tableColumns,
           DiaryCardCoverPosition.top => FontAwesomeIcons.panorama,
+          DiaryCardCoverPosition.bottom => FontAwesomeIcons.rectangleList,
           DiaryCardCoverPosition.background => FontAwesomeIcons.image,
           DiaryCardCoverPosition.hidden => FontAwesomeIcons.eyeSlash,
         },
@@ -81,6 +85,7 @@ diaryCardCoverPositionChoices(AppLocalizations l10n, DiaryCardMode mode) {
           DiaryCardCoverPosition.start => l10n.diaryCardStyleCoverStart,
           DiaryCardCoverPosition.end => l10n.diaryCardStyleCoverEnd,
           DiaryCardCoverPosition.top => l10n.diaryCardStyleCoverTop,
+          DiaryCardCoverPosition.bottom => l10n.diaryCardStyleCoverBottom,
           DiaryCardCoverPosition.background =>
             l10n.diaryCardStyleCoverBackground,
           DiaryCardCoverPosition.hidden => l10n.diaryCardStyleCoverHidden,

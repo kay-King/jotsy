@@ -141,6 +141,39 @@ ORDER BY d.updated_at DESC, d.id DESC
     return query.get();
   }
 
+  /// 读取全库日记的图片来源引用（封面 + 富文本正文）。
+  ///
+  /// 供桌面页统计图片总数。只取三列，不含标题、标签与纯文本镜像；私密
+  /// 日记与未解封的时间胶囊不计入（与探索页画廊口径一致）。
+  Future<List<DiaryImageSourceRef>> getDiaryImageSourceRefs() async {
+    final rows =
+        await (selectOnly(diaries)
+              ..addColumns(<Expression<Object>>[
+                diaries.diaryId,
+                diaries.cover,
+                diaries.content,
+              ])
+              ..where(
+                diaries.isDeleted.equals(false) &
+                    (diaries.capsuleUnlockAt.isNull() |
+                        diaries.capsuleUnlockAt.isSmallerOrEqualValue(
+                          DateTime.now(),
+                        )) &
+                    CustomExpression<bool>(
+                      _privateDiaryExclusionSql('diaries.id'),
+                    ),
+              ))
+            .get();
+    return <DiaryImageSourceRef>[
+      for (final row in rows)
+        DiaryImageSourceRef(
+          diaryId: row.read(diaries.diaryId)!,
+          cover: row.read(diaries.cover),
+          content: row.read(diaries.content)!,
+        ),
+    ];
+  }
+
   /// 监听已归档日记列表（仅归档且未删除，不含私密日记）。
   Stream<List<DiaryWithTags>> watchArchivedDiaries() {
     return customSelect(

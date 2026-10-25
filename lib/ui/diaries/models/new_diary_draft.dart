@@ -51,6 +51,10 @@ class NewDiaryDraft {
     this.energyLevel,
     this.capsuleUnlockAt,
     this.capsulePrecision,
+    // 简洁编辑器（桌面“写点什么”）写的草稿：与富文本草稿同表，但只有
+    // 简洁编辑器会续写它；富文本入口不认它，避免简洁草稿被富文本
+    // 打开后丢掉“只有文字+图片”的简单形态。旧草稿没有这项时为 false。
+    this.simpleComposer = false,
   });
 
   final String title;
@@ -74,6 +78,7 @@ class NewDiaryDraft {
   final double? energyLevel;
   final DateTime? capsuleUnlockAt;
   final String? capsulePrecision;
+  final bool simpleComposer;
 
   /// 标题和正文是否存在可见内容。
   ///
@@ -143,6 +148,7 @@ class NewDiaryDraft {
       energyLevel: (json['energyLevel'] as num?)?.toDouble(),
       capsuleUnlockAt: _parseDateTime(json['capsuleUnlockAt']),
       capsulePrecision: json['capsulePrecision'] as String?,
+      simpleComposer: (json['simpleComposer'] as bool?) ?? false,
     );
   }
 
@@ -170,6 +176,7 @@ class NewDiaryDraft {
       'energyLevel': energyLevel,
       'capsuleUnlockAt': capsuleUnlockAt?.toIso8601String(),
       'capsulePrecision': capsulePrecision,
+      'simpleComposer': simpleComposer,
     };
   }
 
@@ -200,6 +207,7 @@ class NewDiaryDraft {
     Object? energyLevel = _fieldNotChanged,
     Object? capsuleUnlockAt = _fieldNotChanged,
     Object? capsulePrecision = _fieldNotChanged,
+    bool? simpleComposer,
   }) {
     return NewDiaryDraft(
       title: title ?? this.title,
@@ -247,6 +255,7 @@ class NewDiaryDraft {
       capsulePrecision: identical(capsulePrecision, _fieldNotChanged)
           ? this.capsulePrecision
           : capsulePrecision as String?,
+      simpleComposer: simpleComposer ?? this.simpleComposer,
     );
   }
 

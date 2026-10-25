@@ -59,7 +59,15 @@ enum DiaryCardDateFormat { eyebrow, full, numeric, relative }
 enum DiaryCardDateSource { created, updated }
 
 /// 底栏时间。[relativeUpdated] 是改版前的“3 小时前”。
-enum DiaryCardFooterTime { relativeUpdated, absoluteUpdated, created, hidden }
+/// [dateTime]（2026-10-26，备忘预设）：不带“写于/更新于”前缀的
+/// “几月几日 周X 几时几分”，当天也带日期，如“10月26日 周一 10:26”。
+enum DiaryCardFooterTime {
+  relativeUpdated,
+  absoluteUpdated,
+  created,
+  dateTime,
+  hidden,
+}
 
 /// 心情与天气的呈现：[stamp] 为带底色的微胶囊印章，[plain] 只画图标。
 enum DiaryCardIndicatorStyle { stamp, plain }
@@ -69,7 +77,8 @@ enum DiaryCardIndicatorStyle { stamp, plain }
 enum DiaryCardMetaPosition { eyebrow, footer, cover }
 
 /// 封面位置。瀑布流只支持 [top]、[background] 与 [hidden]。
-enum DiaryCardCoverPosition { start, end, top, background, hidden }
+/// [bottom]（2026-10-25，IdeaMemo 风格预设）：文字先、封面在正文下面。
+enum DiaryCardCoverPosition { start, end, top, bottom, background, hidden }
 
 /// 列表侧边封面的形状。
 enum DiaryCardCoverShape { square, landscape, portrait, circle }

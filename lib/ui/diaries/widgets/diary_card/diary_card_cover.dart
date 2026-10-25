@@ -172,30 +172,23 @@ class DiaryCardCollage extends StatelessWidget {
 
   static const double _gap = 2;
 
+  /// 多图拼贴：最多 3 张等宽并排（第一张 + 其余最多 2 张），点进预览看全部。
+  /// （2026-10-25 用户反馈：1 大 2 小不好看，改成 3 张并排。）
   @override
   Widget build(BuildContext context) {
-    final rest = others.take(2).toList(growable: false);
-    final Widget side;
-    if (rest.length == 1) {
-      side = DiaryCardCoverImage(source: rest.first, height: height, radius: 0);
-    } else {
-      final tileHeight = (height - _gap) / 2;
-      side = Column(
-        children: <Widget>[
-          DiaryCardCoverImage(source: rest[0], height: tileHeight, radius: 0),
-          const SizedBox(height: _gap),
-          DiaryCardCoverImage(source: rest[1], height: tileHeight, radius: 0),
-        ],
-      );
+    final tiles = <Widget>[first];
+    for (final path in others.take(2)) {
+      tiles.add(DiaryCardCoverImage(source: path, height: height, radius: 0));
     }
     return SizedBox(
       height: height,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Expanded(flex: rest.length == 1 ? 1 : 2, child: first),
-          const SizedBox(width: _gap),
-          Expanded(child: side),
+          for (var i = 0; i < tiles.length; i++) ...[
+            if (i > 0) const SizedBox(width: _gap),
+            Expanded(child: tiles[i]),
+          ],
         ],
       ),
     );

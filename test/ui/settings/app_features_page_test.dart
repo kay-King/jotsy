@@ -268,7 +268,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.byType(SettingsSwitchTile), findsNWidgets(6));
+      // 桌面 Tab 开关（2026-10-25，v16）：功能管理里 7 个开关。
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(7));
     });
   }
 }

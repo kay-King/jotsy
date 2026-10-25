@@ -46,11 +46,11 @@ class _HomePageController {
 
   /// 把可见 Tab 对齐到 [next]（在 build 中、组装底栏与页面之前调用）。
   ///
-  /// 列表未变时什么也不做。变化时（设置 → 功能管理关闭或开启日历 / 探索，
-  /// 或恢复备份带来不同的开关）：
+  /// 列表未变时什么也不做。变化时（设置 → 功能管理关闭或开启桌面 / 日历 /
+  /// 探索，或恢复备份带来不同的开关）：
   /// 1. 保持目标 Tab 不变，换算它在新列表中的下标；目标 Tab 自己被关闭时
-  ///    （如停在日历时恢复了关掉日历的备份）回到日记页。取目标而不是动画中
-  ///    的当前页，与底栏高亮一致。
+  ///    （如停在日历时恢复了关掉日历的备份）回到首页第一个 Tab。取目标而不
+  ///    是动画中的当前页，与底栏高亮一致。
   /// 2. 递增切页代次并结束切页态：进行中的切页动画结束后 `_settleTabSwitch`
   ///    因代次不符而不再改写下标。
   /// 3. 页面下标前移 / 后移时立即校正 PageView 的像素位置（`correctPixels`
@@ -67,9 +67,7 @@ class _HomePageController {
       return;
     }
     final previousTarget = previous[_state._targetIndex];
-    final kept = next.contains(previousTarget)
-        ? previousTarget
-        : HomeTab.diaries;
+    final kept = next.contains(previousTarget) ? previousTarget : next.first;
     final keptIndex = next.indexOf(kept);
 
     for (final tab in previous) {
@@ -220,11 +218,14 @@ class _HomePageController {
     );
   }
 
-  Future<void> switchToDiariesTab() {
-    return _switchToTab(
-      _state._tabs.indexOf(HomeTab.diaries),
-      allowDuringSwitch: true,
-    );
+  /// 切到指定 Tab（桌面页的快捷入口、返回键回首页用）；目标 Tab 不可见时
+  /// 什么也不做。
+  Future<void> switchToTab(HomeTab tab) {
+    final index = _state._tabs.indexOf(tab);
+    if (index < 0) {
+      return Future<void>.value();
+    }
+    return _switchToTab(index, allowDuringSwitch: true);
   }
 
   /// 若存在启动提示并且尚未展示，则在首帧后展示一次。

@@ -10,8 +10,10 @@ import 'package:node_diary/app/node_diary_app.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
+import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/home/pages/home_page.dart';
+import 'package:node_diary/ui/widgets/bottom_nav.dart';
 import 'package:node_diary/ui/widgets/launch_reveal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -245,7 +247,18 @@ void main() {
         continue;
       }
       sawHome = true;
-      // 首页出现的同一帧里列表已有数据，不会先空白/转圈再硬切。
+      // 桌面是首页首个 Tab：先切到日记页，再断言列表已有数据。
+      // 预热命中的是同一查询实例，切过去的同一帧里就该有数据，
+      // 不会先空白/转圈再硬切。PageView 切页有 300ms 左右的动画，
+      // 先把动画跑完再断言列表。
+      final l10n = AppLocalizations.of(tester.element(find.byType(HomePage)));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(BottomNav),
+          matching: find.text(l10n.navDiaries),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Warm start'), findsOneWidget);
     }
     expect(sawHome, isTrue);

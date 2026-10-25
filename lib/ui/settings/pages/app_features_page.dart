@@ -74,6 +74,12 @@ class AppFeaturesPage extends ConsumerWidget {
             title: l10n.settingsFeaturesPagesGroup,
             footer: l10n.settingsFeaturesPagesFooter,
             children: <Widget>[
+              SettingsSwitchTile(
+                title: l10n.navDesktop,
+                subtitle: l10n.settingsFeaturesDesktopSubtitle,
+                value: features.desktop,
+                onChanged: writer((v) => features.copyWith(desktop: v)),
+              ),
               // 日历与其下的纪念日合成分组里的一项：分组按位置复用子项，若把
               // 纪念日作为单独一项增删，后面“探索”那一行的开关状态会被它
               // 接手，从探索的值播一遍开关动画。

@@ -64,6 +64,7 @@ class DiaryCardStyleDateTab extends StatelessWidget {
       (DiaryCardFooterTime.relativeUpdated, l10n.diaryCardStyleFooterRelative),
       (DiaryCardFooterTime.absoluteUpdated, l10n.diaryCardStyleFooterUpdated),
       (DiaryCardFooterTime.created, l10n.diaryCardStyleFooterCreated),
+      (DiaryCardFooterTime.dateTime, l10n.diaryCardStyleFooterDateTime),
       (DiaryCardFooterTime.hidden, l10n.diaryCardStyleFooterHidden),
     ];
 

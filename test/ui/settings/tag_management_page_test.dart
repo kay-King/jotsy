@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
@@ -208,12 +207,11 @@ void main() {
 
     // 收起进行中：行高介于 0 与原高之间，其他按钮保持可用、不闪灰。
     expect(tester.getSize(removedTile).height, inExclusiveRange(0, fullHeight));
+    // 顶栏 + 号是 Material 描边图标（2026-10-25，v15 顶栏图标描边化）。
     final addButton = tester.widget<IconButton>(
       find.ancestor(
         of: find.byWidgetPredicate(
-          (widget) =>
-              widget is FaIcon &&
-              widget.icon?.codePoint == FontAwesomeIcons.plus.codePoint,
+          (widget) => widget is Icon && widget.icon == Icons.add,
         ),
         matching: find.byType(IconButton),
       ),

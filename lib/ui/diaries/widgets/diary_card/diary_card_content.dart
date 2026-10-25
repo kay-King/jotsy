@@ -15,6 +15,8 @@ import 'diary_card_cover_placeholder.dart';
 ///   镜像）；
 /// - 顶部封面：通栏贴顶（上两角由卡片裁圆，下接细分隔线）或内缩到内边距
 ///   里；开启拼贴且正文有多张图时排成拼贴；
+/// - 底部封面：文字先、封面在正文下面（IdeaMemo 风格），通栏贴底（下两角
+///   由卡片裁圆，上接细分隔线）或内缩到内边距里；拼贴同顶部；
 /// - 背景封面：封面铺满卡片，正文放在底部的半透明底板上；
 /// - 隐藏：只有正文。
 ///
@@ -30,6 +32,7 @@ class DiaryCardContent extends StatelessWidget {
     required this.blocks,
     required this.coverAnchor,
     this.coverIndicators,
+    this.footer,
   });
 
   final DiaryWithTags diary;
@@ -37,6 +40,10 @@ class DiaryCardContent extends StatelessWidget {
   final DiaryCardResolvedStyle resolved;
   final DiaryCardAppearance appearance;
   final Widget blocks;
+
+  /// 拆到封面下面的底栏（时间戳等）；只有封面在底部（备忘预设）时才有，
+  /// 其余布局的底栏仍在 [blocks] 里。
+  final Widget? footer;
 
   /// 点按卡片时抓取封面画面的锚点；null 表示不参与共享元素（设置页预览）。
   final ImageViewerHeroAnchor? coverAnchor;
@@ -61,6 +68,7 @@ class DiaryCardContent extends StatelessWidget {
       DiaryCardCoverPosition.start ||
       DiaryCardCoverPosition.end => _side(context, cover),
       DiaryCardCoverPosition.top => _top(context, cover),
+      DiaryCardCoverPosition.bottom => _bottom(context, cover),
       DiaryCardCoverPosition.background when cover != null => _background(
         context,
         cover,
@@ -256,6 +264,116 @@ class DiaryCardContent extends StatelessWidget {
           padding: _textPadding(atTop: coverWidget == null),
           child: blocks,
         ),
+      ],
+    );
+  }
+
+  /// 底部封面（IdeaMemo 风格）：文字先、封面在正文下面，底栏（时间戳）
+  /// 垫底在封面下面。与 [_top] 镜像：非内缩且没有底栏时封面贴着卡片
+  /// 底边，下方两角由卡片裁圆；有底栏时封面夹在正文与底栏中间，四角
+  /// 用封面圆角；内缩时封面四角自带圆角，放在内边距里。开启拼贴且正文
+  /// 有多张图时排成拼贴（拼贴本身最多 3 张：等宽并排，点进预览看全部）。
+  Widget _bottom(BuildContext context, String? cover) {
+    final inset = _m.coverInset;
+    final height = _m.coverHeight;
+    final hasFooter = footer != null;
+    final Widget? coverWidget;
+    if (cover != null) {
+      final direction = Directionality.of(context);
+      final images = resolved.style.content.collage
+          ? viewData.collageImages
+          : const <String>[];
+      // 有底栏时封面夹在中间，是通栏直角条；没底栏时封面贴着卡片底边，
+      // 下方两角由卡片裁圆；内缩封面四角自带圆角。
+      final visibleRadius = inset
+          ? BorderRadius.circular(_m.coverRadius)
+          : hasFooter
+          ? BorderRadius.zero
+          : BorderRadius.vertical(
+              bottom: Radius.circular(resolved.cornerRadius),
+            );
+      if (images.length > 1) {
+        final firstRadius =
+            (inset
+                    ? BorderRadiusDirectional.horizontal(
+                        start: Radius.circular(_m.coverRadius),
+                      )
+                    : hasFooter
+                    ? BorderRadiusDirectional.zero
+                    : BorderRadiusDirectional.only(
+                        bottomStart: Radius.circular(resolved.cornerRadius),
+                      ))
+                .resolve(direction);
+        final collage = DiaryCardCollage(
+          first: _hero(
+            firstRadius,
+            DiaryCardCoverImage(
+              source: images.first,
+              height: height,
+              radius: 0,
+            ),
+          ),
+          others: images.sublist(1),
+          height: height,
+        );
+        coverWidget = _withIndicators(
+          inset
+              ? ClipRRect(borderRadius: visibleRadius, child: collage)
+              : collage,
+        );
+      } else {
+        coverWidget = _withIndicators(
+          _hero(
+            visibleRadius,
+            DiaryCardCoverImage(
+              source: cover,
+              width: double.infinity,
+              height: height,
+              radius: inset ? _m.coverRadius : 0,
+            ),
+          ),
+        );
+      }
+    } else {
+      coverWidget = _placeholder(
+        width: double.infinity,
+        height: height < 88 ? height : 88,
+        radius: inset ? _m.coverRadius : 0,
+        horizontal: true,
+      );
+    }
+
+    if (inset) {
+      return Padding(
+        padding: _textPadding(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            blocks,
+            if (coverWidget != null) ...[
+              SizedBox(height: _m.coverGap),
+              coverWidget,
+            ],
+            if (footer != null) ...[SizedBox(height: _m.coverGap), footer!],
+          ],
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(padding: _textPadding(atTop: true), child: blocks),
+        if (coverWidget != null) ...[
+          if (_m.coverDivider)
+            Divider(
+              height: 0.6,
+              thickness: 0.6,
+              color: appearance.dividerColor,
+            ),
+          coverWidget,
+        ],
+        if (footer != null)
+          Padding(padding: _textPadding(atTop: false), child: footer!),
       ],
     );
   }

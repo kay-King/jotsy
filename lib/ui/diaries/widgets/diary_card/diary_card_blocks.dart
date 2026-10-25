@@ -32,6 +32,7 @@ class DiaryCardBlocks extends StatelessWidget {
     required this.maxVisibleTags,
     required this.metaPosition,
     required this.selectionMarkDuration,
+    this.includeFooter = true,
   });
 
   final DiaryWithTags diary;
@@ -48,6 +49,10 @@ class DiaryCardBlocks extends StatelessWidget {
   /// 心情天气实际所在位置（封面上时这里不画）。
   final DiaryCardMetaPosition metaPosition;
   final Duration selectionMarkDuration;
+
+  /// 是否包含底栏；封面在底部的布局（备忘预设）要把底栏拆到封面下面，
+  /// 此时正文里不画底栏，调用方用 [buildFooter] 另取。
+  final bool includeFooter;
 
   /// 标题行要显示的文字：样式隐藏标题时为 null；日记没写标题时按
   /// “无标题”占位开关取 [untitled] 或 null（不显示标题行）。
@@ -123,6 +128,9 @@ class DiaryCardBlocks extends StatelessWidget {
 
     final children = <Widget>[];
     for (final block in style.content.blocks) {
+      if (block == DiaryCardBlock.footer && !includeFooter) {
+        continue;
+      }
       final Widget? built = switch (block) {
         DiaryCardBlock.eyebrow =>
           hasEyebrow
@@ -163,6 +171,28 @@ class DiaryCardBlocks extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: children,
+    );
+  }
+
+  /// 只构建底栏（时间戳等）；用于封面在底部的布局，底栏要放在封面下面。
+  /// 与 build() 里 footer 分支的逻辑一致；没有任何内容时为 null。
+  /// 调用方需保证底栏在样式的区块列表里（否则这里也返回 null）。
+  Widget? buildFooter(BuildContext context) {
+    if (!resolved.style.content.blocks.contains(DiaryCardBlock.footer)) {
+      return null;
+    }
+    final lines = DiaryCardLines(
+      diary: diary,
+      viewData: viewData,
+      resolved: resolved,
+      appearance: appearance,
+    );
+    final indicators = buildIndicators();
+    return lines.footer(
+      context,
+      indicators: metaPosition == DiaryCardMetaPosition.footer
+          ? indicators
+          : null,
     );
   }
 

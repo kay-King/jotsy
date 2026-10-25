@@ -10,6 +10,7 @@ enum DiaryCardPresetId {
   sticky,
   journal,
   mood,
+  memo,
 }
 
 /// 内置的卡片样式预设。
@@ -27,6 +28,7 @@ abstract final class DiaryCardPresets {
         DiaryCardPresetId.sticky: _sticky,
         DiaryCardPresetId.journal: _journal,
         DiaryCardPresetId.mood: _mood,
+        DiaryCardPresetId.memo: _memo,
       };
 
   static DiaryCardStyle styleOf(DiaryCardPresetId id) => styles[id]!;
@@ -72,20 +74,24 @@ abstract final class DiaryCardPresets {
   );
 
   /// 杂志：通栏大图、放大的标题与宽松行距，完整日期。
+  /// （2026-10-25 用户拿另一款日记 App 对比后定：竖版通栏大图 +
+  /// 大字 + 宽松间距更高级；封面高 200、标题 1.1 倍、正文全字号，
+  /// 是之前默认改版那一版的样子，现在收进杂志预设，经典小图保留。）
   static const _magazine = DiaryCardStyle(
     surface: DiaryCardSurfaceStyle(
       cornerRadius: 20,
       shadow: DiaryCardShadowStyle.soft,
     ),
     typography: DiaryCardTypography(
-      titleScale: 1.12,
+      titleScale: 1.1,
+      previewScale: 1.0,
       lineHeight: DiaryCardLineHeight.relaxed,
     ),
     content: DiaryCardContentStyle(tagStyle: DiaryCardTagStyle.plain),
     meta: DiaryCardMetaStyle(dateFormat: DiaryCardDateFormat.full),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 184,
+      coverHeight: 200,
       coverDivider: false,
       coverGap: 14,
       paddingH: 18,
@@ -265,5 +271,52 @@ abstract final class DiaryCardPresets {
       coverFallback: DiaryCardCoverFallback.moodTile,
     ),
     meta: DiaryCardMetaStyle(indicatorStyle: DiaryCardIndicatorStyle.plain),
+  );
+
+  /// 备忘（IdeaMemo 风格）：文字先、封面在正文下面，像写备忘一样。
+  /// 借鉴 ldlywt/IdeaMemo 的 NoteCard（GPL-3.0，与本项目同许可证；
+  /// IdeaMemo 是 Kotlin/Compose，jotsy 是 Dart/Flutter，这里是按
+  /// 它的版式与数值在 jotsy 卡片模型里重写，不是照抄代码）：
+  /// 正文 16sp、行高 26sp（宽松），最多显示 8 行；图片在正文下面，
+  /// 多图拼贴最多 3 张（等宽并排，点进预览看全部）；底栏是“几月几日
+  /// 周X 几时几分”垫底，顶上不另排日期行；卡片间距收紧。
+  static const _memo = DiaryCardStyle(
+    surface: DiaryCardSurfaceStyle(
+      cornerRadius: 16,
+      shadow: DiaryCardShadowStyle.soft,
+    ),
+    typography: DiaryCardTypography(
+      titleScale: 1.0,
+      previewScale: 1.1,
+      lineHeight: DiaryCardLineHeight.relaxed,
+    ),
+    content: DiaryCardContentStyle(collage: true),
+    meta: DiaryCardMetaStyle(
+      showDate: false,
+      footerTime: DiaryCardFooterTime.dateTime,
+    ),
+    list: DiaryCardModeStyle(
+      coverPosition: DiaryCardCoverPosition.bottom,
+      coverHeight: 160,
+      coverDivider: false,
+      coverGap: 12,
+      paddingH: 16,
+      paddingV: 12,
+      cardGap: 8,
+      elementGap: 8,
+      previewMaxLines: 8,
+      metaPosition: DiaryCardMetaPosition.footer,
+    ),
+    waterfall: DiaryCardModeStyle(
+      coverPosition: DiaryCardCoverPosition.top,
+      coverHeight: 140,
+      coverGap: 10,
+      paddingH: 14,
+      paddingV: 12,
+      cardGap: 8,
+      elementGap: 6,
+      previewMaxLines: 4,
+      metaPosition: DiaryCardMetaPosition.footer,
+    ),
   );
 }

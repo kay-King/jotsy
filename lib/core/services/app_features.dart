@@ -1,6 +1,6 @@
 // 功能管理开关（设置 → 功能管理）。
 //
-// 职责：描述用户可整体关闭的功能——日历 Tab、探索 Tab、日记本、纪念日、
+// 职责：描述用户可整体关闭的功能——桌面 Tab、日历 Tab、探索 Tab、日记本、纪念日、
 // 日记模板、时间胶囊——是否开启；默认全部开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
 //
@@ -13,6 +13,7 @@ import 'dart:convert';
 /// 各功能是否开启。不可变；修改经 [copyWith] 得到新值后保存。
 class AppFeatures {
   const AppFeatures({
+    this.desktop = true,
     this.calendar = true,
     this.explore = true,
     this.notebooks = true,
@@ -23,6 +24,9 @@ class AppFeatures {
 
   /// 全部开启：从未设置、读不出或恢复默认时都是它。
   static const AppFeatures defaults = AppFeatures();
+
+  /// 桌面 Tab。
+  final bool desktop;
 
   /// 日历 Tab。
   final bool calendar;
@@ -47,6 +51,7 @@ class AppFeatures {
   /// 自己的开关值，日历重新开启时恢复）。
   bool get anniversariesEnabled => calendar && anniversaries;
 
+  static const _keyDesktop = 'desktop';
   static const _keyCalendar = 'calendar';
   static const _keyExplore = 'explore';
   static const _keyNotebooks = 'notebooks';
@@ -73,6 +78,7 @@ class AppFeatures {
     }
 
     return AppFeatures(
+      desktop: read(_keyDesktop, defaults.desktop),
       calendar: read(_keyCalendar, defaults.calendar),
       explore: read(_keyExplore, defaults.explore),
       notebooks: read(_keyNotebooks, defaults.notebooks),
@@ -87,6 +93,7 @@ class AppFeatures {
   String? encode() {
     if (this == defaults) return null;
     return jsonEncode(<String, bool>{
+      _keyDesktop: desktop,
       _keyCalendar: calendar,
       _keyExplore: explore,
       _keyNotebooks: notebooks,
@@ -97,6 +104,7 @@ class AppFeatures {
   }
 
   AppFeatures copyWith({
+    bool? desktop,
     bool? calendar,
     bool? explore,
     bool? notebooks,
@@ -105,6 +113,7 @@ class AppFeatures {
     bool? timeCapsules,
   }) {
     return AppFeatures(
+      desktop: desktop ?? this.desktop,
       calendar: calendar ?? this.calendar,
       explore: explore ?? this.explore,
       notebooks: notebooks ?? this.notebooks,
@@ -117,6 +126,7 @@ class AppFeatures {
   @override
   bool operator ==(Object other) =>
       other is AppFeatures &&
+      other.desktop == desktop &&
       other.calendar == calendar &&
       other.explore == explore &&
       other.notebooks == notebooks &&
@@ -126,6 +136,7 @@ class AppFeatures {
 
   @override
   int get hashCode => Object.hash(
+    desktop,
     calendar,
     explore,
     notebooks,
@@ -136,7 +147,7 @@ class AppFeatures {
 
   @override
   String toString() =>
-      'AppFeatures(calendar: $calendar, explore: $explore, '
+      'AppFeatures(desktop: $desktop, calendar: $calendar, explore: $explore, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
       'templates: $templates, timeCapsules: $timeCapsules)';
 }
