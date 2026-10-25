@@ -75,6 +75,7 @@ class ExploreMediaGalleryController extends ChangeNotifier {
                 source: source,
                 diaryId: diary.diaryId,
                 updatedAt: diary.updatedAt,
+                createdAt: diary.createdAt,
               ),
             );
           }
@@ -96,6 +97,21 @@ class ExploreMediaGalleryController extends ChangeNotifier {
     }
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// 全部加载完（筛选 / 正序时调用）。
+  ///
+  /// 过滤与排序要对完整集合才有意义：只对已加载的子集筛，会漏掉还没
+  /// 加载到的月份；正序也要等最老的一批到了才排得准。等在途的一批落定
+  /// 再继续，滚动监听同时触发的 loadMore 不会重复加载。
+  Future<void> loadAll() async {
+    while (!_disposed && _hasMore) {
+      if (_isLoading) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        continue;
+      }
+      await loadMore();
+    }
   }
 
   @override

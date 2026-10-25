@@ -77,6 +77,8 @@ class SettingsService {
     required String? diaryTemplatePrefsRaw,
     required String? diarySavedColorsRaw,
     required String? appFeaturesRaw,
+    required String profileNickname,
+    required String? profileAvatarPath,
   }) : themeModeNotifier = ValueNotifier<ThemeMode>(mode),
        themeSeedColorNotifier = ValueNotifier<Color>(themeSeedColor),
        homeTabSwitchCurveNotifier = ValueNotifier<HomeTabSwitchCurveType>(
@@ -125,7 +127,9 @@ class SettingsService {
        diarySavedColorsRawNotifier = ValueNotifier<String?>(
          diarySavedColorsRaw,
        ),
-       appFeaturesRawNotifier = ValueNotifier<String?>(appFeaturesRaw);
+       appFeaturesRawNotifier = ValueNotifier<String?>(appFeaturesRaw),
+       profileNicknameNotifier = ValueNotifier<String>(profileNickname),
+       profileAvatarPathNotifier = ValueNotifier<String?>(profileAvatarPath);
 
   final SharedPreferences _prefs;
   final ValueNotifier<ThemeMode> themeModeNotifier;
@@ -188,6 +192,13 @@ class SettingsService {
   /// 回滚）时立即重建。
   final ValueNotifier<String?> appFeaturesRawNotifier;
 
+  /// 时间线个人资料：昵称（空字符串表示未设置，展示时回退为“我”）与
+  /// 头像文件路径（null 表示未设置，展示昵称首字）。头像文件只由
+  /// ProfileAvatarStorageService 写进私有目录；备份只带路径字符串，文件
+  /// 本身不进备份，恢复后文件缺失时展示层回退为首字头像。
+  final ValueNotifier<String> profileNicknameNotifier;
+  final ValueNotifier<String?> profileAvatarPathNotifier;
+
   static const _keyThemeMode = 'app.settings.theme_mode';
   static const _keyThemeSeedColorValue = 'app.settings.theme_seed_color_value';
   static const _keyHomeTabSwitchCurve = 'app.settings.home_tab_switch_curve';
@@ -200,6 +211,10 @@ class SettingsService {
   static const _keyFontScale = 'app.settings.font_scale';
   static const _keyDiarySortMode = 'app.settings.diary_sort_mode';
   static const _keyDiaryLayoutMode = 'app.settings.diary_layout_mode';
+  static const _keyGalleryColumns = 'app.settings.gallery_columns';
+  static const _keyGalleryGroupType = 'app.settings.gallery_group_type';
+  static const _keyProfileNickname = 'app.settings.profile_nickname';
+  static const _keyProfileAvatarPath = 'app.settings.profile_avatar_path';
   static const _keyDiaryToolbarOrder = 'app.settings.diary_toolbar_order';
   static const _keyDiaryToolbarHiddenItems =
       'app.settings.diary_toolbar_hidden_items';
@@ -335,6 +350,8 @@ class SettingsService {
           ? storedDiarySavedColors
           : null,
       appFeaturesRaw: storedAppFeatures is String ? storedAppFeatures : null,
+      profileNickname: prefs.getString(_keyProfileNickname) ?? '',
+      profileAvatarPath: prefs.getString(_keyProfileAvatarPath),
     );
   }
 
@@ -380,6 +397,14 @@ class SettingsService {
   String get diaryLayoutModeRaw =>
       _prefs.getString(_keyDiaryLayoutMode) ?? 'list';
 
+  /// 媒体画廊每行照片数（2–6，默认 3）：旧值越界时按边界收敛。
+  int get galleryColumns =>
+      _normalizeGalleryColumns(_prefs.getInt(_keyGalleryColumns) ?? 3);
+
+  /// 媒体画廊分组粒度（'year' / 'month' / 'day'，默认 'month'）。
+  String get galleryGroupTypeRaw =>
+      _prefs.getString(_keyGalleryGroupType) ?? 'month';
+
   String? get diaryToolbarOrderRaw => diaryToolbarOrderRawNotifier.value;
   String? get diaryToolbarHiddenItemsRaw =>
       diaryToolbarHiddenItemsRawNotifier.value;
@@ -396,6 +421,11 @@ class SettingsService {
 
   String? get diarySavedColorsRaw => diarySavedColorsRawNotifier.value;
   String? get appFeaturesRaw => appFeaturesRawNotifier.value;
+
+  /// 时间线个人资料：昵称原文（空表示未设置）与头像文件路径（null 表示
+  /// 未设置）。展示层负责回退（昵称 → “我”，头像 → 昵称首字）。
+  String get profileNickname => profileNicknameNotifier.value;
+  String? get profileAvatarPath => profileAvatarPathNotifier.value;
   List<String> get moodOptions =>
       decodeMoodOptions(moodOptionsRawNotifier.value);
   int get diaryCardTagLimit => diaryCardTagLimitNotifier.value;
@@ -449,6 +479,41 @@ class SettingsService {
 
   Future<void> setDiaryLayoutModeRaw(String value) async {
     await _writePreference(_prefs.setString(_keyDiaryLayoutMode, value));
+  }
+
+  Future<void> setGalleryColumns(int value) async {
+    await _writePreference(
+      _prefs.setInt(_keyGalleryColumns, _normalizeGalleryColumns(value)),
+    );
+  }
+
+  Future<void> setGalleryGroupTypeRaw(String value) async {
+    await _writePreference(_prefs.setString(_keyGalleryGroupType, value));
+  }
+
+  Future<void> setProfileNickname(String value) async {
+    final normalized = value.trim();
+    profileNicknameNotifier.value = normalized;
+    await _writePreference(_prefs.setString(_keyProfileNickname, normalized));
+  }
+
+  /// 头像路径为 null 时删键；非空路径先更新 notifier 再落盘，时间线即时
+  /// 换头像。旧头像文件的删除由调用方（个人资料页）负责，服务层不管文件。
+  Future<void> setProfileAvatarPath(String? value) async {
+    final normalized = value?.trim();
+    profileAvatarPathNotifier.value = normalized == null || normalized.isEmpty
+        ? null
+        : normalized;
+    if (profileAvatarPathNotifier.value == null) {
+      await _writePreference(_prefs.remove(_keyProfileAvatarPath));
+    } else {
+      await _writePreference(
+        _prefs.setString(
+          _keyProfileAvatarPath,
+          profileAvatarPathNotifier.value!,
+        ),
+      );
+    }
   }
 
   Future<void> setDiaryToolbarOrderRaw(String value) async {
@@ -874,5 +939,9 @@ class SettingsService {
 
   static int _normalizeDiaryCardTagLimit(int value) {
     return value.clamp(minDiaryCardTagLimit, maxDiaryCardTagLimit).toInt();
+  }
+
+  static int _normalizeGalleryColumns(int value) {
+    return value.clamp(2, 6).toInt();
   }
 }

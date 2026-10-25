@@ -5,6 +5,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/services/settings_service.dart';
 import 'explore_content_extractor.dart';
 import 'explore_trend_builder.dart';
+import 'explore_writing_stats_builder.dart';
 import '../models/explore_view_data.dart';
 import '../../../utils/text_stats.dart';
 
@@ -22,12 +23,16 @@ class ExplorePageController {
   static const int _onThisDayMaxEntries = 12;
 
   /// 构建探索页整页所需数据。
+  ///
+  /// [imageCounts] 为配图计数（日记 id → 图片数），由页面层经配图计数
+  /// provider 传入；缺省为空时配图行按 0 计。
   ExploreViewData buildViewData(
     List<ExploreDiaryOverview> diaries, {
     required DateTime now,
     required AppLocalizations l10n,
     List<int> orderedTagIds = const <int>[],
     List<String> moodOptions = SettingsService.defaultMoodOptions,
+    Map<String, int> imageCounts = const <String, int>{},
   }) {
     final fallbackPrompts = <String>[
       l10n.autoT0049,
@@ -46,6 +51,11 @@ class ExplorePageController {
     );
     final tagUsages = buildTagUsages(diaries, orderedTagIds: orderedTagIds);
     final mediaItems = _buildMediaGallery(diaries);
+    final writingStats = const ExploreWritingStatsBuilder().build(
+      diaries,
+      imageCounts: imageCounts,
+      now: now,
+    );
 
     return ExploreViewData(
       stats: stats,
@@ -55,6 +65,7 @@ class ExplorePageController {
       energyValues7: trends.energyValues7,
       tagUsages: tagUsages.take(18).toList(growable: false),
       mediaItems: mediaItems.take(12).toList(growable: false),
+      writingStats: writingStats,
     );
   }
 
@@ -231,6 +242,7 @@ class ExplorePageController {
           source: source,
           diaryId: item.diaryId,
           updatedAt: item.updatedAt,
+          createdAt: item.createdAt,
         ),
       );
     }

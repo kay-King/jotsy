@@ -36,6 +36,8 @@ class DiaryViewPreferences {
     switch (raw) {
       case 'waterfall':
         return DiaryLayoutMode.waterfall;
+      case 'timeline':
+        return DiaryLayoutMode.timeline;
       case 'list':
       default:
         return DiaryLayoutMode.list;

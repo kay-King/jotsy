@@ -19,6 +19,12 @@ class BackupSettings {
     'appLockEnabled': settingsService.isAppLockEnabled,
     'diarySortModeRaw': settingsService.diarySortModeRaw,
     'diaryLayoutModeRaw': settingsService.diaryLayoutModeRaw,
+    'galleryColumns': settingsService.galleryColumns,
+    'galleryGroupTypeRaw': settingsService.galleryGroupTypeRaw,
+    // 个人资料：昵称与头像路径随备份走；头像文件本身不进备份，恢复后
+    // 文件缺失时展示层回退为首字头像。
+    'profileNickname': settingsService.profileNickname,
+    'profileAvatarPath': settingsService.profileAvatarPath,
     'diaryCardTagLimit': settingsService.diaryCardTagLimit,
     'calendarDisplayOptionsRaw': settingsService.calendarDisplayOptionsRaw,
     'diaryCardStyleRaw': settingsService.diaryCardStyleRaw,
@@ -109,6 +115,34 @@ class BackupSettings {
     final layoutRaw = settingsNode['diaryLayoutModeRaw']?.toString();
     if (layoutRaw != null && layoutRaw.isNotEmpty) {
       await settingsService.setDiaryLayoutModeRaw(layoutRaw);
+    }
+
+    final galleryColumnsRaw = settingsNode['galleryColumns'];
+    final galleryColumns = switch (galleryColumnsRaw) {
+      int value => value,
+      num value => value.toInt(),
+      String value => int.tryParse(value),
+      _ => null,
+    };
+    if (galleryColumns != null) {
+      await settingsService.setGalleryColumns(galleryColumns);
+    }
+
+    final galleryGroupTypeRaw = settingsNode['galleryGroupTypeRaw']?.toString();
+    if (galleryGroupTypeRaw != null && galleryGroupTypeRaw.isNotEmpty) {
+      await settingsService.setGalleryGroupTypeRaw(galleryGroupTypeRaw);
+    }
+
+    // 个人资料：旧版备份没有该键时保留本机设置；有键时按备份还原。
+    if (settingsNode.containsKey('profileNickname')) {
+      await settingsService.setProfileNickname(
+        settingsNode['profileNickname']?.toString() ?? '',
+      );
+    }
+    if (settingsNode.containsKey('profileAvatarPath')) {
+      await settingsService.setProfileAvatarPath(
+        settingsNode['profileAvatarPath']?.toString(),
+      );
     }
 
     final diaryCardTagLimitRaw = settingsNode['diaryCardTagLimit'];

@@ -8492,6 +8492,348 @@ abstract class AppLocalizations {
   /// **'No usable weather was returned. Please try again later or enter it manually.'**
   String get weatherParseError;
 
+  /// Profile settings page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// Profile row subtitle on the settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname and avatar shown in the timeline'**
+  String get profileTitleSubtitle;
+
+  /// Profile page nickname field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get profileNickname;
+
+  /// Profile page hint under the nickname field.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown as “我” when left empty'**
+  String get profileNicknameHint;
+
+  /// Profile page avatar section label.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get profileAvatar;
+
+  /// Profile page hint under the avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the first character of your nickname when unset'**
+  String get profileAvatarHint;
+
+  /// Profile page button to pick a new avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Change avatar'**
+  String get profileChangeAvatar;
+
+  /// Profile page button to remove the avatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove avatar'**
+  String get profileRemoveAvatar;
+
+  /// Timeline body text button to collapse expanded text.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get timelineCollapse;
+
+  /// Explore stats section header: overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get statsOverviewTitle;
+
+  /// Explore stats section header: rhythm.
+  ///
+  /// In en, this message translates to:
+  /// **'Rhythm'**
+  String get statsRhythmTitle;
+
+  /// Explore stats section header: content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get statsContentTitle;
+
+  /// Explore stats heatmap chart title.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing heatmap'**
+  String get statsHeatmapTitle;
+
+  /// Heatmap subtitle: entries in the past year.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries in the past year'**
+  String statsHeatmapNearYear(int count);
+
+  /// Heatmap subtitle suffix: longest gap in days.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest gap {count} days'**
+  String statsHeatmapGap(int count);
+
+  /// Heatmap legend title: the cells encode word counts.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get statsHeatmapLegend;
+
+  /// Explore stats row label: total words written.
+  ///
+  /// In en, this message translates to:
+  /// **'Total words'**
+  String get statsTotalWords;
+
+  /// Explore stats row value: total words and average per entry.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words · {avg} on average'**
+  String statsTotalWordsValue(int count, int avg);
+
+  /// Explore stats row label: how long the user has been writing.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing since'**
+  String get statsWritingSpan;
+
+  /// Explore stats row value: first entry date and recorded days.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date} · {days} days'**
+  String statsWritingSpanValue(String date, int days);
+
+  /// Explore stats row label: latest entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest entry'**
+  String get statsLatestDiary;
+
+  /// Monthly words bar chart title for the current year.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly words in {year}'**
+  String statsMonthWordsTitle(int year);
+
+  /// Monthly words chart subtitle: peak month words and total entries this year.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak {words} words · {count} entries'**
+  String statsMonthPeak(int words, int count);
+
+  /// Six-month average words per entry trend chart title.
+  ///
+  /// In en, this message translates to:
+  /// **'Words per entry over the last 6 months'**
+  String get statsTrendTitle;
+
+  /// Trend note: this month's average is higher than last month's.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more words than last month'**
+  String statsTrendMore(int count);
+
+  /// Trend note: this month's average is lower than last month's.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fewer words than last month'**
+  String statsTrendLess(int count);
+
+  /// Trend note: this month's average equals last month's.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as last month'**
+  String get statsTrendEqual;
+
+  /// Trend note shown when there are not enough entries for a trend.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a few more entries to see a trend'**
+  String get statsTrendEmpty;
+
+  /// Writing rhythm chart title (hours of day and weekdays).
+  ///
+  /// In en, this message translates to:
+  /// **'Writing rhythm'**
+  String get statsRhythmChartTitle;
+
+  /// Rhythm chart subtitle: the most common writing time.
+  ///
+  /// In en, this message translates to:
+  /// **'Most: {value}'**
+  String statsRhythmBest(String value);
+
+  /// Rhythm chart subtitle shown when there are too few entries to conclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a few more for a clearer pattern'**
+  String get statsRhythmMore;
+
+  /// Rhythm chart subheading: distribution across hours of the day.
+  ///
+  /// In en, this message translates to:
+  /// **'During the day'**
+  String get statsRhythmDay;
+
+  /// Rhythm chart subheading: distribution across weekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'During the week'**
+  String get statsRhythmWeek;
+
+  /// Hour label in the rhythm chart, e.g. 21点 / 21:00.
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00'**
+  String statsHourLabel(int hour);
+
+  /// Explore stats row label: entries in the last 7 days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get statsRecent7Days;
+
+  /// Explore stats row value: entry count in the last 7 days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String statsRecent7DaysValue(int count);
+
+  /// Explore stats row label: longest gap between recorded days.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest gap'**
+  String get statsLongestGap;
+
+  /// Longest gap value when there is no gap between recorded days.
+  ///
+  /// In en, this message translates to:
+  /// **'No gap yet'**
+  String get statsNoGap;
+
+  /// Explore stats row label: longest single entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest entry'**
+  String get statsLongestDiary;
+
+  /// Explore stats row value: word count of the longest entry.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String statsLongestDiaryValue(int count);
+
+  /// Explore stats row label: photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get statsImages;
+
+  /// Explore stats row value: entries with photos, total photos, average per entry.
+  ///
+  /// In en, this message translates to:
+  /// **'{withImages} entries with photos · {total} in total · {avg} on average'**
+  String statsImagesValue(int withImages, int total, String avg);
+
+  /// Explore stats row label: sentence style habit.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentence style'**
+  String get statsSentenceStyle;
+
+  /// Explore stats row value: commas per 100 words and the tone word.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} commas per 100 words · {tone}'**
+  String statsSentenceValue(String count, String tone);
+
+  /// Sentence style tone: long, flowing sentences.
+  ///
+  /// In en, this message translates to:
+  /// **'Long sentences'**
+  String get statsToneLong;
+
+  /// Sentence style tone: steady, plain prose.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady prose'**
+  String get statsTonePlain;
+
+  /// Sentence style tone: short sentences.
+  ///
+  /// In en, this message translates to:
+  /// **'Short sentences'**
+  String get statsToneShort;
+
+  /// Explore stats footnote: stats are computed locally, nothing is uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats are computed on this device only. Nothing is uploaded.'**
+  String get statsLocalOnly;
+
+  /// Day count value with unit, e.g. 5 天 / 5 days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String statsDaysValue(int count);
+
+  /// Sentence style footnote label for the emoji count.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get statsMarkEmoji;
+
+  /// Media gallery sort toggle: oldest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get gallerySortAsc;
+
+  /// Media gallery sort toggle: newest first.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get gallerySortDesc;
+
+  /// Media gallery layout sheet section: grouping granularity.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get galleryViewTitle;
+
+  /// Media gallery view option: group photos by year.
+  ///
+  /// In en, this message translates to:
+  /// **'Year view'**
+  String get galleryViewYear;
+
+  /// Media gallery view option: group photos by month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month view'**
+  String get galleryViewMonth;
+
+  /// Media gallery view option: group photos by day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day view'**
+  String get galleryViewDay;
+
+  /// Media gallery layout sheet section: photos per row (2-6).
+  ///
+  /// In en, this message translates to:
+  /// **'Photos per row'**
+  String get galleryFilterColumns;
+
   /// Diary metadata panel hint: copying the picked cover image failed.
   ///
   /// In en, this message translates to:

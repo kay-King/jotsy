@@ -193,6 +193,20 @@ class ExploreDiaryOverview {
   final String? cover;
 }
 
+/// 配图统计用的轻量行：只带图片提取所需的三列（日记业务 id、封面、富文本
+/// 正文），由调用方用 [ExploreContentExtractor] 计每篇的图片数。
+class DiaryImageSourceRef {
+  const DiaryImageSourceRef({
+    required this.diaryId,
+    required this.cover,
+    required this.content,
+  });
+
+  final String diaryId;
+  final String? cover;
+  final String content;
+}
+
 /// 日历月份打点聚合模型（轻量版）。
 ///
 /// 用于日历网格渲染与月度概览：只带日期格各种样式要画的标量字段（心情、

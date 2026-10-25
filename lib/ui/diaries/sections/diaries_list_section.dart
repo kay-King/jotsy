@@ -9,6 +9,7 @@ import '../viewmodels/diary_card_resolved_style.dart';
 import '../widgets/diaries_empty_state.dart';
 import '../widgets/diary_card/diary_card.dart';
 import '../widgets/diary_swipe_action_item.dart';
+import '../widgets/diary_timeline/diary_timeline_item.dart';
 import '../widgets/diary_waterfall_sliver.dart';
 import 'diary_head_section.dart';
 import '../../widgets/expressive_entrance.dart';
@@ -135,6 +136,23 @@ class DiariesListSection extends StatelessWidget {
       );
     }
 
+    // 时间线模式：朋友圈式条目（头像 + 昵称 + 正文折叠 + 九宫格），不走
+    // 卡片样式解析（没有卡片表面），与列表/瀑布流互斥。
+    if (layoutMode == DiaryLayoutMode.timeline) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          final diary = diaries[index];
+          return KeyedSubtree(
+            key: ValueKey<String>('timeline_${diary.diary.diaryId}'),
+            child: LaunchReveal(
+              slot: LaunchRevealSlot.content(index),
+              child: _buildTimelineItem(context, diary: diary),
+            ),
+          );
+        }, childCount: diaries.length),
+      );
+    }
+
     final isWaterfall = layoutMode == DiaryLayoutMode.waterfall;
     // 屏宽取 MediaQuery 而不是 SliverLayoutBuilder：后者的约束含滚动偏移，
     // 每个滚动帧都会重跑。四个调用方都是全宽页面，屏宽即可用宽度。
@@ -231,6 +249,47 @@ class DiariesListSection extends StatelessWidget {
         actionColor: swipeActionBackgroundColor ?? colorScheme.primaryContainer,
         actionIconColor: swipeActionIconColor ?? colorScheme.onPrimaryContainer,
         borderRadius: resolved.cornerRadius,
+        onSwiped: () => onArchiveDiary!(diaryId),
+        child: animatedBaseItem,
+      );
+    }
+
+    return animatedBaseItem;
+  }
+
+  /// 时间线条目：与 [_buildDiaryItem] 同一套进出动画与滑动归档（圆角为 0，
+  /// 条目本身是通栏白底行），只把卡片换成朋友圈式排布。
+  Widget _buildTimelineItem(
+    BuildContext context, {
+    required DiaryWithTags diary,
+  }) {
+    final diaryId = diary.diary.diaryId;
+    final item = DiaryTimelineItem(
+      diary: diary,
+      selected: selectedDiaryIds.contains(diaryId),
+      isSelectionMode: isSelectionMode,
+      maxVisibleTags: maxVisibleTags,
+      onOpenEditor: onOpenEditor,
+      onToggleSelection: onToggleSelection,
+      opensLockedCapsulePage: opensLockedCapsulePage,
+    );
+    final animatedBaseItem = _buildAnimatedDiaryItem(
+      context,
+      diaryId: diaryId,
+      child: item,
+    );
+
+    // 与列表分支同理：始终保留 Dismissible 根节点，避免进入选择模式时
+    // 重建子树；选择模式仅关闭滑动方向。
+    if (onArchiveDiary != null) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return DiarySwipeActionItem(
+        diaryId: diaryId,
+        enabled: !isSelectionMode,
+        icon: swipeActionIcon,
+        actionColor: swipeActionBackgroundColor ?? colorScheme.primaryContainer,
+        actionIconColor: swipeActionIconColor ?? colorScheme.onPrimaryContainer,
+        borderRadius: 0,
         onSwiped: () => onArchiveDiary!(diaryId),
         child: animatedBaseItem,
       );

@@ -4599,6 +4599,207 @@ class AppLocalizationsZh extends AppLocalizations {
   String get weatherParseError => '未获取到有效天气，请稍后重试或手动填写。';
 
   @override
+  String get profileTitle => '个人资料';
+
+  @override
+  String get profileTitleSubtitle => '时间线里显示的昵称与头像';
+
+  @override
+  String get profileNickname => '昵称';
+
+  @override
+  String get profileNicknameHint => '留空时显示“我”';
+
+  @override
+  String get profileAvatar => '头像';
+
+  @override
+  String get profileAvatarHint => '未设置时显示昵称首字';
+
+  @override
+  String get profileChangeAvatar => '更换头像';
+
+  @override
+  String get profileRemoveAvatar => '移除头像';
+
+  @override
+  String get timelineCollapse => '收起';
+
+  @override
+  String get statsOverviewTitle => '概况';
+
+  @override
+  String get statsRhythmTitle => '节奏';
+
+  @override
+  String get statsContentTitle => '内容';
+
+  @override
+  String get statsHeatmapTitle => '写作热力图';
+
+  @override
+  String statsHeatmapNearYear(int count) {
+    return '近一年 $count 篇';
+  }
+
+  @override
+  String statsHeatmapGap(int count) {
+    return '最长空档 $count 天';
+  }
+
+  @override
+  String get statsHeatmapLegend => '字数';
+
+  @override
+  String get statsTotalWords => '累计字数';
+
+  @override
+  String statsTotalWordsValue(int count, int avg) {
+    return '$count 字 · 平均 $avg 字';
+  }
+
+  @override
+  String get statsWritingSpan => '写了多久';
+
+  @override
+  String statsWritingSpanValue(String date, int days) {
+    return '$date 起 · $days 天';
+  }
+
+  @override
+  String get statsLatestDiary => '最近一篇';
+
+  @override
+  String statsMonthWordsTitle(int year) {
+    return '$year 年月度字数';
+  }
+
+  @override
+  String statsMonthPeak(int words, int count) {
+    return '最高 $words 字 · 共 $count 篇';
+  }
+
+  @override
+  String get statsTrendTitle => '近 6 个月每篇字数';
+
+  @override
+  String statsTrendMore(int count) {
+    return '比上月多 $count 字';
+  }
+
+  @override
+  String statsTrendLess(int count) {
+    return '比上月少 $count 字';
+  }
+
+  @override
+  String get statsTrendEqual => '和上月持平';
+
+  @override
+  String get statsTrendEmpty => '再写几篇就有走势了';
+
+  @override
+  String get statsRhythmChartTitle => '写作时段';
+
+  @override
+  String statsRhythmBest(String value) {
+    return '最多：$value';
+  }
+
+  @override
+  String get statsRhythmMore => '再写几篇会更准';
+
+  @override
+  String get statsRhythmDay => '一天里';
+
+  @override
+  String get statsRhythmWeek => '一周里';
+
+  @override
+  String statsHourLabel(int hour) {
+    return '$hour点';
+  }
+
+  @override
+  String get statsRecent7Days => '近 7 天';
+
+  @override
+  String statsRecent7DaysValue(int count) {
+    return '$count 篇';
+  }
+
+  @override
+  String get statsLongestGap => '最长空档';
+
+  @override
+  String get statsNoGap => '没有空档';
+
+  @override
+  String get statsLongestDiary => '最长一篇';
+
+  @override
+  String statsLongestDiaryValue(int count) {
+    return '$count 字';
+  }
+
+  @override
+  String get statsImages => '配图';
+
+  @override
+  String statsImagesValue(int withImages, int total, String avg) {
+    return '$withImages 篇带图 · 共 $total 张 · 平均 $avg 张';
+  }
+
+  @override
+  String get statsSentenceStyle => '句式习惯';
+
+  @override
+  String statsSentenceValue(String count, String tone) {
+    return '每 100 字 $count 个 · $tone';
+  }
+
+  @override
+  String get statsToneLong => '长句流';
+
+  @override
+  String get statsTonePlain => '行文平实';
+
+  @override
+  String get statsToneShort => '短句流';
+
+  @override
+  String get statsLocalOnly => '统计只在本机计算，不会上传任何数据。';
+
+  @override
+  String statsDaysValue(int count) {
+    return '$count 天';
+  }
+
+  @override
+  String get statsMarkEmoji => '表情';
+
+  @override
+  String get gallerySortAsc => '正序';
+
+  @override
+  String get gallerySortDesc => '倒序';
+
+  @override
+  String get galleryViewTitle => '视图';
+
+  @override
+  String get galleryViewYear => '年视图';
+
+  @override
+  String get galleryViewMonth => '月视图';
+
+  @override
+  String get galleryViewDay => '日视图';
+
+  @override
+  String get galleryFilterColumns => '每行数量';
+
+  @override
   String get publishCoverImportFailed => '这张图片无法设为封面，请换一张再试';
 
   @override

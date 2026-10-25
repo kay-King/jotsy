@@ -20,8 +20,9 @@ class DiaryCardMediaSummary {
     this.attachmentCount = 0,
   });
 
-  /// 拼贴最多用到的图片数。
-  static const int maxImages = 4;
+  /// 媒体列表最多保留的图片数：卡片拼贴只取前 3 张，时间线九宫格取前 9 张，
+  /// 扫描时按此上限截断（图片总数仍由 [imageCount] 另计）。
+  static const int maxImages = 9;
 
   static const DiaryCardMediaSummary empty = DiaryCardMediaSummary();
 

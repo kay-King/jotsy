@@ -6,6 +6,7 @@ import 'package:node_diary/ui/settings/pages/about_page.dart';
 import 'package:node_diary/ui/settings/pages/app_features_page.dart';
 import 'package:node_diary/ui/settings/pages/data_privacy_page.dart';
 import 'package:node_diary/ui/settings/pages/editor_settings_page.dart';
+import 'package:node_diary/ui/settings/pages/profile_page.dart';
 import 'package:node_diary/ui/settings/pages/tag_management_page.dart';
 import '../../../app/theme/app_spacing.dart';
 import '../../home/widgets/home_bar/home_chrome_scope.dart';
@@ -88,6 +89,20 @@ class SettingsPage extends StatelessWidget {
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) {
                           return const AppFeaturesPage();
+                        },
+                      ),
+                    );
+                  },
+                ),
+                _SettingsDestination(
+                  icon: Icons.person_outlined,
+                  title: l10n.profileTitle,
+                  subtitle: l10n.profileTitleSubtitle,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return const ProfilePage();
                         },
                       ),
                     );

@@ -221,6 +221,12 @@ class _DiaryViewOptionsSheetState extends State<DiaryViewOptionsSheet> {
               selected: _layoutMode == DiaryLayoutMode.waterfall,
               onTap: () => _selectLayoutMode(DiaryLayoutMode.waterfall),
             ),
+            ExpressiveChoiceTile(
+              // 复用日历页已有的“时间线”文案，不新增 ARB key。
+              label: l10n.calendarDayContentTimeline,
+              selected: _layoutMode == DiaryLayoutMode.timeline,
+              onTap: () => _selectLayoutMode(DiaryLayoutMode.timeline),
+            ),
             if (widget.onOpenNotebookShelf case final openShelf?) ...<Widget>[
               const SizedBox(height: AppSpacing.l),
               _SectionHeader(

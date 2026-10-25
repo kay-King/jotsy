@@ -9,8 +9,9 @@ import '../../../app/theme/expressive_surfaces.dart';
 import '../../home/widgets/home_bar/home_chrome_scope.dart';
 import '../../widgets/expressive_menu/expressive_menu.dart';
 
-/// 日记列表布局模式。
-enum DiaryLayoutMode { list, waterfall }
+/// 日记列表布局模式：卡片列表、瀑布流、朋友圈式时间线（头像 + 昵称 +
+/// 正文折叠 + 九宫格，见 diary_timeline/）。
+enum DiaryLayoutMode { list, waterfall, timeline }
 
 /// 日记页顶部头部区块。
 ///

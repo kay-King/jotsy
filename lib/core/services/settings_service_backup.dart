@@ -12,6 +12,10 @@ extension SettingsServiceBackup on SettingsService {
       SettingsService._keyFontScale,
       SettingsService._keyDiarySortMode,
       SettingsService._keyDiaryLayoutMode,
+      SettingsService._keyGalleryColumns,
+      SettingsService._keyGalleryGroupType,
+      SettingsService._keyProfileNickname,
+      SettingsService._keyProfileAvatarPath,
       SettingsService._keyDiaryToolbarOrder,
       SettingsService._keyDiaryToolbarHiddenItems,
       SettingsService._keyDiaryToolbarCurrentTimeFormat,
@@ -57,6 +61,8 @@ extension SettingsServiceBackup on SettingsService {
         _notifierRollback(homeBarStyleRawNotifier),
         _notifierRollback(diaryTemplatePrefsRawNotifier),
         _notifierRollback(appFeaturesRawNotifier),
+        _notifierRollback(profileNicknameNotifier),
+        _notifierRollback(profileAvatarPathNotifier),
       ],
     );
   }

@@ -41,6 +41,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   final ExplorePageController _controller = const ExplorePageController();
   List<ExploreDiaryOverview>? _cachedDiariesRef;
   List<Tag>? _cachedTagsRef;
+  Map<String, int>? _cachedImageCountsRef;
   String? _cachedLocaleName;
   String? _cachedDayKey;
   String? _cachedMoodOptionsRaw;
@@ -52,6 +53,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     required AppLocalizations l10n,
     required String moodOptionsRaw,
     required List<String> moodOptions,
+    required Map<String, int> imageCounts,
   }) {
     final day = DateUtils.dateOnly(DateTime.now());
     final dayKey = '${day.year}-${day.month}-${day.day}';
@@ -59,6 +61,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         _cachedViewData == null ||
         !identical(diaries, _cachedDiariesRef) ||
         !identical(orderedTags, _cachedTagsRef) ||
+        !identical(imageCounts, _cachedImageCountsRef) ||
         _cachedLocaleName != l10n.localeName ||
         _cachedDayKey != dayKey ||
         _cachedMoodOptionsRaw != moodOptionsRaw;
@@ -76,9 +79,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       l10n: l10n,
       orderedTagIds: orderedTagIds,
       moodOptions: moodOptions,
+      imageCounts: imageCounts,
     );
     _cachedDiariesRef = diaries;
     _cachedTagsRef = orderedTags;
+    _cachedImageCountsRef = imageCounts;
     _cachedLocaleName = l10n.localeName;
     _cachedDayKey = dayKey;
     _cachedMoodOptionsRaw = moodOptionsRaw;
@@ -89,6 +94,13 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final diariesAsync = ref.watch(exploreDiariesProvider);
+    // 配图计数是单独的一次性查询：重算期间沿用上一次结果，避免配图行闪空；
+    // 还没算出来过时先按空表画，计数到了再补。
+    final imageCountsAsync = ref.watch(exploreDiaryImageCountsProvider);
+    final imageCounts = imageCountsAsync.maybeWhen(
+      data: (counts) => counts,
+      orElse: () => _cachedImageCountsRef ?? const <String, int>{},
+    );
     final orderedTagsAsync = ref.watch(tagListProvider);
     final moodOptionsAsync = ref.watch(moodOptionsProvider);
     final moodOptions = moodOptionsAsync.maybeWhen(
@@ -162,6 +174,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                           l10n: l10n,
                           moodOptionsRaw: moodOptionsRaw,
                           moodOptions: moodOptions,
+                          imageCounts: imageCounts,
                         );
                         return ExploreContentSection(
                           key: const ValueKey<String>('explore_content'),

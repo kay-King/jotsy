@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app/theme/expressive_motion.dart';
 import '../../../app/theme/expressive_surfaces.dart';
@@ -259,4 +260,247 @@ class ExploreMediaThumb extends StatelessWidget {
     final extent = (displayExtent * effectiveRatio).round();
     return extent > 0 ? extent : null;
   }
+}
+
+/// 卡片内二级图表标题（标题 + 右侧灰色副标题）。
+class ExploreChartTitle extends StatelessWidget {
+  const ExploreChartTitle({super.key, required this.title, this.subtitle});
+
+  final String title;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: <Widget>[
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
+        ),
+        if (subtitle != null) ...<Widget>[
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              subtitle!,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// 统计行：左侧灰色标签，右侧数值（可带一行灰色注脚）。
+class ExploreStatRow extends StatelessWidget {
+  const ExploreStatRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.footnote,
+    this.showDivider = true,
+  });
+
+  final String label;
+  final String value;
+  final String? footnote;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      value,
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (footnote != null) ...<Widget>[
+                      const SizedBox(height: 2),
+                      Text(
+                        footnote!,
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+      ],
+    );
+  }
+}
+
+/// 纵向柱状图（月度字数 / 写作时段共用）。
+///
+/// 每列自上而下：顶部数值 → 柱子（在浅色轨道里从底部长出）→ 底部标签。
+/// [valueLabels] 为空时不画顶部数值；[topIndex] 指向分布里最高的一格，
+/// [dimOthers] 为真时其余有值的柱子半透明（只突出最高格，见节奏图）。
+class ExploreVerticalBars extends StatelessWidget {
+  const ExploreVerticalBars({
+    super.key,
+    required this.values,
+    required this.labels,
+    required this.height,
+    this.valueLabels,
+    this.topIndex = -1,
+    this.dimOthers = false,
+  });
+
+  final List<int> values;
+  final List<String> labels;
+  final double height;
+  final List<String>? valueLabels;
+  final int topIndex;
+  final bool dimOthers;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final maxValue = values.fold<int>(
+      1,
+      (max, value) => value > max ? value : max,
+    );
+    const labelHeight = 14.0;
+    final trackHeight = height - labelHeight * 2;
+    return SizedBox(
+      height: height,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          for (var i = 0; i < values.length; i++)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: labelHeight,
+                      child: OverflowBox(
+                        // 窄列里文案 intrinsic 宽（两位数约 11px）会比列宽还大，
+                        // 不给 Text 放宽约束的话段落会被压到列宽，第二位数字
+                        // 画不出来（实测：24 列时 "12" 只剩 "1"）。
+                        // OverflowBox 让文案按自身宽度排布、居中溢出，不裁剪。
+                        maxWidth: 48,
+                        alignment: Alignment.center,
+                        child: Text(
+                          valueLabels != null && i < valueLabels!.length
+                              ? valueLabels![i]
+                              : '',
+                          maxLines: 1,
+                          overflow: TextOverflow.visible,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.45,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        alignment: Alignment.bottomCenter,
+                        child: values[i] == 0
+                            ? const SizedBox.shrink()
+                            : Container(
+                                height: (values[i] / maxValue * trackHeight)
+                                    .clamp(2.0, trackHeight)
+                                    .toDouble(),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: dimOthers && i != topIndex
+                                        ? 0.55
+                                        : 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: labelHeight,
+                      child: OverflowBox(
+                        // 同上：窄列里两位数刻度（"12"/"15"……）需要比列宽
+                        // 更大的排布宽度，否则第二位数字画不出来。
+                        maxWidth: 48,
+                        alignment: Alignment.center,
+                        child: Text(
+                          i < labels.length ? labels[i] : '',
+                          maxLines: 1,
+                          overflow: TextOverflow.visible,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 星期几的单字简称（热力图左侧与星期分布柱共用）。
+///
+/// [weekdayIndex] 按 0 为周日计。中文取 “周X” 的后一个字（一 / 二 …），
+/// 英文取首字母（S / M …）；其余语言同样取短名的首字母。
+String weekdayShortLabel(int weekdayIndex, String localeName) {
+  // 2024-01-07 是周日，以它为基准推算任意星期几的短名。
+  final name = DateFormat.E(
+    localeName,
+  ).format(DateTime.utc(2024, 1, 7 + weekdayIndex));
+  if (localeName.startsWith('zh')) {
+    return name.length > 1 ? name.substring(1) : name;
+  }
+  return name.isNotEmpty ? name.substring(0, 1) : name;
 }

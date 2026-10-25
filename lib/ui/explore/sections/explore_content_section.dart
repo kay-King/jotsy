@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../controllers/explore_page_controller.dart';
 import '../models/explore_view_data.dart';
+import 'explore_content_stats_card.dart';
+import 'explore_heatmap_card.dart';
 import 'explore_insight_card.dart';
 import 'explore_media_gallery_card.dart';
 import 'explore_memory_card.dart';
+import 'explore_rhythm_card.dart';
 import 'explore_stats_card.dart';
 import 'explore_tag_cloud_card.dart';
 
@@ -34,6 +37,16 @@ class ExploreContentSection extends StatelessWidget {
     return Column(
       children: <Widget>[
         ExploreStatsCard(stats: viewData.stats),
+        const SizedBox(height: 12),
+        ExploreHeatmapCard(
+          stats: viewData.writingStats,
+          totalRecords: viewData.stats.totalRecords,
+          now: DateTime.now(),
+        ),
+        const SizedBox(height: 12),
+        ExploreRhythmCard(stats: viewData.writingStats, now: DateTime.now()),
+        const SizedBox(height: 12),
+        ExploreContentStatsCard(stats: viewData.writingStats),
         const SizedBox(height: 12),
         ExploreMemoryCard(
           viewData: viewData,
