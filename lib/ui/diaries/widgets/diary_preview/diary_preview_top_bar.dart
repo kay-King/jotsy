@@ -86,24 +86,24 @@ class DiaryPreviewTopBar extends StatelessWidget {
           IconButton(
             tooltip: context.l10n.diaryTypographyQuickTooltip,
             onPressed: onOpenTypography,
-            icon: const FaIcon(FontAwesomeIcons.font, size: 16),
+            icon: const Icon(Icons.text_fields_outlined, size: 16),
           ),
         if (style.showEditButton)
           IconButton(
             tooltip: context.l10n.commonEdit,
             onPressed: onEdit,
-            icon: const FaIcon(FontAwesomeIcons.penToSquare, size: 16),
+            icon: const Icon(Icons.edit_outlined, size: 16),
           ),
         if (style.showShareButton)
           IconButton(
             tooltip: context.l10n.previewShare,
             onPressed: onShare,
-            icon: const FaIcon(FontAwesomeIcons.shareFromSquare, size: 16),
+            icon: const Icon(Icons.share_outlined, size: 16),
           ),
         IconButton(
           tooltip: context.l10n.autoT0125,
           onPressed: onMore,
-          icon: const FaIcon(FontAwesomeIcons.ellipsisVertical, size: 16),
+          icon: const Icon(Icons.more_vert, size: 16),
         ),
       ],
       foregroundColor: colorScheme.onSurface,

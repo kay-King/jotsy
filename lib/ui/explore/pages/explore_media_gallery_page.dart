@@ -513,7 +513,7 @@ class _GroupHeader extends StatelessWidget {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               onPressed: onOpenMenu,
-              icon: const FaIcon(FontAwesomeIcons.ellipsisVertical, size: 18),
+              icon: const Icon(Icons.more_vert, size: 18),
             ),
         ],
       ),

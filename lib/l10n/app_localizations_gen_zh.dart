@@ -4629,28 +4629,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statsOverviewTitle => '概况';
 
   @override
-  String get statsRhythmTitle => '节奏';
-
-  @override
-  String get statsContentTitle => '内容';
-
-  @override
-  String get statsHeatmapTitle => '写作热力图';
-
-  @override
-  String statsHeatmapNearYear(int count) {
-    return '近一年 $count 篇';
-  }
-
-  @override
-  String statsHeatmapGap(int count) {
-    return '最长空档 $count 天';
-  }
-
-  @override
-  String get statsHeatmapLegend => '字数';
-
-  @override
   String get statsTotalWords => '累计字数';
 
   @override
@@ -4670,113 +4648,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statsLatestDiary => '最近一篇';
 
   @override
-  String statsMonthWordsTitle(int year) {
-    return '$year 年月度字数';
-  }
-
-  @override
-  String statsMonthPeak(int words, int count) {
-    return '最高 $words 字 · 共 $count 篇';
-  }
-
-  @override
-  String get statsTrendTitle => '近 6 个月每篇字数';
-
-  @override
-  String statsTrendMore(int count) {
-    return '比上月多 $count 字';
-  }
-
-  @override
-  String statsTrendLess(int count) {
-    return '比上月少 $count 字';
-  }
-
-  @override
-  String get statsTrendEqual => '和上月持平';
-
-  @override
-  String get statsTrendEmpty => '再写几篇就有走势了';
-
-  @override
-  String get statsRhythmChartTitle => '写作时段';
-
-  @override
-  String statsRhythmBest(String value) {
-    return '最多：$value';
-  }
-
-  @override
-  String get statsRhythmMore => '再写几篇会更准';
-
-  @override
-  String get statsRhythmDay => '一天里';
-
-  @override
-  String get statsRhythmWeek => '一周里';
-
-  @override
-  String statsHourLabel(int hour) {
-    return '$hour点';
-  }
-
-  @override
   String get statsRecent7Days => '近 7 天';
 
   @override
   String statsRecent7DaysValue(int count) {
     return '$count 篇';
   }
-
-  @override
-  String get statsLongestGap => '最长空档';
-
-  @override
-  String get statsNoGap => '没有空档';
-
-  @override
-  String get statsLongestDiary => '最长一篇';
-
-  @override
-  String statsLongestDiaryValue(int count) {
-    return '$count 字';
-  }
-
-  @override
-  String get statsImages => '配图';
-
-  @override
-  String statsImagesValue(int withImages, int total, String avg) {
-    return '$withImages 篇带图 · 共 $total 张 · 平均 $avg 张';
-  }
-
-  @override
-  String get statsSentenceStyle => '句式习惯';
-
-  @override
-  String statsSentenceValue(String count, String tone) {
-    return '每 100 字 $count 个 · $tone';
-  }
-
-  @override
-  String get statsToneLong => '长句流';
-
-  @override
-  String get statsTonePlain => '行文平实';
-
-  @override
-  String get statsToneShort => '短句流';
-
-  @override
-  String get statsLocalOnly => '统计只在本机计算，不会上传任何数据。';
-
-  @override
-  String statsDaysValue(int count) {
-    return '$count 天';
-  }
-
-  @override
-  String get statsMarkEmoji => '表情';
 
   @override
   String get gallerySortAsc => '正序';

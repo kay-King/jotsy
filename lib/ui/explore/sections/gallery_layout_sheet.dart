@@ -149,7 +149,7 @@ class _GalleryLayoutSheetState extends State<GalleryLayoutSheet> {
               // 在子菜单里放得下；用默认 104 会误判放不下而堆成 5 行。
               minSegmentWidth: 48,
               segments: <ButtonSegment<int>>[
-                for (final columns in <int>[2, 3, 4, 5, 6])
+                for (final columns in <int>[2, 3, 4, 5])
                   ButtonSegment<int>(value: columns, label: Text('$columns')),
               ],
               selected: <int>{_columns},

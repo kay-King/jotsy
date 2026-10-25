@@ -942,6 +942,6 @@ class SettingsService {
   }
 
   static int _normalizeGalleryColumns(int value) {
-    return value.clamp(2, 6).toInt();
+    return value.clamp(2, 5).toInt();
   }
 }

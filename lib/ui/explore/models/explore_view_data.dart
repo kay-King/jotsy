@@ -24,31 +24,14 @@ class ExploreViewData {
   final List<ExploreTagUsage> tagUsages;
   final List<ExploreMediaItem> mediaItems;
 
-  /// 写作统计（概况 / 节奏 / 内容三段）。日记本统计页只复用
-  /// [onThisDayDiaries] 时取默认值，不画这三段。
+  /// 写作统计（只剩概况卡要的字段）。日记本统计页只复用
+  /// [onThisDayDiaries] 时取默认值，不画概况卡。
   final ExploreWritingStats writingStats;
 }
 
-/// 近 6 个月单月走势：年份、月份、篇数、平均每篇字数。
-class ExploreTrendMonth {
-  const ExploreTrendMonth({
-    required this.year,
-    required this.month,
-    required this.count,
-    required this.avgWords,
-  });
-
-  final int year;
-  final int month;
-  final int count;
-  final int avgWords;
-}
-
-/// 句式习惯档位：按每 100 字逗号数划分（<3 短句流；3~6 行文平实；>6 长句流）。
-enum ExploreSentenceTone { short, plain, long }
-
-/// 写作统计（概况 / 节奏 / 内容三段），由写作统计聚合器从探索页概览
-/// + 配图计数聚合。口径与 fakeWechat 统计页一致，见聚合器注释。
+/// 写作统计（概况卡），由写作统计聚合器从探索页概览聚合。
+/// 节奏 / 内容两张卡与概况里的热力图已下线（2026-10-25），
+/// 只留概况三行要的字段。
 class ExploreWritingStats {
   const ExploreWritingStats({
     required this.totalWords,
@@ -56,26 +39,6 @@ class ExploreWritingStats {
     required this.firstDiaryAt,
     required this.recordDays,
     required this.lastDiaryAt,
-    required this.recent7Days,
-    required this.longestGapDays,
-    required this.wordsByDay,
-    required this.monthWords,
-    required this.monthCounts,
-    required this.trendMonths,
-    required this.hourCounts,
-    required this.weekdayCounts,
-    required this.bestHour,
-    required this.bestWeekday,
-    required this.maxSingleWords,
-    required this.diariesWithImages,
-    required this.totalImages,
-    required this.avgImagesPerDiary,
-    required this.commaPer100,
-    required this.sentenceTone,
-    required this.exclamationCount,
-    required this.questionCount,
-    required this.ellipsisCount,
-    required this.emojiCount,
   });
 
   const ExploreWritingStats.empty()
@@ -83,52 +46,7 @@ class ExploreWritingStats {
       avgWordsPerDiary = 0,
       firstDiaryAt = null,
       recordDays = 0,
-      lastDiaryAt = null,
-      recent7Days = 0,
-      longestGapDays = null,
-      wordsByDay = const <int, int>{},
-      monthWords = const <int>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      monthCounts = const <int>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      trendMonths = const <ExploreTrendMonth>[],
-      hourCounts = const <int>[
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ],
-      weekdayCounts = const <int>[0, 0, 0, 0, 0, 0, 0],
-      bestHour = -1,
-      bestWeekday = -1,
-      maxSingleWords = 0,
-      diariesWithImages = 0,
-      totalImages = 0,
-      avgImagesPerDiary = 0,
-      commaPer100 = 0,
-      sentenceTone = null,
-      exclamationCount = 0,
-      questionCount = 0,
-      ellipsisCount = 0,
-      emojiCount = 0;
+      lastDiaryAt = null;
 
   /// 累计字数。
   final int totalWords;
@@ -144,61 +62,6 @@ class ExploreWritingStats {
 
   /// 最近一篇的创建时间；没有日记时为 null。
   final DateTime? lastDiaryAt;
-
-  /// 近 7 天的篇数（含今天）。
-  final int recent7Days;
-
-  /// 相邻两个有记录的日子之间最多空了多少天；0 表示没有空档，
-  /// null 表示不足两天记录、无从计算。
-  final int? longestGapDays;
-
-  /// 每天的字数：键为本地年月日 `yyyyMMdd`，值为当天各篇字数之和。
-  final Map<int, int> wordsByDay;
-
-  /// 今年每月字数（下标 0 为 1 月）。
-  final List<int> monthWords;
-
-  /// 今年每月篇数（下标 0 为 1 月）。
-  final List<int> monthCounts;
-
-  /// 近 6 个月走势（含本月，由早到晚）。
-  final List<ExploreTrendMonth> trendMonths;
-
-  /// 一天里各小时的篇数（下标为小时 0~23）。
-  final List<int> hourCounts;
-
-  /// 一周里各天的篇数（下标 0 为周日）。
-  final List<int> weekdayCounts;
-
-  /// 写得最多的小时；样本不足（<5 篇）时为 -1，不下结论。
-  final int bestHour;
-
-  /// 写得最多的星期几（0 为周日）；样本不足时为 -1。
-  final int bestWeekday;
-
-  /// 最长一篇的字数。
-  final int maxSingleWords;
-
-  /// 带图日记的篇数。
-  final int diariesWithImages;
-
-  /// 图片总数（每篇内按来源去重）。
-  final int totalImages;
-
-  /// 平均每篇配图数（按全部日记算，保留一位小数）。
-  final double avgImagesPerDiary;
-
-  /// 每 100 字的逗号数（保留一位小数）。
-  final double commaPer100;
-
-  /// 句式习惯档位；没有正文时为 null。
-  final ExploreSentenceTone? sentenceTone;
-
-  /// 全文标点计数（注脚用）：感叹号、问号、省略号、表情。
-  final int exclamationCount;
-  final int questionCount;
-  final int ellipsisCount;
-  final int emojiCount;
 }
 
 /// “那年今日”轮播项。

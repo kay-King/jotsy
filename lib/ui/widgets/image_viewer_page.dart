@@ -195,7 +195,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                 onPressed: _export.isBusy
                     ? null
                     : () => unawaited(_openActions(_activeIndex)),
-                icon: const FaIcon(FontAwesomeIcons.ellipsisVertical, size: 18),
+                icon: const Icon(Icons.more_vert, size: 18),
               ),
               const SizedBox(width: 4),
             ]

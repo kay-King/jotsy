@@ -112,8 +112,8 @@ class CalendarHeader extends StatelessWidget {
                     IconButton(
                       tooltip: l10n.anniversaryListTitle,
                       onPressed: onOpenAnniversaries,
-                      icon: FaIcon(
-                        FontAwesomeIcons.heart,
+                      icon: Icon(
+                        Icons.favorite_border,
                         size: 20,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -128,8 +128,8 @@ class CalendarHeader extends StatelessWidget {
                         smallSize: 7,
                         // 选中态图标已是 primary，圆点用 tertiary 才分得开。
                         backgroundColor: theme.colorScheme.tertiary,
-                        child: FaIcon(
-                          FontAwesomeIcons.filter,
+                        child: Icon(
+                          Icons.filter_alt_outlined,
                           size: 20,
                           color: filterActive
                               ? null
@@ -141,8 +141,8 @@ class CalendarHeader extends StatelessWidget {
                     IconButton(
                       tooltip: l10n.calendarDisplayOptionsTooltip,
                       onPressed: onOpenDisplayOptions,
-                      icon: FaIcon(
-                        FontAwesomeIcons.sliders,
+                      icon: Icon(
+                        Icons.tune_outlined,
                         size: 20,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -152,7 +152,7 @@ class CalendarHeader extends StatelessWidget {
                   IconButton.filledTonal(
                     tooltip: l10n.autoT0180,
                     onPressed: onJumpToToday,
-                    icon: const FaIcon(FontAwesomeIcons.calendarDay, size: 20),
+                    icon: const Icon(Icons.today_outlined, size: 20),
                   ),
                 ],
               ),

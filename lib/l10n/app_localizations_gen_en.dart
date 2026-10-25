@@ -5114,28 +5114,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsOverviewTitle => 'Overview';
 
   @override
-  String get statsRhythmTitle => 'Rhythm';
-
-  @override
-  String get statsContentTitle => 'Content';
-
-  @override
-  String get statsHeatmapTitle => 'Writing heatmap';
-
-  @override
-  String statsHeatmapNearYear(int count) {
-    return '$count entries in the past year';
-  }
-
-  @override
-  String statsHeatmapGap(int count) {
-    return 'Longest gap $count days';
-  }
-
-  @override
-  String get statsHeatmapLegend => 'Words';
-
-  @override
   String get statsTotalWords => 'Total words';
 
   @override
@@ -5155,114 +5133,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsLatestDiary => 'Latest entry';
 
   @override
-  String statsMonthWordsTitle(int year) {
-    return 'Monthly words in $year';
-  }
-
-  @override
-  String statsMonthPeak(int words, int count) {
-    return 'Peak $words words · $count entries';
-  }
-
-  @override
-  String get statsTrendTitle => 'Words per entry over the last 6 months';
-
-  @override
-  String statsTrendMore(int count) {
-    return '$count more words than last month';
-  }
-
-  @override
-  String statsTrendLess(int count) {
-    return '$count fewer words than last month';
-  }
-
-  @override
-  String get statsTrendEqual => 'Same as last month';
-
-  @override
-  String get statsTrendEmpty => 'Write a few more entries to see a trend';
-
-  @override
-  String get statsRhythmChartTitle => 'Writing rhythm';
-
-  @override
-  String statsRhythmBest(String value) {
-    return 'Most: $value';
-  }
-
-  @override
-  String get statsRhythmMore => 'Write a few more for a clearer pattern';
-
-  @override
-  String get statsRhythmDay => 'During the day';
-
-  @override
-  String get statsRhythmWeek => 'During the week';
-
-  @override
-  String statsHourLabel(int hour) {
-    return '$hour:00';
-  }
-
-  @override
   String get statsRecent7Days => 'Last 7 days';
 
   @override
   String statsRecent7DaysValue(int count) {
     return '$count entries';
   }
-
-  @override
-  String get statsLongestGap => 'Longest gap';
-
-  @override
-  String get statsNoGap => 'No gap yet';
-
-  @override
-  String get statsLongestDiary => 'Longest entry';
-
-  @override
-  String statsLongestDiaryValue(int count) {
-    return '$count words';
-  }
-
-  @override
-  String get statsImages => 'Photos';
-
-  @override
-  String statsImagesValue(int withImages, int total, String avg) {
-    return '$withImages entries with photos · $total in total · $avg on average';
-  }
-
-  @override
-  String get statsSentenceStyle => 'Sentence style';
-
-  @override
-  String statsSentenceValue(String count, String tone) {
-    return '$count commas per 100 words · $tone';
-  }
-
-  @override
-  String get statsToneLong => 'Long sentences';
-
-  @override
-  String get statsTonePlain => 'Steady prose';
-
-  @override
-  String get statsToneShort => 'Short sentences';
-
-  @override
-  String get statsLocalOnly =>
-      'Stats are computed on this device only. Nothing is uploaded.';
-
-  @override
-  String statsDaysValue(int count) {
-    return '$count days';
-  }
-
-  @override
-  String get statsMarkEmoji => 'Emoji';
 
   @override
   String get gallerySortAsc => 'Oldest first';

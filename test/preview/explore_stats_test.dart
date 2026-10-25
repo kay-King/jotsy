@@ -1,4 +1,4 @@
-// 探索页统计（概况 / 节奏 / 内容）与相册（年月筛选 + 正倒排序）预览台。
+// 探索页统计（概况卡）与相册（年/月/日视图 + 布局子菜单）预览台。
 // 运行：JOTSY_PREVIEW=1 flutter test --update-goldens test/preview/explore_stats_test.dart
 //
 // 字体加载与纯色 PNG 编码与 timeline_test.dart 里的是同一份（预览台之间
@@ -380,27 +380,12 @@ void main() {
     await _pumpApp(tester, seeded.database, seeded.settings);
     await _waitReady(tester, '周末去露营');
     await tester.tap(find.text('探索'));
-    await _waitForText(tester, '写作热力图');
+    // 概况卡标题（热力图 / 节奏 / 内容三段已下线，2026-10-25）。
+    await _waitForText(tester, '概况');
     await _settleImages(tester);
     await expectLater(
       find.byType(NodeDiaryApp),
       matchesGoldenFile('goldens/explore_top.png'),
-    );
-    // 滚到节奏卡：'节奏' 标题在首屏已可见，scrollUntilVisible 不会动，
-    // 直接拖 700 让卡顶进到视口上半部，月度柱+趋势+时段一次拍全。
-    await tester.drag(find.byType(NodeDiaryApp), const Offset(0, -700));
-    await _settle(tester);
-    await expectLater(
-      find.byType(NodeDiaryApp),
-      matchesGoldenFile('goldens/explore_rhythm.png'),
-    );
-    // 滚到内容卡：scrollUntilVisible 在这页会冲过头，改成固定拖拽。
-    // -950 / -1150 都顶到最大滚动（内容卡底贴顶），-550 刚好把卡放进视口。
-    await tester.drag(find.byType(NodeDiaryApp), const Offset(0, -550));
-    await _settle(tester);
-    await expectLater(
-      find.byType(NodeDiaryApp),
-      matchesGoldenFile('goldens/explore_content.png'),
     );
     // 滚到底，进媒体画廊（月视图：第一段标题行右边带 ⋮）。
     await _scrollTo(tester, '媒体画廊');

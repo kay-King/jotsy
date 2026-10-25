@@ -377,7 +377,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           IconButton(
             tooltip: l10n.autoT0040,
             onPressed: _createTag,
-            icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
+            icon: const Icon(Icons.add, size: 16),
           ),
         ],
       ),

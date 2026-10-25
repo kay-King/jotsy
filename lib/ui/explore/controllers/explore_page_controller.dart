@@ -23,16 +23,12 @@ class ExplorePageController {
   static const int _onThisDayMaxEntries = 12;
 
   /// 构建探索页整页所需数据。
-  ///
-  /// [imageCounts] 为配图计数（日记 id → 图片数），由页面层经配图计数
-  /// provider 传入；缺省为空时配图行按 0 计。
   ExploreViewData buildViewData(
     List<ExploreDiaryOverview> diaries, {
     required DateTime now,
     required AppLocalizations l10n,
     List<int> orderedTagIds = const <int>[],
     List<String> moodOptions = SettingsService.defaultMoodOptions,
-    Map<String, int> imageCounts = const <String, int>{},
   }) {
     final fallbackPrompts = <String>[
       l10n.autoT0049,
@@ -53,7 +49,6 @@ class ExplorePageController {
     final mediaItems = _buildMediaGallery(diaries);
     final writingStats = const ExploreWritingStatsBuilder().build(
       diaries,
-      imageCounts: imageCounts,
       now: now,
     );
 

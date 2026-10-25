@@ -281,8 +281,8 @@ class _SearchPreview extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Row(
               children: [
-                FaIcon(
-                  FontAwesomeIcons.magnifyingGlass,
+                Icon(
+                  Icons.search_outlined,
                   size: 16,
                   color: colorScheme.onSurface,
                 ),
@@ -335,8 +335,8 @@ class _TrailingActions extends StatelessWidget {
             isLabelVisible: draftCount > 0,
             backgroundColor: colorScheme.primary,
             textColor: colorScheme.onPrimary,
-            child: FaIcon(
-              FontAwesomeIcons.filePen,
+            child: Icon(
+              Icons.edit_note_outlined,
               size: 20,
               color: colorScheme.onSurface,
             ),
@@ -345,8 +345,8 @@ class _TrailingActions extends StatelessWidget {
         IconButton(
           tooltip: context.l10n.autoT0148,
           onPressed: onOpenArchived,
-          icon: FaIcon(
-            FontAwesomeIcons.boxArchive,
+          icon: Icon(
+            Icons.archive_outlined,
             size: 20,
             color: colorScheme.onSurface,
           ),
@@ -354,11 +354,7 @@ class _TrailingActions extends StatelessWidget {
         IconButton(
           tooltip: context.l10n.autoT0125,
           onPressed: onOpenViewOptions,
-          icon: FaIcon(
-            FontAwesomeIcons.ellipsisVertical,
-            size: 20,
-            color: colorScheme.onSurface,
-          ),
+          icon: Icon(Icons.more_vert, size: 20, color: colorScheme.onSurface),
         ),
       ],
     );

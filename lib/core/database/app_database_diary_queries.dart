@@ -141,38 +141,6 @@ ORDER BY d.updated_at DESC, d.id DESC
     return query.get();
   }
 
-  /// 一次性读取配图统计所需的三列（与探索页概览、媒体画廊同一口径：
-  /// 未删除、已解封、排除私密日记；含归档）。调用方据此计每篇的图片数——
-  /// 概览流刻意避开富文本正文，这里只为配图统计单独读一次 `content`。
-  Future<List<DiaryImageSourceRef>> getDiaryImageSourceRefs() async {
-    final rows =
-        await (selectOnly(diaries)
-              ..addColumns(<Expression<Object>>[
-                diaries.diaryId,
-                diaries.cover,
-                diaries.content,
-              ])
-              ..where(
-                diaries.isDeleted.equals(false) &
-                    (diaries.capsuleUnlockAt.isNull() |
-                        diaries.capsuleUnlockAt.isSmallerOrEqualValue(
-                          DateTime.now(),
-                        )) &
-                    CustomExpression<bool>(
-                      _privateDiaryExclusionSql('diaries.id'),
-                    ),
-              ))
-            .get();
-    return <DiaryImageSourceRef>[
-      for (final row in rows)
-        DiaryImageSourceRef(
-          diaryId: row.read(diaries.diaryId)!,
-          cover: row.read(diaries.cover),
-          content: row.read(diaries.content)!,
-        ),
-    ];
-  }
-
   /// 监听已归档日记列表（仅归档且未删除，不含私密日记）。
   Stream<List<DiaryWithTags>> watchArchivedDiaries() {
     return customSelect(

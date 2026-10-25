@@ -38,7 +38,9 @@ void main() {
   }
 
   final notebooks = filesUnder('lib/ui/notebooks');
-  guard(notebooks, [...common, ...fixedColors, 'Icon(Icons.']);
+  // 顶栏图标已改用 Material 描边图标（用户 2026-10-25 定：与设置页行首
+  // 图标同款，FontAwesome 实心图标太粗太黑），不再禁 Icon(Icons.。
+  guard(notebooks, [...common, ...fixedColors]);
   guard(notebooks.where((file) => !file.path.contains('/controllers/')), [
     animation,
   ]);
