@@ -23,12 +23,17 @@ class ExplorePageController {
   static const int _onThisDayMaxEntries = 12;
 
   /// 构建探索页整页所需数据。
+  ///
+  /// [mediaSources] 为每篇日记的全部图片来源（封面优先、去重），由
+  /// 调用方从 `exploreMediaSourcesProvider` 取；未提供或某篇缺失时
+  /// 该篇回落到只用封面（预览仍可渲染）。
   ExploreViewData buildViewData(
     List<ExploreDiaryOverview> diaries, {
     required DateTime now,
     required AppLocalizations l10n,
     List<int> orderedTagIds = const <int>[],
     List<String> moodOptions = SettingsService.defaultMoodOptions,
+    Map<String, List<String>> mediaSources = const <String, List<String>>{},
   }) {
     final fallbackPrompts = <String>[
       l10n.autoT0049,
@@ -46,7 +51,7 @@ class ExplorePageController {
       moodOptions: moodOptions,
     );
     final tagUsages = buildTagUsages(diaries, orderedTagIds: orderedTagIds);
-    final mediaItems = _buildMediaGallery(diaries);
+    final mediaItems = _buildMediaGallery(diaries, mediaSources);
     final writingStats = const ExploreWritingStatsBuilder().build(
       diaries,
       now: now,
@@ -221,25 +226,36 @@ class ExplorePageController {
         .toList(growable: false);
   }
 
-  /// 提取媒体画廊数据（轻量概览只使用封面，正文图片留给全量媒体页分页解析）。
+  /// 提取媒体画廊数据：每篇日记的全部图片（封面优先、按正文顺序），
+  /// 而不是每篇只取 1 张封面——否则预览只显示 1 张、点开全量页却有
+  /// 多张。图片来源由调用方从 `exploreMediaSourcesProvider` 传入；
+  /// 未提供某篇时该篇回落到只用封面。
   List<ExploreMediaItem> _buildMediaGallery(
     List<ExploreDiaryOverview> diaries,
+    Map<String, List<String>> mediaSources,
   ) {
     final seen = <String>{};
     final items = <ExploreMediaItem>[];
     for (final item in diaries) {
-      final source = contentExtractor.resolveOverviewMediaSource(item);
-      if (source == null || !seen.add(source)) {
-        continue;
+      final sources =
+          mediaSources[item.diaryId] ??
+          switch (contentExtractor.resolveOverviewMediaSource(item)) {
+            final String source => <String>[source],
+            null => const <String>[],
+          };
+      for (final source in sources) {
+        if (!seen.add(source)) {
+          continue;
+        }
+        items.add(
+          ExploreMediaItem(
+            source: source,
+            diaryId: item.diaryId,
+            updatedAt: item.updatedAt,
+            createdAt: item.createdAt,
+          ),
+        );
       }
-      items.add(
-        ExploreMediaItem(
-          source: source,
-          diaryId: item.diaryId,
-          updatedAt: item.updatedAt,
-          createdAt: item.createdAt,
-        ),
-      );
     }
     items.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return items;

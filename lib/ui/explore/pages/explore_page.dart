@@ -46,12 +46,15 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   String? _cachedMoodOptionsRaw;
   ExploreViewData? _cachedViewData;
 
+  Map<String, List<String>>? _cachedMediaSourcesRef;
+
   ExploreViewData _resolveViewData({
     required List<ExploreDiaryOverview> diaries,
     required List<Tag> orderedTags,
     required AppLocalizations l10n,
     required String moodOptionsRaw,
     required List<String> moodOptions,
+    Map<String, List<String>> mediaSources = const <String, List<String>>{},
   }) {
     final day = DateUtils.dateOnly(DateTime.now());
     final dayKey = '${day.year}-${day.month}-${day.day}';
@@ -59,6 +62,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         _cachedViewData == null ||
         !identical(diaries, _cachedDiariesRef) ||
         !identical(orderedTags, _cachedTagsRef) ||
+        !identical(mediaSources, _cachedMediaSourcesRef) ||
         _cachedLocaleName != l10n.localeName ||
         _cachedDayKey != dayKey ||
         _cachedMoodOptionsRaw != moodOptionsRaw;
@@ -76,9 +80,11 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       l10n: l10n,
       orderedTagIds: orderedTagIds,
       moodOptions: moodOptions,
+      mediaSources: mediaSources,
     );
     _cachedDiariesRef = diaries;
     _cachedTagsRef = orderedTags;
+    _cachedMediaSourcesRef = mediaSources;
     _cachedLocaleName = l10n.localeName;
     _cachedDayKey = dayKey;
     _cachedMoodOptionsRaw = moodOptionsRaw;
@@ -90,6 +96,14 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     final l10n = context.l10n;
     final diariesAsync = ref.watch(exploreDiariesProvider);
     final orderedTagsAsync = ref.watch(tagListProvider);
+    // 画廊图片来源（每篇全部图片）：加载中/失败时回落到只用封面，
+    // 预览仍可渲染。
+    final mediaSources = ref
+        .watch(exploreMediaSourcesProvider)
+        .maybeWhen(
+          data: (sources) => sources,
+          orElse: () => const <String, List<String>>{},
+        );
     final moodOptionsAsync = ref.watch(moodOptionsProvider);
     final moodOptions = moodOptionsAsync.maybeWhen(
       data: (options) => options,
@@ -162,6 +176,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                           l10n: l10n,
                           moodOptionsRaw: moodOptionsRaw,
                           moodOptions: moodOptions,
+                          mediaSources: mediaSources,
                         );
                         return ExploreContentSection(
                           key: const ValueKey<String>('explore_content'),

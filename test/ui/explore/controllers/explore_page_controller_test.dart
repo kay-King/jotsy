@@ -114,4 +114,59 @@ void main() {
     expect(data.energyValues7, everyElement(isNull));
     expect(data.fallbackPrompt, isNotEmpty);
   });
+
+  test('gallery preview shows every image of a diary, not just its cover', () {
+    // 一篇日记有 4 张图（封面 + 正文 3 张）：预览应出现 4 项，
+    // 而不是只取封面的 1 项。
+    final withCover = ExploreDiaryOverview(
+      diaryId: 'four-photos',
+      title: 'four-photos',
+      contentText: '',
+      metadata: '{}',
+      createdAt: now,
+      updatedAt: now,
+      tags: const <Tag>[],
+      cover: '/img/cover.jpg',
+    );
+    final data = controller.buildViewData(
+      [withCover],
+      now: now,
+      l10n: l10n,
+      mediaSources: const <String, List<String>>{
+        'four-photos': <String>[
+          '/img/cover.jpg',
+          '/img/a.jpg',
+          '/img/b.jpg',
+          '/img/c.jpg',
+        ],
+      },
+    );
+    expect(data.mediaItems.map((item) => item.source), <String>[
+      '/img/cover.jpg',
+      '/img/a.jpg',
+      '/img/b.jpg',
+      '/img/c.jpg',
+    ]);
+    expect(
+      data.mediaItems.map((item) => item.diaryId),
+      everyElement('four-photos'),
+    );
+  });
+
+  test('gallery preview falls back to the cover without media sources', () {
+    final withCover = ExploreDiaryOverview(
+      diaryId: 'cover-only',
+      title: 'cover-only',
+      contentText: '',
+      metadata: '{}',
+      createdAt: now,
+      updatedAt: now,
+      tags: const <Tag>[],
+      cover: '/img/cover.jpg',
+    );
+    final data = controller.buildViewData([withCover], now: now, l10n: l10n);
+    expect(data.mediaItems.map((item) => item.source), <String>[
+      '/img/cover.jpg',
+    ]);
+  });
 }
