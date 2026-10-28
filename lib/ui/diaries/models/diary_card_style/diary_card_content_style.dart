@@ -14,7 +14,7 @@ class DiaryCardContentStyle {
     this.showPreview = true,
     this.tagStyle = DiaryCardTagStyle.chip,
     this.pinnedBadge = DiaryCardPinnedBadge.standard,
-    this.coverFallback = DiaryCardCoverFallback.none,
+    this.coverFallback = DiaryCardCoverFallback.dateBlock,
     this.collage = false,
   });
 
