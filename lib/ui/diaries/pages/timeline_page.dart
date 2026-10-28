@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,9 +27,11 @@ import 'locked_diary_page.dart';
 /// 桌面“时间线”入口打开的是这里，不是日记页。日记页的时间线视图
 /// （列表/时间线切换）原样不动。
 ///
-/// - 封面：没设时是 Salt 蓝纯色；点封面或右下角相机按钮可换封面
+/// - 封面：没设时是 Salt 蓝纯色；点封面或左下角相机按钮可换封面
 ///   （相册选图后拷贝进私有目录，与头像同口径）；
-/// - 头像与昵称来自个人资料；昵称白色落在封面右下角（朋友圈式）；
+/// - 头像与昵称来自个人资料；昵称白色落在封面右下角（朋友圈式），
+///   点头像可换头像；昵称行背后有一层淡淡的朦胧（轻模糊 + 微暗底），
+///   封面图颜色再杂白字也看得清；
 /// - 简介只在设了时才显示，放在封面下方；
 /// - 日记一条条往下排，复用 [DiaryTimelineItem]（昵称蓝色、九宫格、
 ///   长文折叠都与日记页时间线一致）；点一条进预览页，不做多选；
@@ -53,6 +56,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   int _visibleLimit = _pageSize;
   final ScrollController _scrollController = ScrollController();
   bool _changingCover = false;
+  bool _changingAvatar = false;
 
   @override
   void initState() {
@@ -86,6 +90,18 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     } finally {
       if (mounted) {
         setState(() => _changingCover = false);
+      }
+    }
+  }
+
+  Future<void> _changeAvatar() async {
+    if (_changingAvatar) return;
+    setState(() => _changingAvatar = true);
+    try {
+      await ProfilePageController(ref).pickAvatar();
+    } finally {
+      if (mounted) {
+        setState(() => _changingAvatar = false);
       }
     }
   }
@@ -213,60 +229,83 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
             ),
             flexibleSpace: FlexibleSpaceBar(
               stretchModes: const <StretchMode>[StretchMode.zoomBackground],
-              background: GestureDetector(
-                onTap: _changeCover,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    _CoverImage(profile: profile),
-                    // 封面右下角：昵称（白字）+ 头像，与朋友圈一致。
-                    Positioned(
-                      right: 16,
-                      bottom: 16,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          Text(
-                            profile.displayNickname,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  // 点封面换背景：手势只包封面图本身，不包头像与相机按钮，
+                  // 点头像换头像、点相机换背景，互不抢。
+                  GestureDetector(
+                    onTap: _changeCover,
+                    child: _CoverImage(profile: profile),
+                  ),
+                  // 封面右下角：昵称（白字）+ 头像，与朋友圈一致。
+                  // 昵称行背后一层淡淡的朦胧（轻模糊 + 微暗底）：封面图
+                  // 颜色再杂，白字也看得清；只包这一行，不整片压暗。
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                          color: Colors.black.withValues(alpha: 0.12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                profile.displayNickname,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              GestureDetector(
+                                onTap: _changingAvatar ? null : _changeAvatar,
+                                child: Tooltip(
+                                  message: l10n.profileChangeAvatar,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      // 头像本身是圆角方块（radius 8），描边必须跟
+                                      // 着方块走：之前用了圆形描边，圆圈盖不住方块
+                                      // 的四个角，看起来像头像下面多个白圈。
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: DiaryTimelineAvatar(
+                                      profile: profile,
+                                      size: 72,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            decoration: BoxDecoration(
-                              // 头像本身是圆角方块（radius 8），描边必须跟
-                              // 着方块走：之前用了圆形描边，圆圈盖不住方块
-                              // 的四个角，看起来像头像下面多个白圈。
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: DiaryTimelineAvatar(
-                              profile: profile,
-                              size: 72,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // 封面左下角：相机按钮，提示点封面可换。
-                    Positioned(
-                      left: 16,
-                      bottom: 16,
-                      child: IconButton(
-                        tooltip: l10n.profileChangeCover,
-                        onPressed: _changingCover ? null : _changeCover,
-                        icon: const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 20,
-                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  // 封面左下角：相机按钮，提示点封面可换。
+                  Positioned(
+                    left: 16,
+                    bottom: 16,
+                    child: IconButton(
+                      tooltip: l10n.profileChangeCover,
+                      onPressed: _changingCover ? null : _changeCover,
+                      icon: const Icon(
+                        Icons.camera_alt_outlined,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
