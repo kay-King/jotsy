@@ -245,13 +245,12 @@ void main() {
       final cover = tester.getRect(find.byType(Image));
       expect(cover.contains(tester.getCenter(find.text('😊'))), isTrue);
 
-      // 没有封面时回到眉线。
+      // 没有封面时回到眉线：心情在眉线（标题上方），日期收进底栏。
       await _pump(tester, diaries: <DiaryWithTags>[_diary()], style: style);
-      final eyebrow = tester.getRect(find.text('3月2日 · 周一'));
-      expect(
-        (tester.getCenter(find.text('😊')).dy - eyebrow.center.dy).abs(),
-        lessThan(4),
-      );
+      final title = tester.getRect(find.text('卡片标题'));
+      expect(tester.getCenter(find.text('😊')).dy, lessThan(title.top));
+      final date = tester.getRect(find.text('3月2日 · 周一'));
+      expect(date.top, greaterThan(title.bottom));
     });
   });
 
@@ -279,7 +278,7 @@ void main() {
       expect(title.top, lessThan(date.top));
     });
 
-    testWidgets('a hidden title moves the selection mark to the date line', (
+    testWidgets('a hidden title moves the selection mark to the eyebrow line', (
       tester,
     ) async {
       final diary = _diary();
@@ -294,8 +293,9 @@ void main() {
       );
       expect(find.text('卡片标题'), findsNothing);
       final mark = tester.getCenter(_icon(FontAwesomeIcons.solidCircleCheck));
-      final date = tester.getRect(find.text('3月2日 · 周一'));
-      expect((mark.dy - date.center.dy).abs(), lessThan(6));
+      // 眉线只剩心情天气（日期已收进底栏），标记挂到眉线的心情行。
+      final mood = tester.getRect(find.text('😊'));
+      expect((mark.dy - mood.center.dy).abs(), lessThan(6));
     });
 
     testWidgets('hiding title and date keeps the mark as an overlay', (
@@ -339,10 +339,10 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('无标题'), findsNothing);
       expect(find.text('卡片标题'), findsOneWidget);
-      // 没有标题行的那篇把选择标记挂到日期行，且只有一个（不再叠加浮层）。
+      // 没有标题行的那篇把选择标记挂到眉线（心情行），且只有一个（不再叠加浮层）。
       final mark = tester.getCenter(_icon(FontAwesomeIcons.solidCircleCheck));
-      final date = tester.getRect(find.text('3月2日 · 周一').first);
-      expect((mark.dy - date.center.dy).abs(), lessThan(6));
+      final mood = tester.getRect(find.text('😊').first);
+      expect((mark.dy - mood.center.dy).abs(), lessThan(6));
     });
 
     testWidgets(

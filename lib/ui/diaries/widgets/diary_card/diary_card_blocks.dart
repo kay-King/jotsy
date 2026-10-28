@@ -5,7 +5,6 @@ import '../../models/diary_card_style/diary_card_style.dart';
 import '../../viewmodels/diary_card_appearance.dart';
 import '../../viewmodels/diary_card_resolved_style.dart';
 import '../../viewmodels/diary_card_view_data.dart';
-import '../diary_item_tag_row.dart';
 import 'diary_card_badges.dart';
 import 'diary_card_lines.dart';
 import 'diary_card_selection_mark.dart';
@@ -81,15 +80,18 @@ class DiaryCardBlocks extends StatelessWidget {
     return hasEyebrow ? DiaryCardBlock.eyebrow : null;
   }
 
-  /// 眉线是否有内容（日期、置顶徽章或位于眉线的心情天气）。
+  /// 眉线是否有内容（置顶徽章或位于眉线的心情天气）。
+  ///
+  /// 日期已收进底栏，不再算眉线内容；没有徽章与印章时眉线不渲染，
+  /// 卡片直接从标题开始。
   static bool hasEyebrowContent({
     required DiaryCardStyle style,
     required bool pinned,
     required bool hasIndicators,
     required DiaryCardMetaPosition metaPosition,
   }) {
-    return style.meta.showDate ||
-        (pinned && style.content.pinnedBadge != DiaryCardPinnedBadge.hidden) ||
+    return (pinned &&
+            style.content.pinnedBadge != DiaryCardPinnedBadge.hidden) ||
         (hasIndicators && metaPosition == DiaryCardMetaPosition.eyebrow);
   }
 
@@ -116,6 +118,7 @@ class DiaryCardBlocks extends StatelessWidget {
       viewData: viewData,
       resolved: resolved,
       appearance: appearance,
+      maxVisibleTags: maxVisibleTags,
     );
     final mark = DiaryCardSelectionMark(
       selected: selected,
@@ -143,7 +146,8 @@ class DiaryCardBlocks extends StatelessWidget {
                 )
               : null,
         DiaryCardBlock.title => title == null ? null : _title(title, mark),
-        DiaryCardBlock.tags => _tags(),
+        // 标签已收进底栏（与日期、时间同行），不再单独成行。
+        DiaryCardBlock.tags => null,
         DiaryCardBlock.preview => _preview(),
         DiaryCardBlock.footer => lines.footer(
           context,
@@ -186,6 +190,7 @@ class DiaryCardBlocks extends StatelessWidget {
       viewData: viewData,
       resolved: resolved,
       appearance: appearance,
+      maxVisibleTags: maxVisibleTags,
     );
     final indicators = buildIndicators();
     return lines.footer(
@@ -235,23 +240,6 @@ class DiaryCardBlocks extends StatelessWidget {
         ),
         mark,
       ],
-    );
-  }
-
-  Widget? _tags() {
-    if (diary.tags.isEmpty || maxVisibleTags <= 0) {
-      return null;
-    }
-    final inverted = appearance.inverted;
-    return DiaryItemTagRow(
-      tags: diary.tags,
-      maxVisibleTags: maxVisibleTags,
-      style: resolved.style.content.tagStyle,
-      scale: resolved.metaScale,
-      alignment: resolved.centered ? WrapAlignment.center : WrapAlignment.start,
-      textColor: appearance.bodyColor,
-      overflowFill: inverted ? appearance.chipFill : null,
-      overflowBorder: inverted ? appearance.chipBorder : null,
     );
   }
 
