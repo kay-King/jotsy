@@ -252,50 +252,63 @@ class DiaryCardLines {
       // 实测：标签栏只剩 22px，两个胶囊溢出 11px）。
       final isLight = Theme.of(context).brightness == Brightness.light;
       final firstColor = Color(visible.first.color);
-      return Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Flexible(
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 6 * scale,
-                vertical: 2 * scale,
-              ),
-              decoration: BoxDecoration(
-                color: firstColor.withValues(alpha: isLight ? 0.08 : 0.16),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: firstColor.withValues(alpha: isLight ? 0.22 : 0.32),
-                  width: 0.65,
-                ),
-              ),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    for (var i = 0; i < visible.length; i++) ...[
-                      if (i > 0) const TextSpan(text: '  '),
-                      TextSpan(
-                        text: '# ',
-                        style: TextStyle(
-                          color: Color(visible[i].color),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 10.5 * scale,
-                        ),
-                      ),
-                      TextSpan(text: visible[i].name, style: textStyle),
-                    ],
-                  ],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+      final chip = Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 6 * scale,
+          vertical: 2 * scale,
+        ),
+        decoration: BoxDecoration(
+          color: firstColor.withValues(alpha: isLight ? 0.08 : 0.16),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: firstColor.withValues(alpha: isLight ? 0.22 : 0.32),
+            width: 0.65,
           ),
-          if (hidden > 0) ...[
-            SizedBox(width: 6 * scale),
-            Text('+$hidden', style: textStyle),
-          ],
-        ],
+        ),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              for (var i = 0; i < visible.length; i++) ...[
+                if (i > 0) const TextSpan(text: '  '),
+                TextSpan(
+                  text: '# ',
+                  style: TextStyle(
+                    color: Color(visible[i].color),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10.5 * scale,
+                  ),
+                ),
+                TextSpan(text: visible[i].name, style: textStyle),
+              ],
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+      if (hidden <= 0) {
+        return chip;
+      }
+      // `+N` 是独立 Text（标签上限测试用 find.text('+2') 查找）。
+      // 极窄列里胶囊内边距 + `+N` + 间隙的最小宽度会超过可用宽度
+      // （样式页三列瀑布流预览实测只剩 22px，溢出 5px），这时只留
+      // 胶囊、省略 `+N`；宽度够时才并排显示。
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final showHidden =
+              constraints.maxWidth >= 40 * scale + 12 * scale + 6 * scale;
+          if (!showHidden) {
+            return chip;
+          }
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Flexible(child: chip),
+              SizedBox(width: 6 * scale),
+              Text('+$hidden', style: textStyle),
+            ],
+          );
+        },
       );
     }
     return Text.rich(
