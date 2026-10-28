@@ -26,6 +26,12 @@ import 'diary_preview_page.dart';
 /// - 日记一条条往下排，复用 [DiaryTimelineItem]（昵称蓝色、九宫格、
 ///   长文折叠都与日记页时间线一致）；点一条进预览页，不做多选；
 /// - 分页复用日记页的 [pagedDiariesProvider]，滑到底自动多加载 30 篇。
+/// - 手感：整页用 [BouncingScrollPhysics]，顶部下拉、底部上拉都有
+///   回弹；封面是可拉伸的 SliverAppBar（`stretch: true` +
+///   `StretchMode.zoomBackground`），顶部下拉时封面会跟着放大、
+///   松手弹回——仿朋友圈（my-diary-fakeWechat 的 bindPullToTop）
+///   那种“下拉封面放大”的灵动感。Android 默认是 ClampingScroll
+///   Physics，滑到头就死死停住，看起来像静态页，所以这里显式指定。
 class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key});
 
@@ -57,6 +63,9 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
+    // 回弹越界时（顶部下拉/底部上拉）不要触发分页：回弹动画会连续产生
+    // 多次滚动通知，否则 _visibleLimit 会一次被加很多个 30。
+    if (position.outOfRange) return;
     if (position.pixels >= position.maxScrollExtent - 600) {
       setState(() => _visibleLimit += _pageSize);
     }
@@ -104,10 +113,15 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
+        // 回弹滚动：顶部下拉、底部上拉都带弹性回弹，松手弹回原位。
+        physics: const BouncingScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
             expandedHeight: _coverHeight,
             pinned: false,
+            // 封面可拉伸：顶部下拉越界时背景放大（zoomBackground），
+            // 松手随回弹恢复——仿朋友圈下拉封面放大的效果。
+            stretch: true,
             backgroundColor: colors.surface,
             leading: IconButton(
               tooltip: l10n.commonBack,
@@ -121,6 +135,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
+              stretchModes: const <StretchMode>[StretchMode.zoomBackground],
               background: GestureDetector(
                 onTap: _changeCover,
                 child: Stack(

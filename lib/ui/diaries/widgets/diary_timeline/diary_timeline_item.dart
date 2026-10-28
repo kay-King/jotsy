@@ -18,6 +18,10 @@ import 'diary_timeline_text.dart';
 
 /// 时间线的一条日记（朋友圈式）：头像 + 昵称 + 正文折叠 + 九宫格。
 ///
+/// 朋友圈没有标题，所以这里不显示日记标题，只显示正文与九宫格；
+/// 未解封胶囊例外——正文与图片都不外露，标题是唯一能认出它的标识，
+/// 所以锁住的胶囊仍显示标题（见 [_lockedBody]）。
+///
 /// 点按/长按/多选/未解封胶囊的行为与 [DiaryCard] 完全一致，只换了排布：
 /// - 点按：多选态切换选中；未解封胶囊进封存页；否则进现有预览页（不带封面
 ///   共享元素，时间线没有封面图）；
@@ -133,16 +137,7 @@ class DiaryTimelineItem extends StatelessWidget {
                         if (isLockedCapsule)
                           _lockedBody(context, title, capsuleState)
                         else ...<Widget>[
-                          if (title.isNotEmpty)
-                            Text(
-                              title,
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontSize: 15,
-                                color: colors.onSurface,
-                              ),
-                            ),
-                          if (body.isNotEmpty) ...<Widget>[
-                            if (title.isNotEmpty) const SizedBox(height: 2),
+                          if (body.isNotEmpty)
                             DiaryTimelineFoldableText(
                               text: body,
                               style: textTheme.bodyMedium?.copyWith(
@@ -150,7 +145,6 @@ class DiaryTimelineItem extends StatelessWidget {
                                 color: colors.onSurface,
                               ),
                             ),
-                          ],
                           if (_timelineImages(viewData).isNotEmpty) ...<Widget>[
                             const SizedBox(height: 8),
                             DiaryTimelineGrid(
