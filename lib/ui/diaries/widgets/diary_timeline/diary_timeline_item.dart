@@ -42,6 +42,7 @@ class DiaryTimelineItem extends StatelessWidget {
     required this.onOpenEditor,
     required this.onToggleSelection,
     required this.onOpenMoreMenu,
+    this.onLongPressMenu,
     required this.opensLockedCapsulePage,
   });
 
@@ -58,6 +59,10 @@ class DiaryTimelineItem extends StatelessWidget {
 
   /// 点按右下角“...”按钮：打开条目菜单（编辑 / 查看详情 / 删除）。
   final void Function(DiaryWithTags diary) onOpenMoreMenu;
+
+  /// 长按条目：传入时打开条目菜单（时间线页长按也开菜单，与朋友圈
+  /// 一致）；不传时走默认的多选（日记列表长按进多选）。
+  final void Function(DiaryWithTags diary)? onLongPressMenu;
 
   /// 点按未解封胶囊是否进入封存页；设置页预览的示例胶囊不是真实日记，
   /// 关闭后改为走 [onOpenEditor]（与 DiaryCard 同口径）。
@@ -110,9 +115,14 @@ class DiaryTimelineItem extends StatelessWidget {
             },
             onLongPress: () {
               // Android 上 InkWell 已经通过 Feedback.forLongPress 震动；
-              // iOS 不会，补一次以确认进入多选（与 DiaryCard 同口径）。
+              // iOS 不会，补一次以确认长按已触发（与 DiaryCard 同口径）。
               if (Theme.of(context).platform == TargetPlatform.iOS) {
                 unawaited(HapticFeedback.mediumImpact());
+              }
+              final openMenu = onLongPressMenu;
+              if (openMenu != null) {
+                openMenu(diary);
+                return;
               }
               onToggleSelection(diaryId, true);
             },

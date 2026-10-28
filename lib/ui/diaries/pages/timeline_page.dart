@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/services/app_service.dart';
@@ -347,16 +348,42 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               itemCount: diaries.length,
               itemBuilder: (context, index) {
                 final diary = diaries[index];
-                return DiaryTimelineItem(
-                  diary: diary,
-                  profile: profile,
-                  selected: false,
-                  isSelectionMode: false,
-                  maxVisibleTags: 5,
-                  onOpenEditor: (entry, _) => _openPreview(entry),
-                  onToggleSelection: (_, _) {},
-                  onOpenMoreMenu: _openEntryMenu,
-                  opensLockedCapsulePage: true,
+                // 跨年时在第一条前显示年份头（“2026年”），与朋友圈一致；
+                // 同一年只在第一条前显示一次。分页加载时按前后条目比较，
+                // 不会重复出现。
+                final year = diary.diary.createdAt.year;
+                final showYearHeader =
+                    index == 0 ||
+                    diaries[index - 1].diary.createdAt.year != year;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (showYearHeader)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                        child: Text(
+                          DateFormat.y(
+                            l10n.localeName,
+                          ).format(diary.diary.createdAt),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    DiaryTimelineItem(
+                      diary: diary,
+                      profile: profile,
+                      selected: false,
+                      isSelectionMode: false,
+                      maxVisibleTags: 5,
+                      onOpenEditor: (entry, _) => _openPreview(entry),
+                      onToggleSelection: (_, _) {},
+                      onOpenMoreMenu: _openEntryMenu,
+                      // 长按也开菜单（与朋友圈一致）；时间线页多选已关，
+                      // 长按原来是空操作。
+                      onLongPressMenu: _openEntryMenu,
+                      opensLockedCapsulePage: true,
+                    ),
+                  ],
                 );
               },
             ),
