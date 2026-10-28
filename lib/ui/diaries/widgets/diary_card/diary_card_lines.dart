@@ -246,55 +246,46 @@ class DiaryCardLines {
     final visible = diary.tags.take(maxVisibleTags).toList(growable: false);
     final hidden = diary.tags.length - visible.length;
     if (tagStyle == DiaryCardTagStyle.chip) {
+      // 微胶囊：全部标签拼进一个胶囊（一段富文本，`#` 各取标签色），
+      // 整段省略。不用每标签一个胶囊——窄列里多个胶囊各带内边距与
+      // 描边，最小宽度就超过可用宽度会溢出（样式页三列瀑布流预览
+      // 实测：标签栏只剩 22px，两个胶囊溢出 11px）。
       final isLight = Theme.of(context).brightness == Brightness.light;
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          for (var i = 0; i < visible.length; i++) ...[
-            if (i > 0) SizedBox(width: 6 * scale),
-            Flexible(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 6 * scale,
-                  vertical: 2 * scale,
-                ),
-                decoration: BoxDecoration(
-                  color: Color(
-                    visible[i].color,
-                  ).withValues(alpha: isLight ? 0.08 : 0.16),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: Color(
-                      visible[i].color,
-                    ).withValues(alpha: isLight ? 0.22 : 0.32),
-                    width: 0.65,
+      final firstColor = Color(visible.first.color);
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 6 * scale,
+          vertical: 2 * scale,
+        ),
+        decoration: BoxDecoration(
+          color: firstColor.withValues(alpha: isLight ? 0.08 : 0.16),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: firstColor.withValues(alpha: isLight ? 0.22 : 0.32),
+            width: 0.65,
+          ),
+        ),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              for (var i = 0; i < visible.length; i++) ...[
+                if (i > 0) const TextSpan(text: '  '),
+                TextSpan(
+                  text: '# ',
+                  style: TextStyle(
+                    color: Color(visible[i].color),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10.5 * scale,
                   ),
                 ),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '# ',
-                        style: TextStyle(
-                          color: Color(visible[i].color),
-                          fontWeight: FontWeight.w800,
-                          fontSize: 10.5 * scale,
-                        ),
-                      ),
-                      TextSpan(text: visible[i].name, style: textStyle),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-          if (hidden > 0) ...[
-            SizedBox(width: 6 * scale),
-            Text('+$hidden', style: textStyle),
-          ],
-        ],
+                TextSpan(text: visible[i].name, style: textStyle),
+              ],
+              if (hidden > 0) TextSpan(text: '  +$hidden'),
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       );
     }
     return Text.rich(

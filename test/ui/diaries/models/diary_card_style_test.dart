@@ -146,7 +146,7 @@ void main() {
       expect(style.content.showPreview, isTrue);
       expect(style.content.tagStyle, DiaryCardTagStyle.chip);
       expect(style.content.pinnedBadge, DiaryCardPinnedBadge.standard);
-      expect(style.content.coverFallback, DiaryCardCoverFallback.none);
+      expect(style.content.coverFallback, DiaryCardCoverFallback.dateBlock);
       expect(style.content.collage, isFalse);
       expect(style.meta.showDate, isTrue);
       expect(style.meta.dateFormat, DiaryCardDateFormat.eyebrow);
