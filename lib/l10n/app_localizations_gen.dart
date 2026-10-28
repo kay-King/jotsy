@@ -8618,6 +8618,24 @@ abstract class AppLocalizations {
   /// **'No diaries yet. Write one!'**
   String get timelineEmpty;
 
+  /// Timeline page footer shown when all diaries are loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the end'**
+  String get timelineReachedEnd;
+
+  /// Timeline entry more menu: edit this diary.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit this diary'**
+  String get timelineEntryEdit;
+
+  /// Timeline entry more menu: view article details.
+  ///
+  /// In en, this message translates to:
+  /// **'View article details'**
+  String get timelineEntryViewDetail;
+
   /// Explore stats section header: overview.
   ///
   /// In en, this message translates to:

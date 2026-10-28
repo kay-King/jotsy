@@ -41,6 +41,7 @@ class DiaryTimelineItem extends StatelessWidget {
     required this.maxVisibleTags,
     required this.onOpenEditor,
     required this.onToggleSelection,
+    required this.onOpenMoreMenu,
     required this.opensLockedCapsulePage,
   });
 
@@ -54,6 +55,9 @@ class DiaryTimelineItem extends StatelessWidget {
   final int maxVisibleTags;
   final DiaryOpenCallback onOpenEditor;
   final void Function(String noteId, bool forceSelect) onToggleSelection;
+
+  /// 点按右下角“...”按钮：打开条目菜单（编辑 / 查看详情 / 删除）。
+  final void Function(DiaryWithTags diary) onOpenMoreMenu;
 
   /// 点按未解封胶囊是否进入封存页；设置页预览的示例胶囊不是真实日记，
   /// 关闭后改为走 [onOpenEditor]（与 DiaryCard 同口径）。
@@ -154,7 +158,16 @@ class DiaryTimelineItem extends StatelessWidget {
                           ],
                         ],
                         const SizedBox(height: 6),
-                        _metaLine(context, viewData, timeLabel),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Expanded(
+                              child: _metaLine(context, viewData, timeLabel),
+                            ),
+                            const SizedBox(width: 8),
+                            _moreButton(context),
+                          ],
+                        ),
                         if (!isLockedCapsule &&
                             diary.tags.isNotEmpty) ...<Widget>[
                           const SizedBox(height: 4),
@@ -286,6 +299,26 @@ class DiaryTimelineItem extends StatelessWidget {
       style: Theme.of(
         context,
       ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+    );
+  }
+
+  /// 右下角“...”按钮：点开条目菜单（编辑 / 查看详情 / 删除）。
+  /// 仿朋友圈的小灰块：圆角 4、灰底、三点横排；点按只开菜单，不触发
+  /// 条目的点按（进预览）与长按（进多选）。
+  Widget _moreButton(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(4),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => onOpenMoreMenu(diary),
+        child: const SizedBox(
+          width: 34,
+          height: 24,
+          child: Icon(Icons.more_horiz, size: 18),
+        ),
+      ),
     );
   }
 

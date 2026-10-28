@@ -5148,6 +5148,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timelineEmpty => 'No diaries yet. Write one!';
 
   @override
+  String get timelineReachedEnd => 'You\'ve reached the end';
+
+  @override
+  String get timelineEntryEdit => 'Edit this diary';
+
+  @override
+  String get timelineEntryViewDetail => 'View article details';
+
+  @override
   String get statsOverviewTitle => 'Overview';
 
   @override

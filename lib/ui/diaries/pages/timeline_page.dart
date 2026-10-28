@@ -4,15 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../../core/services/app_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../diaries/controllers/diary_edit_entry_flow.dart';
+import '../../diaries/models/time_capsule.dart';
 import '../../diaries/providers/diary_filters.dart';
 import '../../diaries/providers/diary_profile_provider.dart';
+import '../../diaries/sections/diary_timeline_entry_menu_sheet.dart';
+import '../../diaries/widgets/diary_preview/diary_preview_dialogs.dart';
 import '../../diaries/widgets/diary_timeline/diary_timeline_avatar.dart';
 import '../../diaries/widgets/diary_timeline/diary_timeline_item.dart';
+import '../../home/widgets/home_hint_visibility_scope.dart';
 import '../../settings/controllers/profile_page_controller.dart';
 import '../../widgets/delayed_loading_indicator.dart';
 import '../../widgets/expressive_image_frame.dart';
 import 'diary_preview_page.dart';
+import 'locked_diary_page.dart';
 
 /// 朋友圈式时间线页：封面 + 头像 + 昵称 + 简介 + 一条条日记。
 ///
@@ -96,6 +103,73 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     );
   }
 
+  /// 条目右下角“...”菜单：编辑 / 查看详情 / 删除（仿朋友圈）。
+  Future<void> _openEntryMenu(DiaryWithTags diary) async {
+    final action = await showDiaryTimelineEntryMenuSheet(context);
+    if (!mounted || action == null) return;
+    switch (action) {
+      case DiaryTimelineEntryMenuAction.edit:
+        // 时间线是流式查询，改动自动刷新，不用管返回值。
+        await openDiaryEditorForDetail(
+          context,
+          diaryId: diary.diary.diaryId,
+          detail: diary,
+        );
+      case DiaryTimelineEntryMenuAction.viewDetail:
+        _openEntryDetail(diary);
+      case DiaryTimelineEntryMenuAction.delete:
+        await _deleteEntry(diary);
+    }
+  }
+
+  /// 查看详情：与点条目本身一致；未解封胶囊进封存页。
+  void _openEntryDetail(DiaryWithTags diary) {
+    final entry = diary.diary;
+    final isLockedCapsule = TimeCapsuleState.fromFields(
+      lockedAt: entry.capsuleLockedAt,
+      unlockAt: entry.capsuleUnlockAt,
+      now: DateTime.now(),
+    ).isLocked;
+    if (isLockedCapsule) {
+      unawaited(
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (context) =>
+                LockedDiaryPage(diaryId: entry.diaryId, initialDetail: diary),
+          ),
+        ),
+      );
+      return;
+    }
+    _openPreview(diary);
+  }
+
+  /// 删除一篇日记：先弹确认框，软删进回收站，提示条里可撤销。
+  /// 时间线是流式查询，删除 / 撤销后自动刷新，不用手动处理列表。
+  Future<void> _deleteEntry(DiaryWithTags diary) async {
+    final shouldDelete = await confirmDiaryPreviewDelete(context);
+    if (!mounted || !shouldDelete) return;
+    final db = ref.read(appDatabaseProvider);
+    await db.softDeleteDiary(diary.diary.diaryId, touchUpdatedAt: false);
+    if (!mounted) return;
+    final reason = await HomeHintVisibilityScope.showTrackedSnackBar(
+      context: context,
+      snackBar: SnackBar(
+        content: Text(context.l10n.autoT0074('1')),
+        action: SnackBarAction(
+          label: context.l10n.commonUndo,
+          onPressed: () {},
+        ),
+        // 带动作的 SnackBar 默认常驻，须显式关掉自动消失。
+        persist: false,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+    if (reason == SnackBarClosedReason.action) {
+      await db.restoreDiary(diary.diary.diaryId, touchUpdatedAt: false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -108,7 +182,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       sortMode: DiarySortMode.updatedDesc,
     );
     final diariesAsync = ref.watch(pagedDiariesProvider(query));
-    final diaries = diariesAsync.asData?.value.items;
+    final diariesResult = diariesAsync.asData?.value;
+    final diaries = diariesResult?.items;
+    // 还有更多没加载时不显示“已经到底了”；只有全部加载完才显示。
+    final hasMore = diariesResult?.hasMore ?? true;
 
     return Scaffold(
       body: CustomScrollView(
@@ -240,9 +317,26 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                   maxVisibleTags: 5,
                   onOpenEditor: (entry, _) => _openPreview(entry),
                   onToggleSelection: (_, _) {},
+                  onOpenMoreMenu: _openEntryMenu,
                   opensLockedCapsulePage: true,
                 );
               },
+            ),
+          // 全部加载完才显示“已经到底了”；还有更多时滑到底继续加载，
+          // 不显示。底栏本身随回弹滚动一起上下回弹。
+          if (diaries != null && diaries.isNotEmpty && !hasMore)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 22, 16, 30),
+                child: Center(
+                  child: Text(
+                    '—— ${l10n.timelineReachedEnd} ——',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
       ),

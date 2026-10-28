@@ -4662,6 +4662,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timelineEmpty => '还没有日记，去写一篇吧';
 
   @override
+  String get timelineReachedEnd => '已经到底了';
+
+  @override
+  String get timelineEntryEdit => '编辑这篇日记';
+
+  @override
+  String get timelineEntryViewDetail => '查看文章详情';
+
+  @override
   String get statsOverviewTitle => '概况';
 
   @override
