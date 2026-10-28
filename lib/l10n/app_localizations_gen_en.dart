@@ -3240,6 +3240,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleEditorPreviewDark => 'Dark preview';
 
   @override
+  String get styleEditorPreviewFullscreen => 'Fullscreen preview';
+
+  @override
   String get styleEditorPanelHandle => 'Options panel';
 
   @override

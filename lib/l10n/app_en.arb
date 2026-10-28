@@ -4151,6 +4151,10 @@
   "@styleEditorPreviewDark": {
     "description": "Diary card style settings: tooltip of the button that previews the dark theme."
   },
+  "styleEditorPreviewFullscreen": "Fullscreen preview",
+  "@styleEditorPreviewFullscreen": {
+    "description": "Style editor pages (card, preview page and navigation bar share it): tooltip of the button that opens the live preview fullscreen."
+  },
   "styleEditorPanelHandle": "Options panel",
   "@styleEditorPanelHandle": {
     "description": "Diary card style settings: screen reader name of the options panel's drag handle (drag or tap to resize the panel)."

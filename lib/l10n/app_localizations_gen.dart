@@ -5228,6 +5228,12 @@ abstract class AppLocalizations {
   /// **'Dark preview'**
   String get styleEditorPreviewDark;
 
+  /// Style editor pages (card, preview page and navigation bar share it): tooltip of the button that opens the live preview fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen preview'**
+  String get styleEditorPreviewFullscreen;
+
   /// Diary card style settings: screen reader name of the options panel's drag handle (drag or tap to resize the panel).
   ///
   /// In en, this message translates to:
