@@ -30,8 +30,8 @@ import 'locked_diary_page.dart';
 /// - 封面：没设时是 Salt 蓝纯色；点封面或左下角相机按钮可换封面
 ///   （相册选图后拷贝进私有目录，与头像同口径）；
 /// - 头像与昵称来自个人资料；昵称白色落在封面右下角（朋友圈式），
-///   点头像可换头像；封面底部整条有一层淡淡的朦胧（轻模糊 + 微暗底，
-///   通宽、从底边往上约 110 高），封面图颜色再杂白字也看得清；
+///   点头像可换头像；昵称行背后有一块比昵称宽的朦胧（纯轻模糊、无底
+///   色、无框），把封面图的杂色揉开，白字就看得清了；
 /// - 简介只在设了时才显示，放在封面下方；
 /// - 日记一条条往下排，复用 [DiaryTimelineItem]（昵称蓝色、九宫格、
 ///   长文折叠都与日记页时间线一致）；点一条进预览页，不做多选；
@@ -238,64 +238,56 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     onTap: _changeCover,
                     child: _CoverImage(profile: profile),
                   ),
-                  // 封面底部整条淡淡的朦胧：通宽、从底边往上约 110 高，
-                  // 轻模糊把封面图的杂色揉成柔雾，再加一点微暗底，白字
-                  // 就看得清了。只包昵称一行的小圆角框太突兀，改成这样
-                  // 像参考图那样整条底边都是浅浅的朦胧感。模糊本身有
-                  // 洇开，带子上沿是柔和过渡，不是硬线；不用渐变（仓库
-                  // 源码规则限定渐变只能由取色谱/选择面绘制）。
-                  // 注意：这层只是朦胧底，不收手势，点它仍是换背景。
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: 110,
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.15),
-                      ),
-                    ),
-                  ),
                   // 封面右下角：昵称（白字）+ 头像，与朋友圈一致。
+                  // 昵称行背后一块比昵称宽的朦胧：纯轻模糊（sigma 10），
+                  // 无底色、无圆角框，模糊把封面图的杂色揉开、边缘自带
+                  // 洇开，白字就看得清了。只包一行的紧圆角框太突兀、
+                  // 整条通宽的带子又太宽，这样比昵称宽一圈正好；不用渐
+                  // 变（仓库源码规则限定渐变只能由取色谱/选择面绘制）。
                   Positioned(
                     right: 16,
                     bottom: 16,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Text(
-                          profile.displayNickname,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _changingAvatar ? null : _changeAvatar,
-                          child: Tooltip(
-                            message: l10n.profileChangeAvatar,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                // 头像本身是圆角方块（radius 8），描边必须跟
-                                // 着方块走：之前用了圆形描边，圆圈盖不住方块
-                                // 的四个角，看起来像头像下面多个白圈。
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
-                              ),
-                              child: DiaryTimelineAvatar(
-                                profile: profile,
-                                size: 72,
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(32, 16, 24, 16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Text(
+                              profile.displayNickname,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 12),
+                            GestureDetector(
+                              onTap: _changingAvatar ? null : _changeAvatar,
+                              child: Tooltip(
+                                message: l10n.profileChangeAvatar,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    // 头像本身是圆角方块（radius 8），描边必须跟
+                                    // 着方块走：之前用了圆形描边，圆圈盖不住方块
+                                    // 的四个角，看起来像头像下面多个白圈。
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: DiaryTimelineAvatar(
+                                    profile: profile,
+                                    size: 72,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   // 封面左下角：相机按钮，提示点封面可换。
