@@ -174,7 +174,10 @@ abstract final class DiaryCardPresets {
       coverPosition: DiaryCardCoverPosition.background,
       coverHeight: 252,
       coverGap: 10,
-      scrim: 0.85,
+      // 底板半透明度：0.85 时底板几乎不透白，照片当背景却只剩顶部
+      // 一截能看，底部像贴了一条白带。降到 0.4，照片透过底板仍清
+      // 晰，文字也有浅底衬着可读。
+      scrim: 0.4,
       paddingH: 12,
       paddingV: 12,
       elementGap: 4,

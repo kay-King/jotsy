@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,12 +36,11 @@ import 'locked_diary_page.dart';
 /// - 日记一条条往下排，复用 [DiaryTimelineItem]（昵称蓝色、九宫格、
 ///   长文折叠都与日记页时间线一致）；点一条进预览页，不做多选；
 /// - 分页复用日记页的 [pagedDiariesProvider]，滑到底自动多加载 30 篇。
-/// - 手感：整页用 [BouncingScrollPhysics]，顶部下拉、底部上拉都有
-///   回弹；封面是可拉伸的 SliverAppBar（`stretch: true` +
-///   `StretchMode.zoomBackground`），顶部下拉时封面会跟着放大、
-///   松手弹回——仿朋友圈（my-diary-fakeWechat 的 bindPullToTop）
-///   那种“下拉封面放大”的灵动感。Android 默认是 ClampingScroll
-///   Physics，滑到头就死死停住，看起来像静态页，所以这里显式指定。
+/// - 手感：整页用 Android 原生 [ClampingScrollPhysics]。v18 曾用
+///   [BouncingScrollPhysics] 仿朋友圈回弹，但实测三宗罪——松手后还
+///   会自己滑一段、拖动时整页闪、回弹越界还会连带分页误触发；已改回
+///   原生手感，松手即停。封面拉伸（`stretch` + zoomBackground）依赖
+///   越界回弹，随回弹一并去掉，封面恢复为普通 SliverAppBar。
 class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key});
 
@@ -58,6 +56,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   final ScrollController _scrollController = ScrollController();
   bool _changingCover = false;
   bool _changingAvatar = false;
+
+  /// 是否已在“接近底部”区内：只在刚进入该区时触发一次分页，离开再
+  /// 进入才再次触发。原来每帧都满足条件就 setState，一次拖动能把
+  /// _visibleLimit 连加很多个 30，白白重建整页（拖动闪烁的另一半
+  /// 原因）；只有 1 篇日记时更是每帧都在 setState。
+  bool _nearBottom = false;
 
   @override
   void initState() {
@@ -75,12 +79,25 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   void _onScroll() {
     if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
-    // 回弹越界时（顶部下拉/底部上拉）不要触发分页：回弹动画会连续产生
-    // 多次滚动通知，否则 _visibleLimit 会一次被加很多个 30。
     if (position.outOfRange) return;
-    if (position.pixels >= position.maxScrollExtent - 600) {
-      setState(() => _visibleLimit += _pageSize);
+    final nearBottom = position.pixels >= position.maxScrollExtent - 600;
+    // 只在刚进入底部区的那一下分页；已在区内时不再重复触发。
+    if (!nearBottom || _nearBottom) {
+      _nearBottom = nearBottom;
+      return;
     }
+    _nearBottom = true;
+    // 没更多了就不分页，避免只有 1 篇时反复 setState。
+    final query = DiaryPageQuery(
+      keyword: '',
+      requiredTagIds: const <int>[],
+      limit: _visibleLimit,
+      sortMode: DiarySortMode.updatedDesc,
+    );
+    final hasMore =
+        ref.read(pagedDiariesProvider(query)).asData?.value.hasMore ?? true;
+    if (!hasMore) return;
+    setState(() => _visibleLimit += _pageSize);
   }
 
   Future<void> _changeCover() async {
@@ -207,15 +224,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
-        // 回弹滚动：顶部下拉、底部上拉都带弹性回弹，松手弹回原位。
-        physics: const BouncingScrollPhysics(),
+        // Android 原生手感：松手即停，不回弹、不自己滑。
+        physics: const ClampingScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
             expandedHeight: _coverHeight,
             pinned: false,
-            // 封面可拉伸：顶部下拉越界时背景放大（zoomBackground），
-            // 松手随回弹恢复——仿朋友圈下拉封面放大的效果。
-            stretch: true,
             backgroundColor: colors.surface,
             leading: IconButton(
               tooltip: l10n.commonBack,
@@ -229,7 +243,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const <StretchMode>[StretchMode.zoomBackground],
               background: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
@@ -240,59 +253,59 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     child: _CoverImage(profile: profile),
                   ),
                   // 封面右下角：昵称（白字）+ 头像，与朋友圈一致。
-                  // 昵称行背后一块比昵称宽的朦胧：纯轻模糊（sigma 10），
-                  // 无底色、无圆角框，模糊把封面图的杂色揉开、边缘自带
-                  // 洇开，白字就看得清了。只包一行的紧圆角框太突兀、
-                  // 整条通宽的带子又太宽，这样比昵称宽一圈正好；不用渐
-                  // 变（仓库源码规则限定渐变只能由取色谱/选择面绘制）。
+                  // 不用 BackdropFilter 朦胧：实测三宗罪——照片封面整
+                  // 片发白看不清、滚动时每帧重算背景闪烁、模糊块还盖
+                  // 住封面。白字改用文字阴影（黑 45%、模糊 6、下移 1），
+                  // 在任何照片上都读得清，封面本身一点不动。
                   Positioned(
                     right: 16,
                     bottom: 16,
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(32, 16, 24, 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                profile.displayNickname,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            profile.displayNickname,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.45),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 1),
                                 ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            GestureDetector(
-                              onTap: _changingAvatar ? null : _changeAvatar,
-                              child: Tooltip(
-                                message: l10n.profileChangeAvatar,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    // 头像本身是圆角方块（radius 8），描边必须跟
-                                    // 着方块走：之前用了圆形描边，圆圈盖不住方块
-                                    // 的四个角，看起来像头像下面多个白圈。
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: DiaryTimelineAvatar(
-                                    profile: profile,
-                                    size: 72,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _changingAvatar ? null : _changeAvatar,
+                          child: Tooltip(
+                            message: l10n.profileChangeAvatar,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                // 头像本身是圆角方块（radius 8），描边必须跟
+                                // 着方块走：之前用了圆形描边，圆圈盖不住方块
+                                // 的四个角，看起来像头像下面多个白圈。
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: DiaryTimelineAvatar(
+                                profile: profile,
+                                size: 72,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   // 封面左下角：相机按钮，提示点封面可换。
