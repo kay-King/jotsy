@@ -115,39 +115,6 @@ class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
     };
   }
 
-  void _showFullscreenPreview(BuildContext context) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return Dialog(
-          insetPadding: EdgeInsets.zero,
-          child: Scaffold(
-            appBar: AppTopBar(
-              title: Text(widget.title),
-              leading: IconButton(
-                tooltip: l10n.commonBack,
-                onPressed: () => Navigator.of(dialogContext).maybePop(),
-                icon: const FaIcon(FontAwesomeIcons.angleLeft, size: 18),
-              ),
-            ),
-            // 预览跟随样式实时变：全屏里也要监听同一个控制器，
-            // 否则改了选项全屏里的预览不刷新。
-            body: ListenableBuilder(
-              listenable: widget.listenable,
-              builder: (BuildContext context, Widget? child) {
-                return widget.previewBuilder(
-                  showToolbar: true,
-                  bottomPadding: 0,
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -167,13 +134,6 @@ class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ...?widget.actionsBuilder?.call(context),
-                // 全屏预览：窄屏预览只占四成高度，看不清效果时点开放大；
-                // 全屏里改选项不方便，只看效果，改完关掉回这里调。
-                IconButton(
-                  tooltip: l10n.styleEditorPreviewFullscreen,
-                  onPressed: () => _showFullscreenPreview(context),
-                  icon: const FaIcon(FontAwesomeIcons.expand, size: 18),
-                ),
                 TextButton(
                   onPressed: widget.isDefault() ? null : widget.onReset,
                   child: Text(l10n.commonReset),
@@ -215,11 +175,12 @@ class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
                   ],
                 );
               }
-              // 中档时预览约占四成高度（220~360），矮屏（横屏、分屏）上不超过
-              // 一半，给标签页留出可用空间；标签栏停在拖动条下方的原位置。
+              // 中档时预览约占一半高度（280~480），边调边看：预览够大能看清
+              // 效果，下方标签页还剩一半、照样能滚动调选项；矮屏（横屏、
+              // 分屏）上不超过 55%，给标签页留出可用空间。
               final previewHeight = math.min(
-                (constraints.maxHeight * 0.38).clamp(220.0, 360.0).toDouble(),
-                constraints.maxHeight * 0.5,
+                (constraints.maxHeight * 0.5).clamp(280.0, 480.0).toDouble(),
+                constraints.maxHeight * 0.55,
               );
               return Column(
                 children: <Widget>[

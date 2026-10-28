@@ -2879,9 +2879,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleEditorPreviewDark => '深色预览';
 
   @override
-  String get styleEditorPreviewFullscreen => '全屏预览';
-
-  @override
   String get styleEditorPanelHandle => '选项面板';
 
   @override
