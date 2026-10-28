@@ -30,22 +30,48 @@ import 'locked_diary_page.dart';
 /// - 封面：没设时是 Salt 蓝纯色；点封面或左下角相机按钮可换封面
 ///   （相册选图后拷贝进私有目录，与头像同口径）；
 /// - 头像与昵称来自个人资料；昵称白色落在封面右下角（朋友圈式），
-///   点头像可换头像；昵称行背后有一块比昵称宽的朦胧（纯轻模糊、无底
-///   色、无框），把封面图的杂色揉开，白字就看得清了；
+///   点头像可换头像；昵称白字带文字阴影，在任何照片上都读得清，
+///   封面本身一点不动（不用 BackdropFilter 朦胧：它会把照片封面
+///   整片揉白，滚动时还每帧重算导致闪烁）；
 /// - 简介只在设了时才显示，放在封面下方；
 /// - 日记一条条往下排，复用 [DiaryTimelineItem]（昵称蓝色、九宫格、
 ///   长文折叠都与日记页时间线一致）；点一条进预览页，不做多选；
 /// - 分页复用日记页的 [pagedDiariesProvider]，滑到底自动多加载 30 篇。
-/// - 手感：整页用 Android 原生 [ClampingScrollPhysics]。v18 曾用
-///   [BouncingScrollPhysics] 仿朋友圈回弹，但实测三宗罪——松手后还
-///   会自己滑一段、拖动时整页闪、回弹越界还会连带分页误触发；已改回
-///   原生手感，松手即停。封面拉伸（`stretch` + zoomBackground）依赖
-///   越界回弹，随回弹一并去掉，封面恢复为普通 SliverAppBar。
+/// - 手感：整页用只顶部回弹的 [_TopBounceScrollPhysics]。v18 的双向
+///   回弹（[BouncingScrollPhysics]）松手后会在底部越界再弹回，看着
+///   像自动滚动；改回原生 [ClampingScrollPhysics] 又把顶部回弹也丢
+///   了。所以只留顶部回弹：顶部下拉可越界（封面跟着拉伸放大、松手
+///   弹回），底部夹住不越界，松手即停。
 class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key});
 
   @override
   ConsumerState<TimelinePage> createState() => _TimelinePageState();
+}
+
+/// 只顶部回弹的滚动手感：顶部下拉允许越界（回弹 + 封面拉伸），底部
+/// 夹住不越界。双向回弹的问题在底部：向上滑松手后冲到底部越界再弹
+/// 回，看着像自动滚动；只留顶部回弹，底部松手即停。
+class _TopBounceScrollPhysics extends BouncingScrollPhysics {
+  const _TopBounceScrollPhysics({super.parent});
+
+  @override
+  _TopBounceScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _TopBounceScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    // 顶部越界（value < minScrollExtent）：放行，交给回弹处理。
+    if (value < position.minScrollExtent) {
+      return 0.0;
+    }
+    // 底部越界（value > maxScrollExtent）：夹住，不越界、不回弹。
+    if (value > position.maxScrollExtent) {
+      return value - position.maxScrollExtent;
+    }
+    return 0.0;
+  }
 }
 
 class _TimelinePageState extends ConsumerState<TimelinePage> {
@@ -224,12 +250,15 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
-        // Android 原生手感：松手即停，不回弹、不自己滑。
-        physics: const ClampingScrollPhysics(),
+        // 只顶部回弹：顶部下拉可越界（封面拉伸），底部夹住松手即停。
+        physics: const _TopBounceScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
             expandedHeight: _coverHeight,
             pinned: false,
+            // 封面可拉伸：顶部下拉越界时背景放大（zoomBackground），
+            // 松手随回弹恢复——仿朋友圈下拉封面放大的效果。
+            stretch: true,
             backgroundColor: colors.surface,
             leading: IconButton(
               tooltip: l10n.commonBack,
@@ -243,6 +272,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
+              stretchModes: const <StretchMode>[StretchMode.zoomBackground],
               background: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
@@ -261,6 +291,11 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     right: 16,
                     bottom: 16,
                     child: Row(
+                      // Positioned 只给右/下，不给宽，Row 拿到的宽度无界：
+                      // 必须 shrink-wrap，否则里面的 Flexible 会报
+                      // “无界宽度里不能 flex”。Flexible 默认是 loose，
+                      // 昵称按本身宽度排，超长时才省略。
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         Flexible(
