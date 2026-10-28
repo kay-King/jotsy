@@ -252,40 +252,50 @@ class DiaryCardLines {
       // 实测：标签栏只剩 22px，两个胶囊溢出 11px）。
       final isLight = Theme.of(context).brightness == Brightness.light;
       final firstColor = Color(visible.first.color);
-      return Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 6 * scale,
-          vertical: 2 * scale,
-        ),
-        decoration: BoxDecoration(
-          color: firstColor.withValues(alpha: isLight ? 0.08 : 0.16),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: firstColor.withValues(alpha: isLight ? 0.22 : 0.32),
-            width: 0.65,
-          ),
-        ),
-        child: Text.rich(
-          TextSpan(
-            children: [
-              for (var i = 0; i < visible.length; i++) ...[
-                if (i > 0) const TextSpan(text: '  '),
-                TextSpan(
-                  text: '# ',
-                  style: TextStyle(
-                    color: Color(visible[i].color),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10.5 * scale,
-                  ),
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 6 * scale,
+                vertical: 2 * scale,
+              ),
+              decoration: BoxDecoration(
+                color: firstColor.withValues(alpha: isLight ? 0.08 : 0.16),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: firstColor.withValues(alpha: isLight ? 0.22 : 0.32),
+                  width: 0.65,
                 ),
-                TextSpan(text: visible[i].name, style: textStyle),
-              ],
-              if (hidden > 0) TextSpan(text: '  +$hidden'),
-            ],
+              ),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    for (var i = 0; i < visible.length; i++) ...[
+                      if (i > 0) const TextSpan(text: '  '),
+                      TextSpan(
+                        text: '# ',
+                        style: TextStyle(
+                          color: Color(visible[i].color),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 10.5 * scale,
+                        ),
+                      ),
+                      TextSpan(text: visible[i].name, style: textStyle),
+                    ],
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+          if (hidden > 0) ...[
+            SizedBox(width: 6 * scale),
+            Text('+$hidden', style: textStyle),
+          ],
+        ],
       );
     }
     return Text.rich(
