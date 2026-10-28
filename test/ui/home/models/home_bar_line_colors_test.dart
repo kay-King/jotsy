@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:node_diary/ui/diaries/viewmodels/diary_card_colors.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_presets.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_resolved_style.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
@@ -53,36 +52,6 @@ void main() {
       expect(border(HomeBarLineColor.highlight, _dark), _dark.onSurface);
       expect(border(HomeBarLineColor.primary, _light), _light.primary);
       expect(border(HomeBarLineColor.primary, _dark), _dark.primary);
-      // 自定义却没选颜色：按跟随主题解读。
-      expect(border(HomeBarLineColor.custom, _light), _light.outlineVariant);
-      expect(border(HomeBarLineColor.custom, _dark), _dark.outlineVariant);
-    });
-
-    test('custom colors: light as is, dark explicit or derived as accent', () {
-      const custom = HomeBarLineStyle(
-        color: HomeBarLineColor.custom,
-        customColor: 0xFF1E88E5,
-        opacity: 1,
-        width: 1,
-      );
-      expect(
-        _resolve(_withBorder(custom), _light).borderColor,
-        const Color(0xFF1E88E5),
-      );
-      expect(
-        _resolve(_withBorder(custom), _dark).borderColor,
-        DiaryCardColors.deriveDark(
-          const Color(0xFF1E88E5),
-          DiaryCardColorRole.accent,
-        ),
-      );
-      expect(
-        _resolve(
-          _withBorder(custom.copyWith(customColorDark: () => 0xFF90CAF9)),
-          _dark,
-        ).borderColor,
-        const Color(0xFF90CAF9),
-      );
     });
 
     test('opacity is applied and both values are clamped', () {

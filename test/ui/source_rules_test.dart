@@ -92,7 +92,6 @@ void main() {
         'lib/ui/settings/controllers/diary_preview_style_editor_controller.dart',
         'lib/ui/settings/sections/settings_diary_preview_style_tile.dart',
         'lib/ui/settings/widgets/style_editor/style_editor_scaffold.dart',
-        'lib/ui/settings/widgets/style_editor/style_custom_color_tile.dart',
         'lib/app/theme/seeded_theme_cache.dart',
         'lib/utils/text_stats.dart',
       ])

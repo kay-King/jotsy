@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../diaries/viewmodels/diary_card_colors.dart';
 import 'home_bar_line_colors.dart';
 import 'home_bar_style.dart';
 
@@ -17,10 +16,7 @@ import 'home_bar_style.dart';
 /// - 高对比度时保留用户选的玻璃布局（悬浮底栏、顶栏结构、FAB 位置），只把
 ///   底色换成不透明的 [solidFill] 并关闭模糊（[translucent] 为 false）：半透明
 ///   底色叠在任意内容上无法保证对比度，而布局突然变回贴底实色栏同样让人
-///   困惑。减少动画不影响材质（玻璃本身没有动画）；
-/// - 自定义底色却没有选颜色时按中性色解读（样式里保留原值，不改写）；
-/// - 自定义底色可能很深或很浅，导致主题的前景色看不清，此时前景换成
-///   onSurface / surface 中对比度更高的一个（见 [_readable]）。
+///   困惑。减少动画不影响材质（玻璃本身没有动画）。
 @immutable
 class HomeBarResolvedStyle {
   const HomeBarResolvedStyle._({
@@ -66,14 +62,8 @@ class HomeBarResolvedStyle {
     final tintOpacity = HomeBarStyleLimits.tintOpacity.clamp(style.tintOpacity);
     final tint = _tintBase(style, scheme, dark).withValues(alpha: tintOpacity);
     final solidFill = Color.alphaBlend(tint, scheme.surface);
-    var selected = scheme.primary;
-    var unselected = scheme.onSurfaceVariant;
-    if (style.tint == HomeBarTint.custom && style.tintColor != null) {
-      // 玻璃下方的内容未知，按叠在 surface 上的效果估算底色；这与退回实色
-      // 时的 solidFill 是同一个颜色。
-      selected = _readable(selected, solidFill, scheme, 4.5);
-      unselected = _readable(unselected, solidFill, scheme, 3.0);
-    }
+    final selected = scheme.primary;
+    final unselected = scheme.onSurfaceVariant;
     return HomeBarResolvedStyle._(
       isGlass: isGlass,
       translucent: isGlass && !highContrast,
@@ -186,7 +176,6 @@ class HomeBarResolvedStyle {
     final neutral = dark
         ? scheme.surfaceContainerHigh
         : scheme.surfaceContainerLowest;
-    final custom = style.tintColor;
     return switch (style.tint) {
       HomeBarTint.neutral => neutral,
       HomeBarTint.theme => Color.lerp(
@@ -194,46 +183,7 @@ class HomeBarResolvedStyle {
         scheme.primaryContainer,
         dark ? 0.30 : 0.35,
       )!,
-      HomeBarTint.custom =>
-        custom == null
-            ? neutral
-            : _customBase(custom, style.tintColorDark, dark),
     };
-  }
-
-  /// 自定义底色：浅色直接用；深色优先用户指定的深色值，否则按卡片底色
-  /// 的口径推导（保持色相、压低明度与饱和度），避免暗色模式下一块刺眼的
-  /// 高饱和色带。透明度一律去掉，只由 tintOpacity 表达。
-  static Color _customBase(int light, int? darkValue, bool dark) {
-    if (!dark) {
-      return _opaque(light);
-    }
-    if (darkValue != null) {
-      return _opaque(darkValue);
-    }
-    return DiaryCardColors.deriveDark(
-      _opaque(light),
-      DiaryCardColorRole.surface,
-    );
-  }
-
-  static Color _opaque(int argb) => Color(0xFF000000 | (argb & 0x00FFFFFF));
-
-  /// [preferred] 在 [background] 上的对比度不足 [minRatio] 时，换成
-  /// onSurface / surface 中对比度更高的一个（一深一浅，总有一个看得清）。
-  static Color _readable(
-    Color preferred,
-    Color background,
-    ColorScheme scheme,
-    double minRatio,
-  ) {
-    if (DiaryCardColors.contrastRatio(preferred, background) >= minRatio) {
-      return preferred;
-    }
-    return DiaryCardColors.bestContrast(<Color>[
-      scheme.onSurface,
-      scheme.surface,
-    ], background);
   }
 
   @override

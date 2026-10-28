@@ -29,15 +29,11 @@ void main() {
 
     test('decodes each field independently and clamps numbers', () {
       final line = HomeBarLineStyle.fromJson(<String, Object?>{
-        'color': 'custom',
-        'customColor': '#336699',
-        'customColorDark': 'nope',
+        'color': 'highlight',
         'opacity': 7,
         'width': 'thick',
       }, fallback: _border);
-      expect(line.color, HomeBarLineColor.custom);
-      expect(line.customColor, 0xFF336699);
-      expect(line.customColorDark, isNull);
+      expect(line.color, HomeBarLineColor.highlight);
       expect(line.opacity, HomeBarStyleLimits.lineOpacity.max);
       expect(line.width, _border.width);
 
@@ -58,7 +54,8 @@ void main() {
 
     test('unknown color names fall back to the default source', () {
       final line = HomeBarLineStyle.fromJson(<String, Object?>{
-        'color': 'rainbow',
+        // 旧 JSON 里的 "color": "custom" 已无对应枚举值，按未知名回退主题。
+        'color': 'custom',
       }, fallback: _border);
       expect(line, _border);
       expect(
@@ -67,15 +64,6 @@ void main() {
         }, fallback: _top).color,
         HomeBarLineColor.theme,
       );
-    });
-
-    test('custom colors are forced opaque', () {
-      final line = HomeBarLineStyle.fromJson(<String, Object?>{
-        'customColor': 0x80112233,
-        'customColorDark': '#40445566',
-      }, fallback: _border);
-      expect(line.customColor, 0xFF112233);
-      expect(line.customColorDark, 0xFF445566);
     });
 
     test('encodes sparsely relative to its own defaults', () {
@@ -87,13 +75,11 @@ void main() {
         'width': 1.0,
       });
       final line = _border.copyWith(
-        color: HomeBarLineColor.custom,
-        customColor: () => 0xFF0A0B0C,
+        color: HomeBarLineColor.highlight,
         width: 2.5,
       );
       expect(line.toJson(_border), <String, Object>{
-        'color': 'custom',
-        'customColor': '#0A0B0C',
+        'color': 'highlight',
         'width': 2.5,
       });
       expect(
@@ -102,23 +88,6 @@ void main() {
       );
     });
 
-    test('copyWith keeps or clears custom colors and compares by value', () {
-      const line = HomeBarLineStyle(
-        color: HomeBarLineColor.custom,
-        customColor: 0xFF123456,
-        customColorDark: 0xFF010203,
-        opacity: 0.5,
-        width: 2,
-      );
-      expect(line.copyWith(), line);
-      expect(line.copyWith().hashCode, line.hashCode);
-      expect(line.copyWith(customColor: () => null).customColor, isNull);
-      expect(
-        line.copyWith(customColorDark: () => null).customColor,
-        0xFF123456,
-      );
-      expect(line.copyWith(opacity: 0.55), isNot(line));
-    });
   });
 
   group('HomeBarStyle with lines', () {
@@ -126,9 +95,7 @@ void main() {
       material: HomeBarMaterial.glass,
       topBarHairline: true,
       borderLine: HomeBarLineStyle(
-        color: HomeBarLineColor.custom,
-        customColor: 0xFF224466,
-        customColorDark: 0xFF8899AA,
+        color: HomeBarLineColor.highlight,
         opacity: 0.8,
         width: 2.2,
       ),
@@ -146,9 +113,7 @@ void main() {
       expect(style.toJson(), <String, Object>{
         'material': 'glass',
         'borderLine': <String, Object>{
-          'color': 'custom',
-          'customColor': '#224466',
-          'customColorDark': '#8899AA',
+          'color': 'highlight',
           'opacity': 0.8,
           'width': 2.2,
         },

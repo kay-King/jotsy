@@ -1,9 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_settings.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
-import 'package:node_diary/ui/settings/widgets/style_editor/style_custom_color_tile.dart';
 import 'package:node_diary/ui/widgets/expressive_button_group.dart';
 
 import '../../support/home_bar_style_page_harness.dart';
@@ -78,8 +76,6 @@ void main() {
           .nested,
       isTrue,
     );
-    // 没选自定义时不出现取色行。
-    expect(inHomeBarOptions(l10n.homeBarStyleLineCustomColor), findsNothing);
 
     // 关掉底栏描边：只剩顶栏分隔线的一组从属行。
     await tapHomeBarOption(tester, inHomeBarOptions(l10n.homeBarStyleBorder));
@@ -159,9 +155,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('choosing a color source saves it; custom reveals the picker', (
-    tester,
-  ) async {
+  testWidgets('choosing a color source saves it', (tester) async {
     final (settings, l10n) = await pumpHomeBarStylePage(
       tester,
       initial: _glass,
@@ -176,43 +170,19 @@ void main() {
       storedHomeBarSettings(settings).current.borderLine.color,
       HomeBarLineColor.highlight,
     );
-    expect(
-      storedHomeBarSettings(settings).current.borderLine.customColor,
-      isNull,
-    );
-
-    await tapHomeBarOption(tester, _lineColorOption(l10n.styleEditorCustom));
-    final line = storedHomeBarSettings(settings).current.borderLine;
-    expect(line.color, HomeBarLineColor.custom);
-    // 起始色是切换前这条线的颜色来源（高光）在浅色主题下的颜色，不透明。
-    final scheme = Theme.of(
-      tester.element(find.byType(TabBarView)),
-    ).colorScheme;
-    expect(line.customColor, scheme.surfaceContainerLowest.toARGB32());
-    expect(line.customColor! >> 24, 0xFF);
     // 其余字段不动。
+    final line = storedHomeBarSettings(settings).current.borderLine;
     expect(line.opacity, HomeBarLineStyle.borderDefaults.opacity);
     expect(line.width, HomeBarLineStyle.borderDefaults.width);
 
-    final tile = find.widgetWithText(
-      StyleCustomColorTile,
-      l10n.homeBarStyleLineCustomColor,
-    );
-    await scrollToHomeBarOption(tester, tile);
-    expect(tile, findsOneWidget);
-    final widget = tester.widget<StyleCustomColorTile>(tile);
-    expect(widget.nested && widget.deep, isTrue);
-    expect(widget.light, line.customColor);
-
-    // 换回默认：取色行收起，自定义色保留（再切回来时还是它）。
+    // 换回默认：仍是主题色来源。
     await tapHomeBarOption(
       tester,
       _lineColorOption(l10n.homeBarStyleLineColorTheme),
     );
-    expect(tile, findsNothing);
     expect(
-      storedHomeBarSettings(settings).current.borderLine.customColor,
-      line.customColor,
+      storedHomeBarSettings(settings).current.borderLine.color,
+      HomeBarLineColor.theme,
     );
     expect(tester.takeException(), isNull);
   });

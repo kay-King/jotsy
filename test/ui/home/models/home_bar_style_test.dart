@@ -13,8 +13,6 @@ void main() {
       expect(d.blurSigma, 20);
       expect(d.tintOpacity, 0.72);
       expect(d.tint, HomeBarTint.neutral);
-      expect(d.tintColor, isNull);
-      expect(d.tintColorDark, isNull);
       expect(d.border, isTrue);
       // fork 默认：顶栏发丝线开启（实色顶栏也画），标签间距 2，栏高 60。
       expect(d.topBarHairline, isTrue);
@@ -48,8 +46,6 @@ void main() {
         'blurSigma': 'big',
         'tintOpacity': 0.5,
         'tint': 'rainbow',
-        'tintColor': 0xFF336699,
-        'tintColorDark': 'nope',
         'border': false,
         'topBarHairline': 'on',
         'shadow': 0,
@@ -63,8 +59,6 @@ void main() {
       expect(style.blurSigma, 20);
       expect(style.tintOpacity, 0.5);
       expect(style.tint, HomeBarTint.neutral);
-      expect(style.tintColor, 0xFF336699);
-      expect(style.tintColorDark, isNull);
       expect(style.border, isFalse);
       expect(style.topBarHairline, isTrue);
       expect(style.shadow, isTrue);
@@ -139,29 +133,11 @@ void main() {
       expect(style, HomeBarStyle.defaults);
     });
 
-    test('rejects colors outside the 32-bit range and forces opacity', () {
-      expect(
-        HomeBarStyle.fromJson(<String, Object?>{'tintColor': -1}).tintColor,
-        isNull,
-      );
-      expect(
-        HomeBarStyle.fromJson(<String, Object?>{
-          'tintColor': 0x1FFFFFFFF,
-        }).tintColor,
-        isNull,
-      );
-      expect(
-        HomeBarStyle.fromJson(<String, Object?>{
-          'tintColor': 0x80112233,
-        }).tintColor,
-        0xFF112233,
-      );
-    });
-
-    test('keeps a custom tint without a color as stored', () {
+    test('falls back to neutral for a removed custom tint name', () {
+      // 旧 JSON 里的 "tint": "custom" 已无对应枚举值，按未知名回退中性。
       final style = HomeBarStyle.fromJson(<String, Object?>{'tint': 'custom'});
-      expect(style.tint, HomeBarTint.custom);
-      expect(style.tintColor, isNull);
+      expect(style.tint, HomeBarTint.neutral);
+      expect(style, HomeBarStyle.defaults);
     });
   });
 
@@ -180,9 +156,7 @@ void main() {
         glassTopBars: false,
         blurSigma: 33,
         tintOpacity: 0.4,
-        tint: HomeBarTint.custom,
-        tintColor: 0xFF224466,
-        tintColorDark: 0xFF101820,
+        tint: HomeBarTint.theme,
         border: false,
         topBarHairline: true,
         shadow: false,
@@ -225,11 +199,6 @@ void main() {
       );
     });
 
-    test('copyWith can clear a custom color', () {
-      const style = HomeBarStyle(tintColor: 0xFF123456);
-      expect(style.copyWith().tintColor, 0xFF123456);
-      expect(style.copyWith(tintColor: () => null).tintColor, isNull);
-    });
   });
 
   group('HomeBarStyle.withMaterial', () {

@@ -93,11 +93,6 @@ List<ExpressiveIconChoice<DiaryPreviewColorSeed>> diaryPreviewSeedChoices(
     icon: FontAwesomeIcons.tag,
     label: l10n.diaryPreviewStyleSeedTag,
   ),
-  ExpressiveIconChoice<DiaryPreviewColorSeed>(
-    value: DiaryPreviewColorSeed.custom,
-    icon: FontAwesomeIcons.eyeDropper,
-    label: l10n.diaryPreviewStyleSeedCustom,
-  ),
 ];
 
 String diaryPreviewPaperLabel(AppLocalizations l10n, DiaryPreviewPaper paper) =>
@@ -108,7 +103,6 @@ String diaryPreviewPaperLabel(AppLocalizations l10n, DiaryPreviewPaper paper) =>
       DiaryPreviewPaper.mint => l10n.diaryPreviewStylePaperMint,
       DiaryPreviewPaper.gray => l10n.diaryPreviewStylePaperGray,
       DiaryPreviewPaper.ink => l10n.diaryPreviewStylePaperInk,
-      DiaryPreviewPaper.custom => l10n.diaryPreviewStylePaperCustom,
     };
 
 List<ExpressiveIconChoice<DiaryPreviewCoverMode>> diaryPreviewCoverModeChoices(

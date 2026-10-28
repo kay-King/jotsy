@@ -5009,10 +5009,6 @@
   "@diaryCardStyleSourceTag": {
     "description": "日记卡片样式设置页：颜色来源：第一个标签的颜色。"
   },
-  "diaryCardStyleSourceCustom": "自定义",
-  "@diaryCardStyleSourceCustom": {
-    "description": "日记卡片样式设置页：颜色来源：自定义颜色。"
-  },
   "diaryCardStyleSourceMoodHint": "按每篇日记的心情取色；没有心情时用默认颜色",
   "@diaryCardStyleSourceMoodHint": {
     "description": "日记卡片样式设置页：心情颜色来源的说明。"
@@ -5024,10 +5020,6 @@
   "diaryCardStyleStrength": "浓度",
   "@diaryCardStyleStrength": {
     "description": "日记卡片样式设置页：颜色浓度（不透明度）。"
-  },
-  "styleEditorEditColor": "编辑颜色",
-  "@styleEditorEditColor": {
-    "description": "日记卡片样式设置页：重新选择自定义颜色。"
   },
   "styleEditorColorDarkAuto": "深色模式自动配色",
   "@styleEditorColorDarkAuto": {
@@ -5338,17 +5330,9 @@
   "@diaryPreviewStyleSeedTag": {
     "description": "预览页样式设置：配色基调选项。"
   },
-  "diaryPreviewStyleSeedCustom": "自定义",
-  "@diaryPreviewStyleSeedCustom": {
-    "description": "预览页样式设置：配色基调选项。"
-  },
   "diaryPreviewStyleSeedHint": "没有心情或标签的日记沿用应用主题色。",
   "@diaryPreviewStyleSeedHint": {
     "description": "预览页样式设置：配色基调下方的说明。"
-  },
-  "diaryPreviewStyleSeedColor": "基调颜色",
-  "@diaryPreviewStyleSeedColor": {
-    "description": "预览页样式设置：自定义基调颜色。"
   },
   "diaryPreviewStylePaper": "纸张",
   "@diaryPreviewStylePaper": {
@@ -5378,25 +5362,9 @@
   "@diaryPreviewStylePaperInk": {
     "description": "预览页样式设置：纸张选项。"
   },
-  "diaryPreviewStylePaperCustom": "自定义",
-  "@diaryPreviewStylePaperCustom": {
-    "description": "预览页样式设置：纸张选项。"
-  },
-  "diaryPreviewStylePaperColor": "纸张颜色",
-  "@diaryPreviewStylePaperColor": {
-    "description": "预览页样式设置：自定义纸张颜色。"
-  },
   "diaryPreviewStylePaperHint": "纸色与主题深浅相反时，整页换成相应的明暗，文字始终清楚。",
   "@diaryPreviewStylePaperHint": {
     "description": "预览页样式设置：纸张选项下方的说明。"
-  },
-  "diaryPreviewStyleTextColor": "自定义正文颜色",
-  "@diaryPreviewStyleTextColor": {
-    "description": "预览页样式设置：开关：自定义正文颜色。"
-  },
-  "diaryPreviewStyleTextColorHint": "和纸张对比度不足时自动改用默认颜色。",
-  "@diaryPreviewStyleTextColorHint": {
-    "description": "预览页样式设置：自定义正文与标题颜色的说明。"
   },
   "diaryPreviewStyleLayoutGroup": "版式",
   "@diaryPreviewStyleLayoutGroup": {
@@ -5573,10 +5541,6 @@
   "diaryPreviewStyleAlignCenter": "居中",
   "@diaryPreviewStyleAlignCenter": {
     "description": "预览页样式设置：对齐选项。"
-  },
-  "diaryPreviewStyleTitleColor": "自定义标题颜色",
-  "@diaryPreviewStyleTitleColor": {
-    "description": "预览页样式设置：开关：自定义标题颜色。"
   },
   "diaryPreviewStyleMetaPosition": "位置",
   "@diaryPreviewStyleMetaPosition": {
@@ -10708,10 +10672,6 @@
   "@homeBarStyleTintTheme": {
     "description": "导航栏样式设置：主题色调选项。"
   },
-  "homeBarStyleTintColor": "玻璃颜色",
-  "@homeBarStyleTintColor": {
-    "description": "导航栏样式设置：自定义色调时的玻璃颜色行。"
-  },
   "homeBarStyleBorder": "底栏描边",
   "@homeBarStyleBorder": {
     "description": "导航栏样式设置：悬浮玻璃底栏的描边开关。"
@@ -10739,10 +10699,6 @@
   "homeBarStyleLineColorPrimary": "主题色",
   "@homeBarStyleLineColorPrimary": {
     "description": "导航栏样式设置：描边颜色选项，使用主题色。"
-  },
-  "homeBarStyleLineCustomColor": "描边颜色",
-  "@homeBarStyleLineCustomColor": {
-    "description": "导航栏样式设置：自定义描边 / 分隔线颜色的取色行。"
   },
   "homeBarStyleLineWidth": "粗细",
   "@homeBarStyleLineWidth": {

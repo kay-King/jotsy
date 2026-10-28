@@ -190,17 +190,12 @@ abstract final class DiaryCardPresets {
   static const _sticky = DiaryCardStyle(
     surface: DiaryCardSurfaceStyle(
       cornerRadius: 6,
-      background: DiaryCardColorSpec(
-        source: DiaryCardColorSource.custom,
-        light: 0xFFFFF4B8,
-        strength: 1,
-      ),
+      background: DiaryCardColorSpec(strength: 0),
       borderWidth: 0,
       accentBar: DiaryCardAccentBar.top,
       accentWidth: 6,
       accentColor: DiaryCardColorSpec(
-        source: DiaryCardColorSource.custom,
-        light: 0xFFF2B33D,
+        source: DiaryCardColorSource.primary,
         strength: 1,
       ),
       shadow: DiaryCardShadowStyle.floating,

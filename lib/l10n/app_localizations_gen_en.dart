@@ -3897,9 +3897,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryCardStyleSourceTag => 'First tag';
 
   @override
-  String get diaryCardStyleSourceCustom => 'Custom';
-
-  @override
   String get diaryCardStyleSourceMoodHint =>
       'Uses each entry\'s mood, or the default color when there is none';
 
@@ -3909,9 +3906,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryCardStyleStrength => 'Intensity';
-
-  @override
-  String get styleEditorEditColor => 'Edit color';
 
   @override
   String get styleEditorColorDarkAuto => 'Pick the dark color automatically';
@@ -4167,14 +4161,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryPreviewStyleSeedTag => 'First tag';
 
   @override
-  String get diaryPreviewStyleSeedCustom => 'Custom';
-
-  @override
   String get diaryPreviewStyleSeedHint =>
       'Entries without a mood or tag use the app color.';
-
-  @override
-  String get diaryPreviewStyleSeedColor => 'Basis color';
 
   @override
   String get diaryPreviewStylePaper => 'Paper';
@@ -4198,21 +4186,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryPreviewStylePaperInk => 'Ink';
 
   @override
-  String get diaryPreviewStylePaperCustom => 'Custom';
-
-  @override
-  String get diaryPreviewStylePaperColor => 'Paper color';
-
-  @override
   String get diaryPreviewStylePaperHint =>
       'On paper darker or lighter than the theme, the whole page switches to match so text stays readable.';
-
-  @override
-  String get diaryPreviewStyleTextColor => 'Custom text color';
-
-  @override
-  String get diaryPreviewStyleTextColorHint =>
-      'Falls back to the default color when contrast with the paper is too low.';
 
   @override
   String get diaryPreviewStyleLayoutGroup => 'Layout';
@@ -4353,9 +4328,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryPreviewStyleAlignCenter => 'Center';
-
-  @override
-  String get diaryPreviewStyleTitleColor => 'Custom title color';
 
   @override
   String get diaryPreviewStyleMetaPosition => 'Position';
@@ -8412,9 +8384,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeBarStyleTintTheme => 'Theme';
 
   @override
-  String get homeBarStyleTintColor => 'Glass color';
-
-  @override
   String get homeBarStyleBorder => 'Bottom bar outline';
 
   @override
@@ -8435,9 +8404,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeBarStyleLineColorPrimary => 'Accent';
-
-  @override
-  String get homeBarStyleLineCustomColor => 'Line color';
 
   @override
   String get homeBarStyleLineWidth => 'Width';

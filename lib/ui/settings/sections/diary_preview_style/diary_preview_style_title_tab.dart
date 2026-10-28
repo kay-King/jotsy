@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
-import '../../../diaries/viewmodels/diary_card_colors.dart';
 import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
-import '../../widgets/style_editor/style_custom_color_tile.dart';
 import '../../widgets/style_editor/style_editor_common.dart';
 import '../diary_card_style/diary_card_style_labels.dart';
 
-/// “标题”标签页：显隐、“无标题”占位、大小、字重、对齐与颜色。标题字体
+/// “标题”标签页：显隐、“无标题”占位、大小、字重与对齐。标题字体
 /// 跟随正文字体设置，这里不另设。
 class DiaryPreviewStyleTitleTab extends StatelessWidget {
   const DiaryPreviewStyleTitleTab({super.key, required this.controller});
@@ -22,7 +20,6 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final title = controller.style.title;
-    final scheme = Theme.of(context).colorScheme;
 
     void commit(DiaryPreviewTitleStyle next) =>
         controller.commitWith((style) => style.copyWith(title: next));
@@ -107,30 +104,6 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
                       commit(title.copyWith(align: v.single)),
                 ),
               ),
-              SettingsSwitchTile(
-                title: l10n.diaryPreviewStyleTitleColor,
-                subtitle: l10n.diaryPreviewStyleTextColorHint,
-                value: title.colorLight != null,
-                onChanged: (bool on) => commit(
-                  title.copyWith(
-                    colorLight: () => on ? scheme.primary.toARGB32() : null,
-                    colorDark: () => null,
-                  ),
-                ),
-              ),
-              if (title.colorLight != null)
-                StyleCustomColorTile(
-                  title: l10n.diaryPreviewStyleTitleColor,
-                  light: title.colorLight!,
-                  dark: title.colorDark,
-                  role: DiaryCardColorRole.text,
-                  onChanged: (color) => commit(
-                    title.copyWith(
-                      colorLight: () => color.light,
-                      colorDark: () => color.dark,
-                    ),
-                  ),
-                ),
             ],
           ],
         ),

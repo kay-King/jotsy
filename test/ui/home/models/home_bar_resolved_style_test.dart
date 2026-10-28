@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:node_diary/ui/diaries/viewmodels/diary_card_colors.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_presets.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_resolved_style.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
@@ -152,37 +151,6 @@ void main() {
       );
     });
 
-    test('custom uses the color, then the dark value or a derived one', () {
-      final custom = glass.copyWith(
-        tint: HomeBarTint.custom,
-        tintColor: () => 0xFFE0C080,
-      );
-      expect(_opaque(_resolve(custom, _light).tint), const Color(0xFFE0C080));
-      expect(
-        _opaque(_resolve(custom, _dark).tint),
-        DiaryCardColors.deriveDark(
-          const Color(0xFFE0C080),
-          DiaryCardColorRole.surface,
-        ),
-      );
-      expect(
-        _opaque(
-          _resolve(
-            custom.copyWith(tintColorDark: () => 0xFF202830),
-            _dark,
-          ).tint,
-        ),
-        const Color(0xFF202830),
-      );
-    });
-
-    test('custom without a color reads as neutral', () {
-      final resolved = _resolve(
-        glass.copyWith(tint: HomeBarTint.custom),
-        _light,
-      );
-      expect(resolved, _resolve(glass, _light));
-    });
   });
 
   group('foreground', () {
@@ -190,26 +158,6 @@ void main() {
       final resolved = _resolve(glass, _light);
       expect(resolved.selectedForeground, _light.primary);
       expect(resolved.unselectedForeground, _light.onSurfaceVariant);
-    });
-
-    test('falls back to a contrasting color on a very dark custom tint', () {
-      final resolved = _resolve(
-        glass.copyWith(
-          tint: HomeBarTint.custom,
-          tintColor: () => 0xFF101010,
-          tintOpacity: 0.95,
-        ),
-        _light,
-      );
-      expect(resolved.selectedForeground, _light.surface);
-      expect(resolved.unselectedForeground, _light.surface);
-      expect(
-        DiaryCardColors.contrastRatio(
-          resolved.selectedForeground,
-          resolved.solidFill,
-        ),
-        greaterThanOrEqualTo(4.5),
-      );
     });
   });
 

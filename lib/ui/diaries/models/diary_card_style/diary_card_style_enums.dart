@@ -22,7 +22,6 @@ enum DiaryCardColorSource {
   tertiary,
   mood,
   firstTag,
-  custom,
 }
 
 enum DiaryCardGradientDirection { vertical, horizontal, diagonal }

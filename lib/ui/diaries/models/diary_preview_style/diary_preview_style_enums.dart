@@ -5,13 +5,12 @@
 library;
 
 /// 整页配色基调：[app] 跟随应用主题色；[mood] 取这篇日记心情对应的颜色；
-/// [tag] 取首个标签的颜色；[custom] 为自定义色。没有心情、标签或自定义色时
-/// 回到应用主题色。
-enum DiaryPreviewColorSeed { app, mood, tag, custom }
+/// [tag] 取首个标签的颜色。没有心情或标签时回到应用主题色。
+enum DiaryPreviewColorSeed { app, mood, tag }
 
-/// 纸张（页面底色）：[theme] 为主题底色（改版前的样子），其余为内置纸色与
-/// 自定义色。纸色与主题深浅相反时整页换成同一配色的另一种明暗，保证文字可读。
-enum DiaryPreviewPaper { theme, warm, sepia, mint, gray, ink, custom }
+/// 纸张（页面底色）：[theme] 为主题底色（改版前的样子），其余为内置纸色。
+/// 纸色与主题深浅相反时整页换成同一配色的另一种明暗，保证文字可读。
+enum DiaryPreviewPaper { theme, warm, sepia, mint, gray, ink }
 
 /// 顶栏：[floating] 随滚动隐藏、往回滚即出现（改版前的样子）；[pinned] 常驻。
 enum DiaryPreviewTopBarMode { floating, pinned }

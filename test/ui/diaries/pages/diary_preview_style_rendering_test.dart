@@ -282,36 +282,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a custom text color is used only with enough contrast', (
-    tester,
-  ) async {
-    Color? paragraphColor() => tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .config
-        .customStyles!
-        .paragraph!
-        .style
-        .color;
-
-    await _pump(
-      tester,
-      style: const DiaryPreviewStyle(
-        page: DiaryPreviewPageStyle(textLight: 0xFF5A2D0C),
-      ),
-    );
-    expect(paragraphColor(), const Color(0xFF5A2D0C));
-
-    // 浅黄文字压在浅色纸上对比度不足：回退为主题正文色。
-    await _pump(
-      tester,
-      style: const DiaryPreviewStyle(
-        page: DiaryPreviewPageStyle(textLight: 0xFFFFF4C2),
-      ),
-    );
-    final theme = Theme.of(tester.element(find.byType(quill.QuillEditor)));
-    expect(paragraphColor(), theme.textTheme.bodyMedium!.color);
-  });
-
   testWidgets('top bar mode, title, buttons and reading aids apply', (
     tester,
   ) async {

@@ -5,14 +5,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../diaries/viewmodels/diary_card_colors.dart';
 import '../sections/diary_card_style/diary_card_style_labels.dart';
-import 'style_editor/style_color_dialog.dart';
 import 'settings_option_tiles.dart';
 
 /// 卡片样式里一个颜色位的设置行：来源选择（默认 / 主题三色 / 心情 / 首个
-/// 标签 / 自定义）、自定义颜色的浅深两态，以及可选的浓度滑块。
+/// 标签），以及可选的浓度滑块。
 ///
-/// 选择“自定义”时弹出取色对话框，取消则保持原来源。浓度拖动经
-/// [onPreview] 即时预览、松手经 [onCommit] 提交；其余改动直接提交。
+/// 浓度拖动经 [onPreview] 即时预览、松手经 [onCommit] 提交；其余改动直接提交。
 class DiaryCardColorTile extends StatelessWidget {
   const DiaryCardColorTile({
     super.key,
@@ -45,47 +43,8 @@ class DiaryCardColorTile extends StatelessWidget {
         DiaryCardColorSource.primary => scheme.primary,
         DiaryCardColorSource.secondary => scheme.secondary,
         DiaryCardColorSource.tertiary => scheme.tertiary,
-        DiaryCardColorSource.custom => _customColor(scheme),
         _ => null,
       };
-
-  Color? _customColor(ColorScheme scheme) {
-    final light = spec.light;
-    if (light == null) {
-      return null;
-    }
-    if (scheme.brightness == Brightness.light) {
-      return Color(light);
-    }
-    final dark = spec.dark;
-    return dark != null
-        ? Color(dark)
-        : DiaryCardColors.deriveDark(Color(light), role);
-  }
-
-  Future<void> _editCustom(BuildContext context) async {
-    final scheme = Theme.of(context).colorScheme;
-    final result = await showStyleColorDialog(
-      context,
-      title: title,
-      light:
-          spec.light ??
-          (_sourceColor(scheme, DiaryCardColorSource.primary)!).toARGB32(),
-      dark: spec.dark,
-      role: role,
-    );
-    if (result == null) {
-      return;
-    }
-    onCommit(
-      DiaryCardColorSpec(
-        source: DiaryCardColorSource.custom,
-        light: result.light,
-        dark: result.dark,
-        strength: spec.strength,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +76,6 @@ class DiaryCardColorTile extends StatelessWidget {
       return FaIcon(switch (source) {
         DiaryCardColorSource.mood => FontAwesomeIcons.faceSmile,
         DiaryCardColorSource.firstTag => FontAwesomeIcons.tag,
-        DiaryCardColorSource.custom => FontAwesomeIcons.eyeDropper,
         _ => FontAwesomeIcons.circleHalfStroke,
       }, size: 12);
     }
@@ -158,28 +116,13 @@ class DiaryCardColorTile extends StatelessWidget {
                       selected: spec.source == source,
                       showCheckmark: false,
                       onSelected: (_) {
-                        if (source == DiaryCardColorSource.custom) {
-                          _editCustom(context);
-                        } else if (source != spec.source) {
+                        if (source != spec.source) {
                           onCommit(spec.copyWith(source: source));
                         }
                       },
                     ),
                 ],
               ),
-              if (spec.source == DiaryCardColorSource.custom &&
-                  spec.light != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      onPressed: () => _editCustom(context),
-                      icon: const FaIcon(FontAwesomeIcons.palette, size: 14),
-                      label: Text(l10n.styleEditorEditColor),
-                    ),
-                  ),
-                ),
               if (hint != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),

@@ -1,6 +1,6 @@
 part of 'diary_preview_style.dart';
 
-/// 标题：显隐、“无标题”占位、字号缩放、字重、对齐与颜色。字体跟随正文字体
+/// 标题：显隐、“无标题”占位、字号缩放、字重与对齐。字体跟随正文字体
 /// 设置（`DiaryTypography`），这里不另设。
 @immutable
 class DiaryPreviewTitleStyle {
@@ -10,8 +10,6 @@ class DiaryPreviewTitleStyle {
     this.scale = 1,
     this.weight = DiaryPreviewTitleWeight.heavy,
     this.align = DiaryPreviewAlign.start,
-    this.colorLight,
-    this.colorDark,
   });
 
   final bool visible;
@@ -24,18 +22,12 @@ class DiaryPreviewTitleStyle {
   final DiaryPreviewTitleWeight weight;
   final DiaryPreviewAlign align;
 
-  /// 自定义标题颜色（浅色 / 深色）；浅色为 null 表示自动。
-  final int? colorLight;
-  final int? colorDark;
-
   DiaryPreviewTitleStyle copyWith({
     bool? visible,
     bool? showUntitled,
     double? scale,
     DiaryPreviewTitleWeight? weight,
     DiaryPreviewAlign? align,
-    ValueGetter<int?>? colorLight,
-    ValueGetter<int?>? colorDark,
   }) {
     return DiaryPreviewTitleStyle(
       visible: visible ?? this.visible,
@@ -43,8 +35,6 @@ class DiaryPreviewTitleStyle {
       scale: scale ?? this.scale,
       weight: weight ?? this.weight,
       align: align ?? this.align,
-      colorLight: colorLight == null ? this.colorLight : colorLight(),
-      colorDark: colorDark == null ? this.colorDark : colorDark(),
     );
   }
 
@@ -72,8 +62,6 @@ class DiaryPreviewTitleStyle {
         json['align'],
         d.align,
       ),
-      colorLight: StyleJson.argb(json['colorLight']),
-      colorDark: StyleJson.argb(json['colorDark']),
     );
   }
 
@@ -85,8 +73,6 @@ class DiaryPreviewTitleStyle {
     StyleJson.put(json, 'scale', scale, d.scale);
     StyleJson.putEnum(json, 'weight', weight, d.weight);
     StyleJson.putEnum(json, 'align', align, d.align);
-    StyleJson.putColor(json, 'colorLight', colorLight, d.colorLight);
-    StyleJson.putColor(json, 'colorDark', colorDark, d.colorDark);
     return json;
   }
 
@@ -97,19 +83,9 @@ class DiaryPreviewTitleStyle {
         other.showUntitled == showUntitled &&
         other.scale == scale &&
         other.weight == weight &&
-        other.align == align &&
-        other.colorLight == colorLight &&
-        other.colorDark == colorDark;
+        other.align == align;
   }
 
   @override
-  int get hashCode => Object.hash(
-    visible,
-    showUntitled,
-    scale,
-    weight,
-    align,
-    colorLight,
-    colorDark,
-  );
+  int get hashCode => Object.hash(visible, showUntitled, scale, weight, align);
 }

@@ -27,10 +27,6 @@ HomeBarStyle _homeBarStyleFromJson(Object? raw) {
       HomeBarStyleLimits.tintOpacity,
     ),
     tint: StyleJson.enumByName(HomeBarTint.values, json['tint'], d.tint),
-    // 颜色与其他样式一致：接受 ARGB 整数或 `#RRGGBB`，一律存为不透明色——
-    // 玻璃的透明度只由 tintOpacity 表达，避免两处透明度叠乘。
-    tintColor: StyleJson.argb(json['tintColor']),
-    tintColorDark: StyleJson.argb(json['tintColorDark']),
     border: StyleJson.boolean(json['border'], d.border),
     // 两条线各是一个子对象，按各自的默认值逐字段容错（见 HomeBarLineStyle）。
     borderLine: HomeBarLineStyle.fromJson(
@@ -104,8 +100,6 @@ Map<String, Object> _homeBarStyleToJson(HomeBarStyle s) {
   StyleJson.put(json, 'blurSigma', s.blurSigma, d.blurSigma);
   StyleJson.put(json, 'tintOpacity', s.tintOpacity, d.tintOpacity);
   StyleJson.putEnum(json, 'tint', s.tint, d.tint);
-  StyleJson.putColor(json, 'tintColor', s.tintColor, d.tintColor);
-  StyleJson.putColor(json, 'tintColorDark', s.tintColorDark, d.tintColorDark);
   StyleJson.put(json, 'border', s.border, d.border);
   StyleJson.putObject(json, 'borderLine', s.borderLine.toJson(d.borderLine));
   StyleJson.put(json, 'topBarHairline', s.topBarHairline, d.topBarHairline);

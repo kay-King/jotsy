@@ -16,12 +16,12 @@ part 'home_bar_style_json.dart';
 /// 输入：持久化的 JSON（单键 `homeBarStyleRaw` 中的 `current`，或样式码）；
 /// 输出：不可变的样式对象。无副作用，也不依赖 Flutter 的 `Color`——颜色以
 /// ARGB 整数保存，解析为具体颜色、尺寸由渲染层（`HomeBarResolvedStyle`）
-/// 负责，那里还会处理高对比度回退与自定义色的可读性兜底。
+/// 负责，那里还会处理高对比度回退。
 ///
 /// 字段分三组：
 /// - 材质与玻璃：[material]、[glassTopBars]、[blurSigma]、[tintOpacity]、
-///   [tint]、[tintColor]、[tintColorDark]、[border]、[borderLine]、
-///   [topBarHairline]、[topBarLine]；只在玻璃材质下生效；
+///   [tint]、[border]、[borderLine]、[topBarHairline]、[topBarLine]；只在
+///   玻璃材质下生效；
 /// - 悬浮底栏几何：[shadow]、[barHeight]、[cornerRadius]、[sideMargin]、
 ///   [bottomGap]、[fabPlacement]；实色底栏贴底铺满，不用这些；
 /// - 导航项：[labelMode]、[iconSize]、[labelGap]、[indicator]、
@@ -40,8 +40,6 @@ class HomeBarStyle {
     this.blurSigma = 20,
     this.tintOpacity = 0.72,
     this.tint = HomeBarTint.neutral,
-    this.tintColor,
-    this.tintColorDark,
     this.border = true,
     this.borderLine = HomeBarLineStyle.borderDefaults,
     this.topBarHairline = true,
@@ -80,13 +78,6 @@ class HomeBarStyle {
   /// 玻璃底色的不透明度（叠在模糊后的内容上）。
   final double tintOpacity;
   final HomeBarTint tint;
-
-  /// [HomeBarTint.custom] 的浅色主题底色（不透明 ARGB）；为 null 时按中性色
-  /// 解读，但解码保留原样，不改写用户的选择。
-  final int? tintColor;
-
-  /// 深色主题底色；为 null 时由 [tintColor] 推导。
-  final int? tintColorDark;
 
   /// 悬浮底栏的细描边：在与底色相近的内容上勾出栏的边界。只管底栏，
   /// 顶栏的分隔线另由 [topBarHairline] 控制。
@@ -142,16 +133,12 @@ class HomeBarStyle {
     return copyWith(material: material, labelGap: gap);
   }
 
-  /// 可空颜色用 [ValueGetter] 传入，才能区分“不改”（不传）与“清除”
-  /// （`() => null`）。
   HomeBarStyle copyWith({
     HomeBarMaterial? material,
     bool? glassTopBars,
     double? blurSigma,
     double? tintOpacity,
     HomeBarTint? tint,
-    ValueGetter<int?>? tintColor,
-    ValueGetter<int?>? tintColorDark,
     bool? border,
     HomeBarLineStyle? borderLine,
     bool? topBarHairline,
@@ -174,10 +161,6 @@ class HomeBarStyle {
       blurSigma: blurSigma ?? this.blurSigma,
       tintOpacity: tintOpacity ?? this.tintOpacity,
       tint: tint ?? this.tint,
-      tintColor: tintColor == null ? this.tintColor : tintColor(),
-      tintColorDark: tintColorDark == null
-          ? this.tintColorDark
-          : tintColorDark(),
       border: border ?? this.border,
       borderLine: borderLine ?? this.borderLine,
       topBarHairline: topBarHairline ?? this.topBarHairline,
@@ -204,8 +187,6 @@ class HomeBarStyle {
         other.blurSigma == blurSigma &&
         other.tintOpacity == tintOpacity &&
         other.tint == tint &&
-        other.tintColor == tintColor &&
-        other.tintColorDark == tintColorDark &&
         other.border == border &&
         other.borderLine == borderLine &&
         other.topBarHairline == topBarHairline &&
@@ -230,8 +211,6 @@ class HomeBarStyle {
     blurSigma,
     tintOpacity,
     tint,
-    tintColor,
-    tintColorDark,
     border,
     borderLine,
     topBarHairline,

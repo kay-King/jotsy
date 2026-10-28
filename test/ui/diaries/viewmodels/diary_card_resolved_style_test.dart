@@ -318,12 +318,11 @@ void main() {
       expect(tagged.surface.borderColor, const Color(0xFF4CAF50));
     });
 
-    test('dark custom backgrounds flip the text to inverse colors', () {
+    test('dark primary backgrounds flip the text to inverse colors', () {
       const style = DiaryCardStyle(
         surface: DiaryCardSurfaceStyle(
           background: DiaryCardColorSpec(
-            source: DiaryCardColorSource.custom,
-            light: 0xFF1B1B3A,
+            source: DiaryCardColorSource.primary,
             strength: 1,
           ),
         ),
@@ -334,52 +333,67 @@ void main() {
       expect(appearance.titleColor, resolved.colorScheme.onInverseSurface);
     });
 
-    test('custom dark-mode colors are used as given or derived', () {
-      const given = DiaryCardStyle(
+    test('primary backgrounds follow the current scheme in each brightness', () {
+      // custom 取色已删除：深色不再由浅色值推导，深浅主题各取自家
+      // scheme 的 primary。
+      const style = DiaryCardStyle(
         surface: DiaryCardSurfaceStyle(
           background: DiaryCardColorSpec(
-            source: DiaryCardColorSource.custom,
-            light: 0xFFFFF4B8,
-            dark: 0xFF3A3420,
+            source: DiaryCardColorSource.primary,
             strength: 1,
           ),
         ),
       );
-      expect(
-        _resolve(
-          given,
-          DiaryCardMode.list,
-          brightness: Brightness.dark,
-        ).appearanceFor(pinned: false, locked: false).surface.color,
-        const Color(0xFF3A3420),
+      final lightResolved = _resolve(
+        style,
+        DiaryCardMode.list,
+        brightness: Brightness.light,
       );
-      final derived = _resolve(
-        given.copyWith(
-          surface: given.surface.copyWith(
-            background: given.surface.background.copyWith(clearDark: true),
-          ),
-        ),
+      final darkResolved = _resolve(
+        style,
         DiaryCardMode.list,
         brightness: Brightness.dark,
-      ).appearanceFor(pinned: false, locked: false);
+      );
       expect(
-        HSLColor.fromColor(derived.surface.color).lightness,
-        lessThan(0.3),
+        lightResolved
+            .appearanceFor(pinned: false, locked: false)
+            .surface
+            .color,
+        lightResolved.colorScheme.primary,
+      );
+      expect(
+        darkResolved
+            .appearanceFor(pinned: false, locked: false)
+            .surface
+            .color,
+        darkResolved.colorScheme.primary,
+      );
+      expect(
+        darkResolved.colorScheme.primary,
+        isNot(lightResolved.colorScheme.primary),
       );
     });
 
-    test('unreadable custom text colors fall back unless allowed', () {
-      const faint = DiaryCardColorSpec(
-        source: DiaryCardColorSource.custom,
-        light: 0xFFFDFDFD,
-        strength: 1,
-      );
+    test('unreadable tag text colors fall back unless allowed', () {
+      // 首个标签色过浅（与卡片底色几乎同色）时，标题色自动回退为可读的
+      // onSurface；关掉 ensureContrast 才原样使用。
+      const faintTag = Tag(id: 1, name: 'a', color: 0xFFFDFDFD);
       const style = DiaryCardStyle(
-        typography: DiaryCardTypography(titleColor: faint),
+        typography: DiaryCardTypography(
+          titleColor: DiaryCardColorSpec(
+            source: DiaryCardColorSource.firstTag,
+          ),
+        ),
       );
       final resolved = _resolve(style, DiaryCardMode.list);
       expect(
-        resolved.appearanceFor(pinned: false, locked: false).titleColor,
+        resolved
+            .appearanceFor(
+              pinned: false,
+              locked: false,
+              tags: const <Tag>[faintTag],
+            )
+            .titleColor,
         resolved.colorScheme.onSurface,
       );
       final allowed = _resolve(
@@ -389,7 +403,13 @@ void main() {
         DiaryCardMode.list,
       );
       expect(
-        allowed.appearanceFor(pinned: false, locked: false).titleColor,
+        allowed
+            .appearanceFor(
+              pinned: false,
+              locked: false,
+              tags: const <Tag>[faintTag],
+            )
+            .titleColor,
         const Color(0xFFFDFDFD),
       );
     });

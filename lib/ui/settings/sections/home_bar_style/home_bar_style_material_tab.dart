@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../diaries/viewmodels/diary_card_colors.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
 import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
 import '../../widgets/settings_reveal.dart';
-import '../../widgets/style_editor/style_color_dialog.dart';
-import '../../widgets/style_editor/style_custom_color_tile.dart';
 import '../../widgets/style_editor/style_editor_common.dart';
 import 'home_bar_style_common.dart';
 import 'home_bar_style_labels.dart';
@@ -108,28 +105,10 @@ class _GlassOptions extends StatelessWidget {
 
   final HomeBarStyleEditorController controller;
 
-  /// 第一次切到自定义色调时的起始颜色：当前中性底色（浅色主题下的值，
-  /// 去掉透明度），用户从“看起来没变”的颜色开始调，而不是一块突兀的色。
-  int _neutralLightBase(BuildContext context) => homeBarOpaqueArgb(
-    homeBarLightScheme(context, controller).surfaceContainerLowest,
-  );
-
-  void _setTint(BuildContext context, HomeBarTint tint) {
-    final style = controller.style;
-    final seed = tint == HomeBarTint.custom && style.tintColor == null
-        ? _neutralLightBase(context)
-        : null;
-    controller.commitWith(
-      (s) =>
-          s.copyWith(tint: tint, tintColor: seed == null ? null : () => seed),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final style = controller.style;
-    final isCustom = style.tint == HomeBarTint.custom;
     void commit(HomeBarStyle Function(HomeBarStyle s) update) =>
         controller.commitWith(update);
 
@@ -182,40 +161,10 @@ class _GlassOptions extends StatelessWidget {
                 value: HomeBarTint.theme,
                 label: Text(l10n.homeBarStyleTintTheme),
               ),
-              ButtonSegment<HomeBarTint>(
-                value: HomeBarTint.custom,
-                label: Text(l10n.styleEditorCustom),
-              ),
             ],
             selected: <HomeBarTint>{style.tint},
             onSelectionChanged: (Set<HomeBarTint> v) =>
-                _setTint(context, v.single),
-          ),
-        ),
-        // 自定义颜色紧跟在色调下方，与色调合在同一个位置固定的槽里，
-        // 下面的阴影不会因它的出现而错位复用。
-        SettingsReveal(
-          visible: isCustom,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              settingsDeepNestedDivider,
-              StyleCustomColorTile(
-                nested: true,
-                deep: true,
-                title: l10n.homeBarStyleTintColor,
-                light: style.tintColor ?? _neutralLightBase(context),
-                dark: style.tintColorDark,
-                role: DiaryCardColorRole.surface,
-                onChanged: (StyleCustomColor color) => commit(
-                  (s) => s.copyWith(
-                    tintColor: () => color.light,
-                    tintColorDark: () => color.dark,
-                  ),
-                ),
-              ),
-            ],
+                commit((s) => s.copyWith(tint: v.single)),
           ),
         ),
         settingsNestedDivider,

@@ -6440,12 +6440,6 @@ abstract class AppLocalizations {
   /// **'First tag'**
   String get diaryCardStyleSourceTag;
 
-  /// Diary card style settings: color source: a custom color.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get diaryCardStyleSourceCustom;
-
   /// Diary card style settings: note on the mood color source.
   ///
   /// In en, this message translates to:
@@ -6463,12 +6457,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Intensity'**
   String get diaryCardStyleStrength;
-
-  /// Diary card style settings: picks the custom color again.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit color'**
-  String get styleEditorEditColor;
 
   /// Diary card style settings: color dialog: derive the dark-mode color automatically.
   ///
@@ -6884,23 +6872,11 @@ abstract class AppLocalizations {
   /// **'First tag'**
   String get diaryPreviewStyleSeedTag;
 
-  /// Diary preview style settings: color basis option.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get diaryPreviewStyleSeedCustom;
-
   /// Diary preview style settings: note under the color basis.
   ///
   /// In en, this message translates to:
   /// **'Entries without a mood or tag use the app color.'**
   String get diaryPreviewStyleSeedHint;
-
-  /// Diary preview style settings: custom color basis picker.
-  ///
-  /// In en, this message translates to:
-  /// **'Basis color'**
-  String get diaryPreviewStyleSeedColor;
 
   /// Diary preview style settings: setting title: page background.
   ///
@@ -6944,35 +6920,11 @@ abstract class AppLocalizations {
   /// **'Ink'**
   String get diaryPreviewStylePaperInk;
 
-  /// Diary preview style settings: paper option.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get diaryPreviewStylePaperCustom;
-
-  /// Diary preview style settings: custom paper color picker.
-  ///
-  /// In en, this message translates to:
-  /// **'Paper color'**
-  String get diaryPreviewStylePaperColor;
-
   /// Diary preview style settings: note under the paper choice.
   ///
   /// In en, this message translates to:
   /// **'On paper darker or lighter than the theme, the whole page switches to match so text stays readable.'**
   String get diaryPreviewStylePaperHint;
-
-  /// Diary preview style settings: switch for a custom body text color.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom text color'**
-  String get diaryPreviewStyleTextColor;
-
-  /// Diary preview style settings: note for custom text and title colors.
-  ///
-  /// In en, this message translates to:
-  /// **'Falls back to the default color when contrast with the paper is too low.'**
-  String get diaryPreviewStyleTextColorHint;
 
   /// Diary preview style settings: group title.
   ///
@@ -7237,12 +7189,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Center'**
   String get diaryPreviewStyleAlignCenter;
-
-  /// Diary preview style settings: switch for a custom title color.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom title color'**
-  String get diaryPreviewStyleTitleColor;
 
   /// Diary preview style settings: setting title.
   ///
@@ -13784,12 +13730,6 @@ abstract class AppLocalizations {
   /// **'Theme'**
   String get homeBarStyleTintTheme;
 
-  /// Navigation bar style settings: glass color row for the custom tint.
-  ///
-  /// In en, this message translates to:
-  /// **'Glass color'**
-  String get homeBarStyleTintColor;
-
   /// Navigation bar style settings: outline switch of the floating glass bottom bar.
   ///
   /// In en, this message translates to:
@@ -13831,12 +13771,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accent'**
   String get homeBarStyleLineColorPrimary;
-
-  /// Navigation bar style settings: picker row for a custom outline or divider color.
-  ///
-  /// In en, this message translates to:
-  /// **'Line color'**
-  String get homeBarStyleLineCustomColor;
 
   /// Navigation bar style settings: outline or divider width slider.
   ///

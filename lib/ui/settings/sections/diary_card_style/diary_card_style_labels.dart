@@ -176,7 +176,6 @@ String diaryCardColorSourceLabel(
   DiaryCardColorSource.tertiary => l10n.diaryCardStyleSourceTertiary,
   DiaryCardColorSource.mood => l10n.diaryCardStyleSourceMood,
   DiaryCardColorSource.firstTag => l10n.diaryCardStyleSourceTag,
-  DiaryCardColorSource.custom => l10n.diaryCardStyleSourceCustom,
 };
 
 /// 数值标签：dp、百分比与倍率统一一位小数以内、去掉多余的 `.0`。

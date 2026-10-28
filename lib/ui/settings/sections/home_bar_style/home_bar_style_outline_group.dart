@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
-import '../../../diaries/viewmodels/diary_card_colors.dart';
-import '../../../home/models/home_bar_style/home_bar_line_colors.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
 import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
 import '../../widgets/settings_reveal.dart';
-import '../../widgets/style_editor/style_color_dialog.dart';
-import '../../widgets/style_editor/style_custom_color_tile.dart';
 import 'home_bar_style_common.dart';
 import 'home_bar_style_labels.dart';
 
@@ -89,7 +85,7 @@ class HomeBarStyleOutlineGroup extends StatelessWidget {
   }
 }
 
-/// 一条线的从属行：颜色来源、（自定义时）取色、不透明度、粗细。
+/// 一条线的从属行：颜色来源、不透明度、粗细。
 ///
 /// [read] / [write] 指向样式里的哪条线；滑块经 `homeBarSlider` 拖动中只改
 /// 草稿、松手才写入，所以每次都从传入的最新样式里读出这条线再改。
@@ -111,31 +107,9 @@ class _LineOptions extends StatelessWidget {
     HomeBarLineStyle Function(HomeBarLineStyle line) update,
   ) => write(style, update(read(style)));
 
-  /// 自定义色的起点：这条线当前颜色来源在浅色主题下的颜色（去掉透明度），
-  /// 用户从“看起来没变”的颜色开始调，与玻璃底色的自定义起点同一做法。
-  int _seed(BuildContext context) => homeBarOpaqueArgb(
-    HomeBarLineColors.base(line, homeBarLightScheme(context, controller)),
-  );
-
-  void _setColor(BuildContext context, HomeBarLineColor color) {
-    final seed = color == HomeBarLineColor.custom && line.customColor == null
-        ? _seed(context)
-        : null;
-    controller.commitWith(
-      (s) => _edit(
-        s,
-        (l) => l.copyWith(
-          color: color,
-          customColor: seed == null ? null : () => seed,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isCustom = line.color == HomeBarLineColor.custom;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -155,38 +129,9 @@ class _LineOptions extends StatelessWidget {
             ],
             selected: <HomeBarLineColor>{line.color},
             onSelectionChanged: (Set<HomeBarLineColor> v) =>
-                _setColor(context, v.single),
-          ),
-        ),
-        // 取色行紧跟在颜色来源下方，放在位置固定的槽里，下面的滑块不会
-        // 因它的出现而错位复用。
-        SettingsReveal(
-          visible: isCustom,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              settingsDeepNestedDivider,
-              StyleCustomColorTile(
-                nested: true,
-                deep: true,
-                title: l10n.homeBarStyleLineCustomColor,
-                light: line.customColor ?? _seed(context),
-                dark: line.customColorDark,
-                // 与渲染层（HomeBarLineColors）同一推导口径：细线按强调色
-                // 推导，色块显示的深色值才与实际画出来的一致。
-                role: DiaryCardColorRole.accent,
-                onChanged: (StyleCustomColor color) => controller.commitWith(
-                  (s) => _edit(
-                    s,
-                    (l) => l.copyWith(
-                      customColor: () => color.light,
-                      customColorDark: () => color.dark,
-                    ),
-                  ),
+                controller.commitWith(
+                  (s) => _edit(s, (l) => l.copyWith(color: v.single)),
                 ),
-              ),
-            ],
           ),
         ),
         settingsNestedDivider,

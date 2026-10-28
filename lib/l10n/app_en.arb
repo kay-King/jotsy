@@ -5009,10 +5009,6 @@
   "@diaryCardStyleSourceTag": {
     "description": "Diary card style settings: color source: the first tag's color."
   },
-  "diaryCardStyleSourceCustom": "Custom",
-  "@diaryCardStyleSourceCustom": {
-    "description": "Diary card style settings: color source: a custom color."
-  },
   "diaryCardStyleSourceMoodHint": "Uses each entry's mood, or the default color when there is none",
   "@diaryCardStyleSourceMoodHint": {
     "description": "Diary card style settings: note on the mood color source."
@@ -5024,10 +5020,6 @@
   "diaryCardStyleStrength": "Intensity",
   "@diaryCardStyleStrength": {
     "description": "Diary card style settings: color intensity (opacity)."
-  },
-  "styleEditorEditColor": "Edit color",
-  "@styleEditorEditColor": {
-    "description": "Diary card style settings: picks the custom color again."
   },
   "styleEditorColorDarkAuto": "Pick the dark color automatically",
   "@styleEditorColorDarkAuto": {
@@ -5338,17 +5330,9 @@
   "@diaryPreviewStyleSeedTag": {
     "description": "Diary preview style settings: color basis option."
   },
-  "diaryPreviewStyleSeedCustom": "Custom",
-  "@diaryPreviewStyleSeedCustom": {
-    "description": "Diary preview style settings: color basis option."
-  },
   "diaryPreviewStyleSeedHint": "Entries without a mood or tag use the app color.",
   "@diaryPreviewStyleSeedHint": {
     "description": "Diary preview style settings: note under the color basis."
-  },
-  "diaryPreviewStyleSeedColor": "Basis color",
-  "@diaryPreviewStyleSeedColor": {
-    "description": "Diary preview style settings: custom color basis picker."
   },
   "diaryPreviewStylePaper": "Paper",
   "@diaryPreviewStylePaper": {
@@ -5378,25 +5362,9 @@
   "@diaryPreviewStylePaperInk": {
     "description": "Diary preview style settings: paper option."
   },
-  "diaryPreviewStylePaperCustom": "Custom",
-  "@diaryPreviewStylePaperCustom": {
-    "description": "Diary preview style settings: paper option."
-  },
-  "diaryPreviewStylePaperColor": "Paper color",
-  "@diaryPreviewStylePaperColor": {
-    "description": "Diary preview style settings: custom paper color picker."
-  },
   "diaryPreviewStylePaperHint": "On paper darker or lighter than the theme, the whole page switches to match so text stays readable.",
   "@diaryPreviewStylePaperHint": {
     "description": "Diary preview style settings: note under the paper choice."
-  },
-  "diaryPreviewStyleTextColor": "Custom text color",
-  "@diaryPreviewStyleTextColor": {
-    "description": "Diary preview style settings: switch for a custom body text color."
-  },
-  "diaryPreviewStyleTextColorHint": "Falls back to the default color when contrast with the paper is too low.",
-  "@diaryPreviewStyleTextColorHint": {
-    "description": "Diary preview style settings: note for custom text and title colors."
   },
   "diaryPreviewStyleLayoutGroup": "Layout",
   "@diaryPreviewStyleLayoutGroup": {
@@ -5573,10 +5541,6 @@
   "diaryPreviewStyleAlignCenter": "Center",
   "@diaryPreviewStyleAlignCenter": {
     "description": "Diary preview style settings: alignment option."
-  },
-  "diaryPreviewStyleTitleColor": "Custom title color",
-  "@diaryPreviewStyleTitleColor": {
-    "description": "Diary preview style settings: switch for a custom title color."
   },
   "diaryPreviewStyleMetaPosition": "Position",
   "@diaryPreviewStyleMetaPosition": {
@@ -10708,10 +10672,6 @@
   "@homeBarStyleTintTheme": {
     "description": "Navigation bar style settings: theme color tint option."
   },
-  "homeBarStyleTintColor": "Glass color",
-  "@homeBarStyleTintColor": {
-    "description": "Navigation bar style settings: glass color row for the custom tint."
-  },
   "homeBarStyleBorder": "Bottom bar outline",
   "@homeBarStyleBorder": {
     "description": "Navigation bar style settings: outline switch of the floating glass bottom bar."
@@ -10739,10 +10699,6 @@
   "homeBarStyleLineColorPrimary": "Accent",
   "@homeBarStyleLineColorPrimary": {
     "description": "Navigation bar style settings: outline color option using the theme's primary color."
-  },
-  "homeBarStyleLineCustomColor": "Line color",
-  "@homeBarStyleLineCustomColor": {
-    "description": "Navigation bar style settings: picker row for a custom outline or divider color."
   },
   "homeBarStyleLineWidth": "Width",
   "@homeBarStyleLineWidth": {

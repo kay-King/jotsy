@@ -6,7 +6,6 @@ import '../../../app/theme/seeded_theme_cache.dart';
 import '../../../core/services/settings_service.dart';
 import '../../widgets/mood_band_palette.dart';
 import '../models/diary_preview_style/diary_preview_style.dart';
-import 'diary_card_colors.dart';
 
 /// 预览页样式在当前主题、屏幕与这篇日记下的具体取值。
 ///
@@ -19,8 +18,7 @@ import 'diary_card_colors.dart';
 ///   装配的另一套主题（深色纸上是深色主题），信息栏、胶囊、引用条、勾选框等
 ///   所有语义色一起变化，不会出现深色纸上的深色文字；
 /// - 默认样式（跟随应用 + 主题底色）原样返回应用主题，渲染与改版前一致；
-/// - 自定义正文 / 标题颜色按纸色检查对比度（正文 4.5:1、标题 3:1，WCAG 2.x），
-///   不足时回退为主题色，未设深色值时按色相推导。
+/// - 正文与标题一律用主题色，不再支持自定义颜色。
 @immutable
 class DiaryPreviewResolvedStyle {
   const DiaryPreviewResolvedStyle._({
@@ -34,12 +32,6 @@ class DiaryPreviewResolvedStyle {
     required this.maxContentWidth,
     required this.coverHeight,
   });
-
-  /// 正文与背景的最低对比度。
-  static const double bodyContrast = 4.5;
-
-  /// 标题（大字）与背景的最低对比度。
-  static const double titleContrast = 3;
 
   /// 内置纸色：（浅色主题，深色主题）。墨色两种主题下都是深色纸。
   static const Map<DiaryPreviewPaper, (int, int)> paperColors =
@@ -76,8 +68,6 @@ class DiaryPreviewResolvedStyle {
       ),
       DiaryPreviewColorSeed.tag =>
         firstTagColor == null ? null : Color(firstTagColor),
-      DiaryPreviewColorSeed.custom =>
-        page.seedColor == null ? null : Color(page.seedColor!),
     };
     final themed = seed != null || pageBrightness != appBrightness;
     final theme = themed
@@ -106,20 +96,9 @@ class DiaryPreviewResolvedStyle {
       theme: theme,
       themed: themed,
       background: background,
-      bodyColor: _readable(
-        page.textLight,
-        page.textDark,
-        pageBrightness,
-        background,
-        bodyContrast,
-      ),
-      titleColor: _readable(
-        style.title.colorLight,
-        style.title.colorDark,
-        pageBrightness,
-        background,
-        titleContrast,
-      ),
+      // 正文与标题不再支持自定义颜色，一律用主题色。
+      bodyColor: null,
+      titleColor: null,
       horizontalPadding: horizontalPadding,
       maxContentWidth: maxContentWidth != null && maxContentWidth < width
           ? maxContentWidth
@@ -140,10 +119,10 @@ class DiaryPreviewResolvedStyle {
   /// 页面底色（纸色，或主题 surface）。
   final Color background;
 
-  /// 通过对比度检查的自定义正文颜色；null 表示用主题正文色。
+  /// 正文颜色；始终为 null，表示用主题正文色。
   final Color? bodyColor;
 
-  /// 通过对比度检查的自定义标题颜色；null 表示用主题色。
+  /// 标题颜色；始终为 null，表示用主题色。
   final Color? titleColor;
 
   /// 实际左右边距（窄屏上为正文留出至少
@@ -159,22 +138,6 @@ class DiaryPreviewResolvedStyle {
 
   static Color? _paperColor(DiaryPreviewPageStyle page, Brightness brightness) {
     final light = brightness == Brightness.light;
-    if (page.paper == DiaryPreviewPaper.custom) {
-      final custom = page.paperLight;
-      if (custom == null) {
-        return null;
-      }
-      if (light) {
-        return Color(custom);
-      }
-      final dark = page.paperDark;
-      return dark != null
-          ? Color(dark)
-          : DiaryCardColors.deriveDark(
-              Color(custom),
-              DiaryCardColorRole.surface,
-            );
-    }
     final preset = paperColors[page.paper];
     if (preset == null) {
       return null;
@@ -199,28 +162,5 @@ class DiaryPreviewResolvedStyle {
       scheme,
       MoodBandPalette.bandForWeight(weight),
     ).withValues(alpha: 1);
-  }
-
-  static Color? _readable(
-    int? lightValue,
-    int? darkValue,
-    Brightness pageBrightness,
-    Color background,
-    double minContrast,
-  ) {
-    if (lightValue == null) {
-      return null;
-    }
-    final color = pageBrightness == Brightness.light
-        ? Color(lightValue)
-        : darkValue != null
-        ? Color(darkValue)
-        : DiaryCardColors.deriveDark(
-            Color(lightValue),
-            DiaryCardColorRole.text,
-          );
-    return DiaryCardColors.contrastOver(color, background) >= minContrast
-        ? color
-        : null;
   }
 }

@@ -12,13 +12,8 @@ import 'package:node_diary/ui/diaries/models/diary_preview_style/diary_preview_s
 /// 每个字段都不是默认值的样式，用于往返测试。
 const _everything = DiaryPreviewStyle(
   page: DiaryPreviewPageStyle(
-    colorSeed: DiaryPreviewColorSeed.custom,
-    seedColor: 0xFF336699,
-    paper: DiaryPreviewPaper.custom,
-    paperLight: 0xFFF4ECD8,
-    paperDark: 0xFF2B261E,
-    textLight: 0xFF333333,
-    textDark: 0xFFDDDDDD,
+    colorSeed: DiaryPreviewColorSeed.mood,
+    paper: DiaryPreviewPaper.warm,
     horizontalPadding: 30,
     limitWidth: true,
     contentWidth: 720,
@@ -44,8 +39,6 @@ const _everything = DiaryPreviewStyle(
     scale: 1.4,
     weight: DiaryPreviewTitleWeight.medium,
     align: DiaryPreviewAlign.center,
-    colorLight: 0xFF112233,
-    colorDark: 0xFFCCDDEE,
   ),
   meta: DiaryPreviewMetaStyle(
     position: DiaryPreviewMetaPosition.end,
@@ -205,8 +198,8 @@ void main() {
     final style = DiaryPreviewStyle.fromJson(<String, Object?>{
       'page': <String, Object?>{
         'horizontalPadding': 'wide',
-        'paper': 'sepia',
-        'seedColor': '#12',
+        'paper': 'custom',
+        'colorSeed': 'custom',
       },
       'cover': <String, Object?>{'height': 9999, 'mode': 'inset'},
       'title': <String, Object?>{'scale': double.nan, 'align': 'center'},
@@ -214,8 +207,9 @@ void main() {
       'body': 'nope',
     });
     expect(style.page.horizontalPadding, 16);
-    expect(style.page.paper, DiaryPreviewPaper.sepia);
-    expect(style.page.seedColor, isNull);
+    // 旧的 custom 取色已删除：认不出的名字回退到默认。
+    expect(style.page.paper, DiaryPreviewPaper.theme);
+    expect(style.page.colorSeed, DiaryPreviewColorSeed.app);
     // 越界夹到边界。
     expect(style.cover.height, DiaryPreviewStyleLimits.coverHeight.max);
     expect(style.cover.mode, DiaryPreviewCoverMode.inset);
@@ -224,21 +218,6 @@ void main() {
     expect(style.meta.dateFormat, DiaryCardDateFormat.relative);
     expect(style.meta.showTags, isFalse);
     expect(style.body, const DiaryPreviewBodyStyle());
-  });
-
-  test('custom colors accept hex strings and are stored opaque', () {
-    final style = DiaryPreviewStyle.fromJson(<String, Object?>{
-      'page': <String, Object?>{
-        'paperLight': '#80F4ECD8',
-        'textLight': 0x12345678,
-      },
-    });
-    expect(style.page.paperLight, 0xFFF4ECD8);
-    expect(style.page.textLight, 0xFF345678);
-    expect(style.toJson()['page'], <String, Object>{
-      'paperLight': '#F4ECD8',
-      'textLight': '#345678',
-    });
   });
 
   test('presets are distinct and classic is the default look', () {

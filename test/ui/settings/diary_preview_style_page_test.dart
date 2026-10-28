@@ -413,15 +413,11 @@ void main() {
         const DiaryPreviewSettings(
           current: DiaryPreviewStyle(
             page: DiaryPreviewPageStyle(
-              colorSeed: DiaryPreviewColorSeed.custom,
-              seedColor: 0xFF884488,
-              paper: DiaryPreviewPaper.custom,
-              paperLight: 0xFFF4ECD8,
-              textLight: 0xFF333333,
+              colorSeed: DiaryPreviewColorSeed.mood,
+              paper: DiaryPreviewPaper.warm,
               limitWidth: true,
             ),
             cover: DiaryPreviewCoverStyle(mode: DiaryPreviewCoverMode.inset),
-            title: DiaryPreviewTitleStyle(colorLight: 0xFF224466),
           ),
           behavior: DiaryPreviewBehavior(textSelection: false),
         ).encode(),

@@ -3505,9 +3505,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryCardStyleSourceTag => '首个标签';
 
   @override
-  String get diaryCardStyleSourceCustom => '自定义';
-
-  @override
   String get diaryCardStyleSourceMoodHint => '按每篇日记的心情取色；没有心情时用默认颜色';
 
   @override
@@ -3515,9 +3512,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryCardStyleStrength => '浓度';
-
-  @override
-  String get styleEditorEditColor => '编辑颜色';
 
   @override
   String get styleEditorColorDarkAuto => '深色模式自动配色';
@@ -3740,13 +3734,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryPreviewStyleSeedTag => '首个标签';
 
   @override
-  String get diaryPreviewStyleSeedCustom => '自定义';
-
-  @override
   String get diaryPreviewStyleSeedHint => '没有心情或标签的日记沿用应用主题色。';
-
-  @override
-  String get diaryPreviewStyleSeedColor => '基调颜色';
 
   @override
   String get diaryPreviewStylePaper => '纸张';
@@ -3770,19 +3758,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryPreviewStylePaperInk => '墨色';
 
   @override
-  String get diaryPreviewStylePaperCustom => '自定义';
-
-  @override
-  String get diaryPreviewStylePaperColor => '纸张颜色';
-
-  @override
   String get diaryPreviewStylePaperHint => '纸色与主题深浅相反时，整页换成相应的明暗，文字始终清楚。';
-
-  @override
-  String get diaryPreviewStyleTextColor => '自定义正文颜色';
-
-  @override
-  String get diaryPreviewStyleTextColorHint => '和纸张对比度不足时自动改用默认颜色。';
 
   @override
   String get diaryPreviewStyleLayoutGroup => '版式';
@@ -3915,9 +3891,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryPreviewStyleAlignCenter => '居中';
-
-  @override
-  String get diaryPreviewStyleTitleColor => '自定义标题颜色';
 
   @override
   String get diaryPreviewStyleMetaPosition => '位置';
@@ -7548,9 +7521,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeBarStyleTintTheme => '主题色';
 
   @override
-  String get homeBarStyleTintColor => '玻璃颜色';
-
-  @override
   String get homeBarStyleBorder => '底栏描边';
 
   @override
@@ -7570,9 +7540,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get homeBarStyleLineColorPrimary => '主题色';
-
-  @override
-  String get homeBarStyleLineCustomColor => '描边颜色';
 
   @override
   String get homeBarStyleLineWidth => '粗细';

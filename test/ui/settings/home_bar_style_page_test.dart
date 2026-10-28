@@ -25,14 +25,11 @@ Finder _materialOption(String label) => find.descendant(
 const _glassCustom = HomeBarSettings(
   current: HomeBarStyle(
     material: HomeBarMaterial.glass,
-    tint: HomeBarTint.custom,
-    tintColor: 0xFF88AACC,
-    // 两条线都打开、底栏描边用自定义色：320dp 检查要覆盖描边分组展开最多的
-    // 样子（含二级的取色行）。
+    tint: HomeBarTint.theme,
+    // 两条线都打开、底栏描边用高光色：320dp 检查要覆盖描边分组展开的样子。
     topBarHairline: true,
     borderLine: HomeBarLineStyle(
-      color: HomeBarLineColor.custom,
-      customColor: 0xFF336699,
+      color: HomeBarLineColor.highlight,
       opacity: 0.6,
       width: 1.0,
     ),
@@ -90,20 +87,6 @@ void main() {
     expect(inHomeBarOptions(l10n.homeBarStyleGlassFooter), findsOneWidget);
     expect(find.byType(HomeFloatingBar), findsOneWidget);
 
-    // 自定义色调：起始色是当前中性底色（不透明），颜色行随之展开。
-    await tapHomeBarOption(
-      tester,
-      find.descendant(
-        of: find.byType(ExpressiveButtonGroup<HomeBarTint>),
-        matching: find.text(l10n.styleEditorCustom),
-      ),
-    );
-    final custom = storedHomeBarSettings(settings).current;
-    expect(custom.tint, HomeBarTint.custom);
-    expect(custom.tintColor, isNotNull);
-    expect(custom.tintColor! >> 24, 0xFF);
-    expect(inHomeBarOptions(l10n.homeBarStyleTintColor), findsOneWidget);
-
     await tapHomeBarOption(
       tester,
       _materialOption(l10n.homeBarStyleMaterialSolid),
@@ -115,7 +98,6 @@ void main() {
     // fork 的间距默认值已与玻璃一致（同为 2），切材质不再改间距。
     expect(storedHomeBarSettings(settings).current.labelGap, 2);
     expect(inHomeBarOptions(l10n.homeBarStyleGlassTopBars), findsNothing);
-    expect(inHomeBarOptions(l10n.homeBarStyleTintColor), findsNothing);
     expect(find.byType(BottomNav), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

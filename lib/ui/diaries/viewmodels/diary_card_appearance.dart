@@ -266,18 +266,6 @@ class DiaryCardAppearanceResolver {
         return context.locked ? null : context.moodColor;
       case DiaryCardColorSource.firstTag:
         return context.locked ? null : context.tagColor;
-      case DiaryCardColorSource.custom:
-        final light = spec.light;
-        if (light == null) {
-          return null;
-        }
-        if (_isLight) {
-          return Color(light);
-        }
-        final dark = spec.dark;
-        return dark != null
-            ? Color(dark)
-            : DiaryCardColors.deriveDark(Color(light), role);
     }
   }
 

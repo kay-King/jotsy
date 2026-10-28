@@ -14,10 +14,6 @@ double _double(Object? raw, double fallback, DiaryCardRange range) =>
 int _int(Object? raw, int fallback, DiaryCardRange range) =>
     StyleJson.integer(raw, fallback, range);
 
-int? _argb(Object? raw) => StyleJson.argb(raw);
-
-String _hex(int argb) => StyleJson.hex(argb);
-
 Map<String, dynamic>? _map(Object? raw) => StyleJson.map(raw);
 
 /// 区块顺序：丢弃未知名与重复项，再把缺失的区块按默认顺序补在末尾，保证

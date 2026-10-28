@@ -5,7 +5,7 @@ import 'home_bar_style_enums.dart';
 import 'home_bar_style_limits.dart';
 
 /// 一条细线（悬浮底栏的描边、玻璃顶栏底部的分隔线）的外观：颜色来源、
-/// 自定义色、不透明度与粗细。是否画这条线不在这里，由 `HomeBarStyle` 的
+/// 不透明度与粗细。是否画这条线不在这里，由 `HomeBarStyle` 的
 /// `border` / `topBarHairline` 开关决定——关掉开关时保留这里的调整，再打开
 /// 时原样恢复。
 ///
@@ -19,8 +19,6 @@ import 'home_bar_style_limits.dart';
 class HomeBarLineStyle {
   const HomeBarLineStyle({
     this.color = HomeBarLineColor.theme,
-    this.customColor,
-    this.customColorDark,
     required this.opacity,
     required this.width,
   });
@@ -58,9 +56,6 @@ class HomeBarLineStyle {
         json['color'],
         fallback.color,
       ),
-      customColor: StyleJson.argb(json['customColor']) ?? fallback.customColor,
-      customColorDark:
-          StyleJson.argb(json['customColorDark']) ?? fallback.customColorDark,
       opacity: StyleJson.number(
         json['opacity'],
         fallback.opacity,
@@ -76,12 +71,6 @@ class HomeBarLineStyle {
 
   final HomeBarLineColor color;
 
-  /// [HomeBarLineColor.custom] 的浅色主题颜色（不透明 ARGB）；为 null 时按
-  /// 跟随主题解读，但解码保留原样，不改写用户的选择。
-  final int? customColor;
-
-  /// 深色主题颜色；为 null 时由 [customColor] 推导。
-  final int? customColorDark;
   final double opacity;
   final double width;
 
@@ -89,33 +78,18 @@ class HomeBarLineStyle {
   Map<String, Object> toJson(HomeBarLineStyle fallback) {
     final json = <String, Object>{};
     StyleJson.putEnum(json, 'color', color, fallback.color);
-    StyleJson.putColor(json, 'customColor', customColor, fallback.customColor);
-    StyleJson.putColor(
-      json,
-      'customColorDark',
-      customColorDark,
-      fallback.customColorDark,
-    );
     StyleJson.put(json, 'opacity', opacity, fallback.opacity);
     StyleJson.put(json, 'width', width, fallback.width);
     return json;
   }
 
-  /// 可空颜色用 [ValueGetter] 传入，才能区分“不改”（不传）与“清除”
-  /// （`() => null`）。
   HomeBarLineStyle copyWith({
     HomeBarLineColor? color,
-    ValueGetter<int?>? customColor,
-    ValueGetter<int?>? customColorDark,
     double? opacity,
     double? width,
   }) {
     return HomeBarLineStyle(
       color: color ?? this.color,
-      customColor: customColor == null ? this.customColor : customColor(),
-      customColorDark: customColorDark == null
-          ? this.customColorDark
-          : customColorDark(),
       opacity: opacity ?? this.opacity,
       width: width ?? this.width,
     );
@@ -125,18 +99,13 @@ class HomeBarLineStyle {
   bool operator ==(Object other) {
     return other is HomeBarLineStyle &&
         other.color == color &&
-        other.customColor == customColor &&
-        other.customColorDark == customColorDark &&
         other.opacity == opacity &&
         other.width == width;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(color, customColor, customColorDark, opacity, width);
+  int get hashCode => Object.hash(color, opacity, width);
 
   @override
-  String toString() =>
-      'HomeBarLineStyle($color, $customColor, $customColorDark, '
-      '$opacity, $width)';
+  String toString() => 'HomeBarLineStyle($color, $opacity, $width)';
 }

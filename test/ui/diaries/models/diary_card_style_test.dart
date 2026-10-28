@@ -9,9 +9,7 @@ const _everyField = DiaryCardStyle(
   surface: DiaryCardSurfaceStyle(
     cornerRadius: 10,
     background: DiaryCardColorSpec(
-      source: DiaryCardColorSource.custom,
-      light: 0xFF123456,
-      dark: 0xFF654321,
+      source: DiaryCardColorSource.primary,
       strength: 0.5,
     ),
     opacity: 0.8,
@@ -42,8 +40,7 @@ const _everyField = DiaryCardStyle(
     metaScale: 1.1,
     textAlign: DiaryCardTextAlign.center,
     titleColor: DiaryCardColorSpec(
-      source: DiaryCardColorSource.custom,
-      light: 0xFF000080,
+      source: DiaryCardColorSource.primary,
       strength: 1,
     ),
     bodyColor: DiaryCardColorSpec(
@@ -207,8 +204,21 @@ void main() {
     test('round-trips every field', () {
       final decoded = DiaryCardStyle.decode(_everyField.encode());
       expect(decoded, _everyField);
-      expect(decoded.surface.background.light, 0xFF123456);
-      expect(decoded.surface.background.dark, 0xFF654321);
+    });
+
+    test('unknown color source names fall back to the themed default', () {
+      // 已删除的 custom 来源名（旧备份/样式码里可能还有）只让该颜色位
+      // 回退到主题色，同一对象里的其他字段不受影响。
+      final decoded = DiaryCardStyle.fromJson(<String, Object>{
+        'surface': <String, Object>{
+          'background': <String, Object>{
+            'source': 'custom',
+            'strength': 0.5,
+          },
+        },
+      });
+      expect(decoded.surface.background.source, DiaryCardColorSource.theme);
+      expect(decoded.surface.background.strength, 0.5);
     });
 
     test('encodes only fields that differ from their defaults', () {
@@ -307,25 +317,6 @@ void main() {
         DiaryCardBlock.tags,
         DiaryCardBlock.footer,
       ]);
-    });
-
-    test('parses custom colors leniently and forces them opaque', () {
-      DiaryCardColorSpec decode(Object? light) => DiaryCardStyle.fromJson(
-        <String, Object>{
-          'surface': <String, Object>{
-            'background': <String, Object?>{'source': 'custom', 'light': light},
-          },
-        },
-      ).surface.background;
-
-      expect(decode('#12AB34').light, 0xFF12AB34);
-      expect(decode('12ab34').light, 0xFF12AB34);
-      expect(decode('#8012AB34').light, 0xFF12AB34);
-      expect(decode(0x0012AB34).light, 0xFF12AB34);
-      expect(decode('#12AB3').light, isNull);
-      expect(decode('teal').light, isNull);
-      // 自定义来源却没有颜色时按主题色处理。
-      expect(decode('teal').isThemed, isTrue);
     });
 
     test('ignores a newer field it does not know and keeps the rest', () {

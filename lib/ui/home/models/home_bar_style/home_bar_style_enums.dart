@@ -8,9 +8,8 @@ library;
 /// 圆角胶囊，顶栏可选同样透出下方内容。
 enum HomeBarMaterial { solid, glass }
 
-/// 玻璃的底色：[neutral] 中性表面色；[theme] 向主题色容器色偏一点；
-/// [custom] 自定义色（未设颜色时按 [neutral] 解读）。
-enum HomeBarTint { neutral, theme, custom }
+/// 玻璃的底色：[neutral] 中性表面色；[theme] 向主题色容器色偏一点。
+enum HomeBarTint { neutral, theme }
 
 /// 底栏文字：[always] 始终显示（改版前的样子）；[selected] 只显示选中项；
 /// [never] 只有图标。实色与玻璃两种材质都适用。
@@ -25,6 +24,5 @@ enum HomeBarIndicator { capsule, block, none }
 enum HomeBarFabPlacement { above, inline }
 
 /// 描边 / 分隔线的颜色来源：[theme] 跟随主题的 outlineVariant（改版前的
-/// 细线）；[highlight] 明亮的玻璃边缘高光；[primary] 主题色；[custom] 自定义色
-/// （未设颜色时按 [theme] 解读）。
-enum HomeBarLineColor { theme, highlight, primary, custom }
+/// 细线）；[highlight] 明亮的玻璃边缘高光；[primary] 主题色。
+enum HomeBarLineColor { theme, highlight, primary }
