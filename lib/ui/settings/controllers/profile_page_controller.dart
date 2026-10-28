@@ -5,6 +5,7 @@ import '../../../core/services/app_service.dart';
 import '../../../core/services/diary_media_storage_service.dart';
 import '../../../core/services/profile_avatar_storage_service.dart';
 import '../../../core/services/profile_cover_storage_service.dart';
+import '../../diaries/providers/diary_profile_provider.dart';
 
 /// 个人资料页的异步链路：昵称保存、头像更换/移除、简介保存、封面更换/移除。
 ///
@@ -22,7 +23,11 @@ class ProfilePageController {
     if (settings == null) {
       return;
     }
-    await settings.setProfileNickname(value);
+    final trimmed = value.trim();
+    final limited = trimmed.length > DiaryProfile.nicknameMaxLength
+        ? trimmed.substring(0, DiaryProfile.nicknameMaxLength)
+        : trimmed;
+    await settings.setProfileNickname(limited);
   }
 
   Future<void> saveBio(String value) async {
@@ -30,7 +35,11 @@ class ProfilePageController {
     if (settings == null) {
       return;
     }
-    await settings.setProfileBio(value);
+    final trimmed = value.trim();
+    final limited = trimmed.length > DiaryProfile.bioMaxLength
+        ? trimmed.substring(0, DiaryProfile.bioMaxLength)
+        : trimmed;
+    await settings.setProfileBio(limited);
   }
 
   /// 换上新封面返回 true；取消或导入失败返回 false。

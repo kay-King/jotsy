@@ -179,6 +179,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: TextField(
                   controller: _nicknameController,
                   focusNode: _nicknameFocusNode,
+                  maxLength: DiaryProfile.nicknameMaxLength,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _saveNickname(),
                   decoration: InputDecoration(
@@ -200,6 +201,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: TextField(
                   controller: _bioController,
                   focusNode: _bioFocusNode,
+                  maxLength: DiaryProfile.bioMaxLength,
                   maxLines: 3,
                   minLines: 1,
                   textInputAction: TextInputAction.done,

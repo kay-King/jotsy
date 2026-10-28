@@ -30,6 +30,8 @@ class DesktopHeader extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           '${_greeting(now, l10n)}，$nickname',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w400,

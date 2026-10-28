@@ -22,6 +22,14 @@ class DiaryProfile {
   /// 未设置时的默认昵称。
   static const String defaultNickname = '我';
 
+  /// 昵称字数上限：时间线封面昵称行（20 号字 + 72 头像）与桌面问候行
+  /// （26 号字）都只有一行宽度，超过会溢出；输入框与保存时都按此截断。
+  static const int nicknameMaxLength = 12;
+
+  /// 简介字数上限：时间线页昵称下方最多显示 3 行，超过既占地方又难读；
+  /// 输入框与保存时都按此截断。
+  static const int bioMaxLength = 60;
+
   final String nickname;
   final String? avatarPath;
 
