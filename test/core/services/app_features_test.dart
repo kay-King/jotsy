@@ -19,6 +19,7 @@ void main() {
           'anniversaries': null,
           'templates': 0,
           'timeCapsules': false,
+          'swipeArchive': 'off',
           'futureFeature': false,
         }),
       );
@@ -45,6 +46,7 @@ void main() {
         desktop: false,
         anniversaries: false,
         templates: false,
+        swipeArchive: false,
       );
       final raw = features.encode();
 
@@ -55,6 +57,7 @@ void main() {
         'anniversaries',
         'templates',
         'timeCapsules',
+        'swipeArchive',
       ]);
       expect(AppFeatures.decode(raw), features);
     });

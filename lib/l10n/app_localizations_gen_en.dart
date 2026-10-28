@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations_gen.dart';
 
 // ignore_for_file: type=lint
@@ -1972,8 +1973,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'Adds new diaries and replaces the $count existing diaries with the versions in the file',
-      one:
-          'Adds new diaries and replaces the existing diary with the version in the file',
+      one: 'Adds new diaries and replaces the existing diary with the version in the file',
     );
     return '$_temp0';
   }
@@ -2035,8 +2035,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'The $count diaries already on this device will be replaced entirely by the versions in the file. Their local edits and tags will be lost for good.',
-      one:
-          'The diary already on this device will be replaced entirely by the version in the file. Its local edits and tags will be lost for good.',
+      one: 'The diary already on this device will be replaced entirely by the version in the file. Its local edits and tags will be lost for good.',
     );
     return '$_temp0 Other diaries are not affected.';
   }
@@ -2329,8 +2328,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'The bodies of $count notes couldn\'t be read; only their summaries will be imported',
-      one:
-          'The body of 1 note couldn\'t be read; only its summary will be imported',
+      one: 'The body of 1 note couldn\'t be read; only its summary will be imported',
     );
     return '$_temp0';
   }
@@ -2342,8 +2340,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           '$count notes contain sections that cannot be decrypted or displayed; readable text and original data will be preserved',
-      one:
-          '1 note contains sections that cannot be decrypted or displayed; readable text and original data will be preserved',
+      one: '1 note contains sections that cannot be decrypted or displayed; readable text and original data will be preserved',
     );
     return '$_temp0';
   }
@@ -2799,8 +2796,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'Adds new items and replaces the $count existing anniversaries with the versions in the file',
-      one:
-          'Adds new items and replaces the existing anniversary with the version in the file',
+      one: 'Adds new items and replaces the existing anniversary with the version in the file',
     );
     return '$_temp0';
   }
@@ -2834,8 +2830,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'The $count anniversaries already on this device will be replaced by the versions in the file; local edits will be lost for good.',
-      one:
-          'The anniversary already on this device will be replaced by the version in the file; local edits will be lost for good.',
+      one: 'The anniversary already on this device will be replaced by the version in the file; local edits will be lost for good.',
     );
     return '$_temp0';
   }
@@ -6089,8 +6084,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'Also replaces the name, cover, chapters and other settings of $count existing notebooks',
-      one:
-          'Also replaces the name, cover, chapters and other settings of 1 existing notebook',
+      one: 'Also replaces the name, cover, chapters and other settings of 1 existing notebook',
     );
     return '$_temp0';
   }
@@ -7373,8 +7367,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'Turns the $count source notebooks / folders into notebooks; ones with the same name join your existing notebooks',
-      one:
-          'Turns the source notebook / folder into a notebook; one with the same name joins your existing notebook',
+      one: 'Turns the source notebook / folder into a notebook; one with the same name joins your existing notebook',
     );
     return '$_temp0';
   }
@@ -7890,8 +7883,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'The $count entries that match now will be added (archived entries excluded), and the notebook will stop updating automatically.',
-      one:
-          'The 1 entry that matches now will be added (archived entries excluded), and the notebook will stop updating automatically.',
+      one: 'The 1 entry that matches now will be added (archived entries excluded), and the notebook will stop updating automatically.',
     );
     return '$_temp0';
   }
@@ -8323,6 +8315,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write to the future; opens only when it\'s due';
 
   @override
+  String get settingsFeaturesSwipeArchive => 'Swipe to archive';
+
+  @override
+  String get settingsFeaturesSwipeArchiveSubtitle =>
+      'Swipe a diary card left to archive it, or left in Archive to restore it';
+
+  @override
   String get settingsFeaturesNotebooksOffTitle => 'Turn off notebooks?';
 
   @override
@@ -8332,8 +8331,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other:
           'You have $count hidden or locked notebooks. Their diaries stay out of sight until you turn notebooks back on.',
-      one:
-          'You have 1 hidden or locked notebook. Its diaries stay out of sight until you turn notebooks back on.',
+      one: 'You have 1 hidden or locked notebook. Its diaries stay out of sight until you turn notebooks back on.',
     );
     return '$_temp0';
   }

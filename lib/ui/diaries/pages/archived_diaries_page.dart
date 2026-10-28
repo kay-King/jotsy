@@ -16,6 +16,7 @@ import 'package:node_diary/ui/widgets/empty_hint.dart';
 import '../../../app/theme/expressive_motion.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/settings_service.dart';
+import '../../settings/providers/app_features_provider.dart';
 import '../providers/diary_card_style_provider.dart';
 import '../sections/diary_head_section.dart';
 import '../../widgets/expressive_icon_swap.dart';
@@ -52,7 +53,7 @@ class _ArchivedDiariesPageState extends ConsumerState<ArchivedDiariesPage> {
   /// 在 build 中清理。
   final Set<String> _pendingHideDiaryIds = <String>{};
 
-  /// 滑动取消归档后同步隐藏的条目：Dismissible 离场后必须立即移出列表，
+  /// 滑动取消归档后同步隐藏的条目：侧滑组件收起后必须立即移出列表，
   /// 不能等待异步写库后的数据流更新。
   final Set<String> _sweptAwayDiaryIds = <String>{};
 
@@ -95,6 +96,10 @@ class _ArchivedDiariesPageState extends ConsumerState<ArchivedDiariesPage> {
   @override
   Widget build(BuildContext context) {
     final archivedAsync = ref.watch(archivedDiariesProvider);
+    // 侧滑归档关闭时，归档页同样不再左滑取消归档。
+    final swipeArchiveEnabled = ref.watch(
+      appFeaturesProvider.select((features) => features.swipeArchive),
+    );
     final diaryCardTagLimit =
         ref.watch(diaryCardTagLimitProvider).asData?.value ??
         SettingsService.defaultDiaryCardTagLimit;
@@ -227,9 +232,11 @@ class _ArchivedDiariesPageState extends ConsumerState<ArchivedDiariesPage> {
                                 ),
                               ),
                           onToggleSelection: _controller.toggleSelection,
-                          onArchiveDiary: (diaryId) => unawaited(
-                            _controller.unarchiveDiaryBySwipe(diaryId),
-                          ),
+                          onArchiveDiary: swipeArchiveEnabled
+                              ? (diaryId) => unawaited(
+                                  _controller.unarchiveDiaryBySwipe(diaryId),
+                                )
+                              : null,
                           swipeActionIcon: FontAwesomeIcons.boxOpen,
                         ),
                       ],

@@ -1,7 +1,7 @@
 // 功能管理开关（设置 → 功能管理）。
 //
 // 职责：描述用户可整体关闭的功能——桌面 Tab、日记本、纪念日、
-// 日记模板、时间胶囊——是否开启；默认全部开启。关闭只是在各处隐藏入口与
+// 日记模板、时间胶囊、侧滑归档——是否开启；默认全部开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
 //
 // 探索与日历已经并进桌面页（首页），不再占底栏 Tab，这里也不再有
@@ -21,6 +21,7 @@ class AppFeatures {
     this.anniversaries = true,
     this.templates = true,
     this.timeCapsules = true,
+    this.swipeArchive = true,
   });
 
   /// 全部开启：从未设置、读不出或恢复默认时都是它。
@@ -41,6 +42,10 @@ class AppFeatures {
   /// 时间胶囊。
   final bool timeCapsules;
 
+  /// 侧滑归档：日记列表左滑卡片归档、归档页左滑取消归档（只在手机上有这个
+  /// 手势，桌面用右键菜单）。关闭后仍可长按多选或在预览页里归档。
+  final bool swipeArchive;
+
   /// 纪念日是否可用：只看自己的开关（以前依附日历，日历并进首页后
   /// 不再有日历开关）。界面一律读这个 getter，不直接读 [anniversaries]。
   bool get anniversariesEnabled => anniversaries;
@@ -50,6 +55,7 @@ class AppFeatures {
   static const _keyAnniversaries = 'anniversaries';
   static const _keyTemplates = 'templates';
   static const _keyTimeCapsules = 'timeCapsules';
+  static const _keySwipeArchive = 'swipeArchive';
 
   /// 解析设置原文。空值、坏 JSON 或不是对象时回到 [defaults]；每个字段
   /// 单独读取，类型不对只让这一项回到默认，认不出的键忽略——这样新旧版本
@@ -75,6 +81,7 @@ class AppFeatures {
       anniversaries: read(_keyAnniversaries, defaults.anniversaries),
       templates: read(_keyTemplates, defaults.templates),
       timeCapsules: read(_keyTimeCapsules, defaults.timeCapsules),
+      swipeArchive: read(_keySwipeArchive, defaults.swipeArchive),
     );
   }
 
@@ -88,6 +95,7 @@ class AppFeatures {
       _keyAnniversaries: anniversaries,
       _keyTemplates: templates,
       _keyTimeCapsules: timeCapsules,
+      _keySwipeArchive: swipeArchive,
     });
   }
 
@@ -97,6 +105,7 @@ class AppFeatures {
     bool? anniversaries,
     bool? templates,
     bool? timeCapsules,
+    bool? swipeArchive,
   }) {
     return AppFeatures(
       desktop: desktop ?? this.desktop,
@@ -104,6 +113,7 @@ class AppFeatures {
       anniversaries: anniversaries ?? this.anniversaries,
       templates: templates ?? this.templates,
       timeCapsules: timeCapsules ?? this.timeCapsules,
+      swipeArchive: swipeArchive ?? this.swipeArchive,
     );
   }
 
@@ -114,7 +124,8 @@ class AppFeatures {
       other.notebooks == notebooks &&
       other.anniversaries == anniversaries &&
       other.templates == templates &&
-      other.timeCapsules == timeCapsules;
+      other.timeCapsules == timeCapsules &&
+      other.swipeArchive == swipeArchive;
 
   @override
   int get hashCode => Object.hash(
@@ -123,11 +134,13 @@ class AppFeatures {
     anniversaries,
     templates,
     timeCapsules,
+    swipeArchive,
   );
 
   @override
   String toString() =>
       'AppFeatures(desktop: $desktop, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
-      'templates: $templates, timeCapsules: $timeCapsules)';
+      'templates: $templates, timeCapsules: $timeCapsules, '
+      'swipeArchive: $swipeArchive)';
 }

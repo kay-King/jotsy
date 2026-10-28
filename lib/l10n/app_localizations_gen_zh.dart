@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations_gen.dart';
 
 // ignore_for_file: type=lint
@@ -7473,6 +7474,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsFeaturesTimeCapsulesSubtitle => '写给未来，到期才能打开';
+
+  @override
+  String get settingsFeaturesSwipeArchive => '侧滑归档';
+
+  @override
+  String get settingsFeaturesSwipeArchiveSubtitle => '在日记列表左滑卡片归档，在归档页左滑取消归档';
 
   @override
   String get settingsFeaturesNotebooksOffTitle => '关闭日记本？';

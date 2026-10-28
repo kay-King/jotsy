@@ -57,6 +57,8 @@ void main() {
     expect(stored(h).templates, isFalse);
     await toggle(tester, l10n.settingsFeaturesTimeCapsules);
     expect(stored(h).timeCapsules, isFalse);
+    await toggle(tester, l10n.settingsFeaturesSwipeArchive);
+    expect(stored(h).swipeArchive, isFalse);
     await toggle(tester, l10n.notebookTitle);
     await h.settle();
     expect(stored(h).notebooks, isFalse);
@@ -176,9 +178,18 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // 功能管理里 5 个开关（桌面/日记本/纪念日/模板/时间胶囊；
+      // 功能管理里 6 个开关（桌面/日记本/纪念日/模板/时间胶囊/侧滑归档；
       // 探索与日历已并进首页，不再有开关）。
-      expect(find.byType(SettingsSwitchTile), findsNWidgets(5));
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(6));
     });
   }
+
+  testWidgets('desktop has no swipe-to-archive switch', (tester) async {
+    final h = await DiaryDraftsHarness.create(tester);
+    await h.pump(const AppFeaturesPage());
+
+    expect(switchTile(h.l10n.settingsFeaturesTimeCapsules), findsOneWidget);
+    expect(switchTile(h.l10n.settingsFeaturesSwipeArchive), findsNothing);
+    await h.unmount();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 }

@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/services/app_platform.dart';
 import '../../../core/services/settings_service.dart';
 import '../models/diary_card_style/diary_card_style.dart';
 import '../viewmodels/diary_card_resolved_style.dart';
@@ -240,9 +241,11 @@ class DiariesListSection extends StatelessWidget {
       child: card,
     );
 
-    // 普通列表始终保留 Dismissible 根节点，避免进入选择模式时重建子树，
-    // 从而让首次长按也能完整播放选中反馈；选择模式仅关闭滑动方向。
-    if (!resolved.compact && onArchiveDiary != null) {
+    // 普通列表始终保留侧滑包装，避免进入选择模式时重建子树，从而让首次
+    // 长按也能完整播放选中反馈；选择模式仅关闭滑动。未传 [onArchiveDiary]
+    // （功能管理里关闭了侧滑归档）时不包。
+    // 桌面上不提供左滑：鼠标拖动卡片会误触发归档，右键菜单已提供同样的操作。
+    if (!resolved.compact && onArchiveDiary != null && !AppPlatform.isDesktop) {
       final colorScheme = Theme.of(context).colorScheme;
       return DiarySwipeActionItem(
         diaryId: diaryId,
