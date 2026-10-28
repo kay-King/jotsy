@@ -249,19 +249,19 @@ void main() {
   });
 
   test(
-    'tryExtractSimpleContent rejects over-long text and too many images',
+    'tryExtractSimpleContent accepts over-long text but rejects too many images',
     () {
-      // 正文 2001 字。
-      final longText = '字' * 2001;
-      expect(
-        SimpleComposerController.tryExtractSimpleContent(
-          jsonEncode([
-            {'insert': '$longText\n'},
-          ]),
-        ),
-        isNull,
+      // 正文不限字数：5000 字也能用简洁编辑器重新打开。
+      final longText = '字' * 5000;
+      final extracted = SimpleComposerController.tryExtractSimpleContent(
+        jsonEncode([
+          {'insert': '$longText\n'},
+        ]),
       );
-      // 10 张图。
+      expect(extracted, isNotNull);
+      expect(extracted!.text, longText);
+      expect(extracted.images, isEmpty);
+      // 10 张图还是不行（上限 9 张）。
       final tenImages = <Map<String, Object?>>[
         {'insert': '文字\n'},
         for (var i = 0; i < 10; i++) ...[

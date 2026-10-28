@@ -5,12 +5,10 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/services/settings_service.dart';
 import '../models/diary_card_style/diary_card_style.dart';
-import '../providers/diary_profile_provider.dart';
 import '../viewmodels/diary_card_resolved_style.dart';
 import '../widgets/diaries_empty_state.dart';
 import '../widgets/diary_card/diary_card.dart';
 import '../widgets/diary_swipe_action_item.dart';
-import '../widgets/diary_timeline/diary_timeline_item.dart';
 import '../widgets/diary_waterfall_sliver.dart';
 import 'diary_head_section.dart';
 import '../../widgets/expressive_entrance.dart';
@@ -54,7 +52,6 @@ class DiariesListSection extends StatelessWidget {
     this.enableCoverHero = true,
     this.opensLockedCapsulePage = true,
     this.sectionHeaderBuilder,
-    this.profile = const DiaryProfile(nickname: '', avatarPath: null),
   });
 
   /// 视图层已过滤/排序后的日记数据。
@@ -109,11 +106,6 @@ class DiariesListSection extends StatelessWidget {
   /// 其他列表（归档、搜索、全部日记）不受影响。
   final Widget? Function(BuildContext context, int index)? sectionHeaderBuilder;
 
-  /// 时间线视图用的个人资料（昵称 + 头像）。调用方从 diaryProfileProvider
-  /// 取了传进来；不传时用默认资料（昵称显示“我”）。不在这里读 provider，
-  /// 否则样式预览与矩阵测试拼装本区块时树里没有 ProviderScope 会直接抛错。
-  final DiaryProfile profile;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -140,23 +132,6 @@ class DiariesListSection extends StatelessWidget {
             ),
           ),
         ),
-      );
-    }
-
-    // 时间线模式：朋友圈式条目（头像 + 昵称 + 正文折叠 + 九宫格），不走
-    // 卡片样式解析（没有卡片表面），与列表/瀑布流互斥。
-    if (layoutMode == DiaryLayoutMode.timeline) {
-      return SliverList(
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          final diary = diaries[index];
-          return KeyedSubtree(
-            key: ValueKey<String>('timeline_${diary.diary.diaryId}'),
-            child: LaunchReveal(
-              slot: LaunchRevealSlot.content(index),
-              child: _buildTimelineItem(context, diary: diary),
-            ),
-          );
-        }, childCount: diaries.length),
       );
     }
 
@@ -256,48 +231,6 @@ class DiariesListSection extends StatelessWidget {
         actionColor: swipeActionBackgroundColor ?? colorScheme.primaryContainer,
         actionIconColor: swipeActionIconColor ?? colorScheme.onPrimaryContainer,
         borderRadius: resolved.cornerRadius,
-        onSwiped: () => onArchiveDiary!(diaryId),
-        child: animatedBaseItem,
-      );
-    }
-
-    return animatedBaseItem;
-  }
-
-  /// 时间线条目：与 [_buildDiaryItem] 同一套进出动画与滑动归档（圆角为 0，
-  /// 条目本身是通栏白底行），只把卡片换成朋友圈式排布。
-  Widget _buildTimelineItem(
-    BuildContext context, {
-    required DiaryWithTags diary,
-  }) {
-    final diaryId = diary.diary.diaryId;
-    final item = DiaryTimelineItem(
-      diary: diary,
-      profile: profile,
-      selected: selectedDiaryIds.contains(diaryId),
-      isSelectionMode: isSelectionMode,
-      maxVisibleTags: maxVisibleTags,
-      onOpenEditor: onOpenEditor,
-      onToggleSelection: onToggleSelection,
-      opensLockedCapsulePage: opensLockedCapsulePage,
-    );
-    final animatedBaseItem = _buildAnimatedDiaryItem(
-      context,
-      diaryId: diaryId,
-      child: item,
-    );
-
-    // 与列表分支同理：始终保留 Dismissible 根节点，避免进入选择模式时
-    // 重建子树；选择模式仅关闭滑动方向。
-    if (onArchiveDiary != null) {
-      final colorScheme = Theme.of(context).colorScheme;
-      return DiarySwipeActionItem(
-        diaryId: diaryId,
-        enabled: !isSelectionMode,
-        icon: swipeActionIcon,
-        actionColor: swipeActionBackgroundColor ?? colorScheme.primaryContainer,
-        actionIconColor: swipeActionIconColor ?? colorScheme.onPrimaryContainer,
-        borderRadius: 0,
         onSwiped: () => onArchiveDiary!(diaryId),
         child: animatedBaseItem,
       );

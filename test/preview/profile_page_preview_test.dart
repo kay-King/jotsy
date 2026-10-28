@@ -1,5 +1,5 @@
-// 时间线预览台：首页切到时间线布局（长文折叠 + 九宫格）与个人资料页。
-// 运行：JOTSY_PREVIEW=1 flutter test --update-goldens test/preview/timeline_test.dart
+// 个人资料页预览台：首页进设置页再进个人资料。
+// 运行：JOTSY_PREVIEW=1 flutter test --update-goldens test/preview/profile_page_preview_test.dart
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -14,6 +14,7 @@ import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_create_fab.dart';
+import 'package:node_diary/ui/widgets/bottom_nav.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -129,8 +130,6 @@ Future<({AppDatabase database, SettingsService settings})> _seed() async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
   final database = AppDatabase.forTesting(NativeDatabase.memory());
   final settings = await SettingsService.create();
-  // 时间线布局：经已有设置键持久化，首页控制器启动即读到。
-  await settings.setDiaryLayoutModeRaw('timeline');
   final tempDir = await Directory.systemTemp.createTemp('jotsy_timeline_');
   final colors = <Color>[
     const Color(0xFF7FB069),
@@ -258,35 +257,19 @@ void main() {
     await _loadFonts();
   });
 
-  testWidgets('timeline home', (tester) async {
-    _setLocale(tester);
-    final seeded = (await tester.runAsync(_seed))!;
-    addTearDown(seeded.database.close);
-    await _pumpApp(tester, seeded.database, seeded.settings);
-    await _waitReady(tester, '周末去露营');
-    // 九宫格图片是磁盘文件，解码走真实异步：多等几轮真时间再截图，
-    // 否则格子占了位、图片还是空白。
-    for (var i = 0; i < 10; i++) {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump(const Duration(milliseconds: 100));
-    }
-    await expectLater(
-      find.byType(NodeDiaryApp),
-      matchesGoldenFile('goldens/timeline_home.png'),
-    );
-    await _flushDisposal(tester);
-  }, skip: Platform.environment['JOTSY_PREVIEW'] != '1');
-
   testWidgets('profile page', (tester) async {
     _setLocale(tester);
     final seeded = (await tester.runAsync(_seed))!;
     addTearDown(seeded.database.close);
     await _pumpApp(tester, seeded.database, seeded.settings);
-    await _waitReady(tester, '周末去露营');
+    // 桌面有“最近记录”即就绪（日记标题不在桌面上，之前等“周末去露营”
+    // 永远等不到；v16 起首页默认是桌面）。
+    await _waitReady(tester, '最近记录');
     // 底栏切到设置页，再进个人资料。标签切换是动画，出几帧等新页落定。
-    await tester.tap(find.text('设置'));
+    // 桌面上也有“设置”快捷入口，点底栏必须限定在 BottomNav 内找。
+    await tester.tap(
+      find.descendant(of: find.byType(BottomNav), matching: find.text('设置')),
+    );
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }

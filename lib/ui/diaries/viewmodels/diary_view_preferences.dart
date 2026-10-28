@@ -31,13 +31,12 @@ class DiaryViewPreferences {
     return DiarySortMode.values.asNameMap()[raw] ?? DiarySortMode.updatedDesc;
   }
 
-  /// 布局字符串解析。
+  /// 布局字符串解析：'timeline' 已移除（时间线移入独立页），旧值与
+  /// 未知值一律回退为列表。
   static DiaryLayoutMode _parseLayoutMode(String raw) {
     switch (raw) {
       case 'waterfall':
         return DiaryLayoutMode.waterfall;
-      case 'timeline':
-        return DiaryLayoutMode.timeline;
       case 'list':
       default:
         return DiaryLayoutMode.list;

@@ -8570,11 +8570,53 @@ abstract class AppLocalizations {
   /// **'Remove avatar'**
   String get profileRemoveAvatar;
 
+  /// Profile page bio field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Bio'**
+  String get profileBio;
+
+  /// Profile page hint under the bio field.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown under your nickname on the timeline page'**
+  String get profileBioHint;
+
+  /// Profile page cover section label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get profileCover;
+
+  /// Profile page hint under the cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows a default blue cover when not set'**
+  String get profileCoverHint;
+
+  /// Profile page button to pick a new cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get profileChangeCover;
+
+  /// Profile page button to remove the cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default cover'**
+  String get profileRemoveCover;
+
   /// Timeline body text button to collapse expanded text.
   ///
   /// In en, this message translates to:
   /// **'Collapse'**
   String get timelineCollapse;
+
+  /// Timeline page empty state when there are no diaries.
+  ///
+  /// In en, this message translates to:
+  /// **'No diaries yet. Write one!'**
+  String get timelineEmpty;
 
   /// Explore stats section header: overview.
   ///

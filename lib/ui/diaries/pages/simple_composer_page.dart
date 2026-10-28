@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/services/app_service.dart';
@@ -12,11 +11,12 @@ import 'package:node_diary/ui/diaries/controllers/debounced_auto_save_controller
 import 'package:node_diary/ui/diaries/controllers/simple_composer_controller.dart';
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
 import 'package:node_diary/ui/diaries/widgets/simple_composer_image_grid.dart';
+import 'package:node_diary/ui/widgets/image_viewer_page.dart';
 
 /// 简洁编辑器（fakeWechat 写日记样式）：纯文本 + 图片九宫格。
 ///
 /// 从桌面“写点什么”进入；日历/日记页仍走原来的富文本编辑器。
-/// 正文最多 2000 字，图片最多 9 张（九宫格，满 9 张后“+”消失）。
+/// 正文不限字数，图片最多 9 张（九宫格，满 9 张后“+”消失）。
 /// 写出来的日记进同一张 diaries 表，所以日记页、时间线都能同步看到，
 /// 并在 metadata 里打 `simpleComposer: true` 标记。
 ///
@@ -65,7 +65,6 @@ class SimpleComposerPage extends ConsumerStatefulWidget {
 
 class _SimpleComposerPageState extends ConsumerState<SimpleComposerPage>
     with WidgetsBindingObserver {
-  static const int _maxTextLength = 2000;
   static const int _maxImages = 9;
 
   final TextEditingController _textController = TextEditingController();
@@ -154,6 +153,17 @@ class _SimpleComposerPageState extends ConsumerState<SimpleComposerPage>
       title: snapshot.title,
       contentText: snapshot.contentText,
       payload: snapshot.payload,
+    );
+  }
+
+  /// 点图片进大图预览（看图页，左右切图、双击缩放、下拉关闭都和正文
+  /// 看图一致）；长按删图（九宫格里的 × 已去掉，删图只走长按）。
+  Future<void> _previewImage(int index) async {
+    if (index < 0 || index >= _imagePaths.length) return;
+    await openImageViewer(
+      context,
+      items: _imagePaths.map((path) => ImageViewerItem(source: path)).toList(),
+      initialIndex: index,
     );
   }
 
@@ -248,6 +258,9 @@ class _SimpleComposerPageState extends ConsumerState<SimpleComposerPage>
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     final textLength = _textController.text.length;
+    // 朋友圈编辑页式单列滚动：正文 → 九宫格 → 计数 → 提示，一路往下流，
+    // 不再把计数/提示钉在底部（原来 Expanded + 底部钉死的布局会在中
+    // 间留一大片空白，看着空荡荡的）。
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -271,103 +284,102 @@ class _SimpleComposerPageState extends ConsumerState<SimpleComposerPage>
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              TextField(
+                controller: _textController,
+                maxLines: null,
+                minLines: 5,
+                buildCounter:
+                    (
+                      context, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) => null,
+                onChanged: (_) {
+                  setState(() {});
+                  _autoSave?.schedule();
+                },
+                decoration: InputDecoration(
+                  hintText: l10n.simpleComposerHint,
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                  // 主题默认给输入框上灰底（filled + surfaceContainer），
+                  // 朋友圈编辑页是透明底、字直接落在白底上，这里显式关掉。
+                  filled: false,
+                  fillColor: Colors.transparent,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                style: const TextStyle(fontSize: 17, height: 1.55),
+              ),
+              const SizedBox(height: 16),
+              SimpleComposerImageGrid(
+                imagePaths: _imagePaths,
+                maxImages: _maxImages,
+                onAdd: _pickImages,
+                onPreview: _previewImage,
+                onRemove: (index) {
+                  setState(() => _imagePaths.removeAt(index));
+                  _autoSave?.schedule();
+                },
+              ),
               const SizedBox(height: 8),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      TextField(
-                        controller: _textController,
-                        maxLines: null,
-                        minLines: 8,
-                        maxLength: _maxTextLength,
-                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        buildCounter:
-                            (
-                              context, {
-                              required currentLength,
-                              required isFocused,
-                              maxLength,
-                            }) => null,
-                        onChanged: (_) {
-                          setState(() {});
-                          _autoSave?.schedule();
-                        },
-                        decoration: InputDecoration(
-                          hintText: l10n.simpleComposerHint,
-                          hintStyle: TextStyle(
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.6,
-                            ),
-                          ),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        style: const TextStyle(fontSize: 16, height: 1.6),
+              Text(
+                l10n.simpleComposerMaxImages,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  // 不限字数后只显示字数，不再显示“/2000”上限。
+                  '$textLength字',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.only(top: 14),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(text: l10n.simpleComposerTipPrefix),
+                      TextSpan(
+                        text: l10n.simpleComposerTipBold,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(height: 8),
-                      SimpleComposerImageGrid(
-                        imagePaths: _imagePaths,
-                        maxImages: _maxImages,
-                        onAdd: _pickImages,
-                        onRemove: (index) {
-                          setState(() => _imagePaths.removeAt(index));
-                          _autoSave?.schedule();
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.simpleComposerMaxImages,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                      TextSpan(text: l10n.simpleComposerTipSuffix),
                     ],
                   ),
                 ),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '$textLength/$_maxTextLength',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: textLength > 1900
-                        ? colorScheme.error
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              Text.rich(
-                TextSpan(
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  children: <TextSpan>[
-                    TextSpan(text: l10n.simpleComposerTipPrefix),
-                    TextSpan(
-                      text: l10n.simpleComposerTipBold,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    TextSpan(text: l10n.simpleComposerTipSuffix),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
             ],
           ),
         ),

@@ -79,6 +79,8 @@ class SettingsService {
     required String? appFeaturesRaw,
     required String profileNickname,
     required String? profileAvatarPath,
+    required String profileBio,
+    required String? profileCoverPath,
   }) : themeModeNotifier = ValueNotifier<ThemeMode>(mode),
        themeSeedColorNotifier = ValueNotifier<Color>(themeSeedColor),
        homeTabSwitchCurveNotifier = ValueNotifier<HomeTabSwitchCurveType>(
@@ -129,7 +131,9 @@ class SettingsService {
        ),
        appFeaturesRawNotifier = ValueNotifier<String?>(appFeaturesRaw),
        profileNicknameNotifier = ValueNotifier<String>(profileNickname),
-       profileAvatarPathNotifier = ValueNotifier<String?>(profileAvatarPath);
+       profileAvatarPathNotifier = ValueNotifier<String?>(profileAvatarPath),
+       profileBioNotifier = ValueNotifier<String>(profileBio),
+       profileCoverPathNotifier = ValueNotifier<String?>(profileCoverPath);
 
   final SharedPreferences _prefs;
   final ValueNotifier<ThemeMode> themeModeNotifier;
@@ -196,8 +200,12 @@ class SettingsService {
   /// 头像文件路径（null 表示未设置，展示昵称首字）。头像文件只由
   /// ProfileAvatarStorageService 写进私有目录；备份只带路径字符串，文件
   /// 本身不进备份，恢复后文件缺失时展示层回退为首字头像。
+  /// 个人简介（空字符串表示未设置）与时间线页封面图路径（null 表示未
+  /// 设置，展示默认蓝色封面），与昵称/头像同一套规则。
   final ValueNotifier<String> profileNicknameNotifier;
   final ValueNotifier<String?> profileAvatarPathNotifier;
+  final ValueNotifier<String> profileBioNotifier;
+  final ValueNotifier<String?> profileCoverPathNotifier;
 
   static const _keyThemeMode = 'app.settings.theme_mode';
   static const _keyThemeSeedColorValue = 'app.settings.theme_seed_color_value';
@@ -215,6 +223,8 @@ class SettingsService {
   static const _keyGalleryGroupType = 'app.settings.gallery_group_type';
   static const _keyProfileNickname = 'app.settings.profile_nickname';
   static const _keyProfileAvatarPath = 'app.settings.profile_avatar_path';
+  static const _keyProfileBio = 'app.settings.profile_bio';
+  static const _keyProfileCoverPath = 'app.settings.profile_cover_path';
   static const _keyDiaryToolbarOrder = 'app.settings.diary_toolbar_order';
   static const _keyDiaryToolbarHiddenItems =
       'app.settings.diary_toolbar_hidden_items';
@@ -352,6 +362,8 @@ class SettingsService {
       appFeaturesRaw: storedAppFeatures is String ? storedAppFeatures : null,
       profileNickname: prefs.getString(_keyProfileNickname) ?? '',
       profileAvatarPath: prefs.getString(_keyProfileAvatarPath),
+      profileBio: prefs.getString(_keyProfileBio) ?? '',
+      profileCoverPath: prefs.getString(_keyProfileCoverPath),
     );
   }
 
@@ -426,6 +438,8 @@ class SettingsService {
   /// 未设置）。展示层负责回退（昵称 → “我”，头像 → 昵称首字）。
   String get profileNickname => profileNicknameNotifier.value;
   String? get profileAvatarPath => profileAvatarPathNotifier.value;
+  String get profileBio => profileBioNotifier.value;
+  String? get profileCoverPath => profileCoverPathNotifier.value;
   List<String> get moodOptions =>
       decodeMoodOptions(moodOptionsRawNotifier.value);
   int get diaryCardTagLimit => diaryCardTagLimitNotifier.value;
@@ -512,6 +526,28 @@ class SettingsService {
           _keyProfileAvatarPath,
           profileAvatarPathNotifier.value!,
         ),
+      );
+    }
+  }
+
+  Future<void> setProfileBio(String value) async {
+    final normalized = value.trim();
+    profileBioNotifier.value = normalized;
+    await _writePreference(_prefs.setString(_keyProfileBio, normalized));
+  }
+
+  /// 封面路径为 null 时删键（恢复默认蓝色封面）；非空路径先更新 notifier
+  /// 再落盘，时间线页即时换封面。旧封面文件的删除由调用方负责。
+  Future<void> setProfileCoverPath(String? value) async {
+    final normalized = value?.trim();
+    profileCoverPathNotifier.value = normalized == null || normalized.isEmpty
+        ? null
+        : normalized;
+    if (profileCoverPathNotifier.value == null) {
+      await _writePreference(_prefs.remove(_keyProfileCoverPath));
+    } else {
+      await _writePreference(
+        _prefs.setString(_keyProfileCoverPath, profileCoverPathNotifier.value!),
       );
     }
   }

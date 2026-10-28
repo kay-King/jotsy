@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/diaries/pages/timeline_page.dart';
 import 'package:node_diary/ui/explore/pages/explore_media_gallery_page.dart';
 import 'package:node_diary/ui/settings/pages/data_management_page.dart';
 import 'package:node_diary/ui/settings/pages/profile_page.dart';
@@ -30,9 +31,11 @@ class DesktopTiles extends ConsumerWidget {
                 child: DesktopTile(
                   icon: Icons.view_timeline_outlined,
                   label: l10n.desktopTimeline,
-                  onTap: () => ref
-                      .read(homeTabRequestProvider.notifier)
-                      .request(HomeTab.diaries),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TimelinePage(),
+                    ),
+                  ),
                 ),
               ),
               _DesktopTileDivider(colorScheme: colorScheme),

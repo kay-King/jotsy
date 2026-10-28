@@ -4638,7 +4638,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileRemoveAvatar => '移除头像';
 
   @override
+  String get profileBio => '个人简介';
+
+  @override
+  String get profileBioHint => '在时间线页昵称下方显示';
+
+  @override
+  String get profileCover => '封面';
+
+  @override
+  String get profileCoverHint => '未设置时显示默认蓝色封面';
+
+  @override
+  String get profileChangeCover => '更换封面';
+
+  @override
+  String get profileRemoveCover => '恢复默认封面';
+
+  @override
   String get timelineCollapse => '收起';
+
+  @override
+  String get timelineEmpty => '还没有日记，去写一篇吧';
 
   @override
   String get statsOverviewTitle => '概况';

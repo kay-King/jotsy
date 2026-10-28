@@ -141,9 +141,10 @@ class SimpleComposerController {
   /// 判断一份 Delta 能不能用简洁编辑器打开，能就返回纯文本与图片。
   ///
   /// 简洁编辑器只认纯文本 + 图片：任何文字带了属性（加粗、颜色、标题、
-  /// 列表等）、任何非图片的嵌入（视频、音频、附件等）、正文超 2000 字
-  /// 或图片超 9 张，都返回 null（重新编辑时直进标准编辑器，不给选择）。
-  /// 文本按操作顺序拼接，末尾的换行去掉；图片只取 image 块的路径。
+  /// 列表等）、任何非图片的嵌入（视频、音频、附件等）或图片超 9 张，
+  /// 都返回 null（重新编辑时直进标准编辑器，不给选择）。正文不限字数，
+  /// 写多长都能用简洁编辑器重新打开。文本按操作顺序拼接，末尾的换行
+  /// 去掉；图片只取 image 块的路径。
   static ({String text, List<String> images})? tryExtractSimpleContent(
     String contentDocJson,
   ) {
@@ -181,7 +182,7 @@ class SimpleComposerController {
       while (text.endsWith('\n')) {
         text = text.substring(0, text.length - 1);
       }
-      if (text.length > 2000 || images.length > 9) return null;
+      if (images.length > 9) return null;
       return (text: text, images: images);
     } catch (_) {
       return null;

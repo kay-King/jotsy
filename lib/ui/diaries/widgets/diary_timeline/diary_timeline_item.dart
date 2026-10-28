@@ -124,7 +124,9 @@ class DiaryTimelineItem extends StatelessWidget {
                           style: textTheme.titleMedium?.copyWith(
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
-                            color: colors.onSurface,
+                            // 昵称走主题蓝（朋友圈式）：与标题/正文的暖黑区分开，
+                            // 一眼就能认出是谁发的。
+                            color: colors.primary,
                           ),
                         ),
                         const SizedBox(height: 4),

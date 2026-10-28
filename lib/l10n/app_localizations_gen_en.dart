@@ -5124,7 +5124,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileRemoveAvatar => 'Remove avatar';
 
   @override
+  String get profileBio => 'Bio';
+
+  @override
+  String get profileBioHint => 'Shown under your nickname on the timeline page';
+
+  @override
+  String get profileCover => 'Cover';
+
+  @override
+  String get profileCoverHint => 'Shows a default blue cover when not set';
+
+  @override
+  String get profileChangeCover => 'Change cover';
+
+  @override
+  String get profileRemoveCover => 'Restore default cover';
+
+  @override
   String get timelineCollapse => 'Collapse';
+
+  @override
+  String get timelineEmpty => 'No diaries yet. Write one!';
 
   @override
   String get statsOverviewTitle => 'Overview';
