@@ -344,17 +344,12 @@ class _TrailingActions extends StatelessWidget {
         IconButton(
           tooltip: context.l10n.diaryFilterTitle,
           onPressed: onOpenFilter,
-          icon: Badge(
-            isLabelVisible: hasActiveFilter,
-            backgroundColor: colorScheme.primary,
-            smallSize: 8,
-            child: Icon(
-              Icons.filter_list_outlined,
-              size: 20,
-              color: hasActiveFilter
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
+          icon: Icon(
+            Icons.filter_list_outlined,
+            size: 20,
+            color: hasActiveFilter
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
           ),
         ),
         IconButton(
