@@ -1,24 +1,21 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../../app/theme/expressive_motion.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../widgets/app_top_bar.dart';
-import '../../../widgets/snap_panel.dart';
+import '../../../widgets/expressive_menu/expressive_menu.dart';
 
-/// 样式编辑页（卡片样式、预览页样式、代码块样式）共用的页面外壳。
+/// 样式编辑页（卡片样式、预览页样式、代码块样式、导航栏样式）共用的页面外壳。
 ///
-/// 上方实时预览，下方按标签页分组调整。窄屏时选项是一块可拖动的面板
-/// （[SnapPanel]），停在三档：上档盖住预览、只留顶部工具条（没有工具条的
-/// 页面只留标题栏）；中档为默认，预览
-/// 约占六成五高度；下档只露出标签栏，预览占满其余空间。宽屏（≥720dp）时预览与
-/// 选项左右并排。右上角“重置”在已是默认样式时禁用。
+/// 全屏实时预览：预览占满整个屏幕，所有控制按钮都悬浮在预览上、不占固定位置。
+/// - 左上角悬浮菜单按钮：点开展开菜单（页面标题、返回、重置）；
+/// - 顶部悬浮预览工具条：各页自定（如列表/瀑布流切换、页码点、明暗切换），与
+///   菜单按钮同行；
+/// - 底部悬浮分类按钮：一排独立小按钮，点一个弹 BottomSheet（Salt 白卡）显示
+///   该分类的选项，改动即时生效、关掉即可。
 ///
-/// 标签页之间禁用横滑：选项里有大量滑块与拖拽排序，横滑切页会与它们抢
-/// 手势。状态与写入由各页的编辑控制器负责（[listenable]），外壳只管布局。
-class StyleEditorScaffold extends StatefulWidget {
+/// 标签页之间没有横滑：选项直接按分类进 BottomSheet。状态与写入由各页的编辑
+/// 控制器负责（[listenable]），外壳只管布局。
+class StyleEditorScaffold extends StatelessWidget {
   const StyleEditorScaffold({
     super.key,
     required this.title,
@@ -41,188 +38,240 @@ class StyleEditorScaffold extends StatefulWidget {
   final List<String> tabs;
   final List<Widget> Function() tabViews;
 
-  /// 窄屏时固定在预览上方的工具条（宽屏时由预览自己显示）；为 null 时
-  /// 不占这一行。必须在监听回调内重新创建；复用同一个 Widget 会跳过重建，
-  /// 让选中态与捕获旧明暗值的按钮回调滞留到页面因其他交互重建时才刷新。
+  /// 悬浮在预览顶部的工具条（与菜单按钮同行）；为 null 时这一段只留菜单按钮。
+  /// 必须在监听回调内重新创建；复用同一个 Widget 会跳过重建，让选中态与捕获
+  /// 旧明暗值的按钮回调滞留到页面因其他交互重建时才刷新。
   final WidgetBuilder? toolbarBuilder;
 
-  /// 标题栏里排在“重置”之前的操作按钮（如预览明暗）。工具条只有一两个
-  /// 按钮时放这里，不为它单独占一行、挤占预览。随 [listenable] 重建，理由
-  /// 同 [toolbarBuilder]。
+  /// 悬浮在预览顶部、排在工具条之后的操作按钮（如预览明暗）。随 [listenable]
+  /// 重建，理由同 [toolbarBuilder]。
   final List<Widget> Function(BuildContext context)? actionsBuilder;
 
-  /// 实时预览：[showToolbar] 为宽屏时自带工具条；[bottomPadding] 为窄屏时
-  /// 被面板圆角压住的高度，预览末尾多留这段空白。
+  /// 实时预览：[showToolbar] 恒为 false（工具条已悬浮在顶部）；[bottomPadding]
+  /// 为底部悬浮按钮条预留的高度，预览末尾多留这段、内容不被按钮条盖住。
   final Widget Function({
     required bool showToolbar,
     required double bottomPadding,
   })
   previewBuilder;
 
-  @override
-  State<StyleEditorScaffold> createState() => _StyleEditorScaffoldState();
-}
+  /// 底部悬浮按钮条给预览预留的高度。
+  static const double _bottomBarReserve = 76;
 
-class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
-    with TickerProviderStateMixin {
-  late final SnapPanelController _panel;
-  TabController? _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _panel = SnapPanelController(vsync: this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 切页动画时长取 ExpressiveMotion token（减少动画时为 0），需要读取
-    // MediaQuery，因此在首次 didChangeDependencies 而不是 initState 里创建。
-    _tabController ??= TabController(
-      length: widget.tabs.length,
-      vsync: this,
-      animationDuration: ExpressiveMotion.duration(
-        context,
-        ExpressiveMotion.medium,
+  /// 点分类按钮：弹 BottomSheet 显示该分类的选项（Salt 白卡）。
+  ///
+  /// 各 tab 页内部的选项逻辑一点不动，只是换了个入口。
+  Future<void> _openTabSheet(BuildContext context, int index) {
+    final label = tabs[index];
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _panel.dispose();
-    _tabController?.dispose();
-    super.dispose();
-  }
-
-  TabBar _tabBar(TabController controller, {ValueChanged<int>? onTap}) {
-    return TabBar(
-      controller: controller,
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      onTap: onTap,
-      tabs: <Tab>[for (final tab in widget.tabs) Tab(text: tab)],
-    );
-  }
-
-  String _panelStopLabel(AppLocalizations l10n, SnapPanelStop stop) {
-    return switch (stop) {
-      SnapPanelStop.collapsed => l10n.styleEditorPanelCollapsed,
-      SnapPanelStop.half => l10n.styleEditorPanelHalf,
-      SnapPanelStop.expanded => l10n.styleEditorPanelExpanded,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final tabController = _tabController!;
-    return Scaffold(
-      appBar: AppTopBar(
-        title: Text(widget.title),
-        // 样式编辑页预览优先：标题栏压到 56dp（AppTopBar 默认 64dp 不动，
-        // 只在本页覆盖），给预览多让出 8dp。
-        toolbarHeight: 56,
-        leading: IconButton(
-          tooltip: l10n.commonBack,
-          onPressed: () => Navigator.of(context).maybePop(),
-          icon: const FaIcon(FontAwesomeIcons.angleLeft, size: 18),
-        ),
-        actions: <Widget>[
-          ListenableBuilder(
-            listenable: widget.listenable,
-            builder: (BuildContext context, Widget? child) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ...?widget.actionsBuilder?.call(context),
-                TextButton(
-                  onPressed: widget.isDefault() ? null : widget.onReset,
-                  child: Text(l10n.commonReset),
-                ),
-              ],
+      builder: (BuildContext sheetContext) {
+        final size = MediaQuery.sizeOf(sheetContext);
+        final l10n = sheetContext.l10n;
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: size.width >= 720 ? 640 : double.infinity,
             ),
-          ),
-        ],
-      ),
-      body: ListenableBuilder(
-        listenable: widget.listenable,
-        builder: (BuildContext context, Widget? child) {
-          return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              if (constraints.maxWidth >= 720) {
-                return Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: widget.previewBuilder(
-                        showToolbar: true,
-                        bottomPadding: 0,
-                      ),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(
+            // sheet 里包自己的 ScaffoldMessenger + Scaffold：各 tab 页经
+            // showStyleEditorUndoSnackBar 弹的提示（套用、重置、导入等）走
+            // 最近的 messenger，显示在 sheet 内部；否则会被底下的页面
+            // Scaffold 接住、藏在 modal 遮罩后面看不见、点不到。
+            child: ScaffoldMessenger(
+              child: Scaffold(
+                backgroundColor: Theme.of(
+                  sheetContext,
+                ).colorScheme.surface,
+                body: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    child: SizedBox(
+                      height: size.height * 0.78,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          _tabBar(tabController),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  label,
+                                  style: Theme.of(sheetContext)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: l10n.commonClose,
+                                onPressed: () =>
+                                    Navigator.of(sheetContext).pop(),
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // tab 页内部不自己监听控制器：包一层 ListenableBuilder，
+                          // 控制器变化时重建该分类的选项（与原来 TabBarView 在
+                          // ListenableBuilder 里重建 tabViews() 一致）。
                           Expanded(
-                            child: TabBarView(
-                              controller: tabController,
-                              physics: const NeverScrollableScrollPhysics(),
-                              children: widget.tabViews(),
+                            child: ListenableBuilder(
+                              listenable: listenable,
+                              builder: (BuildContext _, Widget? __) =>
+                                  tabViews()[index],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                );
-              }
-              // 中档时预览约占 65% 高度（360~600），边调边看：预览够大能完整
-              // 看到卡片/日记页效果；矮屏（横屏、分屏）上不超过 70%，给标签
-              // 页留出可用空间。想看选项时手动下拉。
-              final previewHeight = math.min(
-                (constraints.maxHeight * 0.65).clamp(360.0, 600.0).toDouble(),
-                constraints.maxHeight * 0.7,
-              );
-              return Column(
-                children: <Widget>[
-                  ?widget.toolbarBuilder?.call(context),
-                  Expanded(
-                    child: SnapPanel(
-                      controller: _panel,
-                      halfExtent:
-                          constraints.maxHeight -
-                          previewHeight +
-                          SnapPanel.handleExtent,
-                      background: widget.previewBuilder(
-                        showToolbar: false,
-                        bottomPadding: SnapPanel.cornerRadius,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 左上角悬浮菜单按钮：返回、标题、重置都收进菜单，点开显示。
+  Widget _menuButton(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surfaceContainerHigh,
+      shape: const CircleBorder(),
+      elevation: 2,
+      child: ExpressiveMenuButton(
+        tooltip: title,
+        icon: const Icon(Icons.more_vert),
+        placement: ExpressiveMenuPlacement.start,
+        items: <Widget>[
+          // 标题不可点，只起标识作用。
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ExpressiveMenuItem(
+            onPressed: () => Navigator.of(context).maybePop(),
+            leadingIcon: const FaIcon(FontAwesomeIcons.angleLeft),
+            child: Text(l10n.commonBack),
+          ),
+          ExpressiveMenuItem(
+            onPressed: isDefault() ? null : onReset,
+            leadingIcon: const FaIcon(FontAwesomeIcons.arrowRotateLeft),
+            child: Text(l10n.commonReset),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 底部悬浮分类按钮条：独立小按钮横排，超宽时可横滑。
+  Widget _tabButtonBar(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Center(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (int i = 0; i < tabs.length; i++) ...<Widget>[
+              if (i > 0) const SizedBox(width: 8),
+              Material(
+                color: scheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(20),
+                elevation: 2,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _openTabSheet(context, i),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    child: Text(
+                      tabs[i],
+                      style: textTheme.labelLarge?.copyWith(
+                        color: scheme.onSurface,
+                        fontWeight: FontWeight.w500,
                       ),
-                      // 收起时点标签：要看这一页的选项了，面板回到中档。
-                      header: _tabBar(
-                        tabController,
-                        onTap: (_) => _panel.reveal(),
-                      ),
-                      body: TabBarView(
-                        controller: tabController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: <Widget>[
-                          for (final view in widget.tabViews())
-                            SnapPanelScrollScope(
-                              controller: _panel,
-                              child: view,
-                            ),
-                        ],
-                      ),
-                      handleLabel: l10n.styleEditorPanelHandle,
-                      stopLabel: (SnapPanelStop stop) =>
-                          _panelStopLabel(l10n, stop),
                     ),
                   ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ListenableBuilder(
+        listenable: listenable,
+        builder: (BuildContext context, Widget? child) {
+          return Stack(
+            children: <Widget>[
+              // 全屏预览。
+              Positioned.fill(
+                child: previewBuilder(
+                  showToolbar: false,
+                  bottomPadding: _bottomBarReserve,
+                ),
+              ),
+              // 顶部悬浮：菜单按钮 + 预览工具条 + 操作按钮。
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Row(
+                      children: <Widget>[
+                        _menuButton(context),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child:
+                              toolbarBuilder?.call(context) ??
+                              const SizedBox.shrink(),
+                        ),
+                        ...?actionsBuilder?.call(context),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // 底部悬浮：分类按钮条。
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  minimum: const EdgeInsets.only(bottom: 12),
+                  child: _tabButtonBar(context),
+                ),
+              ),
+            ],
           );
         },
       ),

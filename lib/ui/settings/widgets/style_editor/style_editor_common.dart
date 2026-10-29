@@ -20,8 +20,8 @@ class StylePreviewBrightnessButton extends StatelessWidget {
 
   final StyleDraftController<Object?, Object?> controller;
 
-  /// 放在标题栏里（`StyleEditorScaffold.actionsBuilder`）：用标题栏的普通
-  /// 图标按钮，图标 18 与返回键一致；否则是预览工具条上的色调按钮。
+  /// 放在顶部悬浮行里（`StyleEditorScaffold.actionsBuilder`）：用普通的图标
+  /// 按钮，图标 18；否则是预览工具条上的色调按钮。
   final bool inAppBar;
 
   @override

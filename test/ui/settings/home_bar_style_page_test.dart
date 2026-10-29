@@ -37,11 +37,10 @@ const _glassCustom = HomeBarSettings(
 );
 
 void main() {
-  testWidgets('shows a miniature home preview above five option tabs', (
+  testWidgets('shows a miniature home preview with five floating tab buttons', (
     tester,
   ) async {
     final (_, l10n) = await pumpHomeBarStylePage(tester);
-    expect(find.byType(Tab), findsNWidgets(5));
     for (final label in <String>[
       l10n.homeBarStyleTabPresets,
       l10n.homeBarStyleTabMaterial,
@@ -49,17 +48,17 @@ void main() {
       l10n.homeBarStyleTabItems,
       l10n.homeBarStyleTabBehavior,
     ]) {
-      expect(find.widgetWithText(Tab, label), findsOneWidget);
+      expect(find.text(label), findsOneWidget, reason: label);
     }
     // 默认是实色：预览里是贴底的实色底栏。
     expect(find.byType(BottomNav), findsOneWidget);
     expect(find.byType(HomeFloatingBar), findsNothing);
-    expect(
-      tester
-          .widget<TextButton>(find.widgetWithText(TextButton, l10n.commonReset))
-          .onPressed,
-      isNull,
-    );
+    // 默认样式时菜单里的“重置”不可用。
+    final reset = await openHomeBarStyleMenu(tester, l10n);
+    expect(tester.widget<MenuItemButton>(reset).onPressed, isNull);
+    // 关掉菜单。
+    await tester.tap(find.byTooltip(l10n.homeBarStyleTitle));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
@@ -282,7 +281,7 @@ void main() {
     expect(inHomeBarOptions(l10n.homeBarStyleHideOnScroll), findsNothing);
     expect(
       find.descendant(
-        of: find.byType(TabBarView),
+        of: find.byType(BottomSheet),
         matching: find.textContaining(l10n.homeBarStyleHideOnScrollSolidHint),
       ),
       findsOneWidget,
@@ -321,6 +320,7 @@ void main() {
 
   testWidgets('a preset applies with an undo snackbar', (tester) async {
     final (settings, l10n) = await pumpHomeBarStylePage(tester);
+    await openHomeBarStyleTab(tester, l10n.homeBarStyleTabPresets);
     await tapHomeBarOption(
       tester,
       inHomeBarOptions(l10n.homeBarStylePresetGlass),
@@ -394,9 +394,13 @@ void main() {
           l10n.homeBarStyleTabBehavior,
         ]) {
           await openHomeBarStyleTab(tester, label);
-          await tester.drag(find.byType(TabBarView), const Offset(0, -2000));
+          await tester.drag(
+            homeBarSheetScrollable(),
+            const Offset(0, -2000),
+          );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: label);
+          await closeHomeBarStyleSheet(tester, l10n);
         }
       });
     }

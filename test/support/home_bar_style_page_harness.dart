@@ -65,30 +65,52 @@ Future<(SettingsService, AppLocalizations)> pumpHomeBarStylePage(
 HomeBarSettings storedHomeBarSettings(SettingsService settings) =>
     HomeBarSettings.decode(settings.homeBarStyleRaw);
 
+/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
 Future<void> openHomeBarStyleTab(WidgetTester tester, String label) async {
-  final tab = find.widgetWithText(Tab, label);
-  await tester.ensureVisible(tab);
+  final button = find.text(label);
+  await tester.ensureVisible(button);
   await tester.pumpAndSettle();
-  await tester.tap(tab);
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
-/// 选项列表是懒构建的：目标还没进树时先在当前标签页里向下滚动。
+/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+Future<void> closeHomeBarStyleSheet(
+  WidgetTester tester,
+  AppLocalizations l10n,
+) async {
+  await tester.tap(find.byTooltip(l10n.commonClose));
+  await tester.pumpAndSettle();
+}
+
+/// 打开左上角悬浮菜单，返回其中“重置”菜单项的 Finder。
+Future<Finder> openHomeBarStyleMenu(
+  WidgetTester tester,
+  AppLocalizations l10n,
+) async {
+  await tester.tap(find.byTooltip(l10n.homeBarStyleTitle));
+  await tester.pumpAndSettle();
+  return find.widgetWithText(MenuItemButton, l10n.commonReset);
+}
+
+/// BottomSheet 里的纵向滚动列表。
+Finder homeBarSheetScrollable() => find
+    .descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ),
+    )
+    .first;
+
+/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
 Future<void> scrollToHomeBarOption(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
       finder,
       120,
-      scrollable: find
-          .descendant(
-            of: find.byType(TabBarView),
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Scrollable &&
-                  widget.axisDirection == AxisDirection.down,
-            ),
-          )
-          .first,
+      scrollable: homeBarSheetScrollable(),
     );
   }
   await tester.ensureVisible(finder);
@@ -101,6 +123,6 @@ Future<void> tapHomeBarOption(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
-/// 选项面板里的某个文字（不含上方预览）。
+/// 选项 BottomSheet 里的某个文字（不含下方预览）。
 Finder inHomeBarOptions(String text) =>
-    find.descendant(of: find.byType(TabBarView), matching: find.text(text));
+    find.descendant(of: find.byType(BottomSheet), matching: find.text(text));

@@ -76,31 +76,43 @@ Future<(SettingsService, AppLocalizations)> _pumpPage(
 DiaryPreviewSettings _stored(SettingsService settings) =>
     DiaryPreviewSettings.decode(settings.diaryPreviewStyleRaw);
 
+/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
 Future<void> _openTab(WidgetTester tester, String label) async {
-  final tab = find.widgetWithText(Tab, label);
-  await tester.ensureVisible(tab);
+  final button = find.text(label);
+  await tester.ensureVisible(button);
   await tester.pumpAndSettle();
-  await tester.tap(tab);
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
-/// 选项列表是懒构建的：目标还没进树时先在当前标签页里向下滚动。
+/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+Future<void> _closeSheet(WidgetTester tester, AppLocalizations l10n) async {
+  await tester.tap(find.byTooltip(l10n.commonClose));
+  await tester.pumpAndSettle();
+}
+
+/// 打开左上角悬浮菜单，返回其中“重置”菜单项的 Finder。
+Future<Finder> _openMenu(WidgetTester tester, AppLocalizations l10n) async {
+  await tester.tap(find.byTooltip(l10n.diaryPreviewStyleTitle));
+  await tester.pumpAndSettle();
+  return find.widgetWithText(MenuItemButton, l10n.commonReset);
+}
+
+/// BottomSheet 里的纵向滚动列表。
+Finder _sheetScrollable() => find
+    .descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ),
+    )
+    .first;
+
+/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
 Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
-      finder,
-      120,
-      scrollable: find
-          .descendant(
-            of: find.byType(TabBarView),
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Scrollable &&
-                  widget.axisDirection == AxisDirection.down,
-            ),
-          )
-          .first,
-    );
+    await tester.scrollUntilVisible(finder, 120, scrollable: _sheetScrollable());
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
@@ -108,20 +120,7 @@ Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
-      finder,
-      120,
-      scrollable: find
-          .descendant(
-            of: find.byType(TabBarView),
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Scrollable &&
-                  widget.axisDirection == AxisDirection.down,
-            ),
-          )
-          .first,
-    );
+    await tester.scrollUntilVisible(finder, 120, scrollable: _sheetScrollable());
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
@@ -135,20 +134,32 @@ Future<void> _dismissSnackBars(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('shows a live preview above seven option tabs', (tester) async {
+  testWidgets('shows a full-screen preview with seven floating tab buttons', (
+    tester,
+  ) async {
     final (_, l10n) = await _pumpPage(tester);
     expect(find.byType(DiaryPreviewContent), findsWidgets);
-    expect(find.byType(Tab), findsNWidgets(7));
+    for (final label in <String>[
+      l10n.diaryPreviewStyleTabPresets,
+      l10n.diaryPreviewStyleTabPage,
+      l10n.diaryPreviewStyleTabCover,
+      l10n.diaryPreviewStyleTabTitle,
+      l10n.diaryPreviewStyleTabMeta,
+      l10n.diaryPreviewStyleTabBody,
+      l10n.diaryPreviewStyleTabPaging,
+    ]) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
     expect(
       find.bySemanticsLabel(l10n.diaryPreviewStyleSampleOf(1, 3)),
       findsOneWidget,
     );
-    expect(
-      tester
-          .widget<TextButton>(find.widgetWithText(TextButton, l10n.commonReset))
-          .onPressed,
-      isNull,
-    );
+    // 默认样式时菜单里的“重置”不可用。
+    final reset = await _openMenu(tester, l10n);
+    expect(tester.widget<MenuItemButton>(reset).onPressed, isNull);
+    // 关掉菜单。
+    await tester.tap(find.byTooltip(l10n.diaryPreviewStyleTitle));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
@@ -284,6 +295,7 @@ void main() {
       find.widgetWithText(SettingsSwitchTile, l10n.diaryPreviewStyleTodoToggle),
     );
     expect(_stored(settings).behavior.todoToggle, isFalse);
+    await _closeSheet(tester, l10n);
 
     await _openTab(tester, l10n.diaryPreviewStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryPreviewStylePresetNight));
@@ -307,12 +319,14 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
+    await _openTab(tester, l10n.diaryPreviewStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryPreviewStylePresetMagazine));
     await _dismissSnackBars(tester);
     final magazine = DiaryPreviewPresets.styleOf(DiaryPreviewPresetId.magazine);
     expect(_stored(settings).current, magazine);
 
-    await tester.tap(find.widgetWithText(TextButton, l10n.commonReset));
+    await _closeSheet(tester, l10n);
+    await tester.tap(await _openMenu(tester, l10n));
     await tester.pumpAndSettle();
     expect(settings.diaryPreviewStyleRaw, isNull);
     await tester.tap(find.text(l10n.commonUndo));
@@ -433,9 +447,10 @@ void main() {
         l10n.diaryPreviewStyleTabPaging,
       ]) {
         await _openTab(tester, label);
-        await tester.drag(find.byType(TabBarView), const Offset(0, -2000));
+        await tester.drag(_sheetScrollable(), const Offset(0, -2000));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: label);
+        await _closeSheet(tester, l10n);
       }
     });
   }

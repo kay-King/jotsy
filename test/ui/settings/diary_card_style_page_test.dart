@@ -14,7 +14,6 @@ import 'package:node_diary/ui/diaries/viewmodels/diary_card_view_data.dart';
 import 'package:node_diary/ui/settings/pages/diary_card_style_page.dart';
 import 'package:node_diary/ui/settings/sections/diary_card_style/diary_card_style_preview.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
-import 'package:node_diary/ui/widgets/snap_panel.dart';
 import 'package:node_diary/ui/widgets/triple_bar_drag_handle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,15 +74,29 @@ Future<(SettingsService, AppLocalizations)> _pumpPage(
 DiaryCardStyleSettings _stored(SettingsService settings) =>
     DiaryCardStyleSettings.decode(settings.diaryCardStyleRaw);
 
+/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
 Future<void> _openTab(WidgetTester tester, String label) async {
-  final tab = find.widgetWithText(Tab, label);
-  await tester.ensureVisible(tab);
+  final button = find.text(label);
+  await tester.ensureVisible(button);
   await tester.pumpAndSettle();
-  await tester.tap(tab);
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
-/// 选项列表是懒构建的：目标还没进树时先在当前标签页里向下滚动。
+/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+Future<void> _closeSheet(WidgetTester tester, AppLocalizations l10n) async {
+  await tester.tap(find.byTooltip(l10n.commonClose));
+  await tester.pumpAndSettle();
+}
+
+/// 打开左上角悬浮菜单，返回其中“重置”菜单项的 Finder。
+Future<Finder> _openMenu(WidgetTester tester, AppLocalizations l10n) async {
+  await tester.tap(find.byTooltip(l10n.diaryCardStyleTitle));
+  await tester.pumpAndSettle();
+  return find.widgetWithText(MenuItemButton, l10n.commonReset);
+}
+
+/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
@@ -91,7 +104,7 @@ Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
       120,
       scrollable: find
           .descendant(
-            of: find.byType(TabBarView),
+            of: find.byType(BottomSheet),
             matching: find.byWidgetPredicate(
               (widget) =>
                   widget is Scrollable &&
@@ -116,18 +129,31 @@ Future<void> _dismissSnackBars(WidgetTester tester) async {
 void main() {
   setUp(DiaryCardViewData.debugClearCache);
 
-  testWidgets('shows a live preview above nine option tabs', (tester) async {
+  testWidgets('shows a full-screen preview with nine floating tab buttons', (
+    tester,
+  ) async {
     final (_, l10n) = await _pumpPage(tester);
     expect(find.byType(DiariesListSection), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(9));
+    for (final label in <String>[
+      l10n.diaryCardStyleTabPresets,
+      l10n.diaryCardStyleTabLayout,
+      l10n.diaryCardStyleTabCover,
+      l10n.diaryCardStyleTabContent,
+      l10n.diaryCardStyleTabDate,
+      l10n.diaryCardStyleTabOrder,
+      l10n.diaryCardStyleTabText,
+      l10n.diaryCardStyleTabColor,
+      l10n.diaryCardStyleTabTexture,
+    ]) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
     expect(find.text(l10n.diaryCardStyleSampleTitle1), findsOneWidget);
-    // 默认样式时“重置”不可用。
-    expect(
-      tester
-          .widget<TextButton>(find.widgetWithText(TextButton, l10n.commonReset))
-          .onPressed,
-      isNull,
-    );
+    // 默认样式时菜单里的“重置”不可用。
+    final reset = await _openMenu(tester, l10n);
+    expect(tester.widget<MenuItemButton>(reset).onPressed, isNull);
+    // 关掉菜单。
+    await tester.tap(find.byTooltip(l10n.diaryCardStyleTitle));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
@@ -201,60 +227,11 @@ void main() {
     }
   });
 
-  testWidgets('the options panel drags between three stops', (tester) async {
-    final semantics = tester.ensureSemantics();
-    final (_, l10n) = await _pumpPage(tester);
-    String stop() => tester
-        .getSemantics(find.bySemanticsLabel(l10n.styleEditorPanelHandle))
-        .value;
-    double tabBarTop() => tester.getTopLeft(find.byType(TabBar)).dy;
-    expect(stop(), l10n.styleEditorPanelHalf);
-    final halfTop = tabBarTop();
-
-    await tester.fling(find.byType(TabBar), const Offset(0, -80), 1500);
-    await tester.pumpAndSettle();
-    expect(stop(), l10n.styleEditorPanelExpanded);
-    // 上档盖住预览，只留列表/瀑布流与明暗工具条。
-    expect(tabBarTop(), lessThan(halfTop));
-    expect(
-      tabBarTop() - SnapPanel.handleExtent,
-      closeTo(
-        tester.getBottomLeft(find.byType(DiaryCardStylePreviewToolbar)).dy,
-        0.01,
-      ),
-    );
-
-    for (var i = 0; i < 2; i++) {
-      await tester.fling(find.byType(TabBar), const Offset(0, 80), 1500);
-      await tester.pumpAndSettle();
-    }
-    expect(stop(), l10n.styleEditorPanelCollapsed);
-    // 下档只露出拖动条与标签栏，预览占满其余空间。
-    expect(tester.getBottomLeft(find.byType(TabBar)).dy, closeTo(860, 0.01));
-
-    // 收起时点标签：切到这一页，面板回到中档。
-    final contentTab = find.widgetWithText(Tab, l10n.diaryCardStyleTabContent);
-    await tester.ensureVisible(contentTab);
-    await tester.pumpAndSettle();
-    expect(stop(), l10n.styleEditorPanelCollapsed);
-    await tester.tap(contentTab);
-    await tester.pumpAndSettle();
-    expect(stop(), l10n.styleEditorPanelHalf);
-    expect(tabBarTop(), closeTo(halfTop, 0.01));
-    expect(
-      find.widgetWithText(SettingsSwitchTile, l10n.diaryCardStyleShowTitle),
-      findsOneWidget,
-    );
-    semantics.dispose();
-  });
-
-  testWidgets('reordering blocks inside the panel leaves the panel still', (
+  testWidgets('reordering blocks inside the sheet keeps the sheet open', (
     tester,
   ) async {
-    final semantics = tester.ensureSemantics();
     final (settings, l10n) = await _pumpPage(tester);
     await _openTab(tester, l10n.diaryCardStyleTabOrder);
-    final tabBarTop = tester.getTopLeft(find.byType(TabBar)).dy;
     // 拖动“标题”行（第二行）的手柄（拿起即拖动，不经过长按）到“标签”下方。
     final handle = find.byType(TripleBarDragHandle).at(1);
     final gesture = await tester.startGesture(tester.getCenter(handle));
@@ -272,23 +249,19 @@ void main() {
       DiaryCardBlock.preview,
       DiaryCardBlock.footer,
     ]);
-    expect(tester.getTopLeft(find.byType(TabBar)).dy, tabBarTop);
-    expect(
-      tester
-          .getSemantics(find.bySemanticsLabel(l10n.styleEditorPanelHandle))
-          .value,
-      l10n.styleEditorPanelHalf,
-    );
-    semantics.dispose();
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('wide screens keep preview and options side by side', (
+  testWidgets('wide screens use the same floating buttons and sheets', (
     tester,
   ) async {
-    await _pumpPage(tester, size: const Size(900, 700));
-    expect(find.byType(SnapPanel), findsNothing);
+    final (_, l10n) = await _pumpPage(tester, size: const Size(900, 700));
     expect(find.byType(DiaryCardStylePreviewToolbar), findsOneWidget);
-    expect(find.byType(TabBarView), findsOneWidget);
+    expect(find.byType(TabBarView), findsNothing);
+    expect(find.text(l10n.diaryCardStyleTabPresets), findsOneWidget);
+    await _openTab(tester, l10n.diaryCardStyleTabLayout);
+    expect(find.byType(BottomSheet), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -314,12 +287,14 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetMagazine));
     await _dismissSnackBars(tester);
     final magazine = DiaryCardPresets.styleOf(DiaryCardPresetId.magazine);
     expect(_stored(settings).current, magazine);
 
-    await tester.tap(find.widgetWithText(TextButton, l10n.commonReset));
+    await _closeSheet(tester, l10n);
+    await tester.tap(await _openMenu(tester, l10n));
     await tester.pumpAndSettle();
     expect(settings.diaryCardStyleRaw, isNull);
     expect(find.text(l10n.styleEditorResetDone), findsOneWidget);
@@ -331,6 +306,7 @@ void main() {
 
   testWidgets('applying a preset can be undone', (tester) async {
     final (settings, l10n) = await _pumpPage(tester);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetMinimal));
     expect(
       _stored(settings).current,
@@ -349,6 +325,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetCompact));
     await _dismissSnackBars(tester);
 
@@ -391,6 +368,7 @@ void main() {
   ) async {
     _mockClipboard(tester);
     final (settings, l10n) = await _pumpPage(tester);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetJournal));
     await _dismissSnackBars(tester);
 
@@ -399,12 +377,14 @@ void main() {
     await _dismissSnackBars(tester);
 
     final code = _clipboard!;
-    await tester.tap(find.widgetWithText(TextButton, l10n.commonReset));
+    await _closeSheet(tester, l10n);
+    await tester.tap(await _openMenu(tester, l10n));
     await tester.pumpAndSettle();
     await _dismissSnackBars(tester);
     expect(settings.diaryCardStyleRaw, isNull);
 
     _clipboard = 'Try this one: $code';
+    await _openTab(tester, l10n.diaryCardStyleTabPresets);
     await _tapVisible(tester, find.text(l10n.styleEditorImportCode));
     expect(
       _stored(settings).current,
@@ -461,28 +441,9 @@ void main() {
   });
 
   for (final brightness in Brightness.values) {
-    testWidgets('the panel stops fit a 320dp screen in $brightness', (
+    testWidgets('every tab sheet fits a 320dp screen in $brightness', (
       tester,
     ) async {
-      final (_, l10n) = await _pumpPage(
-        tester,
-        brightness: brightness,
-        size: const Size(320, 640),
-      );
-      await _openTab(tester, l10n.diaryCardStyleTabContent);
-      for (final offset in <Offset>[
-        const Offset(0, -80),
-        const Offset(0, 80),
-        const Offset(0, 80),
-      ]) {
-        await tester.fling(find.byType(TabBar), offset, 1500);
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-      }
-      expect(tester.getBottomLeft(find.byType(TabBar)).dy, closeTo(640, 0.01));
-    });
-
-    testWidgets('every tab fits a 320dp screen in $brightness', (tester) async {
       final (_, l10n) = await _pumpPage(
         tester,
         brightness: brightness,
@@ -500,9 +461,18 @@ void main() {
         l10n.diaryCardStyleTabTexture,
       ]) {
         await _openTab(tester, label);
-        await tester.drag(find.byType(TabBarView), const Offset(0, -2000));
+        await tester.drag(
+          find
+              .descendant(
+                of: find.byType(BottomSheet),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+          const Offset(0, -2000),
+        );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: label);
+        await _closeSheet(tester, l10n);
       }
     });
   }
