@@ -47,6 +47,8 @@ class DiaryHeadSection extends StatelessWidget {
     required this.onOpenViewOptions,
     required this.onOpenSearchPage,
     this.searchHint,
+    required this.hasActiveFilter,
+    required this.onOpenFilter,
   });
 
   final bool isSelectionMode;
@@ -77,6 +79,12 @@ class DiaryHeadSection extends StatelessWidget {
 
   /// 搜索条占位文字；null 时用默认文案（在日记本里时为“在「旅行」中搜索”）。
   final String? searchHint;
+
+  /// 是否有生效的筛选（非“全部日记”范围或选中了标签）：有则筛选图标变主题色 + 小圆点。
+  final bool hasActiveFilter;
+
+  /// 打开筛选面板（BottomSheet：日记本切换 + 标签多选 + 清除）。
+  final VoidCallback onOpenFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +236,8 @@ class DiaryHeadSection extends StatelessWidget {
           draftCount: draftCount,
           onOpenArchived: onOpenArchived,
           onOpenViewOptions: onOpenViewOptions,
+          hasActiveFilter: hasActiveFilter,
+          onOpenFilter: onOpenFilter,
         ),
       ],
     );
@@ -314,12 +324,16 @@ class _TrailingActions extends StatelessWidget {
     required this.draftCount,
     required this.onOpenArchived,
     required this.onOpenViewOptions,
+    required this.hasActiveFilter,
+    required this.onOpenFilter,
   });
 
   final VoidCallback onOpenDrafts;
   final int draftCount;
   final VoidCallback onOpenArchived;
   final VoidCallback onOpenViewOptions;
+  final bool hasActiveFilter;
+  final VoidCallback onOpenFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -327,6 +341,22 @@ class _TrailingActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        IconButton(
+          tooltip: context.l10n.diaryFilterTitle,
+          onPressed: onOpenFilter,
+          icon: Badge(
+            isLabelVisible: hasActiveFilter,
+            backgroundColor: colorScheme.primary,
+            smallSize: 8,
+            child: Icon(
+              Icons.filter_list_outlined,
+              size: 20,
+              color: hasActiveFilter
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
         IconButton(
           tooltip: context.l10n.diaryDraftsTitle,
           onPressed: onOpenDrafts,

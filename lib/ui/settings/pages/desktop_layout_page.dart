@@ -140,12 +140,18 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
     );
   }
 
-  FaIconData _iconFor(DesktopModuleId id) => switch (id) {
-    DesktopModuleId.header => FontAwesomeIcons.calendarDay,
-    DesktopModuleId.writeButton => FontAwesomeIcons.pen,
-    DesktopModuleId.quickEntry => FontAwesomeIcons.bolt,
-    DesktopModuleId.recent => FontAwesomeIcons.clockRotateLeft,
-  };
+  Widget _iconFor(DesktopModuleId id, Color color) {
+    switch (id) {
+      case DesktopModuleId.header:
+        return FaIcon(FontAwesomeIcons.calendarDay, size: 20, color: color);
+      case DesktopModuleId.writeButton:
+        return FaIcon(FontAwesomeIcons.pen, size: 20, color: color);
+      case DesktopModuleId.quickEntry:
+        return Icon(Icons.grid_view_outlined, size: 20, color: color);
+      case DesktopModuleId.recent:
+        return FaIcon(FontAwesomeIcons.clockRotateLeft, size: 20, color: color);
+    }
+  }
 
   String _titleFor(AppLocalizations l10n, DesktopModuleId id) => switch (id) {
     DesktopModuleId.header => l10n.desktopLayoutModuleHeader,
@@ -233,10 +239,9 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
                   title: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      FaIcon(
-                        _iconFor(id),
-                        size: 20,
-                        color: spec.visible
+                      _iconFor(
+                        id,
+                        spec.visible
                             ? Theme.of(context).colorScheme.onSurface
                             : Theme.of(
                                 context,

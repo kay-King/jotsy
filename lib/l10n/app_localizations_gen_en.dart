@@ -8800,4 +8800,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryFastScrollUntitled => 'Untitled';
+
+  @override
+  String get diaryFilterTitle => 'Filter';
+
+  @override
+  String get diaryFilterSheetTitle => 'Filter diaries';
+
+  @override
+  String get diaryFilterNotebook => 'Notebook';
+
+  @override
+  String get diaryFilterTags => 'Tags';
+
+  @override
+  String get diaryFilterClear => 'Clear filters';
+
+  @override
+  String get diaryFilterNoTags => 'No tags yet';
 }

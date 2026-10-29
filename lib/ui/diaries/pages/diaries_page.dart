@@ -50,7 +50,7 @@ import '../viewmodels/diary_view_preferences.dart';
 import '../sections/diaries_list_section.dart';
 import '../sections/diary_view_options_sheet.dart';
 import '../widgets/diaries_header_sliver.dart';
-import '../widgets/diary_tag_filter_bar.dart';
+import '../widgets/diary_filter_sheet.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
 import 'package:node_diary/ui/widgets/launch_reveal.dart';
 
@@ -235,7 +235,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     // 标签与日记列表分别独立监听，避免相互阻塞。
     final settingsAsync = ref.watch(settingsServiceProvider);
     final filterState = ref.watch(diaryFilterProvider);
-    final tagsAsync = ref.watch(tagListProvider);
     // 首页顶栏用玻璃时，列表滚到状态栏下方，状态栏那一条并进顶栏（见
     // DiariesHeaderSliver）。两处高度都从页面自己的 context 读（在下面的
     // SafeArea 之外、首页 Scaffold 的 body 之内）：
@@ -343,99 +342,12 @@ class _DiariesPage extends ConsumerState<DiariesPage>
               : DiaryCardMode.list,
         );
         final cardSideMargin = cardModeStyle.sideMargin;
-        final tagHeaderContent = tagsAsync.when(
-          data: (tags) {
-            final visibleTagFilters = _resolveTagFiltersForDisplay(
-              allTags: _scopeTags(
-                tags,
-                scopeTagIds,
-                filterState.selectedTagIds,
-              ),
-              visibleItems: displayedItems,
-              keyword: filterState.keyword,
-            );
-            return Padding(
-              padding: const EdgeInsets.only(
-                top: _tagSectionTopGap,
-                bottom: _tagSectionBottomGap,
-              ),
-              child: DiaryTagFilterBar(
-                tags: visibleTagFilters,
-                expansionProgress: _tagFilterExpansionController,
-                canExpand: () => _tagFilterExpansionController.value < 1,
-                canCollapse: () => _tagFilterExpansionController.value > 0,
-                selectedTagFilterIds: filterState.selectedTagIds,
-                onToggleTagFilter: _controller.toggleTagFilter,
-                onClearTagFilters: _controller.clearTagFilters,
-                onVerticalDragStart: (_) => _handleTagFilterDragStart(),
-                onVerticalDragUpdate: _handleTagFilterDragUpdate,
-                onVerticalDragEnd: _handleTagFilterDragEnd,
-                onCollapse: () => _animateTagFiltersTo(false),
-                leading: notebooksEnabled
-                    ? NotebookSwitcherChip(
-                        notebook: currentNotebook,
-                        onTap: () => unawaited(_scopeController.openShelf()),
-                      )
-                    : null,
-                leadingWidth: notebooksEnabled
-                    ? NotebookSwitcherChip.measureWidth(
-                        context,
-                        currentNotebook,
-                      )
-                    : 0,
-                keepVisible:
-                    notebooksEnabled &&
-                    (hasNotebooks || currentNotebook != null),
-              ),
-            );
-          },
-          loading: () => const Padding(
-            padding: EdgeInsets.only(
-              top: _tagSectionTopGap,
-              bottom: _tagSectionBottomGap,
-            ),
-            child: SizedBox(height: 40),
-          ),
-          error: (Object error, StackTrace stackTrace) => Padding(
-            padding: const EdgeInsets.only(
-              top: _tagSectionTopGap,
-              bottom: _tagSectionBottomGap,
-              left: AppSpacing.m,
-              right: AppSpacing.m,
-            ),
-            child: SizedBox(
-              height: 40,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.autoT0042(error.toString()),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ),
-        );
         // Measure the animated bar itself instead of reserving a fixed
         // maximum-height sliver. Content changes and width/text-scale changes then
         // update the pinned extent in the same layout pass, without a delayed
         // size callback or a second independently calculated animation.
         // 底色留在编排之外：入场期间只有标签内容淡入上浮，不透出下方列表；
         // 玻璃时同理，玻璃绝不能放进 LaunchReveal 的透明度层（模糊采不到
-        // 页面）。标签栏始终存在（没有标签时也留着上下间距），是顶栏最下面
-        // 一片，底缘细线画在这里、不画在刊头上。
-        final tagHeader = PinnedHeaderSliver(
-          child: HomeTopBarSurface(
-            solidColor: pageBgColor,
-            showHairline: true,
-            grouped: true,
-            child: LaunchReveal(
-              slot: LaunchRevealSlot.filters,
-              child: tagHeaderContent,
-            ),
-          ),
-        );
-
         return Scaffold(
           backgroundColor: pageBgColor,
           resizeToAvoidBottomInset: false,
@@ -559,12 +471,19 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                                   currentNotebook,
                                                 ),
                                               ),
+                                        hasActiveFilter:
+                                            !scopeResolution.isAll ||
+                                            filterState
+                                                .selectedTagIds
+                                                .isNotEmpty,
+                                        onOpenFilter: () => unawaited(
+                                          _openFilterSheet(context),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                              tagHeader,
                               // 玻璃顶栏底缘有一条细线，静止时第一张卡片（或日记本
                               // 头部卡片）贴着它显得挤；实色时同色无线、看不出来。
                               // 只在玻璃时留一段与卡片间距相同的空白，让第一张卡片
@@ -1024,6 +943,35 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     _isPagingCooldown = false;
     _pagingCooldownTimer?.cancel();
     _pagingCooldownTimer = null;
+  }
+
+  /// 打开筛选 BottomSheet：日记本切换 + 标签多选 + 清除筛选。
+  ///
+  /// 原来顶栏的 DiaryTagFilterBar 已拿掉，筛选入口搬到顶栏筛选图标。
+  /// 筛选逻辑（filterState、scope）一点不动，只是换入口。
+  Future<void> _openFilterSheet(BuildContext context) async {
+    final scopeResolution = ref.read(homeNotebookScopeResolutionProvider);
+    final currentNotebook = scopeResolution.notebook;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => DiaryFilterSheet(
+        currentNotebookName: currentNotebook?.name,
+        isAllScope: scopeResolution.isAll,
+        onOpenNotebookShelf: () => unawaited(_scopeController.openShelf()),
+        onToggleTag: (tagId, selected) =>
+            _controller.toggleTagFilter(tagId, selected),
+        onClearFilters: () {
+          _controller.clearTagFilters();
+          // 范围回到全部日记。
+          _scopeController.showAll();
+        },
+      ),
+    );
   }
 
   /// 请求加载下一批日记（每次 +20）。

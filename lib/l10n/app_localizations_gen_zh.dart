@@ -930,7 +930,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoT0059 => '探索数据暂不可用';
 
   @override
-  String get autoT0060 => '情绪与精力趋势';
+  String get autoT0060 => '情绪趋势';
 
   @override
   String get autoT0061 => '查看全部图片';
@@ -7917,4 +7917,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryFastScrollUntitled => '无标题';
+
+  @override
+  String get diaryFilterTitle => '筛选';
+
+  @override
+  String get diaryFilterSheetTitle => '筛选日记';
+
+  @override
+  String get diaryFilterNotebook => '日记本';
+
+  @override
+  String get diaryFilterTags => '标签';
+
+  @override
+  String get diaryFilterClear => '清除筛选';
+
+  @override
+  String get diaryFilterNoTags => '暂无标签';
 }

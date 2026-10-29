@@ -41,11 +41,6 @@ class DesktopTiles extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ExploreSectionTitle(
-            icon: FontAwesomeIcons.bolt,
-            title: l10n.desktopTilesTitle,
-          ),
-          const SizedBox(height: 14),
           Row(
             children: <Widget>[
               Expanded(

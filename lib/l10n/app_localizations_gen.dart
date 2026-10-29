@@ -14503,6 +14503,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled'**
   String get diaryFastScrollUntitled;
+
+  /// Diary page top bar filter button tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get diaryFilterTitle;
+
+  /// Diary filter bottom sheet title.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter diaries'**
+  String get diaryFilterSheetTitle;
+
+  /// Diary filter bottom sheet: notebook section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook'**
+  String get diaryFilterNotebook;
+
+  /// Diary filter bottom sheet: tags section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get diaryFilterTags;
+
+  /// Diary filter bottom sheet: clear all filters button.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get diaryFilterClear;
+
+  /// Diary filter bottom sheet: hint when there are no tags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags yet'**
+  String get diaryFilterNoTags;
 }
 
 class _AppLocalizationsDelegate

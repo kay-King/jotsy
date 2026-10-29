@@ -1300,7 +1300,7 @@
   "@autoT0059": {
     "description": "Auto-generated metadata for autoT0059."
   },
-  "autoT0060": "情绪与精力趋势",
+  "autoT0060": "情绪趋势",
   "@autoT0060": {
     "description": "Auto-generated metadata for autoT0060."
   },
@@ -11147,5 +11147,17 @@
   "diaryFastScrollPinned": "置顶",
   "@diaryFastScrollPinned": {"description": "首页快速滚动条：拖到置顶日记时气泡与刻度上的文字。"},
   "diaryFastScrollUntitled": "无标题",
-  "@diaryFastScrollUntitled": {"description": "首页快速滚动条：按标题排序时，没有标题的日记在气泡与刻度上的文字。"}
+  "@diaryFastScrollUntitled": {"description": "首页快速滚动条：按标题排序时，没有标题的日记在气泡与刻度上的文字。"},
+  "diaryFilterTitle": "筛选",
+  "@diaryFilterTitle": {"description": "日记页顶栏筛选按钮的提示文字。"},
+  "diaryFilterSheetTitle": "筛选日记",
+  "@diaryFilterSheetTitle": {"description": "日记筛选 BottomSheet 的标题。"},
+  "diaryFilterNotebook": "日记本",
+  "@diaryFilterNotebook": {"description": "日记筛选 BottomSheet：日记本分组标题。"},
+  "diaryFilterTags": "标签",
+  "@diaryFilterTags": {"description": "日记筛选 BottomSheet：标签分组标题。"},
+  "diaryFilterClear": "清除筛选",
+  "@diaryFilterClear": {"description": "日记筛选 BottomSheet：清除所有筛选的按钮。"},
+  "diaryFilterNoTags": "暂无标签",
+  "@diaryFilterNoTags": {"description": "日记筛选 BottomSheet：没有标签时的提示。"}
 }

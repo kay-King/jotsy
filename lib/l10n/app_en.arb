@@ -11147,5 +11147,17 @@
   "diaryFastScrollPinned": "Pinned",
   "@diaryFastScrollPinned": {"description": "Home fast scroller: bubble and track label for pinned diaries."},
   "diaryFastScrollUntitled": "Untitled",
-  "@diaryFastScrollUntitled": {"description": "Home fast scroller: bubble and track label for diaries without a title when sorted by title."}
+  "@diaryFastScrollUntitled": {"description": "Home fast scroller: bubble and track label for diaries without a title when sorted by title."},
+  "diaryFilterTitle": "Filter",
+  "@diaryFilterTitle": {"description": "Diary page top bar filter button tooltip."},
+  "diaryFilterSheetTitle": "Filter diaries",
+  "@diaryFilterSheetTitle": {"description": "Diary filter bottom sheet title."},
+  "diaryFilterNotebook": "Notebook",
+  "@diaryFilterNotebook": {"description": "Diary filter bottom sheet: notebook section title."},
+  "diaryFilterTags": "Tags",
+  "@diaryFilterTags": {"description": "Diary filter bottom sheet: tags section title."},
+  "diaryFilterClear": "Clear filters",
+  "@diaryFilterClear": {"description": "Diary filter bottom sheet: clear all filters button."},
+  "diaryFilterNoTags": "No tags yet",
+  "@diaryFilterNoTags": {"description": "Diary filter bottom sheet: hint when there are no tags."}
 }
