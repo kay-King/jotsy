@@ -13,7 +13,7 @@ import '../../../widgets/snap_panel.dart';
 /// 上方实时预览，下方按标签页分组调整。窄屏时选项是一块可拖动的面板
 /// （[SnapPanel]），停在三档：上档盖住预览、只留顶部工具条（没有工具条的
 /// 页面只留标题栏）；中档为默认，预览
-/// 约占四成高度；下档只露出标签栏，预览占满其余空间。宽屏（≥720dp）时预览与
+/// 约占六成五高度；下档只露出标签栏，预览占满其余空间。宽屏（≥720dp）时预览与
 /// 选项左右并排。右上角“重置”在已是默认样式时禁用。
 ///
 /// 标签页之间禁用横滑：选项里有大量滑块与拖拽排序，横滑切页会与它们抢
@@ -122,6 +122,9 @@ class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
     return Scaffold(
       appBar: AppTopBar(
         title: Text(widget.title),
+        // 样式编辑页预览优先：标题栏压到 56dp（AppTopBar 默认 64dp 不动，
+        // 只在本页覆盖），给预览多让出 8dp。
+        toolbarHeight: 56,
         leading: IconButton(
           tooltip: l10n.commonBack,
           onPressed: () => Navigator.of(context).maybePop(),
@@ -175,12 +178,12 @@ class _StyleEditorScaffoldState extends State<StyleEditorScaffold>
                   ],
                 );
               }
-              // 中档时预览约占一半高度（280~480），边调边看：预览够大能看清
-              // 效果，下方标签页还剩一半、照样能滚动调选项；矮屏（横屏、
-              // 分屏）上不超过 55%，给标签页留出可用空间。
+              // 中档时预览约占 65% 高度（360~600），边调边看：预览够大能完整
+              // 看到卡片/日记页效果；矮屏（横屏、分屏）上不超过 70%，给标签
+              // 页留出可用空间。想看选项时手动下拉。
               final previewHeight = math.min(
-                (constraints.maxHeight * 0.5).clamp(280.0, 480.0).toDouble(),
-                constraints.maxHeight * 0.55,
+                (constraints.maxHeight * 0.65).clamp(360.0, 600.0).toDouble(),
+                constraints.maxHeight * 0.7,
               );
               return Column(
                 children: <Widget>[
