@@ -51,6 +51,29 @@ class _CalendarPageController {
     });
   }
 
+  /// 上滑手势进年视图（moodiary 模式）：只在月/周视图生效，年视图下忽略。
+  /// 与点标题进年视图同一套状态变更（_yearMode = true，清除范围选择）。
+  void enterYearModeBySwipe() {
+    if (_state._yearMode) {
+      return;
+    }
+    _state.applyState(() {
+      _state._yearMode = true;
+      _state._range = null;
+    });
+  }
+
+  /// 下滑手势出年视图（moodiary 模式）：只在年视图生效，月/周视图下忽略。
+  /// 焦点月份不变，直接回到月视图。
+  void exitYearModeBySwipe() {
+    if (!_state._yearMode) {
+      return;
+    }
+    _state.applyState(() {
+      _state._yearMode = false;
+    });
+  }
+
   /// 长按日期：系统长按反馈后弹出快捷操作面板，再执行所选操作。
   ///
   /// table_calendar 的长按手势不经过 InkWell，Android 不会自动震动；

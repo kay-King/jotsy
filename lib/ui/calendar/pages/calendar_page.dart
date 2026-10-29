@@ -101,6 +101,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   static const double _calendarCardTopPadding = AppSpacing.m;
   static const double _calendarBottomGap = AppSpacing.m;
   static const double _listBottomExtraSpace = 12;
+
+  /// 上下滑动切换月/年视图的速度阈值（px/s），与 moodiary 的
+  /// _kScopeSwipeVelocity 一致。
+  static const double _kYearScopeSwipeVelocity = 300;
   Map<DateTime, CalendarDaySummary> _cachedDaySummaries =
       const <DateTime, CalendarDaySummary>{};
   List<DiaryCalendarMarker>? _summarizedMarkersSource;
@@ -179,6 +183,20 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   CalendarDisplayOptions get _displayOptions =>
       ref.read(calendarDisplayOptionsProvider).asData?.value ??
       _fallbackOptions;
+
+  /// 上下滑动切换月/年视图（moodiary 模式）：
+  /// - 上滑（velocity < -300）：月/周视图 → 年视图
+  /// - 下滑（velocity > 300）：年视图 → 月视图
+  /// 阈值 300 px/s，与 moodiary 的 _kScopeSwipeVelocity 一致。
+  /// 只在日历面板区生效；翻月是左右滑，方向不同不冲突。
+  void _onCalendarVerticalDragEnd(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity < -_kYearScopeSwipeVelocity) {
+      _controller.enterYearModeBySwipe();
+    } else if (velocity > _kYearScopeSwipeVelocity) {
+      _controller.exitYearModeBySwipe();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -319,17 +337,23 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       _calendarCardHorizontalPadding,
                       _calendarBottomGap,
                     ),
-                    child: _buildCalendarPanel(
-                      options: options,
-                      filter: filter,
-                      filterTags: filterTags ?? const <Tag>[],
-                      filterNotebooks:
-                          filterNotebooks ?? const <NotebookView>[],
-                      summaries: summaries,
-                      markersAsync: markersAsync,
-                      moodOptions: moodOptions,
-                      anniversaryIndex: anniversaryIndex,
-                      now: now,
+                    // 上下滑动切换月/年视图（moodiary 模式）：上滑进年视图，
+                    // 下滑回月视图。翻月是左右滑，方向不同不冲突。
+                    child: GestureDetector(
+                      onVerticalDragEnd: _onCalendarVerticalDragEnd,
+                      behavior: HitTestBehavior.opaque,
+                      child: _buildCalendarPanel(
+                        options: options,
+                        filter: filter,
+                        filterTags: filterTags ?? const <Tag>[],
+                        filterNotebooks:
+                            filterNotebooks ?? const <NotebookView>[],
+                        summaries: summaries,
+                        markersAsync: markersAsync,
+                        moodOptions: moodOptions,
+                        anniversaryIndex: anniversaryIndex,
+                        now: now,
+                      ),
                     ),
                   ),
                 ),
