@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart';
 
+import 'diary_blocks/diary_blocks_codec.dart';
+import 'diary_blocks/diary_blocks_from_delta.dart';
+import 'diary_blocks/diary_blocks_to_delta.dart';
 import 'file_embed_codec.dart';
-import 'legacy_content_codec.dart';
 
 /// 将纯文本转换为最小可用的 Delta JSON 结构。
 String plainTextToDeltaJson(String plainText) {
@@ -48,6 +50,11 @@ String deltaJsonToPlainText(String deltaJson) {
 }
 
 /// 将正文存储内容解码为 Quill 文档。
+///
+/// 存储格式已迁移到块文档（见 diary_blocks/）：读取时经
+/// [decodeStoredDiaryBlocks] 收敛三代格式（块文档 JSON、Quill Delta、旧版节点
+/// 文档、纯文本）为块文档，再经 [diaryBlocksToQuillOps] 投影为 Delta，供仍
+/// 使用 Quill 的 UI 读取。写入一律经 [encodeDiaryDocumentToJson] 存为块文档。
 quill.Document decodeDiaryContentToDocument(String rawContent) {
   final trimmed = rawContent.trim();
   if (trimmed.isEmpty) {
@@ -55,17 +62,12 @@ quill.Document decodeDiaryContentToDocument(String rawContent) {
   }
 
   try {
-    final decoded = jsonDecode(trimmed);
-    if (decoded is List) {
-      return _ensureRenderableDocument(
-        _documentFromDiaryDelta(List<dynamic>.from(decoded)),
-      );
-    }
-    if (decoded is Map<String, dynamic>) {
-      return _ensureRenderableDocument(
-        _documentFromDiaryDelta(legacyDocumentToQuillDelta(decoded)),
-      );
-    }
+    // 三代格式收敛为块文档，再投影为 Quill Delta。
+    final blocks = decodeStoredDiaryBlocks(trimmed);
+    final ops = diaryBlocksToQuillOps(blocks);
+    return _ensureRenderableDocument(
+      _documentFromDiaryDelta(ops),
+    );
   } catch (_) {
     // Fall through to plain text fallback.
   }
@@ -73,9 +75,15 @@ quill.Document decodeDiaryContentToDocument(String rawContent) {
   return documentFromPlainText(deltaJsonToPlainText(rawContent));
 }
 
-/// 将富文本正文编码为持久化 JSON。
+/// 将富文本正文编码为持久化 JSON（块文档格式）。
+///
+/// Quill Document 先取 Delta ops，经 [diaryBlocksFromQuillOps] 转为块文档，
+/// 再经 [encodeDiaryBlocks] 编码。历史 Delta 数据在读取时已收敛，写入统一
+/// 为块文档 JSON。
 String encodeDiaryDocumentToJson(quill.Document document) {
-  return jsonEncode(document.toDelta().toJson());
+  final ops = document.toDelta().toJson();
+  final blocks = diaryBlocksFromQuillOps(ops);
+  return encodeDiaryBlocks(blocks);
 }
 
 /// 从正文文档提取纯文本镜像，用于列表摘要和搜索。

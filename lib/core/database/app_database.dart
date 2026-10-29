@@ -37,6 +37,8 @@ part 'app_database_diary_comment_schema.dart';
 part 'app_database_diary_comment_ops.dart';
 part 'app_database_notebook_entry_ops.dart';
 part 'app_database_notebook_stats_ops.dart';
+part 'app_database_day_mood_schema.dart';
+part 'app_database_day_mood_ops.dart';
 
 @DriftDatabase(
   tables: <Type>[
@@ -49,6 +51,7 @@ part 'app_database_notebook_stats_ops.dart';
     Notebooks,
     DiaryNotebooks,
     DiaryComments,
+    DayMoods,
   ],
 )
 class AppDatabase extends _$AppDatabase
@@ -65,6 +68,7 @@ class AppDatabase extends _$AppDatabase
         _AppDatabaseNotebookOps,
         _AppDatabaseNotebookStatsOps,
         _AppDatabaseDiaryCommentOps,
+        _AppDatabaseDayMoodOps,
         _AppDatabaseMigrations {
   AppDatabase() : super(_openConnection());
 
@@ -79,7 +83,7 @@ class AppDatabase extends _$AppDatabase
   static String newBusinessId() => _newBusinessUuid();
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -113,6 +117,12 @@ class AppDatabase extends _$AppDatabase
       // 分支之前：只加列，不碰已有数据。
       if (from < 15) {
         await _migrateAddNotebookParent(m);
+      }
+      // v16 补齐这天的心情表（上游 v14 的内容；本地 v14 是留言表，版本号与
+      // 上游错位，_migrateAddDayMoods 内按表存在性判断，不依赖 from）。
+      // 本地 v14 的留言表与 v15 的 parent_id 列已存在，无需重复处理。
+      if (from < 16) {
+        await _migrateAddDayMoods(m);
       }
       if (from < 2) {
         await _migrateDiariesAddBusinessId();

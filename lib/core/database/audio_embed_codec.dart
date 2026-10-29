@@ -78,20 +78,8 @@ class DiaryAudioAttachment {
   }
 }
 
-Set<String> extractDiaryAudioPaths(String content) {
-  try {
-    final delta = jsonDecode(content);
-    if (delta is! List) return <String>{};
-    return <String>{
-      for (final op in delta)
-        if (op is Map && op['insert'] is Map)
-          if (DiaryAudioAttachment.tryDecode(
-                (op['insert'] as Map)[diaryAudioEmbedType],
-              )
-              case final audio?)
-            audio.path,
-    };
-  } on FormatException {
-    return <String>{};
-  }
-}
+/// 音频嵌入的编解码（Quill Delta 时代）。
+///
+/// 注意：[extractDiaryAudioPaths] 已迁移到
+/// `diary_blocks/diary_blocks_media.dart`（块文档版本，兼容三代存储格式），
+/// 这里不再保留旧版，避免与新版冲突。
