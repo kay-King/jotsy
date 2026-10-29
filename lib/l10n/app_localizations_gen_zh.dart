@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations_gen.dart';
 
 // ignore_for_file: type=lint
@@ -7912,4 +7911,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get codeBlockPreviewIntro => '代码块会按语言高亮，行内代码也跟随配色，例如 ';
+
+  @override
+  String get diaryFastScrollPinned => '置顶';
+
+  @override
+  String get diaryFastScrollUntitled => '无标题';
 }

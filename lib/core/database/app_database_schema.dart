@@ -209,6 +209,27 @@ class DiaryImageSourceRef {
   final String content;
 }
 
+class DiaryTimelineEntry {
+  const DiaryTimelineEntry({
+    required this.diaryId,
+    required this.isPinned,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.title,
+    this.chapterRank,
+  });
+
+  final String diaryId;
+  final bool isPinned;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String title;
+
+  /// 成书顺序时的章节序号：章节在 `DiaryNotebookScope.chapterOrder` 中的
+  /// 下标，未分章（及只在子本里）的不小于章节数；其他排序为 null。
+  final int? chapterRank;
+}
+
 /// 日历月份打点聚合模型（轻量版）。
 ///
 /// 用于日历网格渲染与月度概览：只带日期格各种样式要画的标量字段（心情、

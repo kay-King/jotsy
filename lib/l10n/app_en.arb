@@ -11143,5 +11143,9 @@
   "codeBlockPreviewIntro": "Code blocks are highlighted by language, and inline code follows the theme too, like ",
   "@codeBlockPreviewIntro": {
     "description": "Intro text of the code block style preview; an inline code sample follows the trailing space."
-  }
+  },
+  "diaryFastScrollPinned": "Pinned",
+  "@diaryFastScrollPinned": {"description": "Home fast scroller: bubble and track label for pinned diaries."},
+  "diaryFastScrollUntitled": "Untitled",
+  "@diaryFastScrollUntitled": {"description": "Home fast scroller: bubble and track label for diaries without a title when sorted by title."}
 }

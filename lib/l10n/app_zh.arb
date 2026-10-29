@@ -11143,5 +11143,9 @@
   "codeBlockPreviewIntro": "代码块会按语言高亮，行内代码也跟随配色，例如 ",
   "@codeBlockPreviewIntro": {
     "description": "代码块样式页预览的引导文字，末尾空格后接一段行内代码示例。"
-  }
+  },
+  "diaryFastScrollPinned": "置顶",
+  "@diaryFastScrollPinned": {"description": "首页快速滚动条：拖到置顶日记时气泡与刻度上的文字。"},
+  "diaryFastScrollUntitled": "无标题",
+  "@diaryFastScrollUntitled": {"description": "首页快速滚动条：按标题排序时，没有标题的日记在气泡与刻度上的文字。"}
 }
