@@ -11159,5 +11159,13 @@
   "diaryFilterClear": "清除筛选",
   "@diaryFilterClear": {"description": "日记筛选 BottomSheet：清除所有筛选的按钮。"},
   "diaryFilterNoTags": "暂无标签",
-  "@diaryFilterNoTags": {"description": "日记筛选 BottomSheet：没有标签时的提示。"}
+  "@diaryFilterNoTags": {"description": "日记筛选 BottomSheet：没有标签时的提示。"},
+  "diaryDrawerTotalCount": "共 {count} 篇",
+  "@diaryDrawerTotalCount": {"description": "日记页侧边栏：顶部的日记总数。", "placeholders": {"count": {"type": "int"}}},
+  "diaryDrawerNotebooks": "日记本",
+  "@diaryDrawerNotebooks": {"description": "日记页侧边栏：日记本分组标题。"},
+  "diaryDrawerNotebookCount": "{count} 个",
+  "@diaryDrawerNotebookCount": {"description": "日记页侧边栏：日记本数量。", "placeholders": {"count": {"type": "int"}}},
+  "diaryDrawerManageNotebooks": "管理日记本",
+  "@diaryDrawerManageNotebooks": {"description": "日记页侧边栏：底部的管理日记本按钮。"}
 }

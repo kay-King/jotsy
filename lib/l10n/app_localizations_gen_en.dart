@@ -8818,4 +8818,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryFilterNoTags => 'No tags yet';
+
+  @override
+  String diaryDrawerTotalCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String get diaryDrawerNotebooks => 'Notebooks';
+
+  @override
+  String diaryDrawerNotebookCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String get diaryDrawerManageNotebooks => 'Manage notebooks';
 }

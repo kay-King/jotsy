@@ -11159,5 +11159,13 @@
   "diaryFilterClear": "Clear filters",
   "@diaryFilterClear": {"description": "Diary filter bottom sheet: clear all filters button."},
   "diaryFilterNoTags": "No tags yet",
-  "@diaryFilterNoTags": {"description": "Diary filter bottom sheet: hint when there are no tags."}
+  "@diaryFilterNoTags": {"description": "Diary filter bottom sheet: hint when there are no tags."},
+  "diaryDrawerTotalCount": "{count} entries",
+  "@diaryDrawerTotalCount": {"description": "Diary page drawer: total diary count in the header.", "placeholders": {"count": {"type": "int"}}},
+  "diaryDrawerNotebooks": "Notebooks",
+  "@diaryDrawerNotebooks": {"description": "Diary page drawer: notebooks section title."},
+  "diaryDrawerNotebookCount": "{count}",
+  "@diaryDrawerNotebookCount": {"description": "Diary page drawer: notebook count.", "placeholders": {"count": {"type": "int"}}},
+  "diaryDrawerManageNotebooks": "Manage notebooks",
+  "@diaryDrawerManageNotebooks": {"description": "Diary page drawer: manage notebooks button at the bottom."}
 }

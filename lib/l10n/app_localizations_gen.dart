@@ -14539,6 +14539,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No tags yet'**
   String get diaryFilterNoTags;
+
+  /// Diary page drawer: total diary count in the header.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String diaryDrawerTotalCount(int count);
+
+  /// Diary page drawer: notebooks section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebooks'**
+  String get diaryDrawerNotebooks;
+
+  /// Diary page drawer: notebook count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String diaryDrawerNotebookCount(int count);
+
+  /// Diary page drawer: manage notebooks button at the bottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage notebooks'**
+  String get diaryDrawerManageNotebooks;
 }
 
 class _AppLocalizationsDelegate

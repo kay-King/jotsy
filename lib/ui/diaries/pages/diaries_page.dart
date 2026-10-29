@@ -17,6 +17,7 @@ import 'package:node_diary/ui/diaries/pages/diary_search_page.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_create_entry_flow.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_notebook_drawer.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_chrome_scope.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_top_bar_surface.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
@@ -351,6 +352,8 @@ class _DiariesPage extends ConsumerState<DiariesPage>
         return Scaffold(
           backgroundColor: pageBgColor,
           resizeToAvoidBottomInset: false,
+          drawer: const DiaryNotebookDrawer(),
+          drawerEnableOpenDragGesture: true,
           body: Stack(
             children: [
               // 返回键优先处理页面内部状态，再交给路由栈。
@@ -479,6 +482,8 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                         onOpenFilter: () => unawaited(
                                           _openFilterSheet(context),
                                         ),
+                                        onOpenDrawer: () =>
+                                            Scaffold.of(context).openDrawer(),
                                       ),
                                     ),
                                   ),

@@ -7935,4 +7935,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryFilterNoTags => '暂无标签';
+
+  @override
+  String diaryDrawerTotalCount(int count) {
+    return '共 $count 篇';
+  }
+
+  @override
+  String get diaryDrawerNotebooks => '日记本';
+
+  @override
+  String diaryDrawerNotebookCount(int count) {
+    return '$count 个';
+  }
+
+  @override
+  String get diaryDrawerManageNotebooks => '管理日记本';
 }

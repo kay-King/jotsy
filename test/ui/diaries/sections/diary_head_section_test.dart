@@ -34,6 +34,7 @@ Widget _host({
       onOpenSearchPage: () {},
       hasActiveFilter: false,
       onOpenFilter: () {},
+      onOpenDrawer: () {},
     ),
   ),
 );

@@ -49,6 +49,7 @@ class DiaryHeadSection extends StatelessWidget {
     this.searchHint,
     required this.hasActiveFilter,
     required this.onOpenFilter,
+    required this.onOpenDrawer,
   });
 
   final bool isSelectionMode;
@@ -85,6 +86,9 @@ class DiaryHeadSection extends StatelessWidget {
 
   /// 打开筛选面板（BottomSheet：日记本切换 + 标签多选 + 清除）。
   final VoidCallback onOpenFilter;
+
+  /// 打开左侧边栏（日记本列表）。
+  final VoidCallback onOpenDrawer;
 
   @override
   Widget build(BuildContext context) {
@@ -219,9 +223,20 @@ class DiaryHeadSection extends StatelessWidget {
 
   /// 普通态：搜索预览占满左侧，右侧为操作区。
   Widget _buildDefaultRow(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       key: const ValueKey<String>('head_default'),
       children: [
+        IconButton(
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+          onPressed: onOpenDrawer,
+          icon: Icon(
+            Icons.menu_outlined,
+            size: 20,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(width: 4),
         Expanded(
           child: _SearchPreview(
             key: const ValueKey<String>('search_preview'),
