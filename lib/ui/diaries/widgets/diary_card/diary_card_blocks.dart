@@ -130,6 +130,23 @@ class DiaryCardBlocks extends StatelessWidget {
     );
 
     final children = <Widget>[];
+    // 暖阳预设无封面时顶部已用日期块占位当封面（coverFallback: dateBlock），
+    // 内容行左侧的 inline 日期会与之重复，此时改用普通标题行（日期只留顶部）。
+    // 有真实封面时保留原版 Vivido 排法（顶部是图，左侧日期保留）。
+    final coverShowsDateBlock =
+        viewData.previewCover == null &&
+        resolved.style.content.coverFallback ==
+            DiaryCardCoverFallback.dateBlock &&
+        switch (resolved.modeStyle.coverPosition) {
+          DiaryCardCoverPosition.start ||
+          DiaryCardCoverPosition.end ||
+          DiaryCardCoverPosition.top ||
+          DiaryCardCoverPosition.bottom => true,
+          DiaryCardCoverPosition.background ||
+          DiaryCardCoverPosition.hidden => false,
+        };
+    final useInlineDateRow =
+        resolved.style.meta.inlineDate && !coverShowsDateBlock;
     for (final block in style.content.blocks) {
       if (block == DiaryCardBlock.footer && !includeFooter) {
         continue;
@@ -147,15 +164,14 @@ class DiaryCardBlocks extends StatelessWidget {
               : null,
         DiaryCardBlock.title => title == null
             ? null
-            : (resolved.style.meta.inlineDate
+            : (useInlineDateRow
                   ? _inlineTitleRow(context, title, mark, lines)
                   : _title(title, mark)),
         // 标签已收进底栏（与日期、时间同行），不再单独成行。
         DiaryCardBlock.tags => null,
-        // 日期与标题同行时摘要收进标题行右侧那一列，不再单独成行。
-        DiaryCardBlock.preview => resolved.style.meta.inlineDate
-            ? null
-            : _preview(),
+        // 日期与标题同行时摘要收进标题行右侧那一列，不再单独成行；
+        // 无封面日期块占位时改回独立摘要行（标题行已不再含日期）。
+        DiaryCardBlock.preview => useInlineDateRow ? null : _preview(),
         DiaryCardBlock.footer => lines.footer(
           context,
           indicators: metaPosition == DiaryCardMetaPosition.footer
