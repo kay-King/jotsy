@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/calendar/pages/calendar_page.dart';
 import 'package:node_diary/ui/diaries/pages/timeline_page.dart';
 import 'package:node_diary/ui/explore/pages/explore_media_gallery_page.dart';
-import 'package:node_diary/ui/settings/pages/data_management_page.dart';
-import 'package:node_diary/ui/settings/pages/profile_page.dart';
+import 'package:node_diary/ui/explore/widgets/explore_shared_widgets.dart';
+import 'package:node_diary/ui/settings/pages/tag_management_page.dart';
 
-import '../models/home_tab.dart';
-import '../providers/home_tab_request_provider.dart';
 import '../widgets/desktop_card.dart';
 
-/// 六个快捷入口：一张白卡里两行三格 + 分隔线（用户说角标不需要，已去掉）。
+/// 六个快捷入口：一张白卡，组标题 + 两行三格 + 分隔线。
 ///
-/// 第一行：时间线（日记页）/ 相册（画廊页）/ 日记（日记页）；
-/// 第二行：备份（数据管理页）/ 设置（设置 Tab）/ 我的（个人资料页）。
+/// 只留点进去新页面的入口：时间线（时间线页）/ 相册（画廊页）/ 日历
+/// （完整日历页）/ 标签（标签管理页）/ 那年今日（概况 + 那年今日页）/
+/// 情绪与精力趋势（洞察页）。切底栏 Tab 的「日记」「设置」不在这里——
+/// 底栏本来就能切，首页留着是多余的；「备份」「我的」也已拿掉。
+///
+/// 去重原则：首页上加了按钮，原来的整卡就不要了——标签云、媒体画廊、
+/// 那年今日整卡、情绪趋势整卡、首页概况卡都已拿掉，只留按钮。
 class DesktopTiles extends ConsumerWidget {
-  const DesktopTiles({super.key});
+  const DesktopTiles({
+    super.key,
+    required this.onOpenMemory,
+    required this.onOpenInsight,
+  });
+
+  /// 点「那年今日」：打开概况 + 那年今日页（由首页传入，带着当页数据）。
+  final VoidCallback onOpenMemory;
+
+  /// 点「情绪与精力趋势」：打开洞察页（由首页传入，带着当页数据）。
+  final VoidCallback onOpenInsight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +39,13 @@ class DesktopTiles extends ConsumerWidget {
     return DesktopCard(
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          ExploreSectionTitle(
+            icon: FontAwesomeIcons.bolt,
+            title: l10n.desktopTilesTitle,
+          ),
+          const SizedBox(height: 14),
           Row(
             children: <Widget>[
               Expanded(
@@ -53,11 +74,13 @@ class DesktopTiles extends ConsumerWidget {
               _DesktopTileDivider(colorScheme: colorScheme),
               Expanded(
                 child: DesktopTile(
-                  icon: Icons.book_outlined,
-                  label: l10n.desktopDiary,
-                  onTap: () => ref
-                      .read(homeTabRequestProvider.notifier)
-                      .request(HomeTab.diaries),
+                  icon: Icons.calendar_month_outlined,
+                  label: l10n.desktopCalendar,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const CalendarPage(),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -71,11 +94,11 @@ class DesktopTiles extends ConsumerWidget {
             children: <Widget>[
               Expanded(
                 child: DesktopTile(
-                  icon: Icons.backup_outlined,
-                  label: l10n.desktopBackup,
+                  icon: Icons.label_outlined,
+                  label: l10n.desktopTags,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const DataManagementPage(),
+                      builder: (_) => const TagManagementPage(),
                     ),
                   ),
                 ),
@@ -83,23 +106,17 @@ class DesktopTiles extends ConsumerWidget {
               _DesktopTileDivider(colorScheme: colorScheme),
               Expanded(
                 child: DesktopTile(
-                  icon: Icons.settings_outlined,
-                  label: l10n.navSettings,
-                  onTap: () => ref
-                      .read(homeTabRequestProvider.notifier)
-                      .request(HomeTab.settings),
+                  icon: Icons.history_outlined,
+                  label: l10n.autoT0063,
+                  onTap: onOpenMemory,
                 ),
               ),
               _DesktopTileDivider(colorScheme: colorScheme),
               Expanded(
                 child: DesktopTile(
-                  icon: Icons.person_outlined,
-                  label: l10n.desktopMine,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const ProfilePage(),
-                    ),
-                  ),
+                  icon: Icons.show_chart_outlined,
+                  label: l10n.autoT0060,
+                  onTap: onOpenInsight,
                 ),
               ),
             ],

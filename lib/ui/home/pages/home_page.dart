@@ -7,10 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/core/services/app_service.dart';
-import 'package:node_diary/ui/calendar/pages/calendar_page.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_create_entry_flow.dart';
-import 'package:node_diary/ui/explore/pages/explore_page.dart';
 import 'package:node_diary/ui/home/controllers/home_bar_scroll_hider.dart';
 import 'package:node_diary/ui/home/pages/desktop_page.dart';
 import 'package:node_diary/ui/home/controllers/page_position_listenable.dart';
@@ -39,11 +37,14 @@ import '../../widgets/launch_reveal.dart';
 part '../controllers/home_page_controller.dart';
 part 'home_page_chrome.dart';
 
-/// 主框架页：承载底部 Tab 导航（桌面 / 日记 / 日历 / 探索 / 设置）。
+/// 主框架页：承载底部 Tab 导航（桌面 / 日记 / 设置）。
 ///
-/// 桌面、日历与探索可在设置 → 功能管理中关闭，底栏随之变为 2–5 项（见
+/// 桌面可在设置 → 功能管理中关闭，底栏随之变为 2–3 项（见
 /// [visibleHomeTabs]）；当前页、目标页、FAB 与返回键一律按 [HomeTab] 身份判断，
 /// 可见集合变化时由 `_HomePageController.syncVisibleTabs` 重新对齐下标。
+///
+/// 探索与日历已经并进桌面页（首页），不再占底栏 Tab；完整日历页仍可从
+/// 首页的日历区块点进去。
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({
     super.key,
@@ -254,14 +255,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             pageBackgroundColor: Theme.of(context).colorScheme.surface,
             onCreateActionChanged: _diariesCreateActionChanged,
             onFabVisibilityChanged: _diariesFabVisibilityChanged,
-          ),
-          HomeTab.calendar => CalendarPage(
-            key: const PageStorageKey<String>('tab_calendar'),
-            pageBackgroundColor: Theme.of(context).colorScheme.surface,
-          ),
-          HomeTab.explore => ExplorePage(
-            key: const PageStorageKey<String>('tab_explore'),
-            pageBackgroundColor: Theme.of(context).colorScheme.surface,
           ),
           HomeTab.settings => SettingsPage(
             key: const PageStorageKey<String>('tab_settings'),

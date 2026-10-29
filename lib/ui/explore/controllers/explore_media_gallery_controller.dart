@@ -63,19 +63,22 @@ class ExploreMediaGalleryController extends ChangeNotifier {
         localOffset += diaries.length;
         localHasMore = diaries.length == _candidateBatchSize;
 
-        // 30 张只是批次目标，必须处理完已读取日记中的全部图片再推进游标，
-        // 否则单篇包含大量图片时，超出目标的部分会在下一次分页被跳过。
+        // 30 条只是批次目标，必须处理完已读取日记中的全部媒体再推进游标，
+        // 否则单篇包含大量媒体时，超出目标的部分会在下一次分页被跳过。
         for (final diary in diaries) {
-          for (final source in _extractor.resolveMediaSources(diary)) {
-            if (!localSources.add(source)) {
+          for (final media in _extractor.resolveTypedMediaSources(diary)) {
+            if (!localSources.add(media.source)) {
               continue;
             }
             appended.add(
               ExploreMediaItem(
-                source: source,
+                source: media.source,
                 diaryId: diary.diaryId,
                 updatedAt: diary.updatedAt,
                 createdAt: diary.createdAt,
+                kind: media.kind,
+                displayName: media.displayName,
+                duration: media.duration,
               ),
             );
           }

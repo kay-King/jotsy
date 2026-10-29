@@ -10,7 +10,6 @@ import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
-import 'package:node_diary/ui/calendar/pages/calendar_page.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/home/pages/desktop_page.dart';
 import 'package:node_diary/ui/home/pages/home_page.dart';
@@ -126,8 +125,8 @@ void main() {
     expect(_homePage(tester), 1);
     expect(_createFabShown(tester), isTrue);
 
-    // 日历页在长按日期的菜单里新建，不再显示全局 FAB。
-    await tester.tap(_navItem(l10n.navCalendar));
+    // 设置页不显示全局 FAB。
+    await tester.tap(_navItem(l10n.navSettings));
     await tester.pumpAndSettle();
     expect(_homePage(tester), 2);
     expect(_createFabShown(tester), isFalse);
@@ -148,11 +147,11 @@ void main() {
     await tester.pump();
     for (var frame = 0; frame < 30; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
-      // 桌面(0) -> 设置(4)：不应再滑过日记(1)、日历(2)与探索(3)。
-      expect(_homePage(tester), greaterThanOrEqualTo(2), reason: '$frame');
+      // 桌面(0) -> 设置(2)：不应再滑过日记(1)。
+      expect(_homePage(tester), greaterThanOrEqualTo(1), reason: '$frame');
     }
     await tester.pumpAndSettle();
-    expect(_homePage(tester), 4);
+    expect(_homePage(tester), 2);
     await _unmount(tester);
   });
 
@@ -165,7 +164,7 @@ void main() {
 
     await tester.tap(_navItem(l10n.navSettings));
     await tester.pump();
-    expect(_homePage(tester), 4);
+    expect(_homePage(tester), 2);
     await tester.pumpAndSettle();
     await _unmount(tester);
   });
@@ -252,38 +251,22 @@ void main() {
   });
 
   group('feature toggles hide home tabs', () {
-    testWidgets('calendar and explore off leaves only diaries and settings', (
-      tester,
-    ) async {
+    testWidgets('desktop off leaves only diaries and settings', (tester) async {
       await _pumpHome(
         tester,
-        // 桌面默认开启，这里一并关掉，只留日记与设置。
-        appFeaturesRaw: '{"desktop":false,"calendar":false,"explore":false}',
+        // 桌面是唯一可关的 Tab，关掉后只留日记与设置。
+        appFeaturesRaw: '{"desktop":false}',
       );
       final l10n = tester.element(find.byType(HomePage)).l10n;
 
       expect(_navLabels(tester), <String>[l10n.navDiaries, l10n.navSettings]);
-      expect(_navItem(l10n.navCalendar), findsNothing);
-      expect(_navItem(l10n.navExplore), findsNothing);
+      expect(_navItem(l10n.navDesktop), findsNothing);
 
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
       expect(_homePage(tester), 1);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       expect(find.byType(SettingsPage), findsOneWidget);
-      await _unmount(tester);
-    });
-
-    testWidgets('only explore off keeps the others in order', (tester) async {
-      await _pumpHome(tester, appFeaturesRaw: '{"explore":false}');
-      final l10n = tester.element(find.byType(HomePage)).l10n;
-
-      expect(_navLabels(tester), <String>[
-        l10n.navDesktop,
-        l10n.navDiaries,
-        l10n.navCalendar,
-        l10n.navSettings,
-      ]);
       await _unmount(tester);
     });
 
@@ -295,35 +278,33 @@ void main() {
 
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 4);
+      expect(_homePage(tester), 2);
       final settingsElement = tester.element(find.byType(SettingsPage));
 
-      unawaited(settings.setAppFeaturesRaw('{"calendar":false}'));
+      unawaited(settings.setAppFeaturesRaw('{"desktop":false}'));
       await tester.pump();
       // 本帧就落在新下标上：设置页仍在屏幕上，没有闪到别的页。
-      expect(_homePage(tester), 3);
+      expect(_homePage(tester), 1);
       expect(find.byType(SettingsPage), findsOneWidget);
       await tester.pumpAndSettle();
 
       expect(_navLabels(tester), <String>[
-        l10n.navDesktop,
         l10n.navDiaries,
-        l10n.navExplore,
         l10n.navSettings,
       ]);
       expect(_selectedNavLabel(tester), l10n.navSettings);
-      expect(_homePage(tester), 3);
+      expect(_homePage(tester), 1);
       expect(find.byType(SettingsPage), findsOneWidget);
       // 下标前移不重建设置页。
       expect(tester.element(find.byType(SettingsPage)), same(settingsElement));
       expect(tester.takeException(), isNull);
 
-      // 返回键仍先回到首个 Tab（桌面）。
+      // 返回键仍先回到首个 Tab（桌面已关，首个是日记）。
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(_homePage(tester), 0);
-      expect(_selectedNavLabel(tester), l10n.navDesktop);
-      expect(_createFabShown(tester), isFalse);
+      expect(_selectedNavLabel(tester), l10n.navDiaries);
+      expect(_createFabShown(tester), isTrue);
       await _unmount(tester);
     });
 
@@ -332,36 +313,34 @@ void main() {
     ) async {
       final settings = await _pumpHome(
         tester,
-        appFeaturesRaw: '{"calendar":false,"explore":false}',
+        appFeaturesRaw: '{"desktop":false}',
       );
       final l10n = tester.element(find.byType(HomePage)).l10n;
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 2);
+      expect(_homePage(tester), 1);
       final settingsElement = tester.element(find.byType(SettingsPage));
 
       unawaited(settings.setAppFeaturesRaw(null));
       await tester.pump();
-      expect(_homePage(tester), 4);
+      expect(_homePage(tester), 2);
       expect(find.byType(SettingsPage), findsOneWidget);
       await tester.pumpAndSettle();
 
       expect(_navLabels(tester), <String>[
         l10n.navDesktop,
         l10n.navDiaries,
-        l10n.navCalendar,
-        l10n.navExplore,
         l10n.navSettings,
       ]);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       expect(tester.element(find.byType(SettingsPage)), same(settingsElement));
-      // 重新开启的日历页还没访问过，不提前构建。
-      expect(find.byType(CalendarPage, skipOffstage: false), findsNothing);
+      // 重新开启的桌面页还没访问过，不提前构建。
+      expect(find.byType(DesktopPage, skipOffstage: false), findsNothing);
 
-      await tester.tap(_navItem(l10n.navCalendar));
+      await tester.tap(_navItem(l10n.navDesktop));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 2);
-      expect(find.byType(CalendarPage), findsOneWidget);
+      expect(_homePage(tester), 0);
+      expect(find.byType(DesktopPage), findsOneWidget);
       expect(tester.takeException(), isNull);
       await _unmount(tester);
     });
@@ -384,14 +363,13 @@ void main() {
 
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      unawaited(
-        settings.setAppFeaturesRaw('{"calendar":false,"explore":false}'),
-      );
+      unawaited(settings.setAppFeaturesRaw('{"desktop":false}'));
       await tester.pumpAndSettle();
 
       await tester.tap(_navItem(l10n.navDiaries));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 1);
+      // 桌面隐藏后只剩 [日记, 设置]，日记是第 0 页。
+      expect(_homePage(tester), 0);
       expect(
         tester.state(find.byType(DiariesPage, skipOffstage: false)),
         same(diariesState),
@@ -405,28 +383,28 @@ void main() {
     ) async {
       final settings = await _pumpHome(tester);
       final l10n = tester.element(find.byType(HomePage)).l10n;
-      await tester.tap(_navItem(l10n.navCalendar));
-      await tester.pumpAndSettle();
-      expect(find.byType(CalendarPage), findsOneWidget);
+      // 首个 Tab 就是桌面，当前就在桌面页。
+      expect(_homePage(tester), 0);
+      expect(find.byType(DesktopPage), findsOneWidget);
       expect(_createFabShown(tester), isFalse);
 
-      unawaited(settings.setAppFeaturesRaw('{"calendar":false}'));
+      unawaited(settings.setAppFeaturesRaw('{"desktop":false}'));
       await tester.pump();
       expect(_homePage(tester), 0);
       await tester.pumpAndSettle();
 
-      expect(_selectedNavLabel(tester), l10n.navDesktop);
+      expect(_selectedNavLabel(tester), l10n.navDiaries);
       expect(_homePage(tester), 0);
-      // 被关闭的日历页随之销毁，不再在后台保活。
-      expect(find.byType(CalendarPage, skipOffstage: false), findsNothing);
-      expect(find.byType(DesktopPage), findsOneWidget);
-      expect(_createFabShown(tester), isFalse);
+      // 被关闭的桌面页随之销毁，不再在后台保活。
+      expect(find.byType(DesktopPage, skipOffstage: false), findsNothing);
+      expect(find.byType(DiariesPage), findsOneWidget);
+      expect(_createFabShown(tester), isTrue);
       expect(tester.takeException(), isNull);
 
       // 底栏点击与左右滑动仍按新的下标工作。
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 3);
+      expect(_homePage(tester), 1);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       await _unmount(tester);
     });

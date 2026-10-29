@@ -8,6 +8,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/diaries/providers/diary_draft_providers.dart';
+import 'package:node_diary/ui/diaries/providers/diary_comment_providers.dart';
 import 'package:node_diary/ui/notebooks/providers/notebook_providers.dart';
 import 'package:node_diary/ui/notebooks/viewmodels/notebook_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +50,10 @@ Future<SettingsService> _pumpPage(
       overrides: [
         // 顶栏草稿角标：不打开真实数据库。
         diaryDraftCountProvider.overrideWith((ref) => Stream.value(0)),
+          // 卡片留言角标：不打开真实数据库。
+          diaryCommentCountProvider.overrideWith(
+            (ref, diaryId) => Stream.value(0),
+          ),
         // 书架：没有日记本（不打开真实数据库）。
         notebooksProvider.overrideWith(
           (ref) => Stream.value(const <NotebookView>[]),

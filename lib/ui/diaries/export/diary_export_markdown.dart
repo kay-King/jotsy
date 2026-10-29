@@ -168,6 +168,12 @@ class DiaryMarkdownWriter {
       body.add('![](${_destination(cover)})');
     }
     body.addAll(_renderBlocks(entry, labels: labels, mediaPathOf: mediaPathOf));
+    if (entry.comments.isNotEmpty) {
+      body.add('## 留言（${entry.comments.length}）');
+      for (final comment in entry.comments) {
+        body.add('- ${comment.content}');
+      }
+    }
     if (body.isNotEmpty) {
       out
         ..writeln()

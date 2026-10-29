@@ -15,12 +15,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navDiaries => '日记';
 
   @override
-  String get navCalendar => '日历';
-
-  @override
-  String get navExplore => '探索';
-
-  @override
   String get navSettings => '设置';
 
   @override
@@ -900,7 +894,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoT0057 => '没有更多图片了';
 
   @override
-  String get autoT0058 => '探索';
+  String get galleryFilterAll => '全部';
+
+  @override
+  String get galleryFilterImage => '图片';
+
+  @override
+  String get galleryFilterAudio => '音频';
+
+  @override
+  String get galleryFilterVideo => '视频';
+
+  @override
+  String get galleryEmptyMedia => '还没有可展示的媒体';
+
+  @override
+  String get galleryEmptyAudio => '还没有可展示的音频';
+
+  @override
+  String get galleryEmptyVideo => '还没有可展示的视频';
+
+  @override
+  String get galleryNoMoreMedia => '没有更多媒体了';
+
+  @override
+  String get galleryNoMoreAudio => '没有更多音频了';
+
+  @override
+  String get galleryNoMoreVideo => '没有更多视频了';
+
+  @override
+  String get galleryLoadFailed => '加载媒体失败，请稍后重试';
 
   @override
   String get autoT0059 => '探索数据暂不可用';
@@ -1378,6 +1402,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get autoT0211 => '别着急，属于这一天的精彩还没发生。';
+
+  @override
+  String get diaryCommentsTitle => '留言';
+
+  @override
+  String get diaryCommentsEmpty => '还没有留言，写下第一条吧。';
+
+  @override
+  String get diaryCommentsHint => '写下你的留言…';
+
+  @override
+  String get diaryCommentsSend => '发送留言';
+
+  @override
+  String get diaryCommentsDelete => '删除这条留言';
+
+  @override
+  String get diaryCommentsDeleteConfirm => '确定删除这条留言吗？删除后无法恢复。';
+
+  @override
+  String get diaryCommentsEdit => '编辑留言';
+
+  @override
+  String diaryCommentsCount(int count) {
+    return '$count 条留言';
+  }
 
   @override
   String get timeCapsuleTitle => '定时锁';
@@ -2789,6 +2839,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryTypographyParagraphSpacing => '段间距';
 
   @override
+  String get diaryTypographyFirstLineIndent => '首行缩进（字）';
+
+  @override
   String diaryTypographyDecrease(String label) {
     return '减小$label';
   }
@@ -2985,6 +3038,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryCardStylePresetMemoDesc => '文字在先、图片在后，像写备忘一样';
+
+  @override
+  String get diaryCardStylePresetWarm => '暖阳';
+
+  @override
+  String get diaryCardStylePresetWarmDesc => '暖复古风：通栏大图配橘色大日期';
 
   @override
   String styleEditorApplied(String name) {
@@ -3503,6 +3562,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryCardStyleSourceTag => '首个标签';
+
+  @override
+  String get diaryCardStyleSourceWarm => '暖色';
 
   @override
   String get diaryCardStyleSourceMoodHint => '按每篇日记的心情取色；没有心情时用默认颜色';
@@ -4724,7 +4786,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get desktopGallery => '相册';
 
   @override
-  String get desktopMine => '我的';
+  String get desktopTilesTitle => '快捷入口';
+
+  @override
+  String get desktopCalendar => '日历';
+
+  @override
+  String get desktopTags => '标签';
 
   @override
   String get desktopLatestTitle => '最近记录';
@@ -4747,10 +4815,78 @@ class AppLocalizationsZh extends AppLocalizations {
   String get desktopWriteSubtitle => '记录此刻的想法';
 
   @override
-  String get desktopDiary => '日记';
+  String get desktopLayoutTitle => '首页布局';
 
   @override
-  String get desktopBackup => '备份';
+  String get desktopLayoutIntro => '拖拽调整顺序，勾选控制显隐，改动即时生效。';
+
+  @override
+  String get desktopLayoutModuleHeader => '题头';
+
+  @override
+  String get desktopLayoutModuleHeaderDesc => '日期、问候语与统计行';
+
+  @override
+  String get desktopLayoutModuleWriteButton => '写点什么';
+
+  @override
+  String get desktopLayoutModuleWriteButtonDesc => '首页顶部的写作入口按钮';
+
+  @override
+  String get desktopLayoutModuleQuickEntry => '快捷入口';
+
+  @override
+  String get desktopLayoutModuleQuickEntryDesc => '时间线、相册、日历等 6 个入口';
+
+  @override
+  String get desktopLayoutModuleRecent => '最近记录';
+
+  @override
+  String get desktopLayoutModuleRecentDesc => '最近 3 篇日记';
+
+  @override
+  String get desktopLayoutReset => '恢复默认';
+
+  @override
+  String get desktopLayoutCopyCode => '复制布局码';
+
+  @override
+  String get desktopLayoutImportCode => '导入布局码';
+
+  @override
+  String get desktopLayoutCodeCopied => '布局码已复制';
+
+  @override
+  String get desktopLayoutImportTitle => '导入布局码';
+
+  @override
+  String get desktopLayoutImportHint => '粘贴布局码';
+
+  @override
+  String get desktopLayoutImportEmpty => '没有找到布局码';
+
+  @override
+  String get desktopLayoutImportInvalid => '布局码无效';
+
+  @override
+  String get desktopLayoutImported => '已导入布局';
+
+  @override
+  String get desktopLayoutEntryDefault => '默认布局';
+
+  @override
+  String desktopLayoutEntryCustom(int count) {
+    return '已自定义，显示 $count 个区块';
+  }
+
+  @override
+  String get desktopLayoutEmptyTitle => '首页没有区块';
+
+  @override
+  String get desktopLayoutEmptySubtitle => '四个区块都关掉了，打开至少一个吧。';
+
+  @override
+  String get desktopLayoutOpenEditor => '去调整布局';
 
   @override
   String get simpleComposerTitle => '写日记';
@@ -6217,6 +6353,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notebookSectionClosed => '已合上';
 
   @override
+  String get notebookParentLabel => '父日记本';
+
+  @override
+  String get notebookParentTopLevel => '顶级日记本';
+
+  @override
+  String get notebookParentHint => '挂到另一本下面做子本，子本的日记会算进父本';
+
+  @override
+  String get notebookParentPick => '选择父日记本';
+
+  @override
+  String get notebookUnfiled => '未收录';
+
+  @override
+  String get notebookChildTitle => '子日记本';
+
+  @override
   String notebookEntryCount(int count) {
     return '$count 篇';
   }
@@ -7288,12 +7442,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsFeaturesPagesFooter => '日记和设置始终保留。关闭的页面不再出现在底部导航，数据不受影响。';
-
-  @override
-  String get settingsFeaturesCalendarSubtitle => '按月查看日记，含农历、节假日与纪念日';
-
-  @override
-  String get settingsFeaturesExploreSubtitle => '统计、那年今日、心情趋势与照片墙';
 
   @override
   String get settingsFeaturesDesktopSubtitle => '问候、统计与快捷入口，一目了然';

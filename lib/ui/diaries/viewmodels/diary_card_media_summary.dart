@@ -39,6 +39,10 @@ class DiaryCardMediaSummary {
       videoCount == 0 &&
       attachmentCount == 0;
 
+  /// 各类媒体总数（原版 Vivido 时间线卡片右下角徽章的数字）。
+  int get totalCount =>
+      imageCount + audioCount + videoCount + attachmentCount;
+
   static DiaryCardMediaSummary scan(String contentJson) {
     final normalized = contentJson.trim();
     if (normalized.isEmpty) {

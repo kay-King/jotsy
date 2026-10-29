@@ -43,7 +43,7 @@ mixin _AppDatabaseDiaryScopeSql on _$AppDatabase {
       DiaryNotebookScope() =>
         'JOIN diary_notebooks sdn ON sdn.diary_id = d.id\n'
             'JOIN notebooks sn ON sn.id = sdn.notebook_id\n',
-      DiaryAllScope() || DiarySmartScope() => '',
+      DiaryAllScope() || DiarySmartScope() || DiaryUnfiledScope() => '',
     };
   }
 
@@ -58,8 +58,17 @@ mixin _AppDatabaseDiaryScopeSql on _$AppDatabase {
       case DiaryAllScope():
         sql.writeln('  AND ${_privateDiaryExclusionSql('d.id')}');
       case DiaryNotebookScope():
-        sql.writeln('  AND sn.notebook_id = ?');
-        variables.add(Variable<String>(scope.notebookId));
+        final ids = scope.effectiveIds;
+        if (ids.length == 1) {
+          sql.writeln('  AND sn.notebook_id = ?');
+          variables.add(Variable<String>(ids.single));
+        } else {
+          // 嵌套：父本范围含子本的日记（自己 + 后代）。
+          sql.writeln(
+            '  AND sn.notebook_id IN (${_placeholders(ids.length)})',
+          );
+          variables.addAll(_stringVariables(ids));
+        }
         // 只有手动本有成员行，sn 必是手动本；本子自己私密时显示全部成员
         // （这是私密日记唯一出现的地方），否则同样排除私密日记。
         sql.writeln(
@@ -82,6 +91,14 @@ mixin _AppDatabaseDiaryScopeSql on _$AppDatabase {
       case DiarySmartScope():
         sql.writeln('  AND (${scope.predicate.sql})');
         variables.addAll(scope.predicate.variables);
+        sql.writeln('  AND ${_privateDiaryExclusionSql('d.id')}');
+      case DiaryUnfiledScope():
+        // 未收录：没进任何手动日记本的日记（只有手动本有成员行）。
+        // 私密日记在私密本子里，算已收录，这里同样排除（与全局查询一致）。
+        sql.writeln(
+          '  AND NOT EXISTS (SELECT 1 FROM diary_notebooks udn '
+          'WHERE udn.diary_id = d.id)',
+        );
         sql.writeln('  AND ${_privateDiaryExclusionSql('d.id')}');
     }
   }

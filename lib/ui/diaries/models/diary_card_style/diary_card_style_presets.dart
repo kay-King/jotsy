@@ -11,6 +11,7 @@ enum DiaryCardPresetId {
   journal,
   mood,
   memo,
+  warm,
 }
 
 /// 内置的卡片样式预设。
@@ -29,6 +30,7 @@ abstract final class DiaryCardPresets {
         DiaryCardPresetId.journal: _journal,
         DiaryCardPresetId.mood: _mood,
         DiaryCardPresetId.memo: _memo,
+        DiaryCardPresetId.warm: _warm,
       };
 
   static DiaryCardStyle styleOf(DiaryCardPresetId id) => styles[id]!;
@@ -314,6 +316,76 @@ abstract final class DiaryCardPresets {
       cardGap: 8,
       elementGap: 6,
       previewMaxLines: 4,
+      metaPosition: DiaryCardMetaPosition.footer,
+    ),
+  );
+
+  /// 暖阳：暖复古风——通栏大图、奶油底色、橘色大日期，底栏带字数与媒体数。
+  /// 底栏是“大日期数字 + 月份星期”配标题（不显示正文摘要与心情天气），
+  /// 像一张暖色调的当日卡片；只作可选预设，默认样式仍是经典。
+  /// 暖阳（原版 Vivido 时间线卡片）：奶油底、陶土橘大日期、通栏大图。
+  /// 排法照原版 TimelineCard：封面通栏在上（高约卡宽 0.55）；内容行
+  /// 是大日期块在左、标题 + 两行摘要在右；媒体数是右下角的圆角徽章，
+  /// 没有底栏（不显示字数、标签与时间）。无封面时封面区放暖色日期卡片
+  /// 当封面（奶油底 + 陶土橘字，不用经典预设那种蓝色），通栏同宽，
+  /// 有封面和无封面的卡片外框宽度一致。
+  static const _warm = DiaryCardStyle(
+    surface: DiaryCardSurfaceStyle(
+      cornerRadius: 20,
+      background: DiaryCardColorSpec(
+        source: DiaryCardColorSource.warm,
+        strength: 0.04,
+      ),
+      borderWidth: 1,
+      borderColor: DiaryCardColorSpec(
+        source: DiaryCardColorSource.warm,
+        strength: 0.25,
+      ),
+      shadow: DiaryCardShadowStyle.soft,
+    ),
+    typography: DiaryCardTypography(
+      titleScale: 0.92,
+      previewScale: 1.0,
+      lineHeight: DiaryCardLineHeight.standard,
+    ),
+    content: DiaryCardContentStyle(
+      showPreview: true,
+      coverFallback: DiaryCardCoverFallback.dateBlock,
+    ),
+    meta: DiaryCardMetaStyle(
+      bigDate: true,
+      inlineDate: true,
+      mediaBadge: true,
+      dateAccent: DiaryCardColorSpec(
+        source: DiaryCardColorSource.warm,
+        strength: 1,
+      ),
+      showMood: false,
+      showWeather: false,
+      showWordCount: false,
+      showMedia: false,
+      footerTime: DiaryCardFooterTime.hidden,
+    ),
+    list: DiaryCardModeStyle(
+      coverPosition: DiaryCardCoverPosition.top,
+      coverHeight: 200,
+      coverDivider: false,
+      coverGap: 14,
+      paddingH: 16,
+      paddingV: 16,
+      elementGap: 6,
+      previewMaxLines: 2,
+      metaPosition: DiaryCardMetaPosition.footer,
+    ),
+    waterfall: DiaryCardModeStyle(
+      coverPosition: DiaryCardCoverPosition.top,
+      coverHeight: 120,
+      coverDivider: false,
+      coverGap: 12,
+      paddingH: 14,
+      paddingV: 14,
+      elementGap: 6,
+      previewMaxLines: 2,
       metaPosition: DiaryCardMetaPosition.footer,
     ),
   );

@@ -272,6 +272,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
                           // 新查询 loading 时继续展示上一份结果，避免输入停顿后整屏闪白。
                           DiariesListSection(
                             diaries: displayedSearchItems,
+                            watchCommentCounts: true,
                             layoutMode: DiaryLayoutMode.list,
                             selectedDiaryIds: const <String>{},
                             isSelectionMode: false,

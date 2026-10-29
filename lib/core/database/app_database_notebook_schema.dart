@@ -40,6 +40,14 @@ class Notebooks extends Table {
   BoolColumn get isClosed =>
       boolean().named('is_closed').withDefault(const Constant(false))();
 
+  /// 父日记本的业务 id（`notebook_id`），null 表示顶级日记本（v15 新增）。
+  ///
+  /// 存业务 id 而不是本地 id：备份恢复与合并时本地 id 会变，业务 id 不变，
+  /// 嵌套关系随备份导出、按业务 id 重新挂接；日记本通常只有几个到几十个，
+  /// 自连接的性能可忽略。只允许手动日记本嵌套（智能本是规则现算的成员，
+  /// 不参与嵌套）。
+  TextColumn get parentId => text().named('parent_id').nullable()();
+
   DateTimeColumn get createdAt => dateTime().named('created_at')();
 
   DateTimeColumn get updatedAt => dateTime().named('updated_at')();

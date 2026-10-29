@@ -673,6 +673,7 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                           ),
                                         ),
                                         isSearchResultEmpty: false,
+                                        watchCommentCounts: true,
                                         sectionHeaderBuilder:
                                             _bookSectionHeaders(
                                               scopeResolution,

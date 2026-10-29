@@ -62,7 +62,11 @@ class ExploreSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    // mainAxisSize.min：标题行只占内容宽。默认的 max 会让它在父 Row
+    // （媒体画廊卡标题行、日历区块标题行那种“标题 + Spacer + 尾部按钮”
+    // 的结构）里把整行宽度都占走，尾部按钮再叠上去就横向溢出。
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Container(
           width: 28,
@@ -79,11 +83,17 @@ class ExploreSectionTitle extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
+        // Flexible + ellipsis：标题放在有界宽度的父 Row 里（日历区块标题行
+        // “月份 + Spacer + 完整日历”）时，月份名太长可以收起来而不是把
+        // 整行顶溢出；平时标题短时和原来一样。
+        Flexible(
+          child: Text(
+            title,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
           ),
         ),
       ],

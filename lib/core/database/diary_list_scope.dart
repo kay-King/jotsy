@@ -1,10 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:meta/meta.dart';
 
-/// 日记列表查询的范围：全部日记、某本手动日记本、或某本智能日记本。
+/// 日记列表查询的范围：全部日记、某本手动日记本、某本智能日记本，或未收录
+/// （没进任何手动日记本的日记）。
 ///
 /// 只描述“查哪些日记、按什么口径排序”，SQL 由数据库层
-/// （`app_database_diary_scope_sql.dart`）生成。三种范围都遵守同一条私密规则：
+/// （`app_database_diary_scope_sql.dart`）生成。四种范围都遵守同一条私密规则：
 /// 在隐藏 / 加锁的手动日记本里的日记只出现在那本私密日记本的范围内。
 ///
 /// 实现了值相等：作为 Riverpod family 的 key（经 `DiaryPageQuery` 等）时，
@@ -40,6 +41,9 @@ final class DiaryAllScope extends DiaryListScope {
 ///   （未分章与认不出的章节排最后），再按本子内的 `position`，最后按创建时间；
 ///   此时列表的排序方式与置顶都不生效；
 /// - [chapterOrder] 来自日记本 payload 的章节列表（`NotebookPayload.chapterIds`）。
+/// - [descendantIds] 嵌套范围：自己 + 后代的业务 id（调用方经 NotebookTree
+///   算好、排序后传入，保证 key 稳定）。为 null 时只查自己；章节筛选与书序
+///   只作用于自己本内的成员行（子本的日记按时间混排在后，不参与章节与书序）。
 @immutable
 final class DiaryNotebookScope extends DiaryListScope {
   const DiaryNotebookScope({
@@ -48,6 +52,7 @@ final class DiaryNotebookScope extends DiaryListScope {
     this.unassignedChapterOnly = false,
     this.bookOrder = false,
     this.chapterOrder = const <String>[],
+    this.descendantIds,
   }) : assert(
          chapterId == null || !unassignedChapterOnly,
          'chapterId 与 unassignedChapterOnly 互斥',
@@ -58,6 +63,14 @@ final class DiaryNotebookScope extends DiaryListScope {
   final bool unassignedChapterOnly;
   final bool bookOrder;
   final List<String> chapterOrder;
+  final List<String>? descendantIds;
+
+  /// 实际查询的日记本 id：自己 + 后代（已排序去重）。
+  List<String> get effectiveIds {
+    final ids = descendantIds;
+    if (ids == null || ids.isEmpty) return <String>[notebookId];
+    return ids;
+  }
 
   @override
   bool operator ==(Object other) {
@@ -67,7 +80,8 @@ final class DiaryNotebookScope extends DiaryListScope {
         other.chapterId == chapterId &&
         other.unassignedChapterOnly == unassignedChapterOnly &&
         other.bookOrder == bookOrder &&
-        _listEquals(other.chapterOrder, chapterOrder);
+        _listEquals(other.chapterOrder, chapterOrder) &&
+        _listEquals(other.descendantIds ?? const <String>[], descendantIds ?? const <String>[]);
   }
 
   @override
@@ -77,12 +91,14 @@ final class DiaryNotebookScope extends DiaryListScope {
     unassignedChapterOnly,
     bookOrder,
     Object.hashAll(chapterOrder),
+    Object.hashAll(descendantIds ?? const <String>[]),
   );
 
   @override
   String toString() =>
       'DiaryNotebookScope($notebookId, chapter: $chapterId, '
-      'unassigned: $unassignedChapterOnly, bookOrder: $bookOrder)';
+      'unassigned: $unassignedChapterOnly, bookOrder: $bookOrder, '
+      'descendants: ${descendantIds?.length ?? 0})';
 }
 
 /// 一本智能日记本：成员由规则现算，[predicate] 是规则编译出的 SQL 条件。
@@ -106,6 +122,24 @@ final class DiarySmartScope extends DiaryListScope {
 
   @override
   String toString() => 'DiarySmartScope($notebookId, ${predicate.sql})';
+}
+
+/// 未收录：没进任何手动日记本的日记（书架“未收录”行）。
+///
+/// 私密日记不在其中：私密日记在某本私密本子里，算“已收录”（只是不在全局
+/// 查询里出现）。回收站与归档里的日记同样不算未收录（它们有独立的入口）。
+@immutable
+final class DiaryUnfiledScope extends DiaryListScope {
+  const DiaryUnfiledScope();
+
+  @override
+  bool operator ==(Object other) => other is DiaryUnfiledScope;
+
+  @override
+  int get hashCode => (DiaryUnfiledScope).hashCode;
+
+  @override
+  String toString() => 'DiaryUnfiledScope';
 }
 
 /// 预先编译好的 SQL 布尔表达式，作用于别名为 `d` 的 `diaries` 表。

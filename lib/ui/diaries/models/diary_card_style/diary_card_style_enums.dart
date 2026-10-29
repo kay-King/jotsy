@@ -15,6 +15,8 @@ enum DiaryCardMode { list, waterfall }
 ///
 /// [theme] 表示沿用默认外观：每个颜色位各自取原本的主题语义色（卡片表面、
 /// 描边、阴影、文字各不相同），因此默认样式与改版前逐像素一致。
+/// [warm] 是固定的陶土橘点缀色（暖阳预设用）：不是自由取色，只是预设
+/// 的暖色板里一个写死的颜色；深色主题下按用途推导明度。
 enum DiaryCardColorSource {
   theme,
   primary,
@@ -22,6 +24,7 @@ enum DiaryCardColorSource {
   tertiary,
   mood,
   firstTag,
+  warm,
 }
 
 enum DiaryCardGradientDirection { vertical, horizontal, diagonal }

@@ -32,7 +32,6 @@ import '../../notebooks/viewmodels/notebook_view.dart';
 import '../providers/app_features_provider.dart';
 import '../widgets/settings_card_group.dart';
 import '../widgets/settings_option_tiles.dart';
-import '../widgets/settings_reveal.dart';
 
 /// 功能管理二级页。
 class AppFeaturesPage extends ConsumerWidget {
@@ -80,44 +79,16 @@ class AppFeaturesPage extends ConsumerWidget {
                 value: features.desktop,
                 onChanged: writer((v) => features.copyWith(desktop: v)),
               ),
-              // 日历与其下的纪念日合成分组里的一项：分组按位置复用子项，若把
-              // 纪念日作为单独一项增删，后面“探索”那一行的开关状态会被它
-              // 接手，从探索的值播一遍开关动画。
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  SettingsSwitchTile(
-                    title: l10n.navCalendar,
-                    subtitle: l10n.settingsFeaturesCalendarSubtitle,
-                    value: features.calendar,
-                    onChanged: writer((v) => features.copyWith(calendar: v)),
-                  ),
-                  SettingsReveal(
-                    visible: features.calendar,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        // 纪念日与日历、探索平齐（用户 2026-10-24：从属缩进
-                        // 在卡里读起来像没对齐）：不再用从属缩进与分隔线。
-                        const SettingsCardGroupDivider(),
-                        SettingsSwitchTile(
-                          title: l10n.settingsFeaturesAnniversaries,
-                          subtitle: l10n.settingsFeaturesAnniversariesSubtitle,
-                          value: features.anniversaries,
-                          onChanged: writer(
-                            (v) => features.copyWith(anniversaries: v),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              // 纪念日以前挂在日历开关下面（SettingsReveal），日历并进首页
+              // 后不再有日历开关，纪念日改成平级的一项。
+              const SettingsCardGroupDivider(),
               SettingsSwitchTile(
-                title: l10n.navExplore,
-                subtitle: l10n.settingsFeaturesExploreSubtitle,
-                value: features.explore,
-                onChanged: writer((v) => features.copyWith(explore: v)),
+                title: l10n.settingsFeaturesAnniversaries,
+                subtitle: l10n.settingsFeaturesAnniversariesSubtitle,
+                value: features.anniversaries,
+                onChanged: writer(
+                  (v) => features.copyWith(anniversaries: v),
+                ),
               ),
             ],
           ),

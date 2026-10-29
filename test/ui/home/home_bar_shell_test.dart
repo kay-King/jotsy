@@ -12,7 +12,6 @@ import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
-import 'package:node_diary/ui/calendar/pages/calendar_page.dart';
 import 'package:node_diary/ui/diaries/models/diary_card_style/diary_card_style_enums.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/sections/diaries_list_section.dart';
@@ -20,11 +19,11 @@ import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
 import 'package:node_diary/ui/diaries/widgets/diaries_header_sliver.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_card/diary_card.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_tag_filter_bar.dart';
-import 'package:node_diary/ui/explore/pages/explore_page.dart';
-import 'package:node_diary/ui/explore/sections/explore_content_section.dart';
+import 'package:node_diary/ui/home/sections/desktop_tiles.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_behavior.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_settings.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
+import 'package:node_diary/ui/home/pages/desktop_page.dart';
 import 'package:node_diary/ui/home/pages/home_page.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_bottom_bar.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_floating_bar.dart';
@@ -779,17 +778,13 @@ void main() {
       final lastCard = find.byType(DiaryCard).last;
       expect(tester.getRect(lastCard).bottom, lessThanOrEqualTo(pillTop));
 
-      await _openTab(tester, l10n.navCalendar);
-      final calendar = find.byType(CalendarPage);
-      expect(_slotHeight(tester, calendar), slot);
-      expect(_trailingSpace(tester, calendar), 12 + slot);
-
-      await _openTab(tester, l10n.navExplore);
-      final explore = find.byType(ExplorePage);
-      expect(_trailingSpace(tester, explore), 12 + slot);
-      await _scrollToEnd(tester, explore);
+      await _openTab(tester, l10n.navDesktop);
+      final desktop = find.byType(DesktopPage);
+      expect(_slotHeight(tester, desktop), slot);
+      expect(_trailingSpace(tester, desktop), 24);
+      await _scrollToEnd(tester, desktop);
       expect(
-        tester.getRect(find.byType(ExploreContentSection)).bottom,
+        tester.getRect(find.byType(DesktopTiles)).bottom,
         lessThanOrEqualTo(pillTop),
       );
 
@@ -812,10 +807,8 @@ void main() {
       expect(_slotHeight(tester, diaries), 0);
       expect(_trailingSpace(tester, diaries), 12);
 
-      await _openTab(tester, l10n.navCalendar);
-      expect(_trailingSpace(tester, find.byType(CalendarPage)), 12);
-      await _openTab(tester, l10n.navExplore);
-      expect(_trailingSpace(tester, find.byType(ExplorePage)), 12);
+      await _openTab(tester, l10n.navDesktop);
+      expect(_trailingSpace(tester, find.byType(DesktopPage)), 24);
       await _openTab(tester, l10n.navSettings);
       expect(_trailingSpace(tester, find.byType(SettingsPage)), 8);
       await _unmount(tester);

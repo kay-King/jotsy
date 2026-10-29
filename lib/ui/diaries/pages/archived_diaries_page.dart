@@ -201,6 +201,7 @@ class _ArchivedDiariesPageState extends ConsumerState<ArchivedDiariesPage> {
                         // 列表组件与主页复用，行为通过回调注入实现“归档页语义”。
                         DiariesListSection(
                           diaries: visibleDiaries,
+                          watchCommentCounts: true,
                           pendingHideDiaryIds: _pendingHideDiaryIds,
                           appearingDiaryIds: _appearingDiaryIds,
                           layoutMode: DiaryLayoutMode.list,

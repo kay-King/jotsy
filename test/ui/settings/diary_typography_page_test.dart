@@ -70,6 +70,17 @@ void main() {
       expect(_previewParagraphStyle(tester).fontSize, 17);
       expect(_previewParagraphStyle(tester).fontFamily, 'sans-serif');
 
+      await tester.tap(
+        find.byTooltip(
+          l10n.diaryTypographyIncrease(l10n.diaryTypographyFirstLineIndent),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(settings.diaryTypography.firstLineIndent, 0.5);
+
+      // 多了一行滑块后恢复按钮可能在屏外，先滚到可见再点。
+      await tester.ensureVisible(find.text(l10n.diaryTypographyReset));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.diaryTypographyReset));
       await tester.pumpAndSettle();
       expect(settings.diaryTypography.hasDefaultMetrics, isTrue);

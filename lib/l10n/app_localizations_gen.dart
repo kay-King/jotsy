@@ -110,18 +110,6 @@ abstract class AppLocalizations {
   /// **'Diaries'**
   String get navDiaries;
 
-  /// Auto-generated metadata for navCalendar.
-  ///
-  /// In en, this message translates to:
-  /// **'Calendar'**
-  String get navCalendar;
-
-  /// Auto-generated metadata for navExplore.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore'**
-  String get navExplore;
-
   /// Auto-generated metadata for navSettings.
   ///
   /// In en, this message translates to:
@@ -1712,11 +1700,71 @@ abstract class AppLocalizations {
   /// **'No more images'**
   String get autoT0057;
 
-  /// Auto-generated metadata for autoT0058.
+  /// Media gallery filter: show all media types.
   ///
   /// In en, this message translates to:
-  /// **'Explore'**
-  String get autoT0058;
+  /// **'All'**
+  String get galleryFilterAll;
+
+  /// Media gallery filter: show images only.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get galleryFilterImage;
+
+  /// Media gallery filter: show audio only.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get galleryFilterAudio;
+
+  /// Media gallery filter: show videos only.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get galleryFilterVideo;
+
+  /// Media gallery empty state when the All filter has nothing to show.
+  ///
+  /// In en, this message translates to:
+  /// **'No media to show yet'**
+  String get galleryEmptyMedia;
+
+  /// Media gallery empty state when the Audio filter has nothing to show.
+  ///
+  /// In en, this message translates to:
+  /// **'No audio to show yet'**
+  String get galleryEmptyAudio;
+
+  /// Media gallery empty state when the Video filter has nothing to show.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos to show yet'**
+  String get galleryEmptyVideo;
+
+  /// Media gallery footer when the All filter has loaded everything.
+  ///
+  /// In en, this message translates to:
+  /// **'No more media'**
+  String get galleryNoMoreMedia;
+
+  /// Media gallery footer when the Audio filter has loaded everything.
+  ///
+  /// In en, this message translates to:
+  /// **'No more audio'**
+  String get galleryNoMoreAudio;
+
+  /// Media gallery footer when the Video filter has loaded everything.
+  ///
+  /// In en, this message translates to:
+  /// **'No more videos'**
+  String get galleryNoMoreVideo;
+
+  /// Media gallery error when loading media fails, any filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load media, please try again later'**
+  String get galleryLoadFailed;
 
   /// Auto-generated metadata for autoT0059.
   ///
@@ -2587,6 +2635,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Take it easy, this day\'s highlights haven\'t happened yet.'**
   String get autoT0211;
+
+  /// Diary preview comments section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get diaryCommentsTitle;
+
+  /// Diary preview comments section empty state.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet — write the first one.'**
+  String get diaryCommentsEmpty;
+
+  /// Hint text of the diary comment input field.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment…'**
+  String get diaryCommentsHint;
+
+  /// Semantics label of the diary comment send button.
+  ///
+  /// In en, this message translates to:
+  /// **'Send comment'**
+  String get diaryCommentsSend;
+
+  /// Title of the diary comment delete confirmation dialog and semantics label of the delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this comment'**
+  String get diaryCommentsDelete;
+
+  /// Body of the diary comment delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this comment? This cannot be undone.'**
+  String get diaryCommentsDeleteConfirm;
+
+  /// Menu item and dialog title for editing a diary comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit comment'**
+  String get diaryCommentsEdit;
+
+  /// Semantics label of the diary card comment count badge; count is the number of comments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} comments'**
+  String diaryCommentsCount(int count);
 
   /// Time capsule text for timeCapsuleTitle.
   ///
@@ -5090,6 +5186,12 @@ abstract class AppLocalizations {
   /// **'Paragraph spacing'**
   String get diaryTypographyParagraphSpacing;
 
+  /// Body layout: first-line indent slider label, in characters (1 char = current font size); 0 means no indent. Applies to reading and Word export only, not the editor.
+  ///
+  /// In en, this message translates to:
+  /// **'First-line indent (chars)'**
+  String get diaryTypographyFirstLineIndent;
+
   /// Body layout: tooltip of the decrease button; label is the value name.
   ///
   /// In en, this message translates to:
@@ -5443,6 +5545,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Text first, images below, like a memo'**
   String get diaryCardStylePresetMemoDesc;
+
+  /// Diary card style settings: name of the “Warm” preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm'**
+  String get diaryCardStylePresetWarm;
+
+  /// Diary card style settings: one-line description of the “Warm” preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm vintage: full-width cover with a large orange date'**
+  String get diaryCardStylePresetWarmDesc;
 
   /// Diary card style settings: message after applying a preset or saved style (can be undone).
   ///
@@ -6439,6 +6553,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First tag'**
   String get diaryCardStyleSourceTag;
+
+  /// Diary card style settings: color source: fixed terracotta accent.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm'**
+  String get diaryCardStyleSourceWarm;
 
   /// Diary card style settings: note on the mood color source.
   ///
@@ -8726,31 +8846,43 @@ abstract class AppLocalizations {
   /// **'Gallery'**
   String get desktopGallery;
 
-  /// Desktop tile: open settings.
+  /// Desktop quick-access card title.
   ///
   /// In en, this message translates to:
-  /// **'Mine'**
-  String get desktopMine;
+  /// **'Quick access'**
+  String get desktopTilesTitle;
 
-  /// Desktop section title for the latest diary.
+  /// Desktop tile: open the full calendar page.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get desktopCalendar;
+
+  /// Desktop tile: open the tag management page.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get desktopTags;
+
+  /// Desktop section title for the recent entries.
   ///
   /// In en, this message translates to:
   /// **'Latest entry'**
   String get desktopLatestTitle;
 
-  /// Desktop latest entry button: open the full diary.
+  /// Desktop recent entries button: open the diaries page.
   ///
   /// In en, this message translates to:
   /// **'View all'**
   String get desktopViewAll;
 
-  /// Desktop latest entry meta: the diary is private to the user.
+  /// Desktop recent entry meta: the diary is private to the user.
   ///
   /// In en, this message translates to:
   /// **'Only you can see this'**
   String get desktopOnlyMe;
 
-  /// Desktop latest entry meta: number of images.
+  /// Desktop recent entry meta: number of images.
   ///
   /// In en, this message translates to:
   /// **'{count} photos'**
@@ -8768,17 +8900,149 @@ abstract class AppLocalizations {
   /// **'Capture this moment'**
   String get desktopWriteSubtitle;
 
-  /// 桌面页快捷入口：日记
+  /// Desktop layout page title.
   ///
   /// In en, this message translates to:
-  /// **'Diary'**
-  String get desktopDiary;
+  /// **'Home Layout'**
+  String get desktopLayoutTitle;
 
-  /// 桌面页快捷入口：备份
+  /// Desktop layout page intro.
   ///
   /// In en, this message translates to:
-  /// **'Backup'**
-  String get desktopBackup;
+  /// **'Drag to reorder, check to show or hide. Changes apply instantly.'**
+  String get desktopLayoutIntro;
+
+  /// Desktop layout module: header section.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get desktopLayoutModuleHeader;
+
+  /// Desktop layout module header description.
+  ///
+  /// In en, this message translates to:
+  /// **'Date, greeting and stats line'**
+  String get desktopLayoutModuleHeaderDesc;
+
+  /// Desktop layout module: write button.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get desktopLayoutModuleWriteButton;
+
+  /// Desktop layout module write button description.
+  ///
+  /// In en, this message translates to:
+  /// **'The write entry button at the top of home'**
+  String get desktopLayoutModuleWriteButtonDesc;
+
+  /// Desktop layout module: quick entry grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Entry'**
+  String get desktopLayoutModuleQuickEntry;
+
+  /// Desktop layout module quick entry description.
+  ///
+  /// In en, this message translates to:
+  /// **'6 entries: timeline, gallery, calendar and more'**
+  String get desktopLayoutModuleQuickEntryDesc;
+
+  /// Desktop layout module: recent entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get desktopLayoutModuleRecent;
+
+  /// Desktop layout module recent description.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest 3 entries'**
+  String get desktopLayoutModuleRecentDesc;
+
+  /// Desktop layout: reset to default.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get desktopLayoutReset;
+
+  /// Desktop layout: copy layout code.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Layout Code'**
+  String get desktopLayoutCopyCode;
+
+  /// Desktop layout: import layout code.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Layout Code'**
+  String get desktopLayoutImportCode;
+
+  /// Desktop layout: code copied message.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout code copied'**
+  String get desktopLayoutCodeCopied;
+
+  /// Desktop layout import dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Layout Code'**
+  String get desktopLayoutImportTitle;
+
+  /// Desktop layout import dialog hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste layout code'**
+  String get desktopLayoutImportHint;
+
+  /// Desktop layout import: empty message.
+  ///
+  /// In en, this message translates to:
+  /// **'No layout code found'**
+  String get desktopLayoutImportEmpty;
+
+  /// Desktop layout import: invalid message.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid layout code'**
+  String get desktopLayoutImportInvalid;
+
+  /// Desktop layout import: success message.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout imported'**
+  String get desktopLayoutImported;
+
+  /// Desktop layout settings tile subtitle when default.
+  ///
+  /// In en, this message translates to:
+  /// **'Default layout'**
+  String get desktopLayoutEntryDefault;
+
+  /// Desktop layout settings tile subtitle when customized.
+  ///
+  /// In en, this message translates to:
+  /// **'Customized, showing {count} sections'**
+  String desktopLayoutEntryCustom(int count);
+
+  /// Desktop empty state title when all modules hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'No sections on home'**
+  String get desktopLayoutEmptyTitle;
+
+  /// Desktop empty state subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All four sections are hidden. Turn at least one back on.'**
+  String get desktopLayoutEmptySubtitle;
+
+  /// Desktop empty state button: open layout editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Layout'**
+  String get desktopLayoutOpenEditor;
 
   /// 简洁编辑器 / 写点什么选择：simpleComposerTitle
   ///
@@ -11432,6 +11696,42 @@ abstract class AppLocalizations {
   /// **'Closed'**
   String get notebookSectionClosed;
 
+  /// Notebook editor: section title for the parent notebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent notebook'**
+  String get notebookParentLabel;
+
+  /// Notebook editor: not nested under any parent.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-level notebook'**
+  String get notebookParentTopLevel;
+
+  /// Notebook editor: hint text for the parent notebook section.
+  ///
+  /// In en, this message translates to:
+  /// **'Nest under another notebook; child entries count toward the parent'**
+  String get notebookParentHint;
+
+  /// Notebook editor: title of the parent picker bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose parent notebook'**
+  String get notebookParentPick;
+
+  /// Shelf: row for diaries not in any notebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfiled'**
+  String get notebookUnfiled;
+
+  /// Notebook contents page: title of the child notebook list.
+  ///
+  /// In en, this message translates to:
+  /// **'Child notebooks'**
+  String get notebookChildTitle;
+
   /// Number of entries in a notebook.
   ///
   /// In en, this message translates to:
@@ -13303,18 +13603,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Diaries and Settings always stay. Pages you turn off leave the bottom bar; your data isn\'t affected.'**
   String get settingsFeaturesPagesFooter;
-
-  /// Features page: subtitle of the calendar switch.
-  ///
-  /// In en, this message translates to:
-  /// **'View diaries by month, with lunar dates, holidays and anniversaries'**
-  String get settingsFeaturesCalendarSubtitle;
-
-  /// Features page: subtitle of the explore switch.
-  ///
-  /// In en, this message translates to:
-  /// **'Stats, on this day, mood trends and photo wall'**
-  String get settingsFeaturesExploreSubtitle;
 
   /// Feature management subtitle for the Desktop page.
   ///

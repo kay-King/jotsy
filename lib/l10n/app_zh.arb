@@ -8,14 +8,6 @@
   "@navDiaries": {
     "description": "Auto-generated metadata for navDiaries."
   },
-  "navCalendar": "日历",
-  "@navCalendar": {
-    "description": "Auto-generated metadata for navCalendar."
-  },
-  "navExplore": "探索",
-  "@navExplore": {
-    "description": "Auto-generated metadata for navExplore."
-  },
   "navSettings": "设置",
   "@navSettings": {
     "description": "Auto-generated metadata for navSettings."
@@ -1260,9 +1252,49 @@
   "@autoT0057": {
     "description": "Auto-generated metadata for autoT0057."
   },
-  "autoT0058": "探索",
-  "@autoT0058": {
-    "description": "Auto-generated metadata for autoT0058."
+  "galleryFilterAll": "全部",
+  "@galleryFilterAll": {
+    "description": "画廊分类：显示全部媒体。"
+  },
+  "galleryFilterImage": "图片",
+  "@galleryFilterImage": {
+    "description": "画廊分类：只显示图片。"
+  },
+  "galleryFilterAudio": "音频",
+  "@galleryFilterAudio": {
+    "description": "画廊分类：只显示音频。"
+  },
+  "galleryFilterVideo": "视频",
+  "@galleryFilterVideo": {
+    "description": "画廊分类：只显示视频。"
+  },
+  "galleryEmptyMedia": "还没有可展示的媒体",
+  "@galleryEmptyMedia": {
+    "description": "画廊空态：全部筛选下没有任何媒体。"
+  },
+  "galleryEmptyAudio": "还没有可展示的音频",
+  "@galleryEmptyAudio": {
+    "description": "画廊空态：音频筛选下没有任何音频。"
+  },
+  "galleryEmptyVideo": "还没有可展示的视频",
+  "@galleryEmptyVideo": {
+    "description": "画廊空态：视频筛选下没有任何视频。"
+  },
+  "galleryNoMoreMedia": "没有更多媒体了",
+  "@galleryNoMoreMedia": {
+    "description": "画廊底栏：全部筛选已全部加载完。"
+  },
+  "galleryNoMoreAudio": "没有更多音频了",
+  "@galleryNoMoreAudio": {
+    "description": "画廊底栏：音频筛选已全部加载完。"
+  },
+  "galleryNoMoreVideo": "没有更多视频了",
+  "@galleryNoMoreVideo": {
+    "description": "画廊底栏：视频筛选已全部加载完。"
+  },
+  "galleryLoadFailed": "加载媒体失败，请稍后重试",
+  "@galleryLoadFailed": {
+    "description": "画廊加载失败提示，任何筛选下通用。"
   },
   "autoT0059": "探索数据暂不可用",
   "@autoT0059": {
@@ -1951,6 +1983,43 @@
   "autoT0211": "别着急，属于这一天的精彩还没发生。",
   "@autoT0211": {
     "description": "Auto-generated metadata for autoT0211."
+  },
+  "diaryCommentsTitle": "留言",
+  "@diaryCommentsTitle": {
+    "description": "Diary preview comments section title."
+  },
+  "diaryCommentsEmpty": "还没有留言，写下第一条吧。",
+  "@diaryCommentsEmpty": {
+    "description": "Diary preview comments section empty state."
+  },
+  "diaryCommentsHint": "写下你的留言…",
+  "@diaryCommentsHint": {
+    "description": "Hint text of the diary comment input field."
+  },
+  "diaryCommentsSend": "发送留言",
+  "@diaryCommentsSend": {
+    "description": "Semantics label of the diary comment send button."
+  },
+  "diaryCommentsDelete": "删除这条留言",
+  "@diaryCommentsDelete": {
+    "description": "Title of the diary comment delete confirmation dialog and semantics label of the delete button."
+  },
+  "diaryCommentsDeleteConfirm": "确定删除这条留言吗？删除后无法恢复。",
+  "@diaryCommentsDeleteConfirm": {
+    "description": "Body of the diary comment delete confirmation dialog."
+  },
+  "diaryCommentsEdit": "编辑留言",
+  "@diaryCommentsEdit": {
+    "description": "Menu item and dialog title for editing a diary comment."
+  },
+  "diaryCommentsCount": "{count} 条留言",
+  "@diaryCommentsCount": {
+    "description": "Semantics label of the diary card comment count badge; count is the number of comments.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "timeCapsuleTitle": "定时锁",
   "@timeCapsuleTitle": {
@@ -4007,6 +4076,10 @@
   "@diaryTypographyParagraphSpacing": {
     "description": "正文排版：段间距滑块标题。"
   },
+  "diaryTypographyFirstLineIndent": "首行缩进（字）",
+  "@diaryTypographyFirstLineIndent": {
+    "description": "正文排版：首行缩进滑块标题，单位为字（1 字 = 当前字号）；0 表示不缩进。只作用于阅读页与 Word 导出，不作用于编辑器。"
+  },
   "diaryTypographyDecrease": "减小{label}",
   "@diaryTypographyDecrease": {
     "description": "正文排版：数值减小按钮的提示，label 为数值名称。",
@@ -4294,6 +4367,14 @@
   "diaryCardStylePresetMemoDesc": "文字在先、图片在后，像写备忘一样",
   "@diaryCardStylePresetMemoDesc": {
     "description": "日记卡片样式设置页：内置预设“备忘”的一句话说明。"
+  },
+  "diaryCardStylePresetWarm": "暖阳",
+  "@diaryCardStylePresetWarm": {
+    "description": "日记卡片样式设置页：内置预设“暖阳”的名称。"
+  },
+  "diaryCardStylePresetWarmDesc": "暖复古风：通栏大图配橘色大日期",
+  "@diaryCardStylePresetWarmDesc": {
+    "description": "日记卡片样式设置页：内置预设“暖阳”的一句话说明。"
   },
   "styleEditorApplied": "已套用「{name}」",
   "@styleEditorApplied": {
@@ -5008,6 +5089,10 @@
   "diaryCardStyleSourceTag": "首个标签",
   "@diaryCardStyleSourceTag": {
     "description": "日记卡片样式设置页：颜色来源：第一个标签的颜色。"
+  },
+  "diaryCardStyleSourceWarm": "暖色",
+  "@diaryCardStyleSourceWarm": {
+    "description": "日记卡片样式设置页：颜色来源：固定的陶土橘点缀色。"
   },
   "diaryCardStyleSourceMoodHint": "按每篇日记的心情取色；没有心情时用默认颜色",
   "@diaryCardStyleSourceMoodHint": {
@@ -6565,32 +6650,72 @@
   "@desktopTimeline": {"description": "Desktop tile: open the diary timeline."},
   "desktopGallery": "相册",
   "@desktopGallery": {"description": "Desktop tile: open the photo gallery."},
-  "desktopMine": "我的",
-  "@desktopMine": {"description": "Desktop tile: open settings."},
+  "desktopTilesTitle": "快捷入口",
+  "@desktopTilesTitle": {"description": "Desktop quick-access card title."},
+  "desktopCalendar": "日历",
+  "@desktopCalendar": {"description": "Desktop tile: open the full calendar page."},
+  "desktopTags": "标签",
+  "@desktopTags": {"description": "Desktop tile: open the tag management page."},
   "desktopLatestTitle": "最近记录",
-  "@desktopLatestTitle": {"description": "Desktop section title for the latest diary."},
+  "@desktopLatestTitle": {"description": "Desktop section title for the recent entries."},
   "desktopViewAll": "查看全部",
-  "@desktopViewAll": {"description": "Desktop latest entry button: open the full diary."},
+  "@desktopViewAll": {"description": "Desktop recent entries button: open the diaries page."},
   "desktopOnlyMe": "仅自己可见",
-  "@desktopOnlyMe": {"description": "Desktop latest entry meta: the diary is private to the user."},
+  "@desktopOnlyMe": {"description": "Desktop recent entry meta: the diary is private to the user."},
   "desktopImagesCount": "{count} 张图片",
-  "@desktopImagesCount": {"description": "Desktop latest entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
+  "@desktopImagesCount": {"description": "Desktop recent entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
   "desktopWriteTitle": "写点什么",
-  "@desktopWriteTitle": {
-    "description": "桌面页“写点什么”主按钮标题"
-  },
+  "@desktopWriteTitle": {"description": "桌面页“写点什么”主按钮标题"},
   "desktopWriteSubtitle": "记录此刻的想法",
-  "@desktopWriteSubtitle": {
-    "description": "桌面页“写点什么”主按钮副标题"
-  },
-  "desktopDiary": "日记",
-  "@desktopDiary": {
-    "description": "桌面页快捷入口：日记"
-  },
-  "desktopBackup": "备份",
-  "@desktopBackup": {
-    "description": "桌面页快捷入口：备份"
-  },
+  "@desktopWriteSubtitle": {"description": "桌面页“写点什么”主按钮副标题"},
+  "desktopLayoutTitle": "首页布局",
+  "@desktopLayoutTitle": {"description": "Desktop layout page title."},
+  "desktopLayoutIntro": "拖拽调整顺序，勾选控制显隐，改动即时生效。",
+  "@desktopLayoutIntro": {"description": "Desktop layout page intro."},
+  "desktopLayoutModuleHeader": "题头",
+  "@desktopLayoutModuleHeader": {"description": "Desktop layout module: header section."},
+  "desktopLayoutModuleHeaderDesc": "日期、问候语与统计行",
+  "@desktopLayoutModuleHeaderDesc": {"description": "Desktop layout module header description."},
+  "desktopLayoutModuleWriteButton": "写点什么",
+  "@desktopLayoutModuleWriteButton": {"description": "Desktop layout module: write button."},
+  "desktopLayoutModuleWriteButtonDesc": "首页顶部的写作入口按钮",
+  "@desktopLayoutModuleWriteButtonDesc": {"description": "Desktop layout module write button description."},
+  "desktopLayoutModuleQuickEntry": "快捷入口",
+  "@desktopLayoutModuleQuickEntry": {"description": "Desktop layout module: quick entry grid."},
+  "desktopLayoutModuleQuickEntryDesc": "时间线、相册、日历等 6 个入口",
+  "@desktopLayoutModuleQuickEntryDesc": {"description": "Desktop layout module quick entry description."},
+  "desktopLayoutModuleRecent": "最近记录",
+  "@desktopLayoutModuleRecent": {"description": "Desktop layout module: recent entries."},
+  "desktopLayoutModuleRecentDesc": "最近 3 篇日记",
+  "@desktopLayoutModuleRecentDesc": {"description": "Desktop layout module recent description."},
+  "desktopLayoutReset": "恢复默认",
+  "@desktopLayoutReset": {"description": "Desktop layout: reset to default."},
+  "desktopLayoutCopyCode": "复制布局码",
+  "@desktopLayoutCopyCode": {"description": "Desktop layout: copy layout code."},
+  "desktopLayoutImportCode": "导入布局码",
+  "@desktopLayoutImportCode": {"description": "Desktop layout: import layout code."},
+  "desktopLayoutCodeCopied": "布局码已复制",
+  "@desktopLayoutCodeCopied": {"description": "Desktop layout: code copied message."},
+  "desktopLayoutImportTitle": "导入布局码",
+  "@desktopLayoutImportTitle": {"description": "Desktop layout import dialog title."},
+  "desktopLayoutImportHint": "粘贴布局码",
+  "@desktopLayoutImportHint": {"description": "Desktop layout import dialog hint."},
+  "desktopLayoutImportEmpty": "没有找到布局码",
+  "@desktopLayoutImportEmpty": {"description": "Desktop layout import: empty message."},
+  "desktopLayoutImportInvalid": "布局码无效",
+  "@desktopLayoutImportInvalid": {"description": "Desktop layout import: invalid message."},
+  "desktopLayoutImported": "已导入布局",
+  "@desktopLayoutImported": {"description": "Desktop layout import: success message."},
+  "desktopLayoutEntryDefault": "默认布局",
+  "@desktopLayoutEntryDefault": {"description": "Desktop layout settings tile subtitle when default."},
+  "desktopLayoutEntryCustom": "已自定义，显示 {count} 个区块",
+  "@desktopLayoutEntryCustom": {"description": "Desktop layout settings tile subtitle when customized.", "placeholders": {"count": {"type": "int"}}},
+  "desktopLayoutEmptyTitle": "首页没有区块",
+  "@desktopLayoutEmptyTitle": {"description": "Desktop empty state title when all modules hidden."},
+  "desktopLayoutEmptySubtitle": "四个区块都关掉了，打开至少一个吧。",
+  "@desktopLayoutEmptySubtitle": {"description": "Desktop empty state subtitle."},
+  "desktopLayoutOpenEditor": "去调整布局",
+  "@desktopLayoutOpenEditor": {"description": "Desktop empty state button: open layout editor."},
   "simpleComposerTitle": "写日记",
   "@simpleComposerTitle": {
     "description": "简洁编辑器 / 写点什么选择：simpleComposerTitle"
@@ -8713,6 +8838,30 @@
   "@notebookSectionClosed": {
     "description": "书架与管理页分组：已合上的日记本（书架上默认收起）。"
   },
+  "notebookParentLabel": "父日记本",
+  "@notebookParentLabel": {
+    "description": "日记本编辑页：父日记本一节的标题。"
+  },
+  "notebookParentTopLevel": "顶级日记本",
+  "@notebookParentTopLevel": {
+    "description": "日记本编辑页：不挂到任何父本下，作为顶级日记本。"
+  },
+  "notebookParentHint": "挂到另一本下面做子本，子本的日记会算进父本",
+  "@notebookParentHint": {
+    "description": "日记本编辑页：父日记本一节的说明文字。"
+  },
+  "notebookParentPick": "选择父日记本",
+  "@notebookParentPick": {
+    "description": "日记本编辑页：选择父日记本底部面板的标题。"
+  },
+  "notebookUnfiled": "未收录",
+  "@notebookUnfiled": {
+    "description": "书架：没进任何日记本的日记一行。"
+  },
+  "notebookChildTitle": "子日记本",
+  "@notebookChildTitle": {
+    "description": "日记本内容页：子日记本列表的标题。"
+  },
   "notebookEntryCount": "{count} 篇",
   "@notebookEntryCount": {
     "description": "日记本里的日记篇数。",
@@ -10354,14 +10503,6 @@
   "settingsFeaturesPagesFooter": "日记和设置始终保留。关闭的页面不再出现在底部导航，数据不受影响。",
   "@settingsFeaturesPagesFooter": {
     "description": "功能管理页：页面分组底部说明。"
-  },
-  "settingsFeaturesCalendarSubtitle": "按月查看日记，含农历、节假日与纪念日",
-  "@settingsFeaturesCalendarSubtitle": {
-    "description": "功能管理页：日历开关的说明。"
-  },
-  "settingsFeaturesExploreSubtitle": "统计、那年今日、心情趋势与照片墙",
-  "@settingsFeaturesExploreSubtitle": {
-    "description": "功能管理页：探索开关的说明。"
   },
   "settingsFeaturesDesktopSubtitle": "问候、统计与快捷入口，一目了然",
   "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},

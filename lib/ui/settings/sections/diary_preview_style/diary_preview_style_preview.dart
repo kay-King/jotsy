@@ -159,6 +159,7 @@ class _SamplePageState extends ConsumerState<_SamplePage> {
         behavior: controller.behavior,
         extraBottomPadding: widget.bottomPadding,
         paging: widget.paging,
+        showComments: false,
         onOpenImage: (_, _, hero) => hero?.dispose(),
         actions: DiaryPreviewActions(
           onOpenTypography: ignore,

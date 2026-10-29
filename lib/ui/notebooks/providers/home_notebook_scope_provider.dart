@@ -5,6 +5,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/services/app_service.dart';
 import '../../diaries/providers/diary_filters.dart';
 import '../models/notebook_scope_resolver.dart';
+import '../models/notebook_tree.dart';
 import '../viewmodels/notebook_view.dart';
 import 'notebook_providers.dart';
 
@@ -26,6 +27,7 @@ class HomeNotebookScope {
     this.unassignedChapterOnly = false,
     this.sortOverride,
     this.relocked = false,
+    this.isUnfiled = false,
   });
 
   static const HomeNotebookScope all = HomeNotebookScope();
@@ -36,7 +38,10 @@ class HomeNotebookScope {
   final NotebookSort? sortOverride;
   final bool relocked;
 
-  bool get isAll => notebookId == null;
+  /// 未收录范围（书架“未收录”行）：为 true 时 notebookId 为 null。
+  final bool isUnfiled;
+
+  bool get isAll => notebookId == null && !isUnfiled;
 
   HomeNotebookScope _copyWith({
     ValueGetter<String?>? chapterId,
@@ -51,6 +56,7 @@ class HomeNotebookScope {
           unassignedChapterOnly ?? this.unassignedChapterOnly,
       sortOverride: sortOverride == null ? this.sortOverride : sortOverride(),
       relocked: relocked ?? this.relocked,
+      isUnfiled: isUnfiled,
     );
   }
 
@@ -61,7 +67,8 @@ class HomeNotebookScope {
       other.chapterId == chapterId &&
       other.unassignedChapterOnly == unassignedChapterOnly &&
       other.sortOverride == sortOverride &&
-      other.relocked == relocked;
+      other.relocked == relocked &&
+      other.isUnfiled == isUnfiled;
 
   @override
   int get hashCode => Object.hash(
@@ -70,6 +77,7 @@ class HomeNotebookScope {
     unassignedChapterOnly,
     sortOverride,
     relocked,
+    isUnfiled,
   );
 }
 
@@ -105,6 +113,19 @@ class HomeNotebookScopeNotifier extends Notifier<HomeNotebookScope> {
     state = HomeNotebookScope.all;
     ref.read(diaryFilterProvider.notifier).setTags(_allScopeTagIds);
     _allScopeTagIds = const <int>{};
+  }
+
+  /// 进入未收录范围（书架“未收录”行）。
+  void enterUnfiled() {
+    if (state.isUnfiled) {
+      return;
+    }
+    final filter = ref.read(diaryFilterProvider.notifier);
+    if (state.isAll) {
+      _allScopeTagIds = <int>{...ref.read(diaryFilterProvider).selectedTagIds};
+    }
+    state = const HomeNotebookScope(isUnfiled: true);
+    filter.setTags(const <int>[]);
   }
 
   /// 章节筛选（章节界面使用）；全部日记里无效。
@@ -211,6 +232,13 @@ DiaryListScope _matchNothingScope(String notebookId) => DiarySmartScope(
 final homeNotebookScopeResolutionProvider =
     Provider<HomeNotebookScopeResolution>((Ref ref) {
       final state = ref.watch(homeNotebookScopeProvider);
+      // 未收录范围：不订阅书架，直接返回未收录 scope。
+      if (state.isUnfiled) {
+        return HomeNotebookScopeResolution(
+          state: state,
+          scope: const DiaryUnfiledScope(),
+        );
+      }
       final notebookId = state.notebookId;
       if (notebookId == null) {
         return HomeNotebookScopeResolution.all;
@@ -234,6 +262,19 @@ final homeNotebookScopeResolutionProvider =
         notebook,
         state.sortOverride ?? notebook.payload.sort,
       );
+      // 嵌套：父本范围含子本的日记（经 NotebookTree 算后代，排序后传入保证
+      // key 稳定；只有手动本参与嵌套）。
+      List<String>? descendantIds;
+      if (!notebook.isSmart && notebooks != null) {
+        final tree = NotebookTree(
+          <NotebookNode>[
+            for (final n in notebooks)
+              if (!n.isSmart) NotebookNode(n.id, n.row.parentId),
+          ],
+        );
+        final ids = tree.selfAndDescendants(notebook.id).toList()..sort();
+        descendantIds = ids.length > 1 ? ids : null;
+      }
       return HomeNotebookScopeResolution(
         state: state,
         notebook: notebook,
@@ -243,6 +284,7 @@ final homeNotebookScopeResolutionProvider =
           sort: sort,
           chapterId: state.chapterId,
           unassignedChapterOnly: state.unassignedChapterOnly,
+          descendantIds: descendantIds,
         ),
       );
     });

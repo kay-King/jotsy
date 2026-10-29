@@ -178,12 +178,31 @@ List<({DateTime key, List<ExploreMediaItem> items})> groupGalleryItems(
   ];
 }
 
+/// 媒体画廊里的媒体类型：图片 / 音频 / 视频。画廊分类筛选按它过滤；
+/// 封面与正文图片都算图片，附件（文件）不进画廊。
+enum GalleryMediaKind { image, audio, video }
+
+/// 媒体画廊顶部的分类筛选：全部 + 三种媒体类型。`kind` 为 null 时不过滤。
+enum GalleryMediaFilter { all, image, audio, video }
+
+extension GalleryMediaFilterKind on GalleryMediaFilter {
+  GalleryMediaKind? get kind => switch (this) {
+    GalleryMediaFilter.all => null,
+    GalleryMediaFilter.image => GalleryMediaKind.image,
+    GalleryMediaFilter.audio => GalleryMediaKind.audio,
+    GalleryMediaFilter.video => GalleryMediaKind.video,
+  };
+}
+
 class ExploreMediaItem {
   const ExploreMediaItem({
     required this.source,
     required this.diaryId,
     required this.updatedAt,
     required this.createdAt,
+    required this.kind,
+    this.displayName,
+    this.duration,
   });
 
   final String source;
@@ -192,4 +211,14 @@ class ExploreMediaItem {
 
   /// 所在日记的创建时间：相册按月分组与正倒排序都按它算（不是修改时间）。
   final DateTime createdAt;
+
+  /// 媒体类型：取数时由提取器按正文节点定死，页面只按它筛选与分流点开行为。
+  final GalleryMediaKind kind;
+
+  /// 展示名：音频为录音名（没有时为空，页面用“录音”兜底），视频为文件名，
+  /// 图片为空（图片格只画缩略图，不画文字）。
+  final String? displayName;
+
+  /// 音频时长：只有音频有（取自正文音频节点里的 durationMs），视频与图片为空。
+  final Duration? duration;
 }

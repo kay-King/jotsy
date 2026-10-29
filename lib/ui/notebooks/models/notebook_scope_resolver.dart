@@ -39,6 +39,8 @@ NotebookSort effectiveNotebookSort(NotebookView notebook, NotebookSort sort) =>
 ///   以 [chapterId] 为准）；
 /// - 智能日记本：规则编译出的条件（见 [compileNotebookPayloadRules]），章节
 ///   不适用。
+/// - [descendantIds] 嵌套：自己 + 后代的业务 id（调用方经 NotebookTree 算好、
+///   排序后传入）；为 null 时只查自己。
 ///
 /// [sort] 缺省取日记本自己的排序（`payload.sort`）。
 DiaryListScope resolveNotebookScope(
@@ -46,6 +48,7 @@ DiaryListScope resolveNotebookScope(
   NotebookSort? sort,
   String? chapterId,
   bool unassignedChapterOnly = false,
+  List<String>? descendantIds,
 }) {
   if (notebook.isSmart) {
     return DiarySmartScope(
@@ -65,6 +68,7 @@ DiaryListScope resolveNotebookScope(
     chapterOrder: <String>[
       for (final chapter in notebook.payload.chapters) chapter.id,
     ],
+    descendantIds: descendantIds,
   );
 }
 

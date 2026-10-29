@@ -1,4 +1,5 @@
-// 探索页统计（概况卡）与相册（年/月/日视图 + 布局子菜单）预览台。
+// 合并后的首页统计（概况卡）与相册（年/月/日视图 + 布局子菜单）预览台。
+// 首页就是原来的探索页内容（概况卡在最上），所以不用再切 Tab。
 // 运行：JOTSY_PREVIEW=1 flutter test --update-goldens test/preview/explore_stats_test.dart
 //
 // 字体加载与纯色 PNG 编码与 timeline_test.dart 里的是同一份（预览台之间
@@ -379,7 +380,6 @@ void main() {
     addTearDown(seeded.database.close);
     await _pumpApp(tester, seeded.database, seeded.settings);
     await _waitReady(tester, '周末去露营');
-    await tester.tap(find.text('探索'));
     // 概况卡标题（热力图 / 节奏 / 内容三段已下线，2026-10-25）。
     await _waitForText(tester, '概况');
     await _settleImages(tester);

@@ -21,6 +21,7 @@ import '../../widgets/empty_hint.dart';
 import '../controllers/notebook_contents_controller.dart';
 import '../providers/notebook_providers.dart';
 import '../sections/notebook_chapter_dialogs.dart';
+import '../sections/notebook_contents_nesting.dart';
 import '../sections/notebook_contents_rows.dart';
 import '../viewmodels/notebook_book_layout.dart';
 import '../viewmodels/notebook_view.dart';
@@ -144,10 +145,21 @@ class _NotebookContentsPageState extends ConsumerState<NotebookContentsPage> {
     final hint = chapters.isEmpty
         ? NotebookContentsChapterHint(onAddChapter: _addChapter)
         : null;
+    // 嵌套：面包屑（有父本时）+ 子本列表。
+    final breadcrumb = NotebookBreadcrumb(
+      notebookId: notebook.id,
+      onOpen: (ancestorId) => _openNotebook(context, ancestorId),
+    );
+    final childList = NotebookChildList(
+      notebookId: notebook.id,
+      onOpen: (childId) => _openNotebook(context, childId),
+    );
     if (items.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          breadcrumb,
+          childList,
           ?hint,
           Expanded(
             child: EmptyHint(
@@ -163,6 +175,8 @@ class _NotebookContentsPageState extends ConsumerState<NotebookContentsPage> {
     final now = DateTime.now();
     return CustomScrollView(
       slivers: <Widget>[
+        SliverToBoxAdapter(child: breadcrumb),
+        SliverToBoxAdapter(child: childList),
         if (hint != null) SliverToBoxAdapter(child: hint),
         SliverReorderableList(
           itemCount: items.length,
@@ -297,6 +311,13 @@ class _NotebookContentsPageState extends ConsumerState<NotebookContentsPage> {
       _selecting = value;
       _selected.clear();
     });
+  }
+
+  /// 面包屑 / 子本列表跳转：push 新的内容页（可返回），不用替换当前页。
+  void _openNotebook(BuildContext context, String notebookId) {
+    Navigator.of(context).push(
+      NotebookContentsPage.route(notebookId: notebookId),
+    );
   }
 
   void _toggle(String diaryId) {

@@ -21,6 +21,7 @@ class BackupPayload {
     this.diaryTemplates = const <DiaryTemplateRow>[],
     this.notebooks = const <NotebookRow>[],
     this.diaryNotebooks = const <DiaryNotebookRow>[],
+    this.diaryComments = const <DiaryCommentRow>[],
     this.settings,
   });
 
@@ -47,6 +48,11 @@ class BackupPayload {
   /// 经日记与日记本的 id 映射改写）。解析后只剩两端都在载荷里、且日记本为
   /// 手动类型的行（见 [_withRestorableRelations]）。
   final List<DiaryNotebookRow> diaryNotebooks;
+
+  /// 日记留言（schema v14 起）。旧备份没有这张表，解析为空列表；日记包
+  /// 不带留言。按 `diaryId`（业务 id）与日记匹配，恢复时只保留日记存在的
+  /// 留言。
+  final List<DiaryCommentRow> diaryComments;
   final Map<String, dynamic>? settings;
 
   factory BackupPayload.decode(String raw) {
@@ -134,6 +140,9 @@ class BackupPayload {
             .toList(growable: false),
         diaryNotebooks: _optionalRows(database, 'diaryNotebooks')
             .map((row) => DiaryNotebookRow.fromJson({'position': 0, ...row}))
+            .toList(growable: false),
+        diaryComments: _optionalRows(database, 'diaryComments')
+            .map((row) => DiaryCommentRow.fromJson(row))
             .toList(growable: false),
         settings: settings as Map<String, dynamic>?,
       );
@@ -299,6 +308,9 @@ class BackupPayload {
             .map((row) => row.toJson())
             .toList(),
         'diaryNotebooks': (await database.select(database.diaryNotebooks).get())
+            .map((row) => row.toJson())
+            .toList(),
+        'diaryComments': (await database.select(database.diaryComments).get())
             .map((row) => row.toJson())
             .toList(),
       },
@@ -492,6 +504,7 @@ class BackupPayload {
   Future<void> writeDatabase(AppDatabase database) async {
     // 关联表先删：与两端表一起清空，不留指向旧本地 id 的行。
     await database.delete(database.diaryNotebooks).go();
+    await database.delete(database.diaryComments).go();
     await database.delete(database.notebooks).go();
     await database.delete(database.diaryTags).go();
     await database.delete(database.diaries).go();
@@ -535,6 +548,15 @@ class BackupPayload {
       batch.insertAll(
         database.diaryNotebooks,
         diaryNotebooks.map((row) => row.toCompanion(false)).toList(),
+      );
+      // 留言按业务 id 挂日记：只保留日记存在的留言（旧备份没有这张表时为空）。
+      final diaryIds = diaries.map((d) => d.diaryId).toSet();
+      batch.insertAll(
+        database.diaryComments,
+        diaryComments
+            .where((row) => diaryIds.contains(row.diaryId))
+            .map((row) => row.toCompanion(false))
+            .toList(),
       );
     });
   }

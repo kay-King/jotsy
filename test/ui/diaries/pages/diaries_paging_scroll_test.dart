@@ -9,6 +9,7 @@ import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/providers/diary_draft_providers.dart';
+import 'package:node_diary/ui/diaries/providers/diary_comment_providers.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
@@ -143,6 +144,10 @@ Future<void> _pumpPage(
     ProviderScope(
       overrides: [
         diaryDraftCountProvider.overrideWith((ref) => Stream.value(0)),
+          // 卡片留言角标：不打开真实数据库。
+          diaryCommentCountProvider.overrideWith(
+            (ref, diaryId) => Stream.value(0),
+          ),
         notebooksProvider.overrideWith(
           (ref) => Stream.value(const <NotebookView>[]),
         ),

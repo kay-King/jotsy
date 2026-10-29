@@ -26,6 +26,7 @@ class DiaryCardAppearance {
     required this.dividerColor,
     required this.panelColor,
     required this.inverted,
+    required this.dateAccentColor,
     this.accentBarColor,
   });
 
@@ -38,6 +39,10 @@ class DiaryCardAppearance {
   final Color eyebrowColor;
   final Color previewColor;
   final Color footerColor;
+
+  /// 大日期数字的颜色（`meta.bigDate` 开启时用；来源为 theme 时沿用
+  /// 底栏文字色）。
+  final Color dateAccentColor;
 
   /// 选择模式下未选中的空心圆。
   final Color mutedColor;
@@ -218,6 +223,17 @@ class DiaryCardAppearanceResolver {
               .withValues(alpha: surfaceStyle.accentColor.strength);
 
     final useThemedChips = !inverted;
+    final footerColor = bodyColor.withValues(alpha: bodyColor.a * 0.72);
+    // 大日期数字的颜色：来源为 theme（或拿不到心情/标签色）时沿用底栏文字色。
+    // 这里不做标题/正文那条对比度回退——大号粗体数字是刻意的点缀色，
+    // 预设选了暖橘就是要它以暖橘呈现，3:1 的正文阈值不适用。
+    final dateAccentColor =
+        _sourceColor(
+          style.meta.dateAccent,
+          DiaryCardColorRole.accent,
+          context,
+        ) ??
+        footerColor;
     return DiaryCardAppearance(
       surface: surfaceSpec,
       titleColor: titleColor,
@@ -226,7 +242,7 @@ class DiaryCardAppearanceResolver {
           ? accent
           : bodyColor.withValues(alpha: bodyColor.a * 0.82),
       previewColor: bodyColor.withValues(alpha: bodyColor.a * 0.88),
-      footerColor: bodyColor.withValues(alpha: bodyColor.a * 0.72),
+      footerColor: footerColor,
       mutedColor: bodyColor.withValues(alpha: bodyColor.a * 0.6),
       accentColor: accent,
       chipFill: useThemedChips
@@ -242,6 +258,7 @@ class DiaryCardAppearanceResolver {
           : titleColor.withValues(alpha: 0.16),
       panelColor: background,
       accentBarColor: accentBarColor,
+      dateAccentColor: dateAccentColor,
       inverted: inverted,
     );
   }
@@ -266,6 +283,8 @@ class DiaryCardAppearanceResolver {
         return context.locked ? null : context.moodColor;
       case DiaryCardColorSource.firstTag:
         return context.locked ? null : context.tagColor;
+      case DiaryCardColorSource.warm:
+        return DiaryCardColors.warmAccentFor(scheme.brightness, role);
     }
   }
 

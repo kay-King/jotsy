@@ -109,6 +109,12 @@ class DiaryCardContent extends StatelessWidget {
       case DiaryCardCoverFallback.none:
         return null;
       case DiaryCardCoverFallback.dateBlock:
+        // 暖阳预设的日期卡片封面走暖色（卡片奶油底 + 陶土橘大日期字），
+        // 不用默认的 primaryContainer 蓝；其他预设沿用默认色不变。
+        final style = resolved.style;
+        final isWarm = style.surface.background.source ==
+                DiaryCardColorSource.warm ||
+            style.meta.dateAccent.source == DiaryCardColorSource.warm;
         return DiaryCardDateBlock(
           date: resolved.style.meta.dateSource == DiaryCardDateSource.created
               ? diary.diary.createdAt
@@ -117,6 +123,8 @@ class DiaryCardContent extends StatelessWidget {
           height: height,
           radius: radius,
           horizontal: horizontal,
+          background: isWarm ? appearance.surface.color : null,
+          foreground: isWarm ? appearance.dateAccentColor : null,
         );
       case DiaryCardCoverFallback.moodTile:
         final mood = viewData.moodEmoji;

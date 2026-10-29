@@ -59,6 +59,7 @@ extension SettingsServiceBackup on SettingsService {
         _notifierRollback(diaryPreviewStyleRawNotifier),
         _notifierRollback(diaryCodeBlockStyleRawNotifier),
         _notifierRollback(homeBarStyleRawNotifier),
+        _notifierRollback(desktopLayoutRawNotifier),
         _notifierRollback(diaryTemplatePrefsRawNotifier),
         _notifierRollback(appFeaturesRawNotifier),
         _notifierRollback(profileNicknameNotifier),

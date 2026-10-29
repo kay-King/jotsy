@@ -60,17 +60,45 @@ GROUP BY n.notebook_id
     );
   }
 
+  /// 未收录的日记篇数：没进任何手动日记本（只有手动本有成员行）、不在回收站与
+  /// 归档里、非私密（私密日记在私密本子里，算已收录）。书架“未收录”行用。
+  Stream<int> watchUnfiledDiaryCount() {
+    return customSelect(
+      '''
+SELECT COUNT(*) AS unfiled_count
+FROM diaries d
+WHERE d.is_deleted = 0 AND d.is_archived = 0
+  AND NOT EXISTS (
+    SELECT 1 FROM diary_notebooks udn WHERE udn.diary_id = d.id
+  )
+  AND ${_privateDiaryExclusionSql('d.id')}
+''',
+      readsFrom: <ResultSetImplementation<HasResultSet, dynamic>>{
+        diaries,
+        diaryNotebooks,
+        notebooks,
+      },
+    ).watchSingle().map((row) => row.read<int>('unfiled_count'));
+  }
+
   /// 新建日记本并返回业务 id，排在书架最后。名称去首尾空白后须为 1–60 个
   /// 字符，否则抛 [ArgumentError]。智能日记本一律存成 normal（见表注释）。
+  ///
+  /// [parentId] 为父本业务 id（只允许手动本嵌套手动本）：null 为顶级；指向
+  /// 不存在、非手动、或自己（新建时不可能）的本子时抛 [ArgumentError]。
   Future<String> createNotebook({
     required String name,
     NotebookKind kind = NotebookKind.manual,
     NotebookVisibility visibility = NotebookVisibility.normal,
     NotebookPayload payload = NotebookPayload.defaults,
+    String? parentId,
   }) {
     final normalizedName = _normalizeNotebookName(name);
     return transaction(() async {
       final id = _newBusinessUuid();
+      if (parentId != null) {
+        await _requireNestableParent(parentId, childId: id);
+      }
       final now = DateTime.now();
       await into(notebooks).insert(
         NotebooksCompanion.insert(
@@ -83,6 +111,7 @@ GROUP BY n.notebook_id
                 : NotebookVisibility.normal.name,
           ),
           payload: Value(payload.encode()),
+          parentId: Value(parentId),
           sortOrder: Value(await _nextNotebookSortOrder()),
           createdAt: now,
           updatedAt: now,
@@ -96,6 +125,10 @@ GROUP BY n.notebook_id
   ///
   /// 非手动日记本的可见性一律写成 normal。传入 [payload] 时，本子里指向已不在
   /// 章节列表中的 `chapter_id` 在同一事务里清空，这些日记回到“未分章”。
+  ///
+  /// [parentId] 用 [Value] 包一层以区分“不动”（传 null）与“移到顶级”
+  /// （传 `Value(null)`）；指向不存在、非手动、自己或自己后代的本子时抛
+  /// [ArgumentError]（成环）。非手动本设置父本同样抛错。
   Future<void> updateNotebook(
     String notebookId, {
     String? name,
@@ -103,10 +136,18 @@ GROUP BY n.notebook_id
     NotebookPayload? payload,
     bool? isPinned,
     bool? isClosed,
+    Value<String?>? parentId,
   }) {
     final normalizedName = name == null ? null : _normalizeNotebookName(name);
     return transaction(() async {
       final row = await _requireNotebookRow(notebookId);
+      if (parentId != null) {
+        await _requireNestableParent(
+          parentId.value,
+          childId: notebookId,
+          childRow: row,
+        );
+      }
       final nextVisibility = row.acceptsManualEntries
           ? visibility
           : NotebookVisibility.normal;
@@ -117,6 +158,7 @@ GROUP BY n.notebook_id
           payload: Value.absentIfNull(payload?.encode()),
           isPinned: Value.absentIfNull(isPinned),
           isClosed: Value.absentIfNull(isClosed),
+          parentId: parentId ?? const Value.absent(),
           updatedAt: Value(DateTime.now()),
         ),
       );
@@ -131,6 +173,50 @@ GROUP BY n.notebook_id
             .write(const DiaryNotebooksCompanion(chapterId: Value(null)));
       }
     });
+  }
+
+  /// 校验 [parentId] 能否做 [childId] 的父本：null（顶级）恒成立；否则父本
+  /// 须存在且为手动本，子本须为手动本，不能指自己，也不能指自己的后代
+  /// （成环）。不满足时抛 [ArgumentError]。
+  ///
+  /// [childRow] 为调用方已查到的子本行（update 时），避免重复查询；新建时
+  /// 传 null，此时子本 id 是刚生成的、必不在库里，不用查后代。
+  Future<void> _requireNestableParent(
+    String? parentId, {
+    required String childId,
+    NotebookRow? childRow,
+  }) async {
+    if (parentId == null) return;
+    if (parentId == childId) {
+      throw ArgumentError('日记本不能把自己设为父本');
+    }
+    final parent = await getNotebook(parentId);
+    if (parent == null) {
+      throw ArgumentError('父日记本不存在：$parentId');
+    }
+    if (!parent.acceptsManualEntries) {
+      throw ArgumentError('只有手动日记本能做父本');
+    }
+    final child = childRow ?? await getNotebook(childId);
+    if (child != null && !child.acceptsManualEntries) {
+      throw ArgumentError('只有手动日记本能嵌套');
+    }
+    // 查后代防环：从 parentId 向上走祖先链，若遇到 childId 则成环。
+    // 日记本只有几个到几十个，全表读一次即可。
+    if (child != null) {
+      final rows = await select(notebooks).get();
+      final parentById = <String, String?>{
+        for (final row in rows) row.notebookId: row.parentId,
+      };
+      var current = parentById[parentId];
+      final seen = <String>{parentId};
+      while (current != null && seen.add(current)) {
+        if (current == childId) {
+          throw ArgumentError('不能把后代日记本设为父本（会成环）');
+        }
+        current = parentById[current];
+      }
+    }
   }
 
   /// 按 [orderedNotebookIds] 的先后重写书架顺序 0..n-1；不在列表里的日记本
@@ -201,6 +287,12 @@ GROUP BY n.notebook_id
       await (delete(
         diaryNotebooks,
       )..where((t) => t.notebookId.equals(row.id))).go();
+      // 嵌套：删掉父本时子本不跟着删，parent_id 清空变为顶级（不丢数据）。
+      await (update(
+        notebooks,
+      )..where((t) => t.parentId.equals(notebookId))).write(
+        const NotebooksCompanion(parentId: Value(null)),
+      );
       await (delete(notebooks)..where((t) => t.id.equals(row.id))).go();
       return NotebookDeletion._(
         Map<String, DateTime?>.unmodifiable(archivedAt),
@@ -279,6 +371,13 @@ GROUP BY n.notebook_id
       await (delete(
         diaryNotebooks,
       )..where((t) => t.notebookId.equals(source.id))).go();
+      // 嵌套：源本的子本上移一级（挂到源本的父本下，源本是顶级则变顶级），
+      // 树形不断；目标本若是源本的子本，同样上移（它的父本正在被删）。
+      await (update(
+        notebooks,
+      )..where((t) => t.parentId.equals(sourceId))).write(
+        NotebooksCompanion(parentId: Value(source.parentId)),
+      );
       await (delete(notebooks)..where((t) => t.id.equals(source.id))).go();
     });
   }

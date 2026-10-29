@@ -65,7 +65,19 @@ class DiaryTextWriter {
       entry.blocks,
       embedLabel: labels.mediaLine,
     );
-    return <String>[header.join('\n'), if (body.isNotEmpty) body].join('\n\n');
+    final comments = entry.comments;
+    final commentsText = comments.isEmpty
+        ? ''
+        : <String>[
+            '留言（${comments.length}）',
+            for (final comment in comments)
+              '- ${comment.content}',
+          ].join('\n');
+    return <String>[
+      header.join('\n'),
+      if (body.isNotEmpty) body,
+      if (commentsText.isNotEmpty) commentsText,
+    ].join('\n\n');
   }
 
   static String _book(

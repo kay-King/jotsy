@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/pages/diary_preview_page.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_audio_player.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/widgets/app_top_bar.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
@@ -14,12 +15,16 @@ import 'package:node_diary/ui/widgets/image_viewer_page.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
+import '../../../core/database/audio_embed_codec.dart';
 import '../../../core/services/app_service.dart';
 import '../../../core/services/settings_service.dart';
 import '../controllers/explore_media_gallery_controller.dart';
 import '../models/explore_view_data.dart';
+import '../sections/gallery_filter_bar.dart';
 import '../sections/gallery_layout_sheet.dart';
+import '../sections/gallery_media_tile.dart';
 import '../widgets/explore_shared_widgets.dart';
+import 'gallery_video_page.dart';
 
 /// 探索页“媒体画廊”全量浏览页。
 ///
@@ -47,21 +52,28 @@ class _ExploreMediaGalleryPageState
   late final ExploreMediaGalleryController _controller;
 
   /// 布局：分组粒度与每行数量持久化（设置服务里按边界收敛），
-  /// 正倒序只在本次打开内生效。
+  /// 正倒序与分类筛选只在本次打开内生效。
   GalleryGroupType _groupType = GalleryGroupType.month;
   int _columns = 3;
   bool _sortAsc = false;
+  GalleryMediaFilter _mediaFilter = GalleryMediaFilter.all;
   bool _layoutLoaded = false;
 
   List<ExploreMediaItem> get _mediaItems => _controller.items;
   bool get _isLoading => _controller.isLoading;
   bool get _hasMore => _controller.hasMore;
   String? get _errorMessage =>
-      _controller.hasError ? context.l10n.autoT0197 : null;
+      _controller.hasError ? context.l10n.galleryLoadFailed : null;
 
-  /// 排序后的展示列表（按创建时间排；看图页也在这个列表里翻）。
+  /// 分类过滤 + 排序后的展示列表（按创建时间排；看图页也在这个列表的图片
+  /// 子集里翻）。分类只在内存里筛，不重新取数；切到具体分类时先把剩下的
+  /// 全加载完（见 _selectMediaFilter），否则还没加载到的月份会漏掉。
   List<ExploreMediaItem> get _displayItems {
-    final sorted = List<ExploreMediaItem>.of(_mediaItems);
+    final kind = _mediaFilter.kind;
+    final filtered = kind == null
+        ? _mediaItems
+        : _mediaItems.where((item) => item.kind == kind);
+    final sorted = List<ExploreMediaItem>.of(filtered);
     sorted.sort(
       (a, b) => _sortAsc
           ? a.createdAt.compareTo(b.createdAt)
@@ -69,6 +81,34 @@ class _ExploreMediaGalleryPageState
     );
     return sorted;
   }
+
+  void _selectMediaFilter(GalleryMediaFilter filter) {
+    if (filter == _mediaFilter) {
+      return;
+    }
+    setState(() => _mediaFilter = filter);
+    // 过滤要对完整集合才有意义：切到具体分类时把剩下的全加载完，
+    // 否则还没加载到的月份会漏掉（与正序同理，见 controller.loadAll）。
+    if (filter != GalleryMediaFilter.all) {
+      unawaited(_controller.loadAll());
+    }
+  }
+
+  /// 当前分类下的空态文案：图片沿用旧文案，其余按分类区分。
+  String _emptyText(AppLocalizations l10n) => switch (_mediaFilter) {
+    GalleryMediaFilter.all => l10n.galleryEmptyMedia,
+    GalleryMediaFilter.image => l10n.autoT0055,
+    GalleryMediaFilter.audio => l10n.galleryEmptyAudio,
+    GalleryMediaFilter.video => l10n.galleryEmptyVideo,
+  };
+
+  /// 当前分类下的“已到底”文案：图片沿用旧文案，其余按分类区分。
+  String _noMoreText(AppLocalizations l10n) => switch (_mediaFilter) {
+    GalleryMediaFilter.all => l10n.galleryNoMoreMedia,
+    GalleryMediaFilter.image => l10n.autoT0057,
+    GalleryMediaFilter.audio => l10n.galleryNoMoreAudio,
+    GalleryMediaFilter.video => l10n.galleryNoMoreVideo,
+  };
 
   void _selectGroupType(GalleryGroupType type) {
     if (type == _groupType) {
@@ -196,13 +236,26 @@ class _ExploreMediaGalleryPageState
           icon: const FaIcon(FontAwesomeIcons.angleLeft, size: 18),
         ),
       ),
-      // 首次加载 → 网格 / 空态 / 错误之间交叉淡入，而不是硬切；网格内追加
-      // 分页时 key 不变，不会重复淡入。
-      body: AnimatedSwitcher(
-        duration: ExpressiveMotion.duration(context, ExpressiveMotion.medium),
-        switchInCurve: ExpressiveMotion.effects,
-        switchOutCurve: ExpressiveMotion.exit,
-        child: _buildBody(context),
+      // 分类条固定在顶部（不跟网格一起滚）；下方首次加载 → 网格 / 空态 /
+      // 错误之间交叉淡入，而不是硬切；网格内追加分页时 key 不变，不会重复淡入。
+      body: Column(
+        children: <Widget>[
+          GalleryFilterBar(
+            selected: _mediaFilter,
+            onSelected: _selectMediaFilter,
+          ),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: ExpressiveMotion.duration(
+                context,
+                ExpressiveMotion.medium,
+              ),
+              switchInCurve: ExpressiveMotion.effects,
+              switchOutCurve: ExpressiveMotion.exit,
+              child: _buildBody(context),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -210,13 +263,16 @@ class _ExploreMediaGalleryPageState
   Widget _buildBody(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
+    // 展示列表（已按分类过滤）：空时先区分“还在加载”与“真的没有”。
     // 首次加载在首帧之后才发起，此前 isLoading 仍为 false：把“还没加载过”也
-    // 当作加载中，避免先闪一帧“暂无媒体”。本地查询通常很快，指示器延迟出现。
+    // 当作加载中，避免先闪一帧空态；切到具体分类后 loadAll 在途时同样不闪
+    // 空态。本地查询通常很快，指示器延迟出现。
+    final displayItems = _displayItems;
     final neverLoaded = _hasMore && _errorMessage == null;
-    if (_mediaItems.isEmpty && (_isLoading || neverLoaded)) {
+    if (displayItems.isEmpty && (_isLoading || neverLoaded)) {
       return const DelayedLoadingIndicator(key: ValueKey<String>('loading'));
     }
-    if (_mediaItems.isEmpty && _errorMessage != null) {
+    if (displayItems.isEmpty && _errorMessage != null) {
       return Center(
         key: const ValueKey<String>('error'),
         child: Padding(
@@ -241,11 +297,11 @@ class _ExploreMediaGalleryPageState
         ),
       );
     }
-    if (_mediaItems.isEmpty) {
+    if (displayItems.isEmpty) {
       return Center(
         key: const ValueKey<String>('empty'),
         child: Text(
-          l10n.autoT0055,
+          _emptyText(l10n),
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
@@ -253,8 +309,7 @@ class _ExploreMediaGalleryPageState
       );
     }
 
-    // 没有筛选了：_mediaItems 非空时展示列表一定非空，空态只在上面处理。
-    final displayItems = _displayItems;
+    // 到这里展示列表非空：按分组粒度分段画网格，底栏跟加载状态走。
     final groups = groupGalleryItems(displayItems, _groupType);
     final slivers = <Widget>[];
     var offset = 0;
@@ -308,6 +363,7 @@ class _ExploreMediaGalleryPageState
             isLoading: _isLoading,
             hasMore: _hasMore,
             errorMessage: _errorMessage,
+            endText: _noMoreText(l10n),
             onRetry: _loadMore,
           ),
         ),
@@ -320,7 +376,8 @@ class _ExploreMediaGalleryPageState
     );
   }
 
-  /// 单个缩略格：缩略图本身不透明，水波纹需画在叠于其上的透明 Material 上。
+  /// 单个格：图片是缩略图 + 看图页，音频 / 视频是图标格 + 各自的播放入口。
+  /// 图片缩略图本身不透明，水波纹需画在叠于其上的透明 Material 上。
   /// Builder 提供格子自己的 context：点按时从这里抓取已绘制的缩略图
   /// 作为看图页的飞入画面（delegate 的 context 是整个网格）。
   Widget _buildCell(
@@ -328,6 +385,15 @@ class _ExploreMediaGalleryPageState
     ExploreMediaItem item,
     int displayIndex,
   ) {
+    if (item.kind != GalleryMediaKind.image) {
+      return GalleryMediaTile(
+        item: item,
+        radius: _thumbRadius,
+        onTap: () => item.kind == GalleryMediaKind.audio
+            ? _openAudioSheet(item)
+            : _openVideoPage(item),
+      );
+    }
     return Builder(
       builder: (cellContext) => Stack(
         fit: StackFit.expand,
@@ -382,22 +448,82 @@ class _ExploreMediaGalleryPageState
       ImageViewerHeroTag('explore_gallery', source);
 
   /// 打开看图页：缩略图以共享元素展开成原图，返回时飞回原格子。每张图带上
-  /// 所在日记，长按面板可直接打开它；看图页只在排序后的列表里翻。
+  /// 所在日记，长按面板可直接打开它；看图页只在图片子集里翻——全部筛选下
+  /// 展示列表里可能混着音频 / 视频，先只取图片，初始下标换算到图片子集里。
   void _openViewer(int initialIndex, BuildContext cellContext) {
     final displayItems = _displayItems;
-    final source = displayItems[initialIndex].source;
+    final item = displayItems[initialIndex];
+    final images = displayItems
+        .where((entry) => entry.kind == GalleryMediaKind.image)
+        .toList(growable: false);
     openImageViewer(
       context,
-      items: displayItems
+      items: images
           .map(
-            (item) =>
-                ImageViewerItem(source: item.source, diaryId: item.diaryId),
+            (entry) =>
+                ImageViewerItem(source: entry.source, diaryId: entry.diaryId),
           )
           .toList(growable: false),
-      initialIndex: initialIndex,
-      hero: ImageViewerHero.capture(cellContext, tag: _heroTag(source)),
+      initialIndex: images.indexOf(item),
+      hero: ImageViewerHero.capture(cellContext, tag: _heroTag(item.source)),
       onOpenDiary: (String diaryId) => unawaited(_openDiary(diaryId)),
     );
+  }
+
+  /// 音频格点开：底部面板里放日记正文同款 DiaryAudioPlayer（不新写播放器），
+  /// 面板里“打开日记”带 diaryId 回来，画廊页再打开那篇日记。
+  Future<void> _openAudioSheet(ExploreMediaItem item) async {
+    final l10n = context.l10n;
+    final title = item.displayName?.trim().isNotEmpty == true
+        ? item.displayName!.trim()
+        : l10n.recordingAttachment;
+    final diaryId = await showModalBottomSheet<String>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: Theme.of(sheetContext).textTheme.titleSmall,
+              ),
+              DiaryAudioPlayer(
+                recording: DiaryAudioAttachment(
+                  path: item.source,
+                  duration: item.duration ?? Duration.zero,
+                  name: item.displayName,
+                ),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonal(
+                onPressed: () => Navigator.of(sheetContext).pop(item.diaryId),
+                child: Text(l10n.imageViewerOpenDiary),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (diaryId != null && mounted) {
+      unawaited(_openDiary(diaryId));
+    }
+  }
+
+  /// 视频格点开：单独一页放日记正文同款 DiaryVideoPlayer（不新写播放器），
+  /// 页里“打开日记”带 diaryId 回来，画廊页再打开那篇日记。
+  Future<void> _openVideoPage(ExploreMediaItem item) async {
+    final diaryId = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (_) => GalleryVideoPage(item: item),
+      ),
+    );
+    if (diaryId != null && mounted) {
+      unawaited(_openDiary(diaryId));
+    }
   }
 
   /// 看图页长按“打开日记”：预览页压在看图页之上（单篇入口，不左右翻），
@@ -435,12 +561,16 @@ class _GalleryFooter extends StatelessWidget {
     required this.isLoading,
     required this.hasMore,
     required this.errorMessage,
+    required this.endText,
     required this.onRetry,
   });
 
   final bool isLoading;
   final bool hasMore;
   final String? errorMessage;
+
+  /// “已到底”文案：按当前分类区分（图片沿用旧文案，音频 / 视频 / 全部各有文案）。
+  final String endText;
   final VoidCallback onRetry;
 
   @override
@@ -461,7 +591,7 @@ class _GalleryFooter extends StatelessWidget {
       content = Center(
         key: const ValueKey<String>('footer_end'),
         child: Text(
-          l10n.autoT0057,
+          endText,
           style: Theme.of(
             context,
           ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),

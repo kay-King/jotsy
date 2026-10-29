@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -104,6 +105,11 @@ class DiaryCardLines {
     BuildContext context, {
     required DiaryCardMetaIndicators? indicators,
   }) {
+    // 日期与标题同行时（暖阳预设）没有底栏：日期、标签、时间与附加信息
+    // 都不画，媒体数改由卡片右下角的徽章显示。
+    if (resolved.style.meta.inlineDate) {
+      return null;
+    }
     final meta = resolved.style.meta;
     final timeLabel = DiaryCardDateFormatter.footer(
       l10n: context.l10n,
@@ -129,21 +135,24 @@ class DiaryCardLines {
           )
         : const <Widget>[];
     final showIndicators = indicators != null && !indicators.isEmpty;
-    // 日期（眉线格式，底栏小字号）与标签都收进底栏，与时间同行。
-    final dateText = meta.showDate
-        ? Text(
-            DiaryCardDateFormatter.eyebrow(
-              l10n: context.l10n,
-              meta: meta,
-              createdAt: diary.diary.createdAt,
-              updatedAt: diary.diary.updatedAt,
-              now: DateTime.now(),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: resolved.centered ? TextAlign.center : null,
-            style: timeStyle,
-          )
+    // 日期收进底栏，与标签、时间同行。大日期样式（暖阳预设）时画成放大的
+    // 日期数字 + 右侧月份星期，平时是眉线格式的一段小字。
+    final dateWidget = meta.showDate
+        ? (meta.bigDate
+              ? bigDate(context)
+              : Text(
+                  DiaryCardDateFormatter.eyebrow(
+                    l10n: context.l10n,
+                    meta: meta,
+                    createdAt: diary.diary.createdAt,
+                    updatedAt: diary.diary.updatedAt,
+                    now: DateTime.now(),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: resolved.centered ? TextAlign.center : null,
+                  style: timeStyle,
+                ))
         : null;
     // 标签收进底栏：与日期、时间同行，都用底栏小字号、可收缩省略。
     // 形态跟随样式的 tagStyle（彩色 `#` 微胶囊 / 纯文字 / 圆点）；
@@ -157,7 +166,7 @@ class DiaryCardLines {
     if (timeLabel == null &&
         extras.isEmpty &&
         !showIndicators &&
-        dateText == null &&
+        dateWidget == null &&
         tagsWidget == null) {
       return null;
     }
@@ -178,13 +187,13 @@ class DiaryCardLines {
     final gap = SizedBox(width: 8 * resolved.metaScale);
     final Widget metaRow = Row(
       children: <Widget>[
-        if (dateText != null) Flexible(child: dateText),
+        if (dateWidget != null) Flexible(child: dateWidget),
         if (tagsWidget != null) ...[
-          if (dateText != null) gap,
+          if (dateWidget != null) gap,
           Flexible(flex: 2, child: tagsWidget),
         ],
         if (timeText != null) ...[
-          if (dateText != null || tagsWidget != null) gap,
+          if (dateWidget != null || tagsWidget != null) gap,
           Flexible(child: timeText),
         ],
       ],
@@ -226,6 +235,71 @@ class DiaryCardLines {
         resolved.centered ? Flexible(child: leading) : Expanded(child: leading),
         if (showIndicators) ...[const SizedBox(width: 6), indicators],
       ],
+    );
+  }
+
+  /// 大日期块：放大的日期数字 + 右侧月份与星期两行小字（暖阳预设的
+  /// 日期）。数值照原版 Vivido 时间线卡片：数字 28px w700、行高 32；
+  /// 月份 13px、星期 11px、常规字重、次级文字色，两行间隔 1px；
+  /// 数字与月份星期按基线对齐。窄列或大字号下整块等比缩小、不溢出。
+  Widget bigDate(BuildContext context) {
+    final meta = resolved.style.meta;
+    final local =
+        (meta.dateSource == DiaryCardDateSource.created
+                ? diary.diary.createdAt
+                : diary.diary.updatedAt)
+            .toLocal();
+    final scale = resolved.metaScale;
+    final l10n = context.l10n;
+    final monthStyle = TextStyle(
+      fontSize: 13 * scale,
+      color: appearance.footerColor,
+      height: 1.2,
+    );
+    final weekDayStyle = TextStyle(
+      fontSize: 11 * scale,
+      color: appearance.footerColor,
+      height: 1.2,
+    );
+    final cluster = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: <Widget>[
+        Text(
+          '${local.day}',
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: 28 * scale,
+            fontWeight: FontWeight.w700,
+            height: 32 / 28,
+            color: appearance.dateAccentColor,
+          ),
+        ),
+        SizedBox(width: 6 * scale),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              DateFormat.MMM(l10n.localeName).format(local),
+              maxLines: 1,
+              style: monthStyle,
+            ),
+            SizedBox(height: 1 * scale),
+            Text(
+              DateFormat.E(l10n.localeName).format(local),
+              maxLines: 1,
+              style: weekDayStyle,
+            ),
+          ],
+        ),
+      ],
+    );
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: cluster,
     );
   }
 

@@ -48,6 +48,8 @@ class DiariesNotebookScopeController {
         showAll();
       case NotebookShelfSelectNotebook(:final notebookId):
         await enter(notebookId);
+      case NotebookShelfSelectUnfiled():
+        _notifier.enterUnfiled();
     }
   }
 

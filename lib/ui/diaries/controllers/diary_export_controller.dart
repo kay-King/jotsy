@@ -157,6 +157,28 @@ class DiaryExportController {
       });
     }
     var entries = exportable.map(DiaryExportEntry.fromDetail).toList();
+    // 留言跟正文一起导出：按日记逐篇读留言（已按时间升序），无留言时为空列表。
+    for (var i = 0; i < entries.length; i++) {
+      final comments = await _database.getDiaryComments(
+        entries[i].diaryId,
+      );
+      if (comments.isNotEmpty) {
+        final entry = entries[i];
+        entries[i] = DiaryExportEntry(
+          diaryId: entry.diaryId,
+          title: entry.title,
+          createdAt: entry.createdAt,
+          updatedAt: entry.updatedAt,
+          deltaOps: entry.deltaOps,
+          blocks: entry.blocks,
+          wordCount: entry.wordCount,
+          tagNames: entry.tagNames,
+          cover: entry.cover,
+          context: entry.context,
+          comments: comments,
+        );
+      }
+    }
     DiaryExportBookLayout? layout;
     if (book != null && bookStructure && options.format.supportsBookStructure) {
       final bookLabels = labels.book;

@@ -253,6 +253,8 @@ class ExplorePageController {
             diaryId: item.diaryId,
             updatedAt: item.updatedAt,
             createdAt: item.createdAt,
+            // 这里的来源只取封面与图片（见 resolveMediaSourcesFrom），全算图片。
+            kind: GalleryMediaKind.image,
           ),
         );
       }

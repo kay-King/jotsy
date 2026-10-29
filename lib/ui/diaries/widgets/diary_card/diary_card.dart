@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../app/theme/expressive_motion.dart';
 import '../../../../core/database/app_database.dart';
@@ -48,6 +49,7 @@ class DiaryCard extends StatelessWidget {
     required this.onToggleSelection,
     this.enableCoverHero = true,
     this.opensLockedCapsulePage = true,
+    this.commentCount,
   });
 
   /// 选择标记展开、列表项进出的过渡时长。
@@ -68,6 +70,11 @@ class DiaryCard extends StatelessWidget {
   /// 点按未解封胶囊是否进入封存页；设置页预览的示例胶囊不是真实日记，
   /// 关闭后改为走 [onOpenEditor]。
   final bool opensLockedCapsulePage;
+
+  /// 这篇日记的留言数：null（未知或不订阅计数）与 0 都不显示角标；大于 0
+  /// 时在卡片右下角显示小数字徽章。计数由调用方经
+  /// `watchDiaryCommentCount` 按日记订阅，卡片本身不查库、不全表扫。
+  final int? commentCount;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +170,87 @@ class DiaryCard extends StatelessWidget {
 
     final accentBar = style.surface.accentBar;
     final accentBarColor = appearance.accentBarColor;
+    // 右下角小数字徽章：媒体数徽章（原版 Vivido 时间线卡片的右下角徽章，
+    // 暖阳预设用）与留言数角标共用同一口径——底色是大日期颜色 12% 透明度、
+    // 12 号半粗数字；两者同时存在时并排，不重叠。留言角标有留言才显示，
+    // 无留言（0 或未订阅）隐藏；未解封胶囊不显示，避免泄露内容信息。
+    final mediaCount = viewData.media.totalCount;
+    final commentCount = this.commentCount;
+    Widget smallBadge(Widget child) {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 8 * resolved.metaScale,
+          vertical: 4 * resolved.metaScale,
+        ),
+        decoration: BoxDecoration(
+          color: appearance.dateAccentColor.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: child,
+      );
+    }
+
+    final mediaBadgeContent =
+        !isLockedCapsule && style.meta.mediaBadge && mediaCount > 0
+        ? smallBadge(
+            Text(
+              '$mediaCount',
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 12 * resolved.metaScale,
+                fontWeight: FontWeight.w600,
+                color: appearance.dateAccentColor,
+              ),
+            ),
+          )
+        : null;
+    final commentBadgeContent =
+        !isLockedCapsule && commentCount != null && commentCount > 0
+        ? Semantics(
+            key: const ValueKey<String>('diary-comment-count-badge'),
+            label: l10n.diaryCommentsCount(commentCount),
+            excludeSemantics: true,
+            child: smallBadge(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FaIcon(
+                    FontAwesomeIcons.comment,
+                    size: 10 * resolved.metaScale,
+                    color: appearance.dateAccentColor,
+                  ),
+                  SizedBox(width: 4 * resolved.metaScale),
+                  Text(
+                    '$commentCount',
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12 * resolved.metaScale,
+                      fontWeight: FontWeight.w600,
+                      color: appearance.dateAccentColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : null;
+    final bottomRightBadges =
+        mediaBadgeContent == null && commentBadgeContent == null
+        ? null
+        : PositionedDirectional(
+            end: resolved.paddingH,
+            bottom: resolved.paddingV,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (commentBadgeContent != null) commentBadgeContent,
+                if (commentBadgeContent != null &&
+                    mediaBadgeContent != null)
+                  SizedBox(width: 6 * resolved.metaScale),
+                if (mediaBadgeContent != null) mediaBadgeContent,
+              ],
+            ),
+          );
     return DiarySelectionSurface(
       diaryId: diaryId,
       selected: selected,
@@ -173,6 +261,7 @@ class DiaryCard extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             content,
+            if (bottomRightBadges != null) bottomRightBadges,
             if (accentBarColor != null && accentBar == DiaryCardAccentBar.start)
               PositionedDirectional(
                 start: 0,

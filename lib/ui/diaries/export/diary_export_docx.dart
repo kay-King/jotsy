@@ -75,6 +75,7 @@ class DiaryDocxWriter {
         labels: labels,
         media: media,
         code: code,
+        typography: typography,
       );
     } else {
       for (var i = 0; i < entries.length; i++) {
@@ -86,6 +87,7 @@ class DiaryDocxWriter {
           labels: labels,
           media: media,
           code: code,
+          typography: typography,
         );
       }
     }
@@ -138,6 +140,7 @@ class DiaryDocxWriter {
     required DiaryExportLabels labels,
     required DiaryExportMediaLibrary media,
     DiaryExportCodeTheme? code,
+    required DiaryTypography typography,
   }) async {
     final hasCover =
         options.includeMedia &&
@@ -215,6 +218,7 @@ class DiaryDocxWriter {
           labels: labels,
           media: media,
           code: code,
+          typography: typography,
           titleStyle: 'BookEntry',
           bookmark: _bookmark(book.anchorOf(entry)),
         );
@@ -249,6 +253,7 @@ class DiaryDocxWriter {
     required DiaryExportLabels labels,
     required DiaryExportMediaLibrary media,
     DiaryExportCodeTheme? code,
+    required DiaryTypography typography,
     String titleStyle = 'Title',
     String? bookmark,
   }) async {
@@ -336,9 +341,21 @@ class DiaryDocxWriter {
             runs: <String>[b.run('$marker\t'), ...b.inlines(block.inlines)],
           );
         case ExportBlockKind.paragraph:
+          // 首行缩进只给左对齐 / 两端对齐的普通段落：标题、列表、引用、
+          // 代码各有自己的缩进，居中 / 右对齐段落缩进会破坏对齐。
+          // 1 字 = 当前字号，逻辑像素按 96 DPI 换 twip（1px = 15twip，
+          // 与字距的换算同口径）；w:firstLine 是相对左缩进的首行偏移，
+          // 与 Quill 的段缩进（block.indent）叠加，不互相覆盖。
+          final firstLine = typography.firstLineIndent > 0 &&
+                  (block.align == ExportAlign.start ||
+                      block.align == ExportAlign.justify)
+              ? (typography.firstLineIndent * typography.fontSize * 15)
+                  .round()
+              : null;
           b.paragraph(
             align: block.align,
             indentTwips: block.indent > 0 ? 420 * block.indent : null,
+            firstLineTwips: firstLine,
             runs: b.inlines(block.inlines),
           );
       }
@@ -611,6 +628,7 @@ class _DocxBuilder {
     bool pageBreakBefore = false,
     int? indentTwips,
     int? hangingTwips,
+    int? firstLineTwips,
     ExportAlign align = ExportAlign.start,
     String? bookmark,
   }) {
@@ -618,10 +636,12 @@ class _DocxBuilder {
     final pPr = StringBuffer();
     if (style != null) pPr.write('<w:pStyle w:val="$style"/>');
     if (pageBreakBefore) pPr.write('<w:pageBreakBefore/>');
-    if (indentTwips != null) {
+    if (indentTwips != null || hangingTwips != null || firstLineTwips != null) {
       pPr.write(
-        '<w:ind w:left="$indentTwips"'
-        '${hangingTwips == null ? '' : ' w:hanging="$hangingTwips"'}/>',
+        '<w:ind'
+        '${indentTwips == null ? '' : ' w:left="$indentTwips"'}'
+        '${hangingTwips == null ? '' : ' w:hanging="$hangingTwips"'}'
+        '${firstLineTwips == null ? '' : ' w:firstLine="$firstLineTwips"'}/>',
       );
     }
     final jc = switch (align) {

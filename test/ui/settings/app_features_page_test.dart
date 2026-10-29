@@ -45,14 +45,12 @@ void main() {
     await h.pump(const AppFeaturesPage());
     final l10n = h.l10n;
 
-    await toggle(tester, l10n.navCalendar);
-    expect(stored(h).calendar, isFalse);
-    await toggle(tester, l10n.navCalendar);
+    await toggle(tester, l10n.navDesktop);
+    expect(stored(h).desktop, isFalse);
+    await toggle(tester, l10n.navDesktop);
     expect(stored(h), AppFeatures.defaults);
     expect(h.settings.appFeaturesRaw, isNull);
 
-    await toggle(tester, l10n.navExplore);
-    expect(stored(h).explore, isFalse);
     await toggle(tester, l10n.settingsFeaturesAnniversaries);
     expect(stored(h).anniversaries, isFalse);
     await toggle(tester, l10n.settingsFeaturesTemplates);
@@ -72,31 +70,27 @@ void main() {
     await h.unmount();
   });
 
-  testWidgets('anniversaries sit right below the calendar and write their '
-      'own value', (tester) async {
+  testWidgets('anniversaries sit right below the desktop toggle and write '
+      'their own value', (tester) async {
     final h = await DiaryDraftsHarness.create(tester);
     await h.pump(const AppFeaturesPage());
     final l10n = h.l10n;
 
-    // 「页面」组顺序：日历、纪念日、探索；「功能」组在其后。
-    final calendarY = tester.getTopLeft(switchTile(l10n.navCalendar)).dy;
+    // 「页面」组顺序：桌面、纪念日；「功能」组在其后。
+    final desktopY = tester.getTopLeft(switchTile(l10n.navDesktop)).dy;
     final anniversaryY = tester
         .getTopLeft(switchTile(l10n.settingsFeaturesAnniversaries))
         .dy;
-    final exploreY = tester.getTopLeft(switchTile(l10n.navExplore)).dy;
     final notebooksY = tester.getTopLeft(switchTile(l10n.notebookTitle)).dy;
-    expect(calendarY, lessThan(anniversaryY));
-    expect(anniversaryY, lessThan(exploreY));
-    expect(exploreY, lessThan(notebooksY));
+    expect(desktopY, lessThan(anniversaryY));
+    expect(anniversaryY, lessThan(notebooksY));
 
-    // 与日历、探索平齐（用户 2026-10-24：从属缩进在卡里读起来像
-    // 没对齐，副标题“标在日历上”已说明它和日历的关系）。
-    final calendarTitleX = tester.getTopLeft(find.text(l10n.navCalendar)).dx;
+    // 与桌面平齐（用户 2026-10-24：从属缩进在卡里读起来像没对齐）。
+    final desktopTitleX = tester.getTopLeft(find.text(l10n.navDesktop)).dx;
     final anniversaryTitleX = tester
         .getTopLeft(find.text(l10n.settingsFeaturesAnniversaries))
         .dx;
-    expect(tester.getTopLeft(find.text(l10n.navExplore)).dx, calendarTitleX);
-    expect(anniversaryTitleX, calendarTitleX);
+    expect(anniversaryTitleX, desktopTitleX);
 
     final anniversaries = tile(tester, l10n.settingsFeaturesAnniversaries);
     expect(anniversaries.value, isTrue);
@@ -105,92 +99,6 @@ void main() {
 
     await toggle(tester, l10n.settingsFeaturesAnniversaries);
     expect(stored(h).anniversaries, isFalse);
-    expect(stored(h).calendar, isTrue);
-    await h.unmount();
-  });
-
-  testWidgets('anniversaries hide with the calendar and come back with the '
-      'stored value', (tester) async {
-    final h = await DiaryDraftsHarness.create(tester);
-    await h.pump(const AppFeaturesPage());
-    final l10n = h.l10n;
-
-    await toggle(tester, l10n.navCalendar);
-    expect(switchTile(l10n.settingsFeaturesAnniversaries), findsNothing);
-    expect(find.text(l10n.settingsFeaturesAnniversariesSubtitle), findsNothing);
-    // 日历关闭不改写用户自己的值。
-    expect(stored(h).anniversaries, isTrue);
-
-    await toggle(tester, l10n.navCalendar);
-    expect(tile(tester, l10n.settingsFeaturesAnniversaries).value, isTrue);
-
-    // 先单独关掉纪念日，再关开日历：回来时仍是关，且可以拨动。
-    await toggle(tester, l10n.settingsFeaturesAnniversaries);
-    await toggle(tester, l10n.navCalendar);
-    expect(switchTile(l10n.settingsFeaturesAnniversaries), findsNothing);
-    await toggle(tester, l10n.navCalendar);
-    final restored = tile(tester, l10n.settingsFeaturesAnniversaries);
-    expect(restored.value, isFalse);
-    expect(restored.onChanged, isNotNull);
-    expect(stored(h).anniversaries, isFalse);
-    await h.unmount();
-  });
-
-  testWidgets('anniversaries slide in and out with the calendar without '
-      'taking over the explore row', (tester) async {
-    final h = await DiaryDraftsHarness.create(tester);
-    await h.pump(const AppFeaturesPage());
-    final l10n = h.l10n;
-    Finder rowClip() => find.ancestor(
-      of: switchTile(l10n.settingsFeaturesAnniversaries),
-      matching: find.byType(SizeTransition),
-    );
-
-    // 探索关着时打开日历：纪念日一行若按位置接手探索那一行，开关会从“关”
-    // 播一遍拨动动画；探索那一行必须还是原来的 element。
-    await toggle(tester, l10n.navExplore);
-    await toggle(tester, l10n.navCalendar);
-    final exploreElement = tester.element(switchTile(l10n.navExplore));
-    final exploreSwitch = tester.state(
-      find
-          .descendant(
-            of: switchTile(l10n.navExplore),
-            matching: find.byWidgetPredicate((w) => w is StatefulWidget),
-          )
-          .first,
-    );
-
-    await tester.tap(switchTile(l10n.navCalendar));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    // 展开途中：已在树上、高度还没到整行。
-    final fullHeight = tester
-        .getSize(switchTile(l10n.settingsFeaturesAnniversaries))
-        .height;
-    expect(tester.getSize(rowClip()).height, lessThan(fullHeight));
-    await tester.pumpAndSettle();
-    expect(tester.getSize(rowClip()).height, greaterThanOrEqualTo(fullHeight));
-    expect(tile(tester, l10n.settingsFeaturesAnniversaries).value, isTrue);
-    expect(tester.element(switchTile(l10n.navExplore)), same(exploreElement));
-    expect(
-      tester.state(
-        find
-            .descendant(
-              of: switchTile(l10n.navExplore),
-              matching: find.byWidgetPredicate((w) => w is StatefulWidget),
-            )
-            .first,
-      ),
-      same(exploreSwitch),
-    );
-
-    // 收起途中仍在原处淡出，结束后移除。
-    await tester.tap(switchTile(l10n.navCalendar));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(switchTile(l10n.settingsFeaturesAnniversaries), findsOne);
-    await tester.pumpAndSettle();
-    expect(switchTile(l10n.settingsFeaturesAnniversaries), findsNothing);
     await h.unmount();
   });
 
@@ -268,8 +176,9 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // 桌面 Tab 开关（2026-10-25，v16）：功能管理里 7 个开关。
-      expect(find.byType(SettingsSwitchTile), findsNWidgets(7));
+      // 功能管理里 5 个开关（桌面/日记本/纪念日/模板/时间胶囊；
+      // 探索与日历已并进首页，不再有开关）。
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(5));
     });
   }
 }

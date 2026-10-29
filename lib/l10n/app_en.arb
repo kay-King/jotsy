@@ -8,14 +8,6 @@
   "@navDiaries": {
     "description": "Auto-generated metadata for navDiaries."
   },
-  "navCalendar": "Calendar",
-  "@navCalendar": {
-    "description": "Auto-generated metadata for navCalendar."
-  },
-  "navExplore": "Explore",
-  "@navExplore": {
-    "description": "Auto-generated metadata for navExplore."
-  },
   "navSettings": "Settings",
   "@navSettings": {
     "description": "Auto-generated metadata for navSettings."
@@ -1260,9 +1252,49 @@
   "@autoT0057": {
     "description": "Auto-generated metadata for autoT0057."
   },
-  "autoT0058": "Explore",
-  "@autoT0058": {
-    "description": "Auto-generated metadata for autoT0058."
+  "galleryFilterAll": "All",
+  "@galleryFilterAll": {
+    "description": "Media gallery filter: show all media types."
+  },
+  "galleryFilterImage": "Images",
+  "@galleryFilterImage": {
+    "description": "Media gallery filter: show images only."
+  },
+  "galleryFilterAudio": "Audio",
+  "@galleryFilterAudio": {
+    "description": "Media gallery filter: show audio only."
+  },
+  "galleryFilterVideo": "Videos",
+  "@galleryFilterVideo": {
+    "description": "Media gallery filter: show videos only."
+  },
+  "galleryEmptyMedia": "No media to show yet",
+  "@galleryEmptyMedia": {
+    "description": "Media gallery empty state when the All filter has nothing to show."
+  },
+  "galleryEmptyAudio": "No audio to show yet",
+  "@galleryEmptyAudio": {
+    "description": "Media gallery empty state when the Audio filter has nothing to show."
+  },
+  "galleryEmptyVideo": "No videos to show yet",
+  "@galleryEmptyVideo": {
+    "description": "Media gallery empty state when the Video filter has nothing to show."
+  },
+  "galleryNoMoreMedia": "No more media",
+  "@galleryNoMoreMedia": {
+    "description": "Media gallery footer when the All filter has loaded everything."
+  },
+  "galleryNoMoreAudio": "No more audio",
+  "@galleryNoMoreAudio": {
+    "description": "Media gallery footer when the Audio filter has loaded everything."
+  },
+  "galleryNoMoreVideo": "No more videos",
+  "@galleryNoMoreVideo": {
+    "description": "Media gallery footer when the Video filter has loaded everything."
+  },
+  "galleryLoadFailed": "Failed to load media, please try again later",
+  "@galleryLoadFailed": {
+    "description": "Media gallery error when loading media fails, any filter."
   },
   "autoT0059": "Explore data is unavailable",
   "@autoT0059": {
@@ -1951,6 +1983,43 @@
   "autoT0211": "Take it easy, this day's highlights haven't happened yet.",
   "@autoT0211": {
     "description": "Auto-generated metadata for autoT0211."
+  },
+  "diaryCommentsTitle": "Comments",
+  "@diaryCommentsTitle": {
+    "description": "Diary preview comments section title."
+  },
+  "diaryCommentsEmpty": "No comments yet \u2014 write the first one.",
+  "@diaryCommentsEmpty": {
+    "description": "Diary preview comments section empty state."
+  },
+  "diaryCommentsHint": "Write a comment\u2026",
+  "@diaryCommentsHint": {
+    "description": "Hint text of the diary comment input field."
+  },
+  "diaryCommentsSend": "Send comment",
+  "@diaryCommentsSend": {
+    "description": "Semantics label of the diary comment send button."
+  },
+  "diaryCommentsDelete": "Delete this comment",
+  "@diaryCommentsDelete": {
+    "description": "Title of the diary comment delete confirmation dialog and semantics label of the delete button."
+  },
+  "diaryCommentsDeleteConfirm": "Delete this comment? This cannot be undone.",
+  "@diaryCommentsDeleteConfirm": {
+    "description": "Body of the diary comment delete confirmation dialog."
+  },
+  "diaryCommentsEdit": "Edit comment",
+  "@diaryCommentsEdit": {
+    "description": "Menu item and dialog title for editing a diary comment."
+  },
+  "diaryCommentsCount": "{count} comments",
+  "@diaryCommentsCount": {
+    "description": "Semantics label of the diary card comment count badge; count is the number of comments.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "timeCapsuleTitle": "Time lock",
   "@timeCapsuleTitle": {
@@ -4007,6 +4076,10 @@
   "@diaryTypographyParagraphSpacing": {
     "description": "Body layout: paragraph spacing slider label."
   },
+  "diaryTypographyFirstLineIndent": "First-line indent (chars)",
+  "@diaryTypographyFirstLineIndent": {
+    "description": "Body layout: first-line indent slider label, in characters (1 char = current font size); 0 means no indent. Applies to reading and Word export only, not the editor."
+  },
   "diaryTypographyDecrease": "{label}: decrease",
   "@diaryTypographyDecrease": {
     "description": "Body layout: tooltip of the decrease button; label is the value name.",
@@ -4294,6 +4367,14 @@
   "diaryCardStylePresetMemoDesc": "Text first, images below, like a memo",
   "@diaryCardStylePresetMemoDesc": {
     "description": "Diary card style settings: one-line description of the “Memo” preset."
+  },
+  "diaryCardStylePresetWarm": "Warm",
+  "@diaryCardStylePresetWarm": {
+    "description": "Diary card style settings: name of the “Warm” preset."
+  },
+  "diaryCardStylePresetWarmDesc": "Warm vintage: full-width cover with a large orange date",
+  "@diaryCardStylePresetWarmDesc": {
+    "description": "Diary card style settings: one-line description of the “Warm” preset."
   },
   "styleEditorApplied": "Applied “{name}”",
   "@styleEditorApplied": {
@@ -5008,6 +5089,10 @@
   "diaryCardStyleSourceTag": "First tag",
   "@diaryCardStyleSourceTag": {
     "description": "Diary card style settings: color source: the first tag's color."
+  },
+  "diaryCardStyleSourceWarm": "Warm",
+  "@diaryCardStyleSourceWarm": {
+    "description": "Diary card style settings: color source: fixed terracotta accent."
   },
   "diaryCardStyleSourceMoodHint": "Uses each entry's mood, or the default color when there is none",
   "@diaryCardStyleSourceMoodHint": {
@@ -6565,32 +6650,72 @@
   "@desktopTimeline": {"description": "Desktop tile: open the diary timeline."},
   "desktopGallery": "Gallery",
   "@desktopGallery": {"description": "Desktop tile: open the photo gallery."},
-  "desktopMine": "Mine",
-  "@desktopMine": {"description": "Desktop tile: open settings."},
+  "desktopTilesTitle": "Quick access",
+  "@desktopTilesTitle": {"description": "Desktop quick-access card title."},
+  "desktopCalendar": "Calendar",
+  "@desktopCalendar": {"description": "Desktop tile: open the full calendar page."},
+  "desktopTags": "Tags",
+  "@desktopTags": {"description": "Desktop tile: open the tag management page."},
   "desktopLatestTitle": "Latest entry",
-  "@desktopLatestTitle": {"description": "Desktop section title for the latest diary."},
+  "@desktopLatestTitle": {"description": "Desktop section title for the recent entries."},
   "desktopViewAll": "View all",
-  "@desktopViewAll": {"description": "Desktop latest entry button: open the full diary."},
+  "@desktopViewAll": {"description": "Desktop recent entries button: open the diaries page."},
   "desktopOnlyMe": "Only you can see this",
-  "@desktopOnlyMe": {"description": "Desktop latest entry meta: the diary is private to the user."},
+  "@desktopOnlyMe": {"description": "Desktop recent entry meta: the diary is private to the user."},
   "desktopImagesCount": "{count} photos",
-  "@desktopImagesCount": {"description": "Desktop latest entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
+  "@desktopImagesCount": {"description": "Desktop recent entry meta: number of images.", "placeholders": {"count": {"type": "int"}}},
   "desktopWriteTitle": "Write something",
-  "@desktopWriteTitle": {
-    "description": "桌面页“写点什么”主按钮标题"
-  },
+  "@desktopWriteTitle": {"description": "桌面页“写点什么”主按钮标题"},
   "desktopWriteSubtitle": "Capture this moment",
-  "@desktopWriteSubtitle": {
-    "description": "桌面页“写点什么”主按钮副标题"
-  },
-  "desktopDiary": "Diary",
-  "@desktopDiary": {
-    "description": "桌面页快捷入口：日记"
-  },
-  "desktopBackup": "Backup",
-  "@desktopBackup": {
-    "description": "桌面页快捷入口：备份"
-  },
+  "@desktopWriteSubtitle": {"description": "桌面页“写点什么”主按钮副标题"},
+  "desktopLayoutTitle": "Home Layout",
+  "@desktopLayoutTitle": {"description": "Desktop layout page title."},
+  "desktopLayoutIntro": "Drag to reorder, check to show or hide. Changes apply instantly.",
+  "@desktopLayoutIntro": {"description": "Desktop layout page intro."},
+  "desktopLayoutModuleHeader": "Header",
+  "@desktopLayoutModuleHeader": {"description": "Desktop layout module: header section."},
+  "desktopLayoutModuleHeaderDesc": "Date, greeting and stats line",
+  "@desktopLayoutModuleHeaderDesc": {"description": "Desktop layout module header description."},
+  "desktopLayoutModuleWriteButton": "Write",
+  "@desktopLayoutModuleWriteButton": {"description": "Desktop layout module: write button."},
+  "desktopLayoutModuleWriteButtonDesc": "The write entry button at the top of home",
+  "@desktopLayoutModuleWriteButtonDesc": {"description": "Desktop layout module write button description."},
+  "desktopLayoutModuleQuickEntry": "Quick Entry",
+  "@desktopLayoutModuleQuickEntry": {"description": "Desktop layout module: quick entry grid."},
+  "desktopLayoutModuleQuickEntryDesc": "6 entries: timeline, gallery, calendar and more",
+  "@desktopLayoutModuleQuickEntryDesc": {"description": "Desktop layout module quick entry description."},
+  "desktopLayoutModuleRecent": "Recent",
+  "@desktopLayoutModuleRecent": {"description": "Desktop layout module: recent entries."},
+  "desktopLayoutModuleRecentDesc": "Latest 3 entries",
+  "@desktopLayoutModuleRecentDesc": {"description": "Desktop layout module recent description."},
+  "desktopLayoutReset": "Reset",
+  "@desktopLayoutReset": {"description": "Desktop layout: reset to default."},
+  "desktopLayoutCopyCode": "Copy Layout Code",
+  "@desktopLayoutCopyCode": {"description": "Desktop layout: copy layout code."},
+  "desktopLayoutImportCode": "Import Layout Code",
+  "@desktopLayoutImportCode": {"description": "Desktop layout: import layout code."},
+  "desktopLayoutCodeCopied": "Layout code copied",
+  "@desktopLayoutCodeCopied": {"description": "Desktop layout: code copied message."},
+  "desktopLayoutImportTitle": "Import Layout Code",
+  "@desktopLayoutImportTitle": {"description": "Desktop layout import dialog title."},
+  "desktopLayoutImportHint": "Paste layout code",
+  "@desktopLayoutImportHint": {"description": "Desktop layout import dialog hint."},
+  "desktopLayoutImportEmpty": "No layout code found",
+  "@desktopLayoutImportEmpty": {"description": "Desktop layout import: empty message."},
+  "desktopLayoutImportInvalid": "Invalid layout code",
+  "@desktopLayoutImportInvalid": {"description": "Desktop layout import: invalid message."},
+  "desktopLayoutImported": "Layout imported",
+  "@desktopLayoutImported": {"description": "Desktop layout import: success message."},
+  "desktopLayoutEntryDefault": "Default layout",
+  "@desktopLayoutEntryDefault": {"description": "Desktop layout settings tile subtitle when default."},
+  "desktopLayoutEntryCustom": "Customized, showing {count} sections",
+  "@desktopLayoutEntryCustom": {"description": "Desktop layout settings tile subtitle when customized.", "placeholders": {"count": {"type": "int"}}},
+  "desktopLayoutEmptyTitle": "No sections on home",
+  "@desktopLayoutEmptyTitle": {"description": "Desktop empty state title when all modules hidden."},
+  "desktopLayoutEmptySubtitle": "All four sections are hidden. Turn at least one back on.",
+  "@desktopLayoutEmptySubtitle": {"description": "Desktop empty state subtitle."},
+  "desktopLayoutOpenEditor": "Adjust Layout",
+  "@desktopLayoutOpenEditor": {"description": "Desktop empty state button: open layout editor."},
   "simpleComposerTitle": "Write a diary",
   "@simpleComposerTitle": {
     "description": "简洁编辑器 / 写点什么选择：simpleComposerTitle"
@@ -8713,6 +8838,30 @@
   "@notebookSectionClosed": {
     "description": "Shelf and management group: closed notebooks (collapsed on the shelf by default)."
   },
+  "notebookParentLabel": "Parent notebook",
+  "@notebookParentLabel": {
+    "description": "Notebook editor: section title for the parent notebook."
+  },
+  "notebookParentTopLevel": "Top-level notebook",
+  "@notebookParentTopLevel": {
+    "description": "Notebook editor: not nested under any parent."
+  },
+  "notebookParentHint": "Nest under another notebook; child entries count toward the parent",
+  "@notebookParentHint": {
+    "description": "Notebook editor: hint text for the parent notebook section."
+  },
+  "notebookParentPick": "Choose parent notebook",
+  "@notebookParentPick": {
+    "description": "Notebook editor: title of the parent picker bottom sheet."
+  },
+  "notebookUnfiled": "Unfiled",
+  "@notebookUnfiled": {
+    "description": "Shelf: row for diaries not in any notebook."
+  },
+  "notebookChildTitle": "Child notebooks",
+  "@notebookChildTitle": {
+    "description": "Notebook contents page: title of the child notebook list."
+  },
   "notebookEntryCount": "{count, plural, =1{1 entry} other{{count} entries}}",
   "@notebookEntryCount": {
     "description": "Number of entries in a notebook.",
@@ -10354,14 +10503,6 @@
   "settingsFeaturesPagesFooter": "Diaries and Settings always stay. Pages you turn off leave the bottom bar; your data isn't affected.",
   "@settingsFeaturesPagesFooter": {
     "description": "Features page: footer of the pages group."
-  },
-  "settingsFeaturesCalendarSubtitle": "View diaries by month, with lunar dates, holidays and anniversaries",
-  "@settingsFeaturesCalendarSubtitle": {
-    "description": "Features page: subtitle of the calendar switch."
-  },
-  "settingsFeaturesExploreSubtitle": "Stats, on this day, mood trends and photo wall",
-  "@settingsFeaturesExploreSubtitle": {
-    "description": "Features page: subtitle of the explore switch."
   },
   "settingsFeaturesDesktopSubtitle": "Greeting, stats and shortcuts at a glance",
   "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},

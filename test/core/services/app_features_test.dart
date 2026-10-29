@@ -14,8 +14,7 @@ void main() {
     test('reads each field on its own and ignores unknown keys', () {
       final features = AppFeatures.decode(
         jsonEncode(<String, Object?>{
-          'calendar': false,
-          'explore': 'no',
+          'desktop': false,
           'notebooks': false,
           'anniversaries': null,
           'templates': 0,
@@ -27,7 +26,7 @@ void main() {
       expect(
         features,
         const AppFeatures(
-          calendar: false,
+          desktop: false,
           notebooks: false,
           timeCapsules: false,
         ),
@@ -43,7 +42,7 @@ void main() {
 
     test('round-trips every non-default combination field', () {
       const features = AppFeatures(
-        explore: false,
+        desktop: false,
         anniversaries: false,
         templates: false,
       );
@@ -52,8 +51,6 @@ void main() {
       expect(raw, isNotNull);
       expect((jsonDecode(raw!) as Map).keys, <String>[
         'desktop',
-        'calendar',
-        'explore',
         'notebooks',
         'anniversaries',
         'templates',
@@ -64,36 +61,20 @@ void main() {
   });
 
   group('AppFeatures.anniversariesEnabled', () {
-    test('needs both the calendar and the anniversaries toggle', () {
+    test('only follows the anniversaries toggle', () {
       expect(AppFeatures.defaults.anniversariesEnabled, isTrue);
-      expect(
-        const AppFeatures(calendar: false).anniversariesEnabled,
-        isFalse,
-        reason: 'calendar off hides anniversaries even when kept on',
-      );
       expect(
         const AppFeatures(anniversaries: false).anniversariesEnabled,
         isFalse,
       );
       expect(
         const AppFeatures(
-          calendar: false,
+          desktop: false,
           anniversaries: false,
         ).anniversariesEnabled,
         isFalse,
       );
     });
-
-    test(
-      'restores the stored anniversaries choice when the calendar returns',
-      () {
-        const off = AppFeatures(calendar: false, anniversaries: false);
-        expect(off.copyWith(calendar: true).anniversariesEnabled, isFalse);
-
-        const kept = AppFeatures(calendar: false);
-        expect(kept.copyWith(calendar: true).anniversariesEnabled, isTrue);
-      },
-    );
   });
 
   group('AppFeatures value semantics', () {
@@ -106,8 +87,8 @@ void main() {
     });
 
     test('equal values share a hash code', () {
-      const a = AppFeatures(explore: false, timeCapsules: false);
-      const b = AppFeatures(timeCapsules: false, explore: false);
+      const a = AppFeatures(notebooks: false, timeCapsules: false);
+      const b = AppFeatures(timeCapsules: false, notebooks: false);
 
       expect(a, b);
       expect(a.hashCode, b.hashCode);

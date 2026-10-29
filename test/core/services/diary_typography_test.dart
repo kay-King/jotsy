@@ -91,4 +91,41 @@ void main() {
     expect(typography.usesImportedFont, isTrue);
     expect(const DiaryTypography().usesImportedFont, isFalse);
   });
+
+  group('DiaryTypography first-line indent', () {
+    test('defaults to no indent and round-trips through raw json', () {
+      expect(const DiaryTypography().firstLineIndent, 0);
+      final typography = const DiaryTypography().copyWith(
+        firstLineIndent: 2.5,
+      );
+      expect(DiaryTypography.fromRaw(typography.toRaw()), typography);
+    });
+
+    test('clamps to 0-4 chars and snaps to the 0.5 char step', () {
+      final typography = DiaryTypography.fromRaw(
+        '{"firstLineIndent":9,"fontSize":16}',
+      );
+      expect(typography.firstLineIndent, 4);
+      expect(
+        const DiaryTypography().copyWith(firstLineIndent: 2.3).firstLineIndent,
+        2.5,
+      );
+      expect(
+        const DiaryTypography().copyWith(firstLineIndent: -1).firstLineIndent,
+        0,
+      );
+      expect(
+        DiaryTypography.normalizeFirstLineIndent(double.nan),
+        DiaryTypography.defaultFirstLineIndent,
+      );
+    });
+
+    test('resetting metrics also clears the indent', () {
+      final typography = const DiaryTypography().copyWith(
+        firstLineIndent: 2,
+      );
+      expect(typography.hasDefaultMetrics, isFalse);
+      expect(typography.withDefaultMetrics().firstLineIndent, 0);
+    });
+  });
 }

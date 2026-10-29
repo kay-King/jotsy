@@ -180,6 +180,34 @@ ADD COLUMN capsule_locked_at INTEGER NULL
     await migrator.createIndex(idxDiaryNotebooksNotebook);
   }
 
+  /// v14 新增日记留言表，与日记本表同理：表已存在（降级后再升级）时保留
+  /// 其中用户的留言，什么也不做；索引先删再建，保证与生成的 schema 一致。
+  Future<void> _migrateAddDiaryComments(Migrator migrator) async {
+    await _createTableIfMissing(migrator, diaryComments);
+    await migrator.drop(idxDiaryCommentsDiaryId);
+    await migrator.createIndex(idxDiaryCommentsDiaryId);
+  }
+
+  /// v15 日记本表加 `parent_id` 列（可空 TEXT，存父本业务 id）。
+  ///
+  /// 列已存在（降级后再升级）时什么也不做：SQLite 的 ALTER TABLE ADD COLUMN
+  /// 重复加列会报错，先查 `PRAGMA table_info` 确认。只加列，已有日记本的
+  /// `parent_id` 全是 NULL（顶级），不改任何已有数据。
+  Future<void> _migrateAddNotebookParent(Migrator migrator) async {
+    final columns = await customSelect(
+      "PRAGMA table_info('notebooks')",
+    ).get();
+    final hasParentId = columns.any(
+      (row) => row.read<String>('name') == 'parent_id',
+    );
+    if (!hasParentId) {
+      await customStatement('''
+ALTER TABLE notebooks
+ADD COLUMN parent_id TEXT NULL
+''');
+    }
+  }
+
   Future<void> _createTableIfMissing(
     Migrator migrator,
     TableInfo<Table, Object?> table,

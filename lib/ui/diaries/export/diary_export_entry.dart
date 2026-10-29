@@ -24,6 +24,7 @@ class DiaryExportEntry {
     this.tagNames = const <String>[],
     this.cover,
     this.context = const DiaryContextInfo(),
+    this.comments = const <DiaryCommentRow>[],
   });
 
   factory DiaryExportEntry.fromDetail(DiaryWithTags detail) {
@@ -96,6 +97,7 @@ class DiaryExportEntry {
   final List<String> tagNames;
   final String? cover;
   final DiaryContextInfo context;
+  final List<DiaryCommentRow> comments;
 
   /// 封面与正文图片，按出现顺序去重；封面在最前。
   List<String> get imageSources {

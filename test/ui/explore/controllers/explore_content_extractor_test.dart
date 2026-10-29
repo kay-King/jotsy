@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/ui/explore/controllers/explore_content_extractor.dart';
+import 'package:node_diary/ui/explore/models/explore_view_data.dart';
 
 import '../explore_test_fixtures.dart';
 
@@ -82,6 +83,86 @@ void main() {
         isEmpty,
       );
     }
+  });
+
+  test('typed collection keeps images, audio and video in order', () {
+    final diary = createExploreTestDiary(
+      cover: '/cover.jpg',
+      content: jsonEncode([
+        {'insert': 'A day in pictures\n'},
+        {
+          'insert': {'image': '/first.jpg'},
+        },
+        {
+          'insert': {'video': '/clip.mp4'},
+        },
+        {
+          'insert': {
+            'audio': jsonEncode({
+              'path': '/rec.m4a',
+              'durationMs': 65000,
+              'name': '晨间录音',
+            }),
+          },
+        },
+        {
+          'insert': {'image': '/cover.jpg'},
+        },
+      ]),
+    );
+
+    final typed = extractor.resolveTypedMediaSources(diary);
+    expect(
+      typed.map((media) => media.source),
+      ['/cover.jpg', '/first.jpg', '/clip.mp4', '/rec.m4a'],
+    );
+    expect(typed.map((media) => media.kind), [
+      GalleryMediaKind.image,
+      GalleryMediaKind.image,
+      GalleryMediaKind.video,
+      GalleryMediaKind.audio,
+    ]);
+    expect(typed[2].displayName, 'clip.mp4');
+    expect(typed[3].displayName, '晨间录音');
+    expect(typed[3].duration, const Duration(seconds: 65));
+  });
+
+  test('typed collection accepts legacy video nodes and drops bad media', () {
+    final diary = createExploreTestDiary(
+      content: jsonEncode({
+        'root': {
+          'children': [
+            {
+              'type': 'video',
+              'attributes': {'url': '/legacy.mp4'},
+            },
+            {
+              'type': 'image',
+              'attributes': {'url': null},
+            },
+            {
+              'insert': {'audio': 'not json'},
+            },
+            {
+              'insert': {'video': ''},
+            },
+            {
+              'insert': {'image': '/valid.jpg'},
+            },
+          ],
+        },
+      }),
+    );
+
+    final typed = extractor.resolveTypedMediaSources(diary);
+    expect(
+      typed.map((media) => media.source),
+      ['/legacy.mp4', '/valid.jpg'],
+    );
+    expect(typed.map((media) => media.kind), [
+      GalleryMediaKind.video,
+      GalleryMediaKind.image,
+    ]);
   });
 
   test(

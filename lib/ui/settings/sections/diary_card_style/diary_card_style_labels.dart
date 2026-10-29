@@ -21,6 +21,7 @@ String diaryCardPresetName(AppLocalizations l10n, DiaryCardPresetId id) =>
       DiaryCardPresetId.journal => l10n.diaryCardStylePresetJournal,
       DiaryCardPresetId.mood => l10n.diaryCardStylePresetMood,
       DiaryCardPresetId.memo => l10n.diaryCardStylePresetMemo,
+      DiaryCardPresetId.warm => l10n.diaryCardStylePresetWarm,
     };
 
 String diaryCardPresetDescription(
@@ -36,6 +37,7 @@ String diaryCardPresetDescription(
   DiaryCardPresetId.journal => l10n.diaryCardStylePresetJournalDesc,
   DiaryCardPresetId.mood => l10n.diaryCardStylePresetMoodDesc,
   DiaryCardPresetId.memo => l10n.diaryCardStylePresetMemoDesc,
+  DiaryCardPresetId.warm => l10n.diaryCardStylePresetWarmDesc,
 };
 
 FaIconData diaryCardPresetIcon(DiaryCardPresetId id) => switch (id) {
@@ -48,6 +50,7 @@ FaIconData diaryCardPresetIcon(DiaryCardPresetId id) => switch (id) {
   DiaryCardPresetId.journal => FontAwesomeIcons.bookBookmark,
   DiaryCardPresetId.mood => FontAwesomeIcons.faceSmile,
   DiaryCardPresetId.memo => FontAwesomeIcons.lightbulb,
+  DiaryCardPresetId.warm => FontAwesomeIcons.sun,
 };
 
 /// 当前样式的显示名：内置预设名、我的样式名，或“自定义”。
@@ -176,6 +179,7 @@ String diaryCardColorSourceLabel(
   DiaryCardColorSource.tertiary => l10n.diaryCardStyleSourceTertiary,
   DiaryCardColorSource.mood => l10n.diaryCardStyleSourceMood,
   DiaryCardColorSource.firstTag => l10n.diaryCardStyleSourceTag,
+  DiaryCardColorSource.warm => l10n.diaryCardStyleSourceWarm,
 };
 
 /// 数值标签：dp、百分比与倍率统一一位小数以内、去掉多余的 `.0`。

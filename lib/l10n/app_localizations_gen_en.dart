@@ -15,12 +15,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDiaries => 'Diaries';
 
   @override
-  String get navCalendar => 'Calendar';
-
-  @override
-  String get navExplore => 'Explore';
-
-  @override
   String get navSettings => 'Settings';
 
   @override
@@ -942,7 +936,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoT0057 => 'No more images';
 
   @override
-  String get autoT0058 => 'Explore';
+  String get galleryFilterAll => 'All';
+
+  @override
+  String get galleryFilterImage => 'Images';
+
+  @override
+  String get galleryFilterAudio => 'Audio';
+
+  @override
+  String get galleryFilterVideo => 'Videos';
+
+  @override
+  String get galleryEmptyMedia => 'No media to show yet';
+
+  @override
+  String get galleryEmptyAudio => 'No audio to show yet';
+
+  @override
+  String get galleryEmptyVideo => 'No videos to show yet';
+
+  @override
+  String get galleryNoMoreMedia => 'No more media';
+
+  @override
+  String get galleryNoMoreAudio => 'No more audio';
+
+  @override
+  String get galleryNoMoreVideo => 'No more videos';
+
+  @override
+  String get galleryLoadFailed =>
+      'Failed to load media, please try again later';
 
   @override
   String get autoT0059 => 'Explore data is unavailable';
@@ -1427,6 +1452,33 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoT0211 =>
       'Take it easy, this day\'s highlights haven\'t happened yet.';
+
+  @override
+  String get diaryCommentsTitle => 'Comments';
+
+  @override
+  String get diaryCommentsEmpty => 'No comments yet — write the first one.';
+
+  @override
+  String get diaryCommentsHint => 'Write a comment…';
+
+  @override
+  String get diaryCommentsSend => 'Send comment';
+
+  @override
+  String get diaryCommentsDelete => 'Delete this comment';
+
+  @override
+  String get diaryCommentsDeleteConfirm =>
+      'Delete this comment? This cannot be undone.';
+
+  @override
+  String get diaryCommentsEdit => 'Edit comment';
+
+  @override
+  String diaryCommentsCount(int count) {
+    return '$count comments';
+  }
 
   @override
   String get timeCapsuleTitle => 'Time lock';
@@ -3143,6 +3195,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryTypographyParagraphSpacing => 'Paragraph spacing';
 
   @override
+  String get diaryTypographyFirstLineIndent => 'First-line indent (chars)';
+
+  @override
   String diaryTypographyDecrease(String label) {
     return '$label: decrease';
   }
@@ -3356,6 +3411,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diaryCardStylePresetMemoDesc =>
       'Text first, images below, like a memo';
+
+  @override
+  String get diaryCardStylePresetWarm => 'Warm';
+
+  @override
+  String get diaryCardStylePresetWarmDesc =>
+      'Warm vintage: full-width cover with a large orange date';
 
   @override
   String styleEditorApplied(String name) {
@@ -3895,6 +3957,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryCardStyleSourceTag => 'First tag';
+
+  @override
+  String get diaryCardStyleSourceWarm => 'Warm';
 
   @override
   String get diaryCardStyleSourceMoodHint =>
@@ -5209,7 +5274,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get desktopGallery => 'Gallery';
 
   @override
-  String get desktopMine => 'Mine';
+  String get desktopTilesTitle => 'Quick access';
+
+  @override
+  String get desktopCalendar => 'Calendar';
+
+  @override
+  String get desktopTags => 'Tags';
 
   @override
   String get desktopLatestTitle => 'Latest entry';
@@ -5232,10 +5303,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String get desktopWriteSubtitle => 'Capture this moment';
 
   @override
-  String get desktopDiary => 'Diary';
+  String get desktopLayoutTitle => 'Home Layout';
 
   @override
-  String get desktopBackup => 'Backup';
+  String get desktopLayoutIntro =>
+      'Drag to reorder, check to show or hide. Changes apply instantly.';
+
+  @override
+  String get desktopLayoutModuleHeader => 'Header';
+
+  @override
+  String get desktopLayoutModuleHeaderDesc => 'Date, greeting and stats line';
+
+  @override
+  String get desktopLayoutModuleWriteButton => 'Write';
+
+  @override
+  String get desktopLayoutModuleWriteButtonDesc =>
+      'The write entry button at the top of home';
+
+  @override
+  String get desktopLayoutModuleQuickEntry => 'Quick Entry';
+
+  @override
+  String get desktopLayoutModuleQuickEntryDesc =>
+      '6 entries: timeline, gallery, calendar and more';
+
+  @override
+  String get desktopLayoutModuleRecent => 'Recent';
+
+  @override
+  String get desktopLayoutModuleRecentDesc => 'Latest 3 entries';
+
+  @override
+  String get desktopLayoutReset => 'Reset';
+
+  @override
+  String get desktopLayoutCopyCode => 'Copy Layout Code';
+
+  @override
+  String get desktopLayoutImportCode => 'Import Layout Code';
+
+  @override
+  String get desktopLayoutCodeCopied => 'Layout code copied';
+
+  @override
+  String get desktopLayoutImportTitle => 'Import Layout Code';
+
+  @override
+  String get desktopLayoutImportHint => 'Paste layout code';
+
+  @override
+  String get desktopLayoutImportEmpty => 'No layout code found';
+
+  @override
+  String get desktopLayoutImportInvalid => 'Invalid layout code';
+
+  @override
+  String get desktopLayoutImported => 'Layout imported';
+
+  @override
+  String get desktopLayoutEntryDefault => 'Default layout';
+
+  @override
+  String desktopLayoutEntryCustom(int count) {
+    return 'Customized, showing $count sections';
+  }
+
+  @override
+  String get desktopLayoutEmptyTitle => 'No sections on home';
+
+  @override
+  String get desktopLayoutEmptySubtitle =>
+      'All four sections are hidden. Turn at least one back on.';
+
+  @override
+  String get desktopLayoutOpenEditor => 'Adjust Layout';
 
   @override
   String get simpleComposerTitle => 'Write a diary';
@@ -6864,6 +7007,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notebookSectionClosed => 'Closed';
 
   @override
+  String get notebookParentLabel => 'Parent notebook';
+
+  @override
+  String get notebookParentTopLevel => 'Top-level notebook';
+
+  @override
+  String get notebookParentHint =>
+      'Nest under another notebook; child entries count toward the parent';
+
+  @override
+  String get notebookParentPick => 'Choose parent notebook';
+
+  @override
+  String get notebookUnfiled => 'Unfiled';
+
+  @override
+  String get notebookChildTitle => 'Child notebooks';
+
+  @override
   String notebookEntryCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -8123,14 +8285,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsFeaturesPagesFooter =>
       'Diaries and Settings always stay. Pages you turn off leave the bottom bar; your data isn\'t affected.';
-
-  @override
-  String get settingsFeaturesCalendarSubtitle =>
-      'View diaries by month, with lunar dates, holidays and anniversaries';
-
-  @override
-  String get settingsFeaturesExploreSubtitle =>
-      'Stats, on this day, mood trends and photo wall';
 
   @override
   String get settingsFeaturesDesktopSubtitle =>

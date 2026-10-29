@@ -311,7 +311,8 @@ class DiaryCardResolvedStyle {
             surface.shadow != DiaryCardShadowStyle.none &&
             surface.shadowColor.source == source) ||
         typography.titleColor.source == source ||
-        typography.bodyColor.source == source;
+        typography.bodyColor.source == source ||
+        style.meta.dateAccent.source == source;
   }
 
   static double? _scaledOrNull(double? base, double fallback, double scale) {

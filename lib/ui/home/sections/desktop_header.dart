@@ -3,8 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/utils/relative_time_formatter.dart';
 
-import '../models/desktop_view_data.dart';
-
 /// 桌面页顶部：日期 + 问候（问候语按时间变，昵称来自个人资料）。
 class DesktopHeader extends StatelessWidget {
   const DesktopHeader({super.key, required this.now, required this.nickname});
@@ -64,31 +62,43 @@ class DesktopHeader extends StatelessWidget {
 }
 
 /// 总览数一行：已记录 N 篇 · 连续记录 X 天 · 最近更新 …；没有日记时一句空态。
+///
+/// 口径与原来一致（总数、连续天数来自探索页轻量日记流的统计，调用方
+/// 传探索页算好的值；最近更新取最新一篇的更新时间）。原来接 DesktopData
+/// 的版本已随桌面数据模型删除，这里直接传数值，不再依赖已删的模型。
 class DesktopStatsLine extends StatelessWidget {
-  const DesktopStatsLine({super.key, required this.data, required this.now});
+  const DesktopStatsLine({
+    super.key,
+    required this.totalRecords,
+    required this.streakDays,
+    required this.latestUpdatedAt,
+    required this.now,
+  });
 
-  final DesktopData? data;
+  final int totalRecords;
+  final int streakDays;
+  final DateTime? latestUpdatedAt;
   final DateTime now;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
-    final current = data;
     final style = TextStyle(
       fontSize: 13,
       fontWeight: FontWeight.w400,
       color: colorScheme.onSurfaceVariant,
     );
-    if (current == null || current.latestDiary == null) {
+    final latest = latestUpdatedAt;
+    if (totalRecords == 0 || latest == null) {
       return Text(l10n.desktopStatsLineEmpty, style: style);
     }
     return Text(
       l10n.desktopStatsLine(
-        current.totalRecords,
-        current.streakDays,
+        totalRecords,
+        streakDays,
         RelativeTimeFormatter.formatUpdatedAt(
-          updatedAt: current.latestDiary!.updatedAt,
+          updatedAt: latest,
           now: now,
           l10n: l10n,
         ),

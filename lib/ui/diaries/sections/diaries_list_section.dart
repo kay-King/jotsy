@@ -8,6 +8,7 @@ import '../models/diary_card_style/diary_card_style.dart';
 import '../viewmodels/diary_card_resolved_style.dart';
 import '../widgets/diaries_empty_state.dart';
 import '../widgets/diary_card/diary_card.dart';
+import '../widgets/diary_card/diary_card_comment_count.dart';
 import '../widgets/diary_swipe_action_item.dart';
 import '../widgets/diary_waterfall_sliver.dart';
 import 'diary_head_section.dart';
@@ -52,6 +53,7 @@ class DiariesListSection extends StatelessWidget {
     this.enableCoverHero = true,
     this.opensLockedCapsulePage = true,
     this.sectionHeaderBuilder,
+    this.watchCommentCounts = false,
   });
 
   /// 视图层已过滤/排序后的日记数据。
@@ -105,6 +107,11 @@ class DiariesListSection extends StatelessWidget {
   /// 返回 null 表示这篇上方没有。只在列表布局生效，瀑布流忽略；默认 null，
   /// 其他列表（归档、搜索、全部日记）不受影响。
   final Widget? Function(BuildContext context, int index)? sectionHeaderBuilder;
+
+  /// 是否给每张卡片接实时留言数角标：为 true 时每张卡片各订阅自己那一篇
+  /// 的计数流（按 `diary_id` 做 `COUNT`，不全表扫）。默认 false：设置页
+  /// 预览与不包 ProviderScope 的旧调用方保持原样，不订阅、不改外观。
+  final bool watchCommentCounts;
 
   @override
   Widget build(BuildContext context) {
@@ -203,17 +210,30 @@ class DiariesListSection extends StatelessWidget {
     required DiaryCardResolvedStyle resolved,
   }) {
     final diaryId = diary.diary.diaryId;
-    final card = DiaryCard(
-      diary: diary,
-      resolved: resolved,
-      selected: selectedDiaryIds.contains(diaryId),
-      isSelectionMode: isSelectionMode,
-      maxVisibleTags: maxVisibleTags,
-      onOpenEditor: onOpenEditor,
-      onToggleSelection: onToggleSelection,
-      enableCoverHero: enableCoverHero,
-      opensLockedCapsulePage: opensLockedCapsulePage,
-    );
+    Widget buildCard(int? commentCount) {
+      return DiaryCard(
+        diary: diary,
+        resolved: resolved,
+        selected: selectedDiaryIds.contains(diaryId),
+        isSelectionMode: isSelectionMode,
+        maxVisibleTags: maxVisibleTags,
+        onOpenEditor: onOpenEditor,
+        onToggleSelection: onToggleSelection,
+        enableCoverHero: enableCoverHero,
+        opensLockedCapsulePage: opensLockedCapsulePage,
+        commentCount: commentCount,
+      );
+    }
+
+    // 实时角标只在显式开启的真实列表里包订阅层；默认路径（设置页预览、
+    // 旧测试）仍是原来的裸卡片，结构与外观零变化。
+    final card = watchCommentCounts
+        ? DiaryCardCommentCountBuilder(
+            diaryId: diaryId,
+            builder: (BuildContext context, int? commentCount) =>
+                buildCard(commentCount),
+          )
+        : buildCard(null);
     final animatedBaseItem = _buildAnimatedDiaryItem(
       context,
       diaryId: diaryId,

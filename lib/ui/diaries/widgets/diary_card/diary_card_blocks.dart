@@ -145,10 +145,17 @@ class DiaryCardBlocks extends StatelessWidget {
                   mark: markHost == DiaryCardBlock.eyebrow ? mark : null,
                 )
               : null,
-        DiaryCardBlock.title => title == null ? null : _title(title, mark),
+        DiaryCardBlock.title => title == null
+            ? null
+            : (resolved.style.meta.inlineDate
+                  ? _inlineTitleRow(context, title, mark, lines)
+                  : _title(title, mark)),
         // 标签已收进底栏（与日期、时间同行），不再单独成行。
         DiaryCardBlock.tags => null,
-        DiaryCardBlock.preview => _preview(),
+        // 日期与标题同行时摘要收进标题行右侧那一列，不再单独成行。
+        DiaryCardBlock.preview => resolved.style.meta.inlineDate
+            ? null
+            : _preview(),
         DiaryCardBlock.footer => lines.footer(
           context,
           indicators: metaPosition == DiaryCardMetaPosition.footer
@@ -219,6 +226,58 @@ class DiaryCardBlocks extends StatelessWidget {
           ? resolved.colorScheme.onSurfaceVariant
           : appearance.bodyColor,
       scale: resolved.metaScale,
+    );
+  }
+
+  /// 日期与标题同行（原版 Vivido 时间线卡片的排法，暖阳预设用）：
+  /// 大日期块在左、标题与摘要在右，两列顶部对齐、间隔 14；标题行末尾
+  /// 仍挂选择标记。摘要为空时只有标题一行。日期簇最多占行宽一半，
+  /// 窄列 / 大字号下靠里面的 FittedBox 等比缩小、不溢出。
+  Widget _inlineTitleRow(
+    BuildContext context,
+    String title,
+    Widget mark,
+    DiaryCardLines lines,
+  ) {
+    final scale = resolved.metaScale;
+    final titleText = Text(
+      title,
+      maxLines: resolved.modeStyle.titleMaxLines,
+      overflow: TextOverflow.ellipsis,
+      textAlign: resolved.centered ? TextAlign.center : null,
+      style: resolved.titleStyle?.copyWith(color: appearance.titleColor),
+    );
+    final previewText = _preview();
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth * 0.5,
+              ),
+              child: lines.bigDate(context),
+            ),
+            SizedBox(width: 14 * scale),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [Expanded(child: titleText), mark],
+                  ),
+                  if (previewText != null) ...[
+                    SizedBox(height: 6 * scale),
+                    previewText,
+                  ],
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

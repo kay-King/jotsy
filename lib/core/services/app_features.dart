@@ -1,8 +1,11 @@
 // 功能管理开关（设置 → 功能管理）。
 //
-// 职责：描述用户可整体关闭的功能——桌面 Tab、日历 Tab、探索 Tab、日记本、纪念日、
+// 职责：描述用户可整体关闭的功能——桌面 Tab、日记本、纪念日、
 // 日记模板、时间胶囊——是否开启；默认全部开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
+//
+// 探索与日历已经并进桌面页（首页），不再占底栏 Tab，这里也不再有
+// 这两项开关；纪念日不再依附日历，只看自己的开关。
 //
 // 存储：单个 JSON 设置键 `app.settings.app_features`（经
 // `SettingsService.setAppFeaturesRaw`），逐字段容错解析，随完整备份导出，
@@ -14,8 +17,6 @@ import 'dart:convert';
 class AppFeatures {
   const AppFeatures({
     this.desktop = true,
-    this.calendar = true,
-    this.explore = true,
     this.notebooks = true,
     this.anniversaries = true,
     this.templates = true,
@@ -28,16 +29,10 @@ class AppFeatures {
   /// 桌面 Tab。
   final bool desktop;
 
-  /// 日历 Tab。
-  final bool calendar;
-
-  /// 探索 Tab。
-  final bool explore;
-
   /// 日记本。
   final bool notebooks;
 
-  /// 纪念日的用户开关值；界面判断是否可用请读 [anniversariesEnabled]。
+  /// 纪念日的开关值；界面判断是否可用请读 [anniversariesEnabled]。
   final bool anniversaries;
 
   /// 日记模板。
@@ -46,14 +41,11 @@ class AppFeatures {
   /// 时间胶囊。
   final bool timeCapsules;
 
-  /// 纪念日依附日历（列表只能从日历顶栏进入），日历关闭时一并关闭；界面一律
-  /// 读这个 getter 判断纪念日是否可用，不直接读 [anniversaries]（它只是用户
-  /// 自己的开关值，日历重新开启时恢复）。
-  bool get anniversariesEnabled => calendar && anniversaries;
+  /// 纪念日是否可用：只看自己的开关（以前依附日历，日历并进首页后
+  /// 不再有日历开关）。界面一律读这个 getter，不直接读 [anniversaries]。
+  bool get anniversariesEnabled => anniversaries;
 
   static const _keyDesktop = 'desktop';
-  static const _keyCalendar = 'calendar';
-  static const _keyExplore = 'explore';
   static const _keyNotebooks = 'notebooks';
   static const _keyAnniversaries = 'anniversaries';
   static const _keyTemplates = 'templates';
@@ -79,8 +71,6 @@ class AppFeatures {
 
     return AppFeatures(
       desktop: read(_keyDesktop, defaults.desktop),
-      calendar: read(_keyCalendar, defaults.calendar),
-      explore: read(_keyExplore, defaults.explore),
       notebooks: read(_keyNotebooks, defaults.notebooks),
       anniversaries: read(_keyAnniversaries, defaults.anniversaries),
       templates: read(_keyTemplates, defaults.templates),
@@ -94,8 +84,6 @@ class AppFeatures {
     if (this == defaults) return null;
     return jsonEncode(<String, bool>{
       _keyDesktop: desktop,
-      _keyCalendar: calendar,
-      _keyExplore: explore,
       _keyNotebooks: notebooks,
       _keyAnniversaries: anniversaries,
       _keyTemplates: templates,
@@ -105,8 +93,6 @@ class AppFeatures {
 
   AppFeatures copyWith({
     bool? desktop,
-    bool? calendar,
-    bool? explore,
     bool? notebooks,
     bool? anniversaries,
     bool? templates,
@@ -114,8 +100,6 @@ class AppFeatures {
   }) {
     return AppFeatures(
       desktop: desktop ?? this.desktop,
-      calendar: calendar ?? this.calendar,
-      explore: explore ?? this.explore,
       notebooks: notebooks ?? this.notebooks,
       anniversaries: anniversaries ?? this.anniversaries,
       templates: templates ?? this.templates,
@@ -127,8 +111,6 @@ class AppFeatures {
   bool operator ==(Object other) =>
       other is AppFeatures &&
       other.desktop == desktop &&
-      other.calendar == calendar &&
-      other.explore == explore &&
       other.notebooks == notebooks &&
       other.anniversaries == anniversaries &&
       other.templates == templates &&
@@ -137,8 +119,6 @@ class AppFeatures {
   @override
   int get hashCode => Object.hash(
     desktop,
-    calendar,
-    explore,
     notebooks,
     anniversaries,
     templates,
@@ -147,7 +127,7 @@ class AppFeatures {
 
   @override
   String toString() =>
-      'AppFeatures(desktop: $desktop, calendar: $calendar, explore: $explore, '
+      'AppFeatures(desktop: $desktop, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
       'templates: $templates, timeCapsules: $timeCapsules)';
 }

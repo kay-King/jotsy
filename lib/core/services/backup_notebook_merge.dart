@@ -68,6 +68,7 @@ class BackupNotebookMerge {
     required Set<int> replacedDiaryIds,
   }) async {
     final definitions = await _writeDefinitions(db);
+    await _repairDanglingParents(db);
     await _writeMemberships(
       db,
       definitions.targets,
@@ -75,6 +76,24 @@ class BackupNotebookMerge {
       replacedDiaryIds,
     );
     return definitions.added;
+  }
+
+  /// 清理悬空的 parent_id：父本不在库里（部分备份、源设备上父本已删但子本
+  /// 没更新）时，子本变为顶级。parent_id 存业务 id，跨设备稳定，正常合并
+  /// 不会悬空，这里只防不一致的旧数据。
+  Future<void> _repairDanglingParents(AppDatabase db) async {
+    final rows = await db.select(db.notebooks).get();
+    final ids = <String>{for (final row in rows) row.notebookId};
+    final dangling = <int>[
+      for (final row in rows)
+        if (row.parentId != null && !ids.contains(row.parentId)) row.id,
+    ];
+    if (dangling.isEmpty) return;
+    await (db.update(
+      db.notebooks,
+    )..where((t) => t.id.isIn(dangling))).write(
+      const NotebooksCompanion(parentId: Value(null)),
+    );
   }
 
   /// 文件日记本 id → 写入后本机那一本（本机 id、本机侧的载荷）以及是否本次

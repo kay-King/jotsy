@@ -6,6 +6,7 @@ ExploreMediaItem item(String id, DateTime createdAt) => ExploreMediaItem(
   diaryId: id,
   updatedAt: createdAt,
   createdAt: createdAt,
+  kind: GalleryMediaKind.image,
 );
 
 void main() {

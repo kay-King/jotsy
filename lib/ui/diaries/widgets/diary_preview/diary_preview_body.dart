@@ -11,11 +11,15 @@ import '../../../../utils/relative_time_formatter.dart';
 import '../../../widgets/image_viewer_hero.dart';
 import '../../models/diary_preview_style/diary_preview_style.dart';
 import '../../models/time_capsule.dart';
+import '../../viewmodels/diary_first_line_indent.dart';
 import '../../viewmodels/diary_quill_styles.dart';
 import '../../viewmodels/diary_text_appearance.dart';
 import '../diary_mobile_toolbar.dart';
 
 /// 预览页正文：只读 Quill，没有可见内容时显示空正文提示（可关）。
+///
+/// 首行缩进只在这里垫出来（[diaryFirstLineIndentWidth]）：段落首个文字
+/// span 前插定宽占位，原文 Delta 不动，待办勾选仍写回原控制器。
 ///
 /// 是否有正文不能只看 contentText（纯文本镜像），否则“仅图片正文”会被误判
 /// 为空：统一按 Quill 文档是否存在可见内容判断，图片、视频与其他嵌入都算
@@ -80,6 +84,9 @@ class DiaryPreviewBody extends StatelessWidget {
                   foldLongImages:
                       longImageMode == DiaryPreviewLongImageMode.fold,
                 ),
+              ),
+              firstLineIndentWidth: diaryFirstLineIndentWidth(
+                appearance.typography,
               ),
             ),
           );

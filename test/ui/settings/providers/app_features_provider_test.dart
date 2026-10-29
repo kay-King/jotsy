@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const stored = AppFeatures(calendar: false, templates: false);
+  const stored = AppFeatures(desktop: false, templates: false);
 
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{
@@ -50,13 +50,13 @@ void main() {
       fireImmediately: true,
     );
 
-    const next = AppFeatures(explore: false);
+    const next = AppFeatures(desktop: false);
     await saveAppFeatures(settings, next);
     expect(container.read(appFeaturesProvider), next);
 
     // 同一组开关换种写法（键序不同）：解码相等，不应再通知。
     await settings.setAppFeaturesRaw(
-      '{"timeCapsules":true,"explore":false,"calendar":true}',
+      '{"timeCapsules":true,"desktop":false}',
     );
     expect(seen, <AppFeatures>[stored, next]);
 

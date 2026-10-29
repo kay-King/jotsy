@@ -4,6 +4,7 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_surfaces.dart';
 import '../../../l10n/app_localizations.dart';
+import '../viewmodels/diary_first_line_indent.dart';
 import '../viewmodels/diary_quill_styles.dart';
 import '../viewmodels/diary_text_appearance.dart';
 
@@ -108,6 +109,9 @@ class _DiaryTypographyPreviewState extends State<DiaryTypographyPreview> {
                     scrollable: false,
                     padding: EdgeInsets.zero,
                     showCursor: false,
+                  ),
+                  firstLineIndentWidth: diaryFirstLineIndentWidth(
+                    widget.appearance.typography,
                   ),
                 ),
               );

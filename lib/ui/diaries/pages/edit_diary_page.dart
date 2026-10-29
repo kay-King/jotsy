@@ -43,6 +43,7 @@ import 'package:node_diary/ui/diaries/providers/diary_detail_provider.dart';
 import 'package:node_diary/ui/diaries/providers/diary_saved_colors_provider.dart';
 import 'package:node_diary/ui/diaries/providers/diary_typography_provider.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_quill_styles.dart';
+import 'package:node_diary/ui/diaries/viewmodels/diary_first_line_indent.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_text_appearance.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_floating_toolbar_surface.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
@@ -675,12 +676,16 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     required DiaryTextAppearance appearance,
   }) {
     final placeholder = context.l10n.autoT0133;
+    final firstLineIndentWidth = diaryFirstLineIndentWidth(
+      appearance.typography,
+    );
     // QuillController 未覆写 ==，按实例比较；ThemeData 与正文外观为值比较。
     final inputs = (
       _contentController,
       placeholder,
       Theme.of(context),
       appearance,
+      firstLineIndentWidth,
     );
     final cached = _cachedQuillEditor;
     if (cached != null && _cachedQuillEditorInputs == inputs) {
@@ -710,6 +715,7 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
               padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
               embedBuilders: buildDiaryQuillEmbedBuilders(),
             ),
+            firstLineIndentWidth: firstLineIndentWidth,
           ),
         );
       },

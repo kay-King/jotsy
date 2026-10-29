@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../core/database/app_database.dart';
@@ -23,6 +24,7 @@ typedef _NotebookDraft = ({
   String? templateId,
   NotebookRuleSet rules,
   NotebookGoal? goal,
+  String? parentId,
 });
 
 /// 日记本编辑页的表单状态与保存（新建与编辑共用）。
@@ -61,6 +63,7 @@ class NotebookEditorController extends ChangeNotifier {
     _visibility = notebook?.visibility ?? NotebookVisibility.normal;
     _sort = payload.sort;
     _templateId = payload.templateId;
+    _parentId = notebook?.row.parentId;
     _rules = NotebookRuleSet.decode(payload.rules);
     final goal = payload.goal;
     _goalEnabled = goal != null;
@@ -117,6 +120,12 @@ class NotebookEditorController extends ChangeNotifier {
   String? _templateId;
   String? get templateId => _templateId;
   set templateId(String? value) => _set(() => _templateId = value);
+
+  String? _parentId;
+  // 父日记本业务 id，null 为顶级。新建时从 _notebook 取（编辑）或 null；
+  // 只有手动本可设，智能本保持 null（保存时不传）。
+  String? get parentId => _parentId;
+  set parentId(String? value) => _set(() => _parentId = value);
 
   late NotebookRuleSet _rules;
 
@@ -220,6 +229,7 @@ class NotebookEditorController extends ChangeNotifier {
     templateId: _templateId,
     rules: _rules,
     goal: goal,
+    parentId: _parentId,
   );
 
   /// 实际写入的可见性：智能日记本一律 normal。
@@ -260,12 +270,15 @@ class NotebookEditorController extends ChangeNotifier {
     try {
       final existing = _notebook;
       final String id;
+      // 只有手动本可嵌套；智能本的 parentId 恒为 null（不传）。
+      final parentId = isSmart ? null : _parentId;
       if (existing == null) {
         id = await database.createNotebook(
           name: name.text,
           kind: _kind,
           visibility: effectiveVisibility,
           payload: payload,
+          parentId: parentId,
         );
       } else {
         id = existing.id;
@@ -274,6 +287,8 @@ class NotebookEditorController extends ChangeNotifier {
           name: name.text,
           visibility: effectiveVisibility,
           payload: payload,
+          // 没改父本时传 null（不动）；改了传 Value（null 为移到顶级）。
+          parentId: parentId == existing.row.parentId ? null : Value(parentId),
         );
       }
       _initial = _draft;

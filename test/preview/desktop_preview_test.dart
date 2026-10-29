@@ -1,5 +1,6 @@
-// 桌面页预览：拍首页底栏第一个 Tab（桌面）——日期问候 + 总览数 +
-// 三个快捷入口（时间线 / 相册 / 我的）+ 最近记录，给用户看桌面效果。
+// 合并后的首页预览：拍首页底栏第一个 Tab——写点什么按钮 + 快捷入口
+// （时间线 / 相册 / 日历 / 标签 / 那年今日 / 情绪与精力趋势，2 行 3 格），
+// 给用户看合并后的首页效果。
 // 运行：JOTSY_PREVIEW=1 flutter test --update-goldens test/preview/desktop_preview_test.dart
 import 'dart:convert';
 import 'dart:io';
@@ -223,14 +224,14 @@ void main() {
         child: const NodeDiaryApp(),
       ),
     );
-    // 桌面是底栏第一个 Tab，首帧即是桌面：等“最近记录”出现。
+    // 桌面是底栏第一个 Tab，首帧即是首页：等快捷入口的“时间线”出现。
     var ready = false;
     for (var i = 0; i < 600 && !ready; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 10)),
       );
       await tester.pump(const Duration(milliseconds: 50));
-      ready = find.text('最近记录').evaluate().isNotEmpty;
+      ready = find.text('时间线').evaluate().isNotEmpty;
     }
     // 封面图是真实异步加载，多给几帧落定。
     for (var i = 0; i < 10; i++) {

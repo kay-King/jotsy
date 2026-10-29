@@ -24,6 +24,9 @@ sealed class NotebookShelfResult {
 
   const factory NotebookShelfResult.selectNotebook(String notebookId) =
       NotebookShelfSelectNotebook;
+
+  const factory NotebookShelfResult.selectUnfiled() =
+      NotebookShelfSelectUnfiled;
 }
 
 final class NotebookShelfSelectAll extends NotebookShelfResult {
@@ -47,6 +50,16 @@ final class NotebookShelfSelectNotebook extends NotebookShelfResult {
 
   @override
   int get hashCode => notebookId.hashCode;
+}
+
+final class NotebookShelfSelectUnfiled extends NotebookShelfResult {
+  const NotebookShelfSelectUnfiled();
+
+  @override
+  bool operator ==(Object other) => other is NotebookShelfSelectUnfiled;
+
+  @override
+  int get hashCode => (NotebookShelfSelectUnfiled).hashCode;
 }
 
 /// 打开书架面板。[currentNotebookId] 为当前所在的日记本（null 为全部日记），
@@ -168,6 +181,10 @@ class _NotebookShelfState extends ConsumerState<NotebookShelf> {
               title: Text(l10n.notebookAllDiaries),
               onTap: () => _select(const NotebookShelfResult.selectAll()),
             ),
+            _UnfiledRow(
+              onTap: () =>
+                  _select(const NotebookShelfResult.selectUnfiled()),
+            ),
             if (notebooks == null)
               const SizedBox(height: 160, child: DelayedLoadingIndicator())
             else if (notebooks.isEmpty)
@@ -249,5 +266,39 @@ class _NotebookShelfState extends ConsumerState<NotebookShelf> {
         ),
       ],
     ];
+  }
+}
+
+/// 书架“未收录”行：没进任何日记本的日记，显示篇数，点进未收录列表。
+class _UnfiledRow extends ConsumerWidget {
+  const _UnfiledRow({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final count = ref.watch(unfiledDiaryCountProvider).value ?? 0;
+    // 没有未收录日记时不占一行。
+    if (count == 0) return const SizedBox.shrink();
+    return ListTile(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      leading: FaIcon(
+        FontAwesomeIcons.inbox,
+        size: 20,
+        color: theme.colorScheme.onSurface,
+      ),
+      title: Text(l10n.notebookUnfiled),
+      trailing: Text(
+        l10n.notebookEntryCount(count),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      onTap: onTap,
+    );
   }
 }

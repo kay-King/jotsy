@@ -369,5 +369,33 @@ void main() {
       ).copyWith(surface: const DiaryCardSurfaceStyle(cornerRadius: 3));
       expect(DiaryCardPresets.match(tweaked), isNull);
     });
+
+    test('warm preset is the warm vintage card', () {
+      final warm = DiaryCardPresets.styleOf(DiaryCardPresetId.warm);
+      // 原版 Vivido 时间线卡片：奶油底（暖色极小浓度叠加）+ 陶土橘大日期
+      // 与标题同行、两行摘要、右下角媒体徽章，没有底栏；默认仍是经典。
+      expect(warm.surface.cornerRadius, 20);
+      expect(warm.surface.background.source, DiaryCardColorSource.warm);
+      expect(warm.surface.borderWidth, 1);
+      expect(warm.meta.bigDate, isTrue);
+      expect(warm.meta.inlineDate, isTrue);
+      expect(warm.meta.mediaBadge, isTrue);
+      expect(warm.meta.dateAccent.source, DiaryCardColorSource.warm);
+      expect(warm.meta.showWordCount, isFalse);
+      expect(warm.meta.showMedia, isFalse);
+      expect(warm.meta.footerTime, DiaryCardFooterTime.hidden);
+      expect(warm.content.showPreview, isTrue);
+      // 无封面时封面区放暖色日期卡片当封面（奶油底 + 陶土橘字），
+      // 通栏同宽，有封面和无封面的卡片外框宽度一致。
+      expect(
+        warm.content.coverFallback,
+        DiaryCardCoverFallback.dateBlock,
+      );
+      expect(warm.typography.titleScale, 0.92);
+      expect(warm.typography.previewScale, 1.0);
+      expect(warm.list.coverPosition, DiaryCardCoverPosition.top);
+      expect(DiaryCardPresets.styleOf(DiaryCardPresetId.classic),
+          DiaryCardStyle.defaults);
+    });
   });
 }

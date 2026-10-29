@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
+import 'package:node_diary/ui/diaries/providers/diary_comment_providers.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/diary_preview_style/diary_preview_presets.dart';
@@ -115,6 +116,10 @@ void main() {
               ProviderScope(
                 overrides: [
                   appDatabaseProvider.overrideWithValue(database),
+                  // 预览页留言区：不打开真实数据库。
+                  diaryCommentsProvider.overrideWith(
+                    (ref, diaryId) => Stream.value(const <DiaryCommentRow>[]),
+                  ),
                   settingsServiceProvider.overrideWith((ref) async => settings),
                 ],
                 child: MediaQuery(

@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/ui/explore/controllers/explore_media_gallery_controller.dart';
+import 'package:node_diary/ui/explore/models/explore_view_data.dart';
 
 import '../explore_test_fixtures.dart';
 
@@ -53,6 +54,39 @@ void main() {
     expect(controller.hasError, isFalse);
     await controller.loadMore();
     expect(database.offsets, [0]);
+  });
+
+  test('loads audio and video with kinds, names and durations', () async {
+    final diary = createExploreTestDiary(
+      cover: '/cover.jpg',
+      content: jsonEncode([
+        {
+          'insert': {'video': '/clip.mp4'},
+        },
+        {
+          'insert': {
+            'audio': jsonEncode({'path': '/rec.m4a', 'durationMs': 30000}),
+          },
+        },
+      ]),
+    );
+    database.readPage = (_, _) async => [diary];
+
+    await controller.loadMore();
+
+    expect(controller.items.map((item) => item.source), [
+      '/cover.jpg',
+      '/clip.mp4',
+      '/rec.m4a',
+    ]);
+    expect(controller.items.map((item) => item.kind), [
+      GalleryMediaKind.image,
+      GalleryMediaKind.video,
+      GalleryMediaKind.audio,
+    ]);
+    expect(controller.items[1].displayName, 'clip.mp4');
+    expect(controller.items[2].duration, const Duration(seconds: 30));
+    expect(controller.hasMore, isFalse);
   });
 
   test('deduplicates across pages while retaining later images', () async {

@@ -10,7 +10,7 @@ String formatDiaryTypographyValue(double value) {
   return value.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
 }
 
-/// 字号 / 行距 / 字间距 / 段间距四个滑块，设置页与预览页快捷面板共用。
+/// 字号 / 行距 / 字间距 / 段间距 / 首行缩进五个滑块，设置页与预览页快捷面板共用。
 ///
 /// 拖动期间只更新本地草稿（经 [onPreview] 交给需要即时预览的页面），松手时
 /// 经 [onCommit] 提交；± 按钮每点一次直接提交一步，便于精确微调。提交完成
@@ -108,6 +108,15 @@ class _DiaryTypographyMetricsEditorState
             step: DiaryTypography.paragraphSpacingStep,
             onChanged: (v) => _preview(current.copyWith(paragraphSpacing: v)),
             onCommit: (v) => _commit(current.copyWith(paragraphSpacing: v)),
+          ),
+          _MetricRow(
+            label: l10n.diaryTypographyFirstLineIndent,
+            value: current.firstLineIndent,
+            min: DiaryTypography.minFirstLineIndent,
+            max: DiaryTypography.maxFirstLineIndent,
+            step: DiaryTypography.firstLineIndentStep,
+            onChanged: (v) => _preview(current.copyWith(firstLineIndent: v)),
+            onCommit: (v) => _commit(current.copyWith(firstLineIndent: v)),
           ),
         ],
       ),

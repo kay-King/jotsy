@@ -43,6 +43,10 @@ class DiaryCardColorTile extends StatelessWidget {
         DiaryCardColorSource.primary => scheme.primary,
         DiaryCardColorSource.secondary => scheme.secondary,
         DiaryCardColorSource.tertiary => scheme.tertiary,
+        DiaryCardColorSource.warm => DiaryCardColors.warmAccentFor(
+          scheme.brightness,
+          role,
+        ),
         _ => null,
       };
 

@@ -10,6 +10,17 @@ enum DiaryCardColorRole { surface, accent, text }
 /// 用户可以为卡片底色、文字等指定任意颜色（含只设了浅色值的情况），这里
 /// 负责把“用户想要的颜色”落到当前明暗主题下仍然可读的具体颜色上。
 abstract final class DiaryCardColors {
+  /// 暖阳预设的陶土橘点缀色（浅色主题下的取值，原版 Vivido 的品牌金
+  /// `#c47030`）：卡片奶油底色的 tint、大日期数字等暖色位共用。深色
+  /// 主题下经 [deriveDark] 按用途推导。
+  static const Color warmAccent = Color(0xFFC47030);
+
+  /// [warmAccent] 落到当前明暗主题下的取值；深色按 [role] 推导明度，
+  /// 保证在深色卡片上仍然可读。
+  static Color warmAccentFor(Brightness brightness, DiaryCardColorRole role) =>
+      brightness == Brightness.light
+          ? warmAccent
+          : deriveDark(warmAccent, role);
   /// WCAG 2.x 对比度（1~21）。只看不透明分量：半透明颜色需由调用方先叠到
   /// 背景上（`Color.alphaBlend`）再比较。
   static double contrastRatio(Color a, Color b) {

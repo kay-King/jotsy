@@ -15,6 +15,7 @@ import '../../providers/diary_typography_provider.dart';
 import '../../viewmodels/diary_preview_resolved_style.dart';
 import '../../viewmodels/diary_preview_view_data.dart';
 import 'diary_preview_body.dart';
+import 'diary_preview_comments.dart';
 import 'diary_preview_header.dart';
 import 'diary_preview_meta.dart';
 import 'diary_preview_neighbors.dart';
@@ -75,6 +76,7 @@ class DiaryPreviewContent extends ConsumerWidget {
     this.paging,
     this.notebooks = const <NotebookView>[],
     this.onOpenNotebook,
+    this.showComments = true,
   });
 
   final DiaryWithTags detail;
@@ -108,6 +110,10 @@ class DiaryPreviewContent extends ConsumerWidget {
 
   /// 点按日记本胶囊：回到首页打开那本。
   final ValueChanged<NotebookView>? onOpenNotebook;
+
+  /// 是否在正文下方挂留言区：正式预览页为 true；设置页的样式预览用示例
+  /// 日记（不是真实日记），关闭，避免对着示例 id 读写留言表。
+  final bool showComments;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -256,6 +262,10 @@ class DiaryPreviewContent extends ConsumerWidget {
                     paging: neighbors,
                     textColor: resolved.bodyColor,
                   ),
+                ],
+                if (showComments) ...<Widget>[
+                  const SizedBox(height: 24),
+                  DiaryPreviewCommentsSection(diaryId: diary.diaryId),
                 ],
               ],
             ],

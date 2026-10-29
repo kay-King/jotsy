@@ -74,6 +74,7 @@ class SettingsService {
     required String? diaryPreviewStyleRaw,
     required String? diaryCodeBlockStyleRaw,
     required String? homeBarStyleRaw,
+    required String? desktopLayoutRaw,
     required String? diaryTemplatePrefsRaw,
     required String? diarySavedColorsRaw,
     required String? appFeaturesRaw,
@@ -123,6 +124,7 @@ class SettingsService {
          diaryCodeBlockStyleRaw,
        ),
        homeBarStyleRawNotifier = ValueNotifier<String?>(homeBarStyleRaw),
+       desktopLayoutRawNotifier = ValueNotifier<String?>(desktopLayoutRaw),
        diaryTemplatePrefsRawNotifier = ValueNotifier<String?>(
          diaryTemplatePrefsRaw,
        ),
@@ -180,6 +182,7 @@ class SettingsService {
   /// 底栏与各 Tab 顶栏实色 / 玻璃材质等）；解析与默认值由首页模块
   /// （`HomeBarSettings`）负责，服务层只保存原文。
   final ValueNotifier<String?> homeBarStyleRawNotifier;
+  final ValueNotifier<String?> desktopLayoutRawNotifier;
 
   /// 日记模板偏好（单个 JSON 字符串：建议条开关、自动套用的模板、隐藏的
   /// 内置模板、最近使用）；解析与默认值由模板模块负责，服务层只保存原文。
@@ -246,6 +249,7 @@ class SettingsService {
   static const _keyDiaryPreviewStyle = 'app.settings.diary_preview_style';
   static const _keyDiaryCodeBlockStyle = 'app.settings.diary_code_block_style';
   static const _keyHomeBarStyle = 'app.settings.home_bar_style';
+  static const _keyDesktopLayout = 'app.settings.desktop_layout';
   static const _keyDiaryTemplatePrefs = 'app.settings.diary_template_prefs';
   // 键名沿用早先“最近颜色”的叫法，已有记录原样成为我的颜色。
   static const _keyDiarySavedColors = 'app.settings.diary_recent_colors';
@@ -316,6 +320,7 @@ class SettingsService {
     final storedDiaryPreviewStyle = prefs.get(_keyDiaryPreviewStyle);
     final storedDiaryCodeBlockStyle = prefs.get(_keyDiaryCodeBlockStyle);
     final storedHomeBarStyle = prefs.get(_keyHomeBarStyle);
+    final storedDesktopLayout = prefs.get(_keyDesktopLayout);
     final storedDiaryTemplatePrefs = prefs.get(_keyDiaryTemplatePrefs);
     final storedDiarySavedColors = prefs.get(_keyDiarySavedColors);
     final storedAppFeatures = prefs.get(_keyAppFeatures);
@@ -353,6 +358,9 @@ class SettingsService {
           ? storedDiaryCodeBlockStyle
           : null,
       homeBarStyleRaw: storedHomeBarStyle is String ? storedHomeBarStyle : null,
+      desktopLayoutRaw: storedDesktopLayout is String
+          ? storedDesktopLayout
+          : null,
       diaryTemplatePrefsRaw: storedDiaryTemplatePrefs is String
           ? storedDiaryTemplatePrefs
           : null,
@@ -429,6 +437,7 @@ class SettingsService {
   String? get diaryPreviewStyleRaw => diaryPreviewStyleRawNotifier.value;
   String? get diaryCodeBlockStyleRaw => diaryCodeBlockStyleRawNotifier.value;
   String? get homeBarStyleRaw => homeBarStyleRawNotifier.value;
+  String? get desktopLayoutRaw => desktopLayoutRawNotifier.value;
   String? get diaryTemplatePrefsRaw => diaryTemplatePrefsRawNotifier.value;
 
   String? get diarySavedColorsRaw => diarySavedColorsRawNotifier.value;
@@ -676,6 +685,19 @@ class SettingsService {
     }
     homeBarStyleRawNotifier.value = normalized;
     await _writePreference(_prefs.setString(_keyHomeBarStyle, normalized));
+  }
+
+  /// 保存首页布局设置；空值移除该键，回到默认的四部分顺序（题头 / 写点什么 /
+  /// 快捷入口 / 最近记录，全部显示）。
+  Future<void> setDesktopLayoutRaw(String? value) async {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      desktopLayoutRawNotifier.value = null;
+      await _writePreference(_prefs.remove(_keyDesktopLayout));
+      return;
+    }
+    desktopLayoutRawNotifier.value = normalized;
+    await _writePreference(_prefs.setString(_keyDesktopLayout, normalized));
   }
 
   /// 保存日记模板偏好；空值移除该键，回到默认（显示建议条、不自动套用）。

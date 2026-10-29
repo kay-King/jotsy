@@ -33,6 +33,8 @@ part 'app_database_template_schema.dart';
 part 'app_database_template_ops.dart';
 part 'app_database_notebook_schema.dart';
 part 'app_database_notebook_ops.dart';
+part 'app_database_diary_comment_schema.dart';
+part 'app_database_diary_comment_ops.dart';
 part 'app_database_notebook_entry_ops.dart';
 part 'app_database_notebook_stats_ops.dart';
 
@@ -46,6 +48,7 @@ part 'app_database_notebook_stats_ops.dart';
     DiaryTemplates,
     Notebooks,
     DiaryNotebooks,
+    DiaryComments,
   ],
 )
 class AppDatabase extends _$AppDatabase
@@ -61,6 +64,7 @@ class AppDatabase extends _$AppDatabase
         _AppDatabaseTemplateOps,
         _AppDatabaseNotebookOps,
         _AppDatabaseNotebookStatsOps,
+        _AppDatabaseDiaryCommentOps,
         _AppDatabaseMigrations {
   AppDatabase() : super(_openConnection());
 
@@ -75,7 +79,7 @@ class AppDatabase extends _$AppDatabase
   static String newBusinessId() => _newBusinessUuid();
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -100,6 +104,15 @@ class AppDatabase extends _$AppDatabase
       // 分支之前。
       if (from < 13) {
         await _migrateAddNotebooks(m);
+      }
+      // v14 日记留言表只存日记业务 id，不改日记表，同样排在 v1 分支之前。
+      if (from < 14) {
+        await _migrateAddDiaryComments(m);
+      }
+      // v15 日记本表加 parent_id 列（可空，存父本业务 id），同样排在 v1
+      // 分支之前：只加列，不碰已有数据。
+      if (from < 15) {
+        await _migrateAddNotebookParent(m);
       }
       if (from < 2) {
         await _migrateDiariesAddBusinessId();

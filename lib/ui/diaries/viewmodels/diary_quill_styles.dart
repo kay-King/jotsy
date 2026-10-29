@@ -10,6 +10,7 @@ import '../providers/diary_typography_provider.dart';
 import '../widgets/diary_code_block/diary_code_block_chrome.dart';
 import 'diary_code_block_look.dart';
 import 'diary_code_span_builder.dart';
+import 'diary_first_line_indent.dart';
 import 'diary_text_appearance.dart';
 
 /// 正文位置解析出的 Quill 外观：样式表、代码块外观与该控制器的语言识别
@@ -32,7 +33,14 @@ class DiaryQuillLook {
   /// 经 `QuillEditorConfig.copyWith`：flutter_quill 11.6.0 的 copyWith 漏掉了
   /// `onSingleLongTap*` 与 `quillMagnifierBuilder`，页面若要用到这几个回调，
   /// 需要先在这里补上（断言兜底，防止被静默丢掉）。
-  quill.QuillEditorConfig configure(quill.QuillEditorConfig config) {
+  ///
+  /// [firstLineIndentWidth] 首行缩进宽度（逻辑像素）：为 0 时不包 span
+  /// 构建器。预览页与设置预览卡传只读渲染的宽度；编辑页传入后打字时实时
+  /// 显示缩进（只改渲染层 span，不动存档 Delta，光标行为与只读一致）。
+  quill.QuillEditorConfig configure(
+    quill.QuillEditorConfig config, {
+    double firstLineIndentWidth = 0,
+  }) {
     assert(
       config.onSingleLongTapStart == null &&
           config.onSingleLongTapMoveUpdate == null &&
@@ -40,10 +48,13 @@ class DiaryQuillLook {
           config.quillMagnifierBuilder == null,
       'QuillEditorConfig.copyWith drops these callbacks; pass them here.',
     );
+    final base = buildDiaryCodeSpanBuilder(code, tracker);
     return config.copyWith(
       customStyles: styles,
       showCodeBlockLineNumbers: code.lineNumbers,
-      textSpanBuilder: buildDiaryCodeSpanBuilder(code, tracker),
+      textSpanBuilder: firstLineIndentWidth > 0
+          ? buildFirstLineIndentSpanBuilder(base, firstLineIndentWidth)
+          : base,
       customStyleBuilder: buildDiaryCodeCustomStyleBuilder(code),
       customLeadingBlockBuilder: buildDiaryCodeLeadingBuilder(code),
     );

@@ -4,6 +4,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/services/app_service.dart';
 import '../controllers/notebooks_controller.dart';
 import '../models/notebook_scope_resolver.dart';
+import '../models/notebook_tree.dart';
 import '../viewmodels/notebook_view.dart';
 
 /// 书架上的全部日记本（置顶在前，再按手动顺序），实时跟随数据库。
@@ -16,10 +17,49 @@ final notebooksProvider = StreamProvider<List<NotebookView>>((Ref ref) {
   );
 });
 
+/// 数据库层的直接篇数（不含后代），内部用。
+final _directNotebookEntryCountsProvider =
+    StreamProvider<Map<String, int>>((Ref ref) {
+  return ref.watch(appDatabaseProvider).watchManualNotebookEntryCounts();
+});
+
 /// 普通日记本 id → 篇数（不算回收站与归档）。没有日记的本子不在表里，读取方
 /// 按 0 处理；智能日记本的篇数由规则现算，见 [smartNotebookCountProvider]。
+///
+/// 嵌套：父本的篇数含子本（自己 + 后代的直接篇数之和），与打开父本时看到的
+/// 列表（`DiaryNotebookScope` 含后代）一致。直接篇数或日记本树变化时重算。
 final notebookEntryCountsProvider = StreamProvider<Map<String, int>>((Ref ref) {
-  return ref.watch(appDatabaseProvider).watchManualNotebookEntryCounts();
+  final directAsync = ref.watch(_directNotebookEntryCountsProvider);
+  final notebooksAsync = ref.watch(notebooksProvider);
+  final direct = directAsync.value;
+  final notebooks = notebooksAsync.value;
+  if (direct == null || notebooks == null) {
+    return const Stream<Map<String, int>>.empty();
+  }
+  if (notebooks.isEmpty) {
+    return Stream<Map<String, int>>.value(direct);
+  }
+  final tree = NotebookTree(
+    <NotebookNode>[
+      for (final n in notebooks)
+        if (n.isManual) NotebookNode(n.id, n.row.parentId),
+    ],
+  );
+  final inclusive = <String, int>{};
+  for (final n in notebooks) {
+    if (!n.isManual) continue;
+    var total = 0;
+    for (final id in tree.selfAndDescendants(n.id)) {
+      total += direct[id] ?? 0;
+    }
+    inclusive[n.id] = total;
+  }
+  return Stream<Map<String, int>>.value(inclusive);
+});
+
+/// 未收录的日记篇数（书架“未收录”行）。
+final unfiledDiaryCountProvider = StreamProvider<int>((Ref ref) {
+  return ref.watch(appDatabaseProvider).watchUnfiledDiaryCount();
 });
 
 /// 智能日记本按规则现算的篇数（未删除、未归档、非私密），口径与首页在这本里的
