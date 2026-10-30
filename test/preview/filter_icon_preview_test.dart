@@ -54,6 +54,7 @@ Widget _host({required bool hasActiveFilter}) => MaterialApp(
       onOpenSearchPage: () {},
       hasActiveFilter: hasActiveFilter,
       onOpenFilter: () {},
+      onOpenDrawer: () {},
     ),
   ),
 );
