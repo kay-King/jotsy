@@ -42,39 +42,43 @@ class DiaryAudioAttachment {
   });
 
   static DiaryAudioAttachment? tryDecode(Object? data) {
-    if (data is! String) return null;
-    try {
-      final value = jsonDecode(data);
-      if (value is! Map || value['path'] is! String) return null;
-      final path = (value['path'] as String).trim();
-      if (path.isEmpty) return null;
-      final milliseconds = value['durationMs'];
-      final nameRaw = value['name'];
-      final name = nameRaw is String && nameRaw.trim().isNotEmpty
-          ? nameRaw.trim()
-          : null;
-      final waveformRaw = value['waveform'];
-      final waveform = <double>[];
-      if (waveformRaw is List) {
-        for (final item in waveformRaw) {
-          if (item is num && item.isFinite) {
-            waveform.add(item.toDouble().clamp(0.0, 1.0));
-          }
+    Object? value = data;
+    if (value is String) {
+      try {
+        value = jsonDecode(value);
+      } on FormatException {
+        return null;
+      }
+    }
+    if (value is! Map) return null;
+    final pathValue = value['path'];
+    if (pathValue is! String) return null;
+    final path = pathValue.trim();
+    if (path.isEmpty) return null;
+    final milliseconds = value['durationMs'];
+    final nameRaw = value['name'];
+    final name = nameRaw is String && nameRaw.trim().isNotEmpty
+        ? nameRaw.trim()
+        : null;
+    final waveformRaw = value['waveform'];
+    final waveform = <double>[];
+    if (waveformRaw is List) {
+      for (final item in waveformRaw) {
+        if (item is num && item.isFinite) {
+          waveform.add(item.toDouble().clamp(0.0, 1.0));
         }
       }
-      return DiaryAudioAttachment(
-        path: path,
-        duration: Duration(
-          milliseconds: milliseconds is num && milliseconds.isFinite
-              ? milliseconds.toInt().clamp(0, 86400000)
-              : 0,
-        ),
-        name: name,
-        waveform: waveform,
-      );
-    } on FormatException {
-      return null;
     }
+    return DiaryAudioAttachment(
+      path: path,
+      duration: Duration(
+        milliseconds: milliseconds is num && milliseconds.isFinite
+            ? milliseconds.toInt().clamp(0, 86400000)
+            : 0,
+      ),
+      name: name,
+      waveform: waveform,
+    );
   }
 }
 

@@ -1,3 +1,4 @@
+import 'audio_embed_codec.dart';
 import 'file_embed_codec.dart';
 
 /// 将旧版 AppFlowy 节点映射为 Quill Delta，保留图片、视频和附件引用。
@@ -45,16 +46,74 @@ void _appendAppFlowyNode(dynamic rawNode, List<Map<String, Object>> ops) {
 
   final type = rawNode['type'] as String?;
   if (type == 'video' || diaryFileEmbedTypes.contains(type)) {
-    final file = DiaryFileAttachment.tryDecode(rawNode['attributes']);
+    final attributes = rawNode['attributes'];
+    final file = DiaryFileAttachment.tryDecode(attributes);
     if (file != null) {
-      ops.add(<String, Object>{
-        'insert': <String, Object>{
-          type == 'video' ? 'video' : diaryAttachmentEmbedType: type == 'video'
-              ? file.path
-              : file.encode(),
-        },
-      });
+      // 保留 width 等显示 metadata 与未知字段：tryDecode 只取 path/name/size，
+      // 其余字段放到 op attributes（video）或直接透传（attachment），
+      // 块转换时会并入块 data，rewrite 时原样保留。
+      final extra = <String, Object>{};
+      if (attributes is Map) {
+        for (final entry in attributes.entries) {
+          final key = entry.key;
+          if (key is String &&
+              !const {
+                'url',
+                'path',
+                'name',
+                'fileName',
+                'size',
+                'sizeBytes',
+              }.contains(key)) {
+            extra[key] = entry.value as Object;
+          }
+        }
+      }
+      if (type == 'video') {
+        ops.add(<String, Object>{
+          'insert': <String, Object>{'video': file.path},
+          if (extra.isNotEmpty) 'attributes': extra,
+        });
+      } else {
+        // 附件：透传全部原始字段（不规范化键名，测试期望保留 url/size 原样），
+        // 避免 file.encode() 丢掉 custom 等未知 metadata。
+        final data = <String, Object>{};
+        if (attributes is Map) {
+          for (final entry in attributes.entries) {
+            final key = entry.key;
+            if (key is String) {
+              data[key] = entry.value as Object;
+            }
+          }
+        }
+        // 确保 path/url 指向解码出的规范路径。
+        if (!data.containsKey('path') && !data.containsKey('url')) {
+          data['path'] = file.path;
+        }
+        ops.add(<String, Object>{
+          'insert': <String, Object>{diaryAttachmentEmbedType: data},
+        });
+      }
       ops.add(<String, Object>{'insert': '\n'});
+    }
+    return;
+  }
+  if (type == diaryAudioEmbedType) {
+    final attributes = rawNode['attributes'];
+    if (attributes is Map) {
+      final data = <String, Object>{
+        for (final entry in attributes.entries)
+          if (entry.key is String) entry.key as String: entry.value as Object,
+      };
+      // 确保 path 存在且非空，否则丢弃。
+      final path = data['path'];
+      if (path is String && path.trim().isNotEmpty) {
+        data['path'] = path.trim();
+        ops.add(<String, Object>{
+          'insert': <String, Object>{diaryAudioEmbedType: data},
+        });
+        ops.add(<String, Object>{'insert': '\n'});
+      }
     }
     return;
   }
