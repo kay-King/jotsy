@@ -16,6 +16,7 @@ import '../../../core/services/settings_service.dart';
 import '../../notebooks/controllers/notebook_quick_create_flows.dart';
 import '../../settings/providers/app_features_provider.dart';
 import '../providers/diary_card_style_provider.dart';
+import '../providers/diary_comment_providers.dart';
 import '../providers/diary_filters.dart';
 import '../sections/diaries_list_section.dart';
 import '../sections/diary_head_section.dart';
@@ -131,6 +132,11 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
   String _pagingSignature = '';
   List<DiaryWithTags> _cachedSearchItems = const <DiaryWithTags>[];
 
+  /// 搜留言开关：打开后在关键词结果上方单独展示“留言匹配”分组。
+  /// 只在全局范围（全部日记）可用：按日记本范围搜索时不显示开关，
+  /// 避免把别的日记本里的留言命中漏进来。
+  bool _searchComments = false;
+
   /// [_cachedSearchItems] 对应的查询：新查询加载中时列表仍显示上一份结果，
   /// 预览页接续加载必须用结果自己的查询条件。
   DiaryPageQuery? _cachedSearchQuery;
@@ -209,6 +215,26 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
     }
     final displayedSearchItems = latestPage?.items ?? _cachedSearchItems;
     final hasMoreDiaries = _hasMoreDiaries;
+    // 搜留言：开关打开、关键词非空且为全局范围时，查留言命中的日记；
+    // 已在关键词结果里的去重，避免同一篇在两个分组重复出现。
+    final commentSearchActive =
+        _searchComments &&
+        _effectiveSearchKeyword.isNotEmpty &&
+        _scope == DiaryListScope.all;
+    final commentMatchAsync = commentSearchActive
+        ? ref.watch(
+            commentMatchedDiariesProvider(_effectiveSearchKeyword),
+          )
+        : null;
+    final commentMatches =
+        commentMatchAsync?.asData?.value ?? const <DiaryWithTags>[];
+    final displayedIds = <String>{
+      for (final item in displayedSearchItems) item.diary.diaryId,
+    };
+    final commentOnlyMatches = <DiaryWithTags>[
+      for (final item in commentMatches)
+        if (!displayedIds.contains(item.diary.diaryId)) item,
+    ];
     final tagListAsync = ref.watch(tagListProvider);
     final selectedTags = tagListAsync.maybeWhen(
       data: (tags) => tags
@@ -243,6 +269,45 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
                     SliverToBoxAdapter(
                       child: SizedBox(height: headerOverlayHeight + 6),
                     ),
+                    // 搜留言分组：关键词结果上方单独展示留言命中的日记
+                    // （已在关键词结果里的去重），带“留言匹配”标识头。
+                    if (commentSearchActive && commentOnlyMatches.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: _CommentMatchSectionHeader(
+                          count: commentOnlyMatches.length,
+                        ),
+                      ),
+                    if (commentSearchActive && commentOnlyMatches.isNotEmpty)
+                      DiariesListSection(
+                        diaries: commentOnlyMatches,
+                        watchCommentCounts: true,
+                        layoutMode: DiaryLayoutMode.list,
+                        selectedDiaryIds: const <String>{},
+                        isSelectionMode: false,
+                        maxVisibleTags: diaryCardTagLimit,
+                        cardStyle: ref.watch(diaryCardStyleProvider),
+                        moodOptions: ref.watch(
+                          diaryCardMoodOptionsProvider,
+                        ),
+                        onCreate: () {},
+                        onOpenEditor: (diary, coverHero) =>
+                            _openPreviewFromCombined(
+                              diary,
+                              coverHero,
+                              commentOnlyMatches,
+                            ),
+                        onToggleSelection: (_, __) {},
+                        isSearchResultEmpty: true,
+                      ),
+                    if (commentSearchActive &&
+                        commentOnlyMatches.isEmpty &&
+                        (commentMatchAsync?.isLoading ?? false))
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: DelayedLoadingIndicator(size: 18),
+                        ),
+                      ),
                     if (!query.hasAnyCondition)
                       const SliverFillRemaining(
                         hasScrollBody: false,
@@ -373,6 +438,13 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
                     height: 1,
                     margin: const EdgeInsets.only(top: AppSpacing.xs),
                   ),
+                  if (_effectiveSearchKeyword.isNotEmpty &&
+                      _scope == DiaryListScope.all)
+                    _CommentSearchToggle(
+                      selected: _searchComments,
+                      onChanged: (value) =>
+                          setState(() => _searchComments = value),
+                    ),
                 ],
               ),
             ),
@@ -399,6 +471,10 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
       }
       setState(() {
         _effectiveSearchKeyword = normalized;
+        // 关键词清空时搜留言开关一并关闭，避免空关键词残留开关态。
+        if (normalized.isEmpty) {
+          _searchComments = false;
+        }
       });
     });
   }
@@ -409,6 +485,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
     setState(() {
       _searchInput = '';
       _effectiveSearchKeyword = '';
+      _searchComments = false;
     });
     _searchFocusNode.requestFocus();
   }
@@ -487,8 +564,10 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
   /// 接上。
   void _openPreview(DiaryWithTags diary, ImageViewerHero? coverHero) {
     final query = _cachedSearchQuery;
-    final sequence = DiaryPreviewSequence.fromItems(
-      _cachedSearchItems,
+    _pushPreview(
+      diary: diary,
+      coverHero: coverHero,
+      items: _cachedSearchItems,
       query: _hasMoreDiaries && query != null
           ? DiaryPreviewListQuery(
               keyword: query.keyword,
@@ -498,6 +577,33 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
             )
           : null,
     );
+  }
+
+  /// 留言分组点开预览：左右翻页在“留言匹配 + 当前关键词结果”合并列表里
+  /// 进行，都是已加载项，不再按条件接续查询。
+  void _openPreviewFromCombined(
+    DiaryWithTags diary,
+    ImageViewerHero? coverHero,
+    List<DiaryWithTags> commentItems,
+  ) {
+    final commentIds = <String>{
+      for (final item in commentItems) item.diary.diaryId,
+    };
+    final items = <DiaryWithTags>[
+      ...commentItems,
+      for (final item in _cachedSearchItems)
+        if (!commentIds.contains(item.diary.diaryId)) item,
+    ];
+    _pushPreview(diary: diary, coverHero: coverHero, items: items);
+  }
+
+  void _pushPreview({
+    required DiaryWithTags diary,
+    required ImageViewerHero? coverHero,
+    required List<DiaryWithTags> items,
+    DiaryPreviewListQuery? query,
+  }) {
+    final sequence = DiaryPreviewSequence.fromItems(items, query: query);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (BuildContext context) => DiaryPreviewPage(
@@ -551,6 +657,81 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
     _pagingCooldownTimer = Timer(const Duration(milliseconds: 140), () {
       _isPagingCooldown = false;
     });
+  }
+}
+
+/// 搜留言开关：搜索框下方的一行小开关，打开后在关键词结果上方单独展示
+/// “留言匹配”分组。只在有关键词且为全局范围时出现。
+class _CommentSearchToggle extends StatelessWidget {
+  const _CommentSearchToggle({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final bool selected;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.l, 6, AppSpacing.l, 2),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FilterChip(
+          label: Text(context.l10n.autoT0212),
+          selected: selected,
+          onSelected: onChanged,
+          showCheckmark: false,
+          visualDensity: VisualDensity.compact,
+          labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: selected
+                ? colorScheme.onPrimaryContainer
+                : colorScheme.onSurfaceVariant,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+          backgroundColor: colorScheme.surfaceContainerLow,
+          selectedColor: colorScheme.primaryContainer,
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.nav),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 留言匹配分组头：小胶囊标识，说明下方是留言内容命中的日记。
+class _CommentMatchSectionHeader extends StatelessWidget {
+  const _CommentMatchSectionHeader({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.l, 10, AppSpacing.l, 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(AppRadii.nav),
+          ),
+          child: Text(
+            '${context.l10n.autoT0213} · $count',
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -1454,6 +1454,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Take it easy, this day\'s highlights haven\'t happened yet.';
 
   @override
+  String get autoT0212 => 'Search comments';
+
+  @override
+  String get autoT0213 => 'Comment matches';
+
+  @override
   String get diaryCommentsTitle => 'Comments';
 
   @override

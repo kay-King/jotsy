@@ -1984,6 +1984,14 @@
   "@autoT0211": {
     "description": "Auto-generated metadata for autoT0211."
   },
+  "autoT0212": "Search comments",
+  "@autoT0212": {
+    "description": "Search page: toggle to also search within diary comments."
+  },
+  "autoT0213": "Comment matches",
+  "@autoT0213": {
+    "description": "Search page: section title for diaries matched via comments."
+  },
   "diaryCommentsTitle": "Comments",
   "@diaryCommentsTitle": {
     "description": "Diary preview comments section title."

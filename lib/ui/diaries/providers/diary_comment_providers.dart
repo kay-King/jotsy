@@ -37,3 +37,28 @@ final searchDiaryIdsByCommentProvider =
       final database = ref.watch(appDatabaseProvider);
       return database.searchDiaryCommentDiaryIds(trimmed);
     });
+
+/// 搜留言开关用的留言匹配日记列表：按关键词查留言，逐条取日记 + 标签，
+/// 排除软删除，按更新时间倒序。调用方自行与关键词搜索结果去重（避免
+/// 同一篇在两个分组重复出现）。
+final commentMatchedDiariesProvider =
+    FutureProvider.family.autoDispose<List<DiaryWithTags>, String>((
+      Ref ref,
+      String keyword,
+    ) async {
+      final trimmed = keyword.trim();
+      if (trimmed.isEmpty) {
+        return const <DiaryWithTags>[];
+      }
+      final database = ref.watch(appDatabaseProvider);
+      final ids = await database.searchDiaryCommentDiaryIds(trimmed);
+      final diaries = <DiaryWithTags>[];
+      for (final id in ids) {
+        final diary = await database.getDiaryWithTagsByDiaryId(id);
+        if (diary != null && !diary.diary.isDeleted) {
+          diaries.add(diary);
+        }
+      }
+      diaries.sort((a, b) => b.diary.updatedAt.compareTo(a.diary.updatedAt));
+      return diaries;
+    });

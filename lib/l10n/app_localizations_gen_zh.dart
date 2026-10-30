@@ -1404,6 +1404,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoT0211 => '别着急，属于这一天的精彩还没发生。';
 
   @override
+  String get autoT0212 => '搜留言';
+
+  @override
+  String get autoT0213 => '留言匹配';
+
+  @override
   String get diaryCommentsTitle => '留言';
 
   @override

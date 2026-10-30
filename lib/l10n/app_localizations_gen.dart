@@ -2636,6 +2636,18 @@ abstract class AppLocalizations {
   /// **'Take it easy, this day\'s highlights haven\'t happened yet.'**
   String get autoT0211;
 
+  /// Search page: toggle to also search within diary comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Search comments'**
+  String get autoT0212;
+
+  /// Search page: section title for diaries matched via comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment matches'**
+  String get autoT0213;
+
   /// Diary preview comments section title.
   ///
   /// In en, this message translates to:
