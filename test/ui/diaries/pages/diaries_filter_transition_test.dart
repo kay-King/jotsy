@@ -97,12 +97,7 @@ double _listOpacity(WidgetTester tester) => tester
     .opacity
     .value;
 
-
 void main() {
-
-
-
-
   testWidgets('switching layout fades out before the grid replaces the list', (
     tester,
   ) async {

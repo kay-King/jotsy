@@ -39,7 +39,6 @@ void main() {
   Future<void> turnOff(DiaryDraftsHarness h) =>
       h.settings.setAppFeaturesRaw(notebooksOff);
 
-
   Future<void> openShelfAndPick(DiaryDraftsHarness h, String name) async {
     await h.tester.tap(find.byType(NotebookSwitcherChip));
     await h.settleAll();
@@ -51,7 +50,6 @@ void main() {
     );
     await h.settleAll();
   }
-
 
   group('turning the feature off inside a notebook', () {
     // 首页被推上来的页面盖住后不在台上（find 默认跳过），从始终挂着的
