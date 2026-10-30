@@ -42,56 +42,48 @@ class DiaryAudioAttachment {
   });
 
   static DiaryAudioAttachment? tryDecode(Object? data) {
-    if (data is! String) return null;
-    try {
-      final value = jsonDecode(data);
-      if (value is! Map || value['path'] is! String) return null;
-      final path = (value['path'] as String).trim();
-      if (path.isEmpty) return null;
-      final milliseconds = value['durationMs'];
-      final nameRaw = value['name'];
-      final name = nameRaw is String && nameRaw.trim().isNotEmpty
-          ? nameRaw.trim()
-          : null;
-      final waveformRaw = value['waveform'];
-      final waveform = <double>[];
-      if (waveformRaw is List) {
-        for (final item in waveformRaw) {
-          if (item is num && item.isFinite) {
-            waveform.add(item.toDouble().clamp(0.0, 1.0));
-          }
+    Object? value = data;
+    if (value is String) {
+      try {
+        value = jsonDecode(value);
+      } on FormatException {
+        return null;
+      }
+    }
+    if (value is! Map) return null;
+    final pathValue = value['path'];
+    if (pathValue is! String) return null;
+    final path = pathValue.trim();
+    if (path.isEmpty) return null;
+    final milliseconds = value['durationMs'];
+    final nameRaw = value['name'];
+    final name = nameRaw is String && nameRaw.trim().isNotEmpty
+        ? nameRaw.trim()
+        : null;
+    final waveformRaw = value['waveform'];
+    final waveform = <double>[];
+    if (waveformRaw is List) {
+      for (final item in waveformRaw) {
+        if (item is num && item.isFinite) {
+          waveform.add(item.toDouble().clamp(0.0, 1.0));
         }
       }
-      return DiaryAudioAttachment(
-        path: path,
-        duration: Duration(
-          milliseconds: milliseconds is num && milliseconds.isFinite
-              ? milliseconds.toInt().clamp(0, 86400000)
-              : 0,
-        ),
-        name: name,
-        waveform: waveform,
-      );
-    } on FormatException {
-      return null;
     }
+    return DiaryAudioAttachment(
+      path: path,
+      duration: Duration(
+        milliseconds: milliseconds is num && milliseconds.isFinite
+            ? milliseconds.toInt().clamp(0, 86400000)
+            : 0,
+      ),
+      name: name,
+      waveform: waveform,
+    );
   }
 }
 
-Set<String> extractDiaryAudioPaths(String content) {
-  try {
-    final delta = jsonDecode(content);
-    if (delta is! List) return <String>{};
-    return <String>{
-      for (final op in delta)
-        if (op is Map && op['insert'] is Map)
-          if (DiaryAudioAttachment.tryDecode(
-                (op['insert'] as Map)[diaryAudioEmbedType],
-              )
-              case final audio?)
-            audio.path,
-    };
-  } on FormatException {
-    return <String>{};
-  }
-}
+/// 音频嵌入的编解码（Quill Delta 时代）。
+///
+/// 注意：[extractDiaryAudioPaths] 已迁移到
+/// `diary_blocks/diary_blocks_media.dart`（块文档版本，兼容三代存储格式），
+/// 这里不再保留旧版，避免与新版冲突。

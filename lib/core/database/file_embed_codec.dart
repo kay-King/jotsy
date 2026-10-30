@@ -85,36 +85,6 @@ Object? replaceDiaryFilePath(Object? data, String path) {
 }
 
 /// 提取 Quill 或旧版 AppFlowy 正文中的视频/附件引用，用于托管资源清理。
-Set<String> extractDiaryFilePaths(String content) {
-  final paths = <String>{};
-  void collect(Object? node) {
-    if (node is List) {
-      for (final child in node) {
-        collect(child);
-      }
-    } else if (node is Map) {
-      final insert = node['insert'];
-      if (insert is Map) {
-        for (final type in ['video', ...diaryFileEmbedTypes]) {
-          final file = DiaryFileAttachment.tryDecode(insert[type]);
-          if (file != null) paths.add(file.path);
-        }
-      }
-      if (node['type'] == 'video' ||
-          diaryFileEmbedTypes.contains(node['type'])) {
-        final file = DiaryFileAttachment.tryDecode(node['attributes']);
-        if (file != null) paths.add(file.path);
-      }
-      for (final child in node.values) {
-        collect(child);
-      }
-    }
-  }
-
-  try {
-    collect(jsonDecode(content));
-  } on FormatException {
-    // 历史纯文本正文没有需要清理的文件引用。
-  }
-  return paths;
-}
+/// 文件（视频/附件）路径提取已迁移到
+/// `diary_blocks/diary_blocks_media.dart`（块文档版本，兼容三代存储格式），
+/// 这里不再保留旧版，避免与新版冲突。

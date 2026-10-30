@@ -188,6 +188,16 @@ ADD COLUMN capsule_locked_at INTEGER NULL
     await migrator.createIndex(idxDiaryCommentsDiaryId);
   }
 
+  /// v16 补齐这天的心情表（上游 v14 的内容）。
+  ///
+  /// 版本号与上游错位：本地 v14 是留言表（上游 v16 才有），本地 v15 已有
+  /// parent_id 列（与上游 v15 一致）。这里不按 `from < 14` 判断，直接检查
+  /// 表是否存在——本地 v13/v14/v15 升级上来时 day_moods 都不存在，需要创建；
+  /// 表已存在时什么也不做。
+  Future<void> _migrateAddDayMoods(Migrator migrator) async {
+    await _createTableIfMissing(migrator, dayMoods);
+  }
+
   /// v15 日记本表加 `parent_id` 列（可空 TEXT，存父本业务 id）。
   ///
   /// 列已存在（降级后再升级）时什么也不做：SQLite 的 ALTER TABLE ADD COLUMN
