@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../app/theme/seeded_theme_cache.dart';
 import '../../../../app/theme/expressive_surfaces.dart';
@@ -9,7 +10,6 @@ import '../../../diaries/sections/diaries_list_section.dart';
 import '../../../diaries/sections/diary_head_section.dart';
 import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
-import '../../widgets/style_editor/style_editor_common.dart';
 
 /// 卡片样式的实时预览：顶部工具条（[DiaryCardStylePreviewToolbar]）切换列表/
 /// 瀑布流与预览明暗，下方用真实的 [DiariesListSection] 渲染示例日记，与日记
@@ -136,6 +136,10 @@ class _DiaryCardStylePreviewState extends State<DiaryCardStylePreview> {
 }
 
 /// 预览工具条：列表/瀑布流（同时决定“专属”分组编辑哪种布局）与预览明暗。
+///
+/// Salt 悬浮风：白底、无边框、轻微阴影；选中段 Salt 蓝底白字。分段复用
+/// 共用的 [ExpressiveButtonGroup]（组件本身不动），外层包悬浮样式、选中
+/// 色经 Theme 改写组件读到的色板。
 class DiaryCardStylePreviewToolbar extends StatelessWidget {
   const DiaryCardStylePreviewToolbar({super.key, required this.controller});
 
@@ -143,34 +147,95 @@ class DiaryCardStylePreviewToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Center(child: _modeSegments(context)),
+        ),
+        _brightnessButton(context),
+      ],
+    );
+  }
+
+  /// 列表/瀑布流分段：白底圆角轨道 + 轻微阴影，选中段 Salt 蓝。
+  Widget _modeSegments(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: ExpressiveButtonGroup<DiaryCardMode>(
-              minSegmentWidth: 96,
-              segments: <ButtonSegment<DiaryCardMode>>[
-                // 只放文字：预览顶栏与明暗按钮同行，窄屏大字号下带图标
-                // 的“Waterfall”会折行。
-                ButtonSegment<DiaryCardMode>(
-                  value: DiaryCardMode.list,
-                  label: Text(l10n.autoT0146),
-                ),
-                ButtonSegment<DiaryCardMode>(
-                  value: DiaryCardMode.waterfall,
-                  label: Text(l10n.autoT0147),
-                ),
-              ],
-              selected: <DiaryCardMode>{controller.mode},
-              onSelectionChanged: (Set<DiaryCardMode> selection) =>
-                  controller.mode = selection.single,
-            ),
+    final scheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
           ),
-          const SizedBox(width: 8),
-          StylePreviewBrightnessButton(controller: controller),
         ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: scheme.copyWith(
+            // 轨道白底；选中片 Salt 蓝、选中字白。只影响这一棵子树。
+            surfaceContainerHigh: Colors.white,
+            surfaceContainerLowest: const Color(0xFF0470E6),
+            onSurface: Colors.white,
+          ),
+        ),
+        child: ExpressiveButtonGroup<DiaryCardMode>(
+          minSegmentWidth: 64,
+          segments: <ButtonSegment<DiaryCardMode>>[
+            // 只放文字：预览顶栏与明暗按钮同行，窄屏大字号下带图标
+            // 的“Waterfall”会折行。
+            ButtonSegment<DiaryCardMode>(
+              value: DiaryCardMode.list,
+              label: Text(l10n.autoT0146),
+            ),
+            ButtonSegment<DiaryCardMode>(
+              value: DiaryCardMode.waterfall,
+              label: Text(l10n.autoT0147),
+            ),
+          ],
+          selected: <DiaryCardMode>{controller.mode},
+          onSelectionChanged: (Set<DiaryCardMode> selection) =>
+              controller.mode = selection.single,
+        ),
+      ),
+    );
+  }
+
+  /// 预览明暗切换：白底圆、无边框、轻微阴影，与左上角菜单按钮同式；
+  /// 只换预览的明暗（[controller.previewBrightness]），不改应用主题。
+  Widget _brightnessButton(BuildContext context) {
+    final l10n = context.l10n;
+    final brightness =
+        controller.previewBrightness ?? Theme.of(context).brightness;
+    final isLight = brightness == Brightness.light;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: IconButton(
+          tooltip: isLight
+              ? l10n.styleEditorPreviewDark
+              : l10n.styleEditorPreviewLight,
+          onPressed: () => controller.previewBrightness =
+              isLight ? Brightness.dark : Brightness.light,
+          icon: FaIcon(
+            isLight ? FontAwesomeIcons.moon : FontAwesomeIcons.sun,
+            size: 18,
+          ),
+        ),
       ),
     );
   }

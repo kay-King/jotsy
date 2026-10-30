@@ -141,14 +141,28 @@ class StyleEditorScaffold extends StatelessWidget {
   }
 
   /// 左上角悬浮菜单按钮：返回、标题、重置都收进菜单，点开显示。
+  ///
+  /// Salt 风：白底圆、无边框、轻微阴影；不用 Material.elevation（阴影重会
+  /// 显出深色描边），与底部悬浮分类按钮同式。
   Widget _menuButton(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: scheme.surfaceContainerHigh,
-      shape: const CircleBorder(),
-      elevation: 2,
-      child: ExpressiveMenuButton(
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: ExpressiveMenuButton(
         tooltip: title,
         icon: const Icon(Icons.more_vert),
         placement: ExpressiveMenuPlacement.start,
@@ -175,13 +189,16 @@ class StyleEditorScaffold extends StatelessWidget {
             child: Text(l10n.commonReset),
           ),
         ],
+        ),
       ),
     );
   }
 
   /// 底部悬浮分类按钮条：独立小按钮横排，超宽时可横滑。
+  ///
+  /// Salt 风：白底胶囊、无边框、轻微阴影，深灰字；不用 Material.elevation
+  ///（阴影重会显出深色描边）。水波纹保留。
   Widget _tabButtonBar(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Center(
       child: SingleChildScrollView(
@@ -192,23 +209,35 @@ class StyleEditorScaffold extends StatelessWidget {
           children: <Widget>[
             for (int i = 0; i < tabs.length; i++) ...<Widget>[
               if (i > 0) const SizedBox(width: 8),
-              Material(
-                color: scheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(20),
-                elevation: 2,
-                child: InkWell(
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  onTap: () => _openTabSheet(context, i),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+                  boxShadow: const <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
                     ),
-                    child: Text(
-                      tabs[i],
-                      style: textTheme.labelLarge?.copyWith(
-                        color: scheme.onSurface,
-                        fontWeight: FontWeight.w500,
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => _openTabSheet(context, i),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        tabs[i],
+                        style: textTheme.labelLarge?.copyWith(
+                          color: const Color(0xFF5A534E),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
