@@ -66,9 +66,7 @@ quill.Document decodeDiaryContentToDocument(String rawContent) {
     // 三代格式收敛为块文档，再投影为 Quill Delta。
     final blocks = decodeStoredDiaryBlocks(trimmed);
     final ops = diaryBlocksToQuillOps(blocks);
-    return _ensureRenderableDocument(
-      _documentFromDiaryDelta(ops),
-    );
+    return _ensureRenderableDocument(_documentFromDiaryDelta(ops));
   } catch (_) {
     // Fall through to plain text fallback.
   }
@@ -115,7 +113,9 @@ bool diaryContentHasEmbeddedContent(String rawContent) {
     if (decoded is List) {
       return decoded.any(
         (op) =>
-            op is Map && op['insert'] is Map && (op['insert'] as Map).isNotEmpty,
+            op is Map &&
+            op['insert'] is Map &&
+            (op['insert'] as Map).isNotEmpty,
       );
     }
     if (decoded is Map) {

@@ -72,10 +72,10 @@ Future<void> pumpTagPage(
       overrides: [
         // 顶栏草稿角标：不打开真实数据库。
         diaryDraftCountProvider.overrideWith((ref) => Stream.value(0)),
-          // 卡片留言角标：不打开真实数据库。
-          diaryCommentCountProvider.overrideWith(
-            (ref, diaryId) => Stream.value(0),
-          ),
+        // 卡片留言角标：不打开真实数据库。
+        diaryCommentCountProvider.overrideWith(
+          (ref, diaryId) => Stream.value(0),
+        ),
         // 书架：没有日记本（不打开真实数据库）。
         notebooksProvider.overrideWith(
           (ref) => Stream.value(const <NotebookView>[]),

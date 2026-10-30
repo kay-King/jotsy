@@ -19,8 +19,9 @@ abstract final class DiaryCardColors {
   /// 保证在深色卡片上仍然可读。
   static Color warmAccentFor(Brightness brightness, DiaryCardColorRole role) =>
       brightness == Brightness.light
-          ? warmAccent
-          : deriveDark(warmAccent, role);
+      ? warmAccent
+      : deriveDark(warmAccent, role);
+
   /// WCAG 2.x 对比度（1~21）。只看不透明分量：半透明颜色需由调用方先叠到
   /// 背景上（`Color.alphaBlend`）再比较。
   static double contrastRatio(Color a, Color b) {

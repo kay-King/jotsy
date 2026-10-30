@@ -35,9 +35,7 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
   @override
   void initState() {
     super.initState();
-    _layout = DesktopLayout.decode(
-      widget.settingsService.desktopLayoutRaw,
-    );
+    _layout = DesktopLayout.decode(widget.settingsService.desktopLayoutRaw);
   }
 
   Future<void> _persist() async {
@@ -106,8 +104,7 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
             child: Text(l10n.commonCancel),
           ),
           TextButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text),
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
             child: Text(l10n.commonConfirm),
           ),
         ],
@@ -119,8 +116,8 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
     final message = switch (result.status) {
       StyleCodeStatus.empty => l10n.desktopLayoutImportEmpty,
       StyleCodeStatus.invalid => l10n.desktopLayoutImportInvalid,
-      StyleCodeStatus.ok || StyleCodeStatus.newerVersion =>
-        l10n.desktopLayoutImported,
+      StyleCodeStatus.ok ||
+      StyleCodeStatus.newerVersion => l10n.desktopLayoutImported,
     };
     if (result.status == StyleCodeStatus.ok ||
         result.status == StyleCodeStatus.newerVersion) {
@@ -209,9 +206,7 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
           ),
           const SizedBox(height: 12),
           Material(
-            color: ExpressiveSurfaces.cardColor(
-              Theme.of(context).colorScheme,
-            ),
+            color: ExpressiveSurfaces.cardColor(Theme.of(context).colorScheme),
             borderRadius: BorderRadius.circular(AppRadii.card),
             clipBehavior: Clip.antiAlias,
             child: ReorderableListView.builder(
@@ -221,8 +216,7 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
               buildDefaultDragHandles: false,
               proxyDecorator: expressiveReorderProxyDecorator,
               itemCount: modules.length,
-              onReorderStart: (_) =>
-                  unawaited(HapticFeedback.mediumImpact()),
+              onReorderStart: (_) => unawaited(HapticFeedback.mediumImpact()),
               // onReorderItem 的 newIndex 已按移除做过调整，直接插入即可。
               onReorderItem: _handleReorder,
               itemBuilder: (BuildContext context, int index) {
@@ -243,9 +237,7 @@ class _DesktopLayoutPageState extends State<DesktopLayoutPage> {
                         id,
                         spec.visible
                             ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 12),
                       Expanded(

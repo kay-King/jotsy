@@ -222,9 +222,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
         _effectiveSearchKeyword.isNotEmpty &&
         _scope == DiaryListScope.all;
     final commentMatchAsync = commentSearchActive
-        ? ref.watch(
-            commentMatchedDiariesProvider(_effectiveSearchKeyword),
-          )
+        ? ref.watch(commentMatchedDiariesProvider(_effectiveSearchKeyword))
         : null;
     final commentMatches =
         commentMatchAsync?.asData?.value ?? const <DiaryWithTags>[];
@@ -286,9 +284,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
                         isSelectionMode: false,
                         maxVisibleTags: diaryCardTagLimit,
                         cardStyle: ref.watch(diaryCardStyleProvider),
-                        moodOptions: ref.watch(
-                          diaryCardMoodOptionsProvider,
-                        ),
+                        moodOptions: ref.watch(diaryCardMoodOptionsProvider),
                         onCreate: () {},
                         onOpenEditor: (diary, coverHero) =>
                             _openPreviewFromCombined(
@@ -663,10 +659,7 @@ class _DiarySearchPageState extends ConsumerState<DiarySearchPage> {
 /// 搜留言开关：搜索框下方的一行小开关，打开后在关键词结果上方单独展示
 /// “留言匹配”分组。只在有关键词且为全局范围时出现。
 class _CommentSearchToggle extends StatelessWidget {
-  const _CommentSearchToggle({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _CommentSearchToggle({required this.selected, required this.onChanged});
 
   final bool selected;
   final ValueChanged<bool> onChanged;

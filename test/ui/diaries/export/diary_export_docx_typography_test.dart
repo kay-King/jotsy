@@ -124,62 +124,60 @@ void main() {
     expect(run.getElement('w:spacing')!.getAttribute('w:val'), '-15');
   });
 
-  test('first-line indent lands on body paragraphs only, as w:firstLine',
-      () async {
-    Future<XmlDocument> document(DiaryTypography typography) async {
-      final output = await DiaryDocxWriter.write(
-        [richEntry()],
-        options: DiaryExportOptions.defaults,
-        labels: testExportLabels,
-        media: DiaryExportMediaLibrary(),
-        documentTitle: 'Typography',
-        languageTag: 'zh-CN',
-        typography: typography,
-      );
-      return XmlDocument.parse(
-        utf8.decode(
-          output.files!.singleWhere((f) => f.path == 'word/document.xml')
-              .bytes!,
-        ),
-      );
-    }
+  test(
+    'first-line indent lands on body paragraphs only, as w:firstLine',
+    () async {
+      Future<XmlDocument> document(DiaryTypography typography) async {
+        final output = await DiaryDocxWriter.write(
+          [richEntry()],
+          options: DiaryExportOptions.defaults,
+          labels: testExportLabels,
+          media: DiaryExportMediaLibrary(),
+          documentTitle: 'Typography',
+          languageTag: 'zh-CN',
+          typography: typography,
+        );
+        return XmlDocument.parse(
+          utf8.decode(
+            output.files!
+                .singleWhere((f) => f.path == 'word/document.xml')
+                .bytes!,
+          ),
+        );
+      }
 
-    String textOf(XmlElement paragraph) => paragraph
-        .findAllElements('w:t')
-        .map((e) => e.innerText)
-        .join();
-    XmlElement paragraphWith(XmlDocument doc, String needle) => doc
-        .findAllElements('w:p')
-        .singleWhere((p) => textOf(p).contains(needle));
-    String? firstLineOf(XmlElement paragraph) => paragraph
-        .getElement('w:pPr')
-        ?.getElement('w:ind')
-        ?.getAttribute('w:firstLine');
+      String textOf(XmlElement paragraph) =>
+          paragraph.findAllElements('w:t').map((e) => e.innerText).join();
+      XmlElement paragraphWith(XmlDocument doc, String needle) => doc
+          .findAllElements('w:p')
+          .singleWhere((p) => textOf(p).contains(needle));
+      String? firstLineOf(XmlElement paragraph) => paragraph
+          .getElement('w:pPr')
+          ?.getElement('w:ind')
+          ?.getAttribute('w:firstLine');
 
-    // 2 字 × 16px 字号 × 15twip/px = 480twip。
-    final indented = await document(
-      const DiaryTypography(firstLineIndent: 2),
-    );
-    expect(
-      firstLineOf(paragraphWith(indented, '今天')),
-      '480',
-    );
-    // 标题、列表、引用不带首行缩进（列表仍保留自己的左缩进与悬挂）。
-    expect(firstLineOf(paragraphWith(indented, '小标题')), isNull);
-    final list = paragraphWith(indented, '第一');
-    expect(firstLineOf(list), isNull);
-    expect(
-      list.getElement('w:pPr')!.getElement('w:ind')!.getAttribute('w:left'),
-      '420',
-    );
-    expect(firstLineOf(paragraphWith(indented, '一句话')), isNull);
-    // 默认 0 时整份文档没有 w:firstLine。
-    final plain = await document(const DiaryTypography());
-    expect(
-      plain.findAllElements('w:ind').map(
-        (e) => e.getAttribute('w:firstLine'),
-      ),
-      everyElement(isNull),
-    );
-  });
+      // 2 字 × 16px 字号 × 15twip/px = 480twip。
+      final indented = await document(
+        const DiaryTypography(firstLineIndent: 2),
+      );
+      expect(firstLineOf(paragraphWith(indented, '今天')), '480');
+      // 标题、列表、引用不带首行缩进（列表仍保留自己的左缩进与悬挂）。
+      expect(firstLineOf(paragraphWith(indented, '小标题')), isNull);
+      final list = paragraphWith(indented, '第一');
+      expect(firstLineOf(list), isNull);
+      expect(
+        list.getElement('w:pPr')!.getElement('w:ind')!.getAttribute('w:left'),
+        '420',
+      );
+      expect(firstLineOf(paragraphWith(indented, '一句话')), isNull);
+      // 默认 0 时整份文档没有 w:firstLine。
+      final plain = await document(const DiaryTypography());
+      expect(
+        plain
+            .findAllElements('w:ind')
+            .map((e) => e.getAttribute('w:firstLine')),
+        everyElement(isNull),
+      );
+    },
+  );
 }

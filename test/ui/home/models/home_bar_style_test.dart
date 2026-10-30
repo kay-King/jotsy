@@ -198,7 +198,6 @@ void main() {
         <String, Object>{'labelGap': 4.0, 'blockPadding': 10.0},
       );
     });
-
   });
 
   group('HomeBarStyle.withMaterial', () {

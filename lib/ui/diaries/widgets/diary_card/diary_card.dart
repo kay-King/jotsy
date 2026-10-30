@@ -244,8 +244,7 @@ class DiaryCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 if (commentBadgeContent != null) commentBadgeContent,
-                if (commentBadgeContent != null &&
-                    mediaBadgeContent != null)
+                if (commentBadgeContent != null && mediaBadgeContent != null)
                   SizedBox(width: 6 * resolved.metaScale),
                 if (mediaBadgeContent != null) mediaBadgeContent,
               ],

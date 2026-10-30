@@ -33,10 +33,11 @@ mixin _AppDatabaseDiaryCommentOps on _$AppDatabase {
 
   Future<int> countDiaryComments(String diaryId) async {
     final count = diaryComments.id.count();
-    final row = await (selectOnly(diaryComments)
-          ..where(diaryComments.diaryId.equals(diaryId))
-          ..addColumns(<Expression<Object>>[count]))
-        .getSingle();
+    final row =
+        await (selectOnly(diaryComments)
+              ..where(diaryComments.diaryId.equals(diaryId))
+              ..addColumns(<Expression<Object>>[count]))
+            .getSingle();
     return row.read(count)!;
   }
 
@@ -69,12 +70,10 @@ mixin _AppDatabaseDiaryCommentOps on _$AppDatabase {
     required String diaryId,
     required String commentId,
   }) async {
-    await (delete(
-      diaryComments,
-    )..where(
-      (t) =>
-          t.commentId.equals(commentId) & t.diaryId.equals(diaryId),
-    )).go();
+    await (delete(diaryComments)..where(
+          (t) => t.commentId.equals(commentId) & t.diaryId.equals(diaryId),
+        ))
+        .go();
   }
 
   /// 按业务 id 改一条留言的内容：内容由调用方先 trim、空内容不写入；
@@ -87,17 +86,15 @@ mixin _AppDatabaseDiaryCommentOps on _$AppDatabase {
   }) async {
     final trimmed = content.trim();
     assert(trimmed.isNotEmpty, 'comment content must not be empty');
-    await (update(
-      diaryComments,
-    )..where(
-      (t) =>
-          t.commentId.equals(commentId) & t.diaryId.equals(diaryId),
-    )).write(
-      DiaryCommentsCompanion(
-        content: Value(trimmed),
-        updatedAt: Value(now ?? DateTime.now()),
-      ),
-    );
+    await (update(diaryComments)..where(
+          (t) => t.commentId.equals(commentId) & t.diaryId.equals(diaryId),
+        ))
+        .write(
+          DiaryCommentsCompanion(
+            content: Value(trimmed),
+            updatedAt: Value(now ?? DateTime.now()),
+          ),
+        );
   }
 
   /// 导出用：某篇日记的全部留言（按创建时间升序），一次读出，不订阅。
@@ -116,11 +113,12 @@ mixin _AppDatabaseDiaryCommentOps on _$AppDatabase {
   Future<List<String>> searchDiaryCommentDiaryIds(String keyword) async {
     final trimmed = keyword.trim();
     if (trimmed.isEmpty) return const <String>[];
-    final rows = await (selectOnly(diaryComments, distinct: true)
-          ..where(diaryComments.content.contains(trimmed))
-          ..addColumns(<Expression<Object>>[diaryComments.diaryId]))
-        .map((row) => row.read(diaryComments.diaryId)!)
-        .get();
+    final rows =
+        await (selectOnly(diaryComments, distinct: true)
+              ..where(diaryComments.content.contains(trimmed))
+              ..addColumns(<Expression<Object>>[diaryComments.diaryId]))
+            .map((row) => row.read(diaryComments.diaryId)!)
+            .get();
     return rows;
   }
 }

@@ -51,7 +51,10 @@ class NotebookTree {
   }
 
   /// 自己 + 全部后代（范围查询用：父本范围含子本的日记）。
-  Set<String> selfAndDescendants(String id) => <String>{id, ...descendantsOf(id)};
+  Set<String> selfAndDescendants(String id) => <String>{
+    id,
+    ...descendantsOf(id),
+  };
 
   /// 全部祖先的业务 id（从直接父到根），不含自己。
   List<String> ancestorsOf(String id) {

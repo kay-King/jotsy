@@ -18,8 +18,9 @@ final notebooksProvider = StreamProvider<List<NotebookView>>((Ref ref) {
 });
 
 /// 数据库层的直接篇数（不含后代），内部用。
-final _directNotebookEntryCountsProvider =
-    StreamProvider<Map<String, int>>((Ref ref) {
+final _directNotebookEntryCountsProvider = StreamProvider<Map<String, int>>((
+  Ref ref,
+) {
   return ref.watch(appDatabaseProvider).watchManualNotebookEntryCounts();
 });
 
@@ -39,12 +40,10 @@ final notebookEntryCountsProvider = StreamProvider<Map<String, int>>((Ref ref) {
   if (notebooks.isEmpty) {
     return Stream<Map<String, int>>.value(direct);
   }
-  final tree = NotebookTree(
-    <NotebookNode>[
-      for (final n in notebooks)
-        if (n.isManual) NotebookNode(n.id, n.row.parentId),
-    ],
-  );
+  final tree = NotebookTree(<NotebookNode>[
+    for (final n in notebooks)
+      if (n.isManual) NotebookNode(n.id, n.row.parentId),
+  ]);
   final inclusive = <String, int>{};
   for (final n in notebooks) {
     if (!n.isManual) continue;

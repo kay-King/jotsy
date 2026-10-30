@@ -178,9 +178,7 @@ void _registerFilterTests() {
     );
     await tester.pumpAndSettle();
 
-    final viewer = tester.widget<ImageViewerPage>(
-      find.byType(ImageViewerPage),
-    );
+    final viewer = tester.widget<ImageViewerPage>(find.byType(ImageViewerPage));
     expect(viewer.items.map((item) => item.source), [
       '/cover.jpg',
       '/first.jpg',

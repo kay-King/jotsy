@@ -84,9 +84,9 @@ class DiaryNotebookDrawer extends ConsumerWidget {
 
   void _openSettings(BuildContext context) {
     Navigator.of(context).pop();
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const SettingsPage()));
   }
 
   @override
@@ -336,10 +336,7 @@ class _ColorDot extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
-              colors: [
-                colorScheme.primary,
-                colorScheme.tertiary,
-              ],
+              colors: [colorScheme.primary, colorScheme.tertiary],
             ),
           ),
         );
@@ -349,10 +346,7 @@ class _ColorDot extends StatelessWidget {
           height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-              color: colorScheme.outline,
-              width: 1.5,
-            ),
+            border: Border.all(color: colorScheme.outline, width: 1.5),
           ),
         );
       case _DotVariant.color:

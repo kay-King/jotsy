@@ -141,9 +141,10 @@ class BackupPayload {
         diaryNotebooks: _optionalRows(database, 'diaryNotebooks')
             .map((row) => DiaryNotebookRow.fromJson({'position': 0, ...row}))
             .toList(growable: false),
-        diaryComments: _optionalRows(database, 'diaryComments')
-            .map((row) => DiaryCommentRow.fromJson(row))
-            .toList(growable: false),
+        diaryComments: _optionalRows(
+          database,
+          'diaryComments',
+        ).map((row) => DiaryCommentRow.fromJson(row)).toList(growable: false),
         settings: settings as Map<String, dynamic>?,
       );
       payload._validateKeys();

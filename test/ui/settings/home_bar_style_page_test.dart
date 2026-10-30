@@ -394,10 +394,7 @@ void main() {
           l10n.homeBarStyleTabBehavior,
         ]) {
           await openHomeBarStyleTab(tester, label);
-          await tester.drag(
-            homeBarSheetScrollable(),
-            const Offset(0, -2000),
-          );
+          await tester.drag(homeBarSheetScrollable(), const Offset(0, -2000));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: label);
           await closeHomeBarStyleSheet(tester, l10n);

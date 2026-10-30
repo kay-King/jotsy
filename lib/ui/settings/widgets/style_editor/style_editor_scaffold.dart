@@ -84,9 +84,7 @@ class StyleEditorScaffold extends StatelessWidget {
             // Scaffold 接住、藏在 modal 遮罩后面看不见、点不到。
             child: ScaffoldMessenger(
               child: Scaffold(
-                backgroundColor: Theme.of(
-                  sheetContext,
-                ).colorScheme.surface,
+                backgroundColor: Theme.of(sheetContext).colorScheme.surface,
                 body: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -103,9 +101,7 @@ class StyleEditorScaffold extends StatelessWidget {
                                   style: Theme.of(sheetContext)
                                       .textTheme
                                       .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      ?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                               ),
                               IconButton(
@@ -163,32 +159,32 @@ class StyleEditorScaffold extends StatelessWidget {
         color: Colors.transparent,
         shape: const CircleBorder(),
         child: ExpressiveMenuButton(
-        tooltip: title,
-        icon: const Icon(Icons.more_vert),
-        placement: ExpressiveMenuPlacement.start,
-        items: <Widget>[
-          // 标题不可点，只起标识作用。
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
+          tooltip: title,
+          icon: const Icon(Icons.more_vert),
+          placement: ExpressiveMenuPlacement.start,
+          items: <Widget>[
+            // 标题不可点，只起标识作用。
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          ExpressiveMenuItem(
-            onPressed: () => Navigator.of(context).maybePop(),
-            leadingIcon: const FaIcon(FontAwesomeIcons.angleLeft),
-            child: Text(l10n.commonBack),
-          ),
-          ExpressiveMenuItem(
-            onPressed: isDefault() ? null : onReset,
-            leadingIcon: const FaIcon(FontAwesomeIcons.arrowRotateLeft),
-            child: Text(l10n.commonReset),
-          ),
-        ],
+            ExpressiveMenuItem(
+              onPressed: () => Navigator.of(context).maybePop(),
+              leadingIcon: const FaIcon(FontAwesomeIcons.angleLeft),
+              child: Text(l10n.commonBack),
+            ),
+            ExpressiveMenuItem(
+              onPressed: isDefault() ? null : onReset,
+              leadingIcon: const FaIcon(FontAwesomeIcons.arrowRotateLeft),
+              child: Text(l10n.commonReset),
+            ),
+          ],
         ),
       ),
     );

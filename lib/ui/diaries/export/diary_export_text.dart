@@ -70,8 +70,7 @@ class DiaryTextWriter {
         ? ''
         : <String>[
             '留言（${comments.length}）',
-            for (final comment in comments)
-              '- ${comment.content}',
+            for (final comment in comments) '- ${comment.content}',
           ].join('\n');
     return <String>[
       header.join('\n'),

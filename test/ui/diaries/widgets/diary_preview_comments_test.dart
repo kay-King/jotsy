@@ -52,8 +52,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('comments section shows empty state, then a written comment',
-      (WidgetTester tester) async {
+  testWidgets('comments section shows empty state, then a written comment', (
+    WidgetTester tester,
+  ) async {
     await pumpSection(tester);
     expect(find.text('还没有留言，写下第一条吧。'), findsOneWidget);
     expect(find.text('留言'), findsOneWidget);
@@ -89,8 +90,9 @@ void main() {
     await unmountSection(tester);
   });
 
-  testWidgets('deleting a comment asks for confirmation, then removes it',
-      (WidgetTester tester) async {
+  testWidgets('deleting a comment asks for confirmation, then removes it', (
+    WidgetTester tester,
+  ) async {
     await db.addDiaryComment(diaryId: diaryId, content: '要删掉的一条');
     await pumpSection(tester);
     expect(find.text('要删掉的一条'), findsOneWidget);

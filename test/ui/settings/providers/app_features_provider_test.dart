@@ -55,9 +55,7 @@ void main() {
     expect(container.read(appFeaturesProvider), next);
 
     // 同一组开关换种写法（键序不同）：解码相等，不应再通知。
-    await settings.setAppFeaturesRaw(
-      '{"timeCapsules":true,"desktop":false}',
-    );
+    await settings.setAppFeaturesRaw('{"timeCapsules":true,"desktop":false}');
     expect(seen, <AppFeatures>[stored, next]);
 
     await saveAppFeatures(settings, AppFeatures.defaults);

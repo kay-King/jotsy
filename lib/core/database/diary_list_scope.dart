@@ -81,7 +81,10 @@ final class DiaryNotebookScope extends DiaryListScope {
         other.unassignedChapterOnly == unassignedChapterOnly &&
         other.bookOrder == bookOrder &&
         _listEquals(other.chapterOrder, chapterOrder) &&
-        _listEquals(other.descendantIds ?? const <String>[], descendantIds ?? const <String>[]);
+        _listEquals(
+          other.descendantIds ?? const <String>[],
+          descendantIds ?? const <String>[],
+        );
   }
 
   @override

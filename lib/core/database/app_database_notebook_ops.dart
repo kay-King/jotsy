@@ -288,11 +288,8 @@ WHERE d.is_deleted = 0 AND d.is_archived = 0
         diaryNotebooks,
       )..where((t) => t.notebookId.equals(row.id))).go();
       // 嵌套：删掉父本时子本不跟着删，parent_id 清空变为顶级（不丢数据）。
-      await (update(
-        notebooks,
-      )..where((t) => t.parentId.equals(notebookId))).write(
-        const NotebooksCompanion(parentId: Value(null)),
-      );
+      await (update(notebooks)..where((t) => t.parentId.equals(notebookId)))
+          .write(const NotebooksCompanion(parentId: Value(null)));
       await (delete(notebooks)..where((t) => t.id.equals(row.id))).go();
       return NotebookDeletion._(
         Map<String, DateTime?>.unmodifiable(archivedAt),
@@ -373,11 +370,8 @@ WHERE d.is_deleted = 0 AND d.is_archived = 0
       )..where((t) => t.notebookId.equals(source.id))).go();
       // 嵌套：源本的子本上移一级（挂到源本的父本下，源本是顶级则变顶级），
       // 树形不断；目标本若是源本的子本，同样上移（它的父本正在被删）。
-      await (update(
-        notebooks,
-      )..where((t) => t.parentId.equals(sourceId))).write(
-        NotebooksCompanion(parentId: Value(source.parentId)),
-      );
+      await (update(notebooks)..where((t) => t.parentId.equals(sourceId)))
+          .write(NotebooksCompanion(parentId: Value(source.parentId)));
       await (delete(notebooks)..where((t) => t.id.equals(source.id))).go();
     });
   }

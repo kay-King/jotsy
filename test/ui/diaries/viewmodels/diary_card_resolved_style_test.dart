@@ -333,46 +333,49 @@ void main() {
       expect(appearance.titleColor, resolved.colorScheme.onInverseSurface);
     });
 
-    test('primary backgrounds follow the current scheme in each brightness', () {
-      // custom 取色已删除：深色不再由浅色值推导，深浅主题各取自家
-      // scheme 的 primary。
-      const style = DiaryCardStyle(
-        surface: DiaryCardSurfaceStyle(
-          background: DiaryCardColorSpec(
-            source: DiaryCardColorSource.primary,
-            strength: 1,
+    test(
+      'primary backgrounds follow the current scheme in each brightness',
+      () {
+        // custom 取色已删除：深色不再由浅色值推导，深浅主题各取自家
+        // scheme 的 primary。
+        const style = DiaryCardStyle(
+          surface: DiaryCardSurfaceStyle(
+            background: DiaryCardColorSpec(
+              source: DiaryCardColorSource.primary,
+              strength: 1,
+            ),
           ),
-        ),
-      );
-      final lightResolved = _resolve(
-        style,
-        DiaryCardMode.list,
-        brightness: Brightness.light,
-      );
-      final darkResolved = _resolve(
-        style,
-        DiaryCardMode.list,
-        brightness: Brightness.dark,
-      );
-      expect(
-        lightResolved
-            .appearanceFor(pinned: false, locked: false)
-            .surface
-            .color,
-        lightResolved.colorScheme.primary,
-      );
-      expect(
-        darkResolved
-            .appearanceFor(pinned: false, locked: false)
-            .surface
-            .color,
-        darkResolved.colorScheme.primary,
-      );
-      expect(
-        darkResolved.colorScheme.primary,
-        isNot(lightResolved.colorScheme.primary),
-      );
-    });
+        );
+        final lightResolved = _resolve(
+          style,
+          DiaryCardMode.list,
+          brightness: Brightness.light,
+        );
+        final darkResolved = _resolve(
+          style,
+          DiaryCardMode.list,
+          brightness: Brightness.dark,
+        );
+        expect(
+          lightResolved
+              .appearanceFor(pinned: false, locked: false)
+              .surface
+              .color,
+          lightResolved.colorScheme.primary,
+        );
+        expect(
+          darkResolved
+              .appearanceFor(pinned: false, locked: false)
+              .surface
+              .color,
+          darkResolved.colorScheme.primary,
+        );
+        expect(
+          darkResolved.colorScheme.primary,
+          isNot(lightResolved.colorScheme.primary),
+        );
+      },
+    );
 
     test('unreadable tag text colors fall back unless allowed', () {
       // 首个标签色过浅（与卡片底色几乎同色）时，标题色自动回退为可读的
@@ -380,9 +383,7 @@ void main() {
       const faintTag = Tag(id: 1, name: 'a', color: 0xFFFDFDFD);
       const style = DiaryCardStyle(
         typography: DiaryCardTypography(
-          titleColor: DiaryCardColorSpec(
-            source: DiaryCardColorSource.firstTag,
-          ),
+          titleColor: DiaryCardColorSpec(source: DiaryCardColorSource.firstTag),
         ),
       );
       final resolved = _resolve(style, DiaryCardMode.list);

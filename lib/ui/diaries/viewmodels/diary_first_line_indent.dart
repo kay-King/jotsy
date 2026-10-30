@@ -47,10 +47,7 @@ quill.TextSpanBuilder buildFirstLineIndentSpanBuilder(
       children: <InlineSpan>[
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: SizedBox(
-            width: width,
-            height: style?.fontSize ?? 16,
-          ),
+          child: SizedBox(width: width, height: style?.fontSize ?? 16),
         ),
         span,
       ],
@@ -58,13 +55,11 @@ quill.TextSpanBuilder buildFirstLineIndentSpanBuilder(
   };
 }
 
-bool _isFirstLineIndentTarget(
-  quill.Node node,
-  int nodeOffset,
-  String text,
-) {
+bool _isFirstLineIndentTarget(quill.Node node, int nodeOffset, String text) {
   // 组字切片（nodeOffset > 0）与空文本不垫；已手动空过格的不重复垫。
-  if (nodeOffset != 0 || text.isEmpty || text.trimLeft().length != text.length) {
+  if (nodeOffset != 0 ||
+      text.isEmpty ||
+      text.trimLeft().length != text.length) {
     return false;
   }
   if (node is! quill.QuillText) {

@@ -150,7 +150,6 @@ void main() {
         Color.lerp(_dark.surfaceContainerHigh, _dark.primaryContainer, 0.30),
       );
     });
-
   });
 
   group('foreground', () {

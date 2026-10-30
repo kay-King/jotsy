@@ -27,18 +27,14 @@ class NotebookBreadcrumb extends ConsumerWidget {
     if (notebooks == null || notebooks.isEmpty) {
       return const SizedBox.shrink();
     }
-    final tree = NotebookTree(
-      <NotebookNode>[
-        for (final n in notebooks) NotebookNode(n.id, n.row.parentId),
-      ],
-    );
+    final tree = NotebookTree(<NotebookNode>[
+      for (final n in notebooks) NotebookNode(n.id, n.row.parentId),
+    ]);
     final ancestors = tree.ancestorsOf(notebookId).reversed.toList();
     if (ancestors.isEmpty) {
       return const SizedBox.shrink();
     }
-    final byId = <String, NotebookView>{
-      for (final n in notebooks) n.id: n,
-    };
+    final byId = <String, NotebookView>{for (final n in notebooks) n.id: n};
     final theme = Theme.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -117,16 +113,12 @@ class NotebookChildList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notebooks = ref.watch(notebooksProvider).value;
     if (notebooks == null) return const SizedBox.shrink();
-    final tree = NotebookTree(
-      <NotebookNode>[
-        for (final n in notebooks) NotebookNode(n.id, n.row.parentId),
-      ],
-    );
+    final tree = NotebookTree(<NotebookNode>[
+      for (final n in notebooks) NotebookNode(n.id, n.row.parentId),
+    ]);
     final childIds = tree.childrenOf(notebookId);
     if (childIds.isEmpty) return const SizedBox.shrink();
-    final byId = <String, NotebookView>{
-      for (final n in notebooks) n.id: n,
-    };
+    final byId = <String, NotebookView>{for (final n in notebooks) n.id: n};
     final l10n = context.l10n;
     final theme = Theme.of(context);
     return Column(

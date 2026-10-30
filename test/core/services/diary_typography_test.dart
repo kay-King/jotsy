@@ -95,9 +95,7 @@ void main() {
   group('DiaryTypography first-line indent', () {
     test('defaults to no indent and round-trips through raw json', () {
       expect(const DiaryTypography().firstLineIndent, 0);
-      final typography = const DiaryTypography().copyWith(
-        firstLineIndent: 2.5,
-      );
+      final typography = const DiaryTypography().copyWith(firstLineIndent: 2.5);
       expect(DiaryTypography.fromRaw(typography.toRaw()), typography);
     });
 
@@ -121,9 +119,7 @@ void main() {
     });
 
     test('resetting metrics also clears the indent', () {
-      final typography = const DiaryTypography().copyWith(
-        firstLineIndent: 2,
-      );
+      final typography = const DiaryTypography().copyWith(firstLineIndent: 2);
       expect(typography.hasDefaultMetrics, isFalse);
       expect(typography.withDefaultMetrics().firstLineIndent, 0);
     });

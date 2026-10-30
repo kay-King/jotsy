@@ -112,8 +112,8 @@ class DiaryCardContent extends StatelessWidget {
         // 暖阳预设的日期卡片封面走暖色（卡片奶油底 + 陶土橘大日期字），
         // 不用默认的 primaryContainer 蓝；其他预设沿用默认色不变。
         final style = resolved.style;
-        final isWarm = style.surface.background.source ==
-                DiaryCardColorSource.warm ||
+        final isWarm =
+            style.surface.background.source == DiaryCardColorSource.warm ||
             style.meta.dateAccent.source == DiaryCardColorSource.warm;
         return DiaryCardDateBlock(
           date: resolved.style.meta.dateSource == DiaryCardDateSource.created

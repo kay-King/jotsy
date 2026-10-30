@@ -9,20 +9,20 @@ void main() {
       expect(DesktopLayout.decode(''), DesktopLayout.defaults);
       expect(DesktopLayout.decode('   '), DesktopLayout.defaults);
       expect(DesktopLayout.decode('not json'), DesktopLayout.defaults);
-      expect(DesktopLayout.decode('{"modules": "nope"}'), DesktopLayout.defaults);
+      expect(
+        DesktopLayout.decode('{"modules": "nope"}'),
+        DesktopLayout.defaults,
+      );
     });
 
     test('default order is header/writeButton/quickEntry/recent', () {
       final layout = DesktopLayout.decode(null);
-      expect(
-        layout.visibleModuleIds,
-        const <DesktopModuleId>[
-          DesktopModuleId.header,
-          DesktopModuleId.writeButton,
-          DesktopModuleId.quickEntry,
-          DesktopModuleId.recent,
-        ],
-      );
+      expect(layout.visibleModuleIds, const <DesktopModuleId>[
+        DesktopModuleId.header,
+        DesktopModuleId.writeButton,
+        DesktopModuleId.quickEntry,
+        DesktopModuleId.recent,
+      ]);
     });
 
     test('unknown ids are dropped, duplicates keep first', () {
@@ -36,40 +36,31 @@ void main() {
       );
       // recent first (visible), unknown dropped, duplicate recent dropped,
       // header last (hidden); missing writeButton/quickEntry appended visible.
-      expect(
-        layout.modules.map((m) => m.id).toList(),
-        const <DesktopModuleId>[
-          DesktopModuleId.recent,
-          DesktopModuleId.header,
-          DesktopModuleId.writeButton,
-          DesktopModuleId.quickEntry,
-        ],
-      );
+      expect(layout.modules.map((m) => m.id).toList(), const <DesktopModuleId>[
+        DesktopModuleId.recent,
+        DesktopModuleId.header,
+        DesktopModuleId.writeButton,
+        DesktopModuleId.quickEntry,
+      ]);
       expect(layout.modules[0].visible, isTrue);
       expect(layout.modules[1].visible, isFalse);
-      expect(
-        layout.visibleModuleIds,
-        const <DesktopModuleId>[
-          DesktopModuleId.recent,
-          DesktopModuleId.writeButton,
-          DesktopModuleId.quickEntry,
-        ],
-      );
+      expect(layout.visibleModuleIds, const <DesktopModuleId>[
+        DesktopModuleId.recent,
+        DesktopModuleId.writeButton,
+        DesktopModuleId.quickEntry,
+      ]);
     });
 
     test('missing modules are appended at the end, visible', () {
       final layout = DesktopLayout.decode(
         '{"v":1,"modules":[{"id":"recent","visible":true}]}',
       );
-      expect(
-        layout.modules.map((m) => m.id).toList(),
-        const <DesktopModuleId>[
-          DesktopModuleId.recent,
-          DesktopModuleId.header,
-          DesktopModuleId.writeButton,
-          DesktopModuleId.quickEntry,
-        ],
-      );
+      expect(layout.modules.map((m) => m.id).toList(), const <DesktopModuleId>[
+        DesktopModuleId.recent,
+        DesktopModuleId.header,
+        DesktopModuleId.writeButton,
+        DesktopModuleId.quickEntry,
+      ]);
     });
   });
 
@@ -77,9 +68,7 @@ void main() {
     test('default encodes to null (key removed)', () {
       expect(DesktopLayout.defaults.encode(), isNull);
       expect(
-        const DesktopLayout(
-          modules: DesktopLayout.defaultModules,
-        ).encode(),
+        const DesktopLayout(modules: DesktopLayout.defaultModules).encode(),
         isNull,
       );
     });
@@ -88,10 +77,7 @@ void main() {
       const layout = DesktopLayout(
         modules: <DesktopModuleSpec>[
           DesktopModuleSpec(id: DesktopModuleId.recent),
-          DesktopModuleSpec(
-            id: DesktopModuleId.header,
-            visible: false,
-          ),
+          DesktopModuleSpec(id: DesktopModuleId.header, visible: false),
           DesktopModuleSpec(id: DesktopModuleId.writeButton),
           DesktopModuleSpec(id: DesktopModuleId.quickEntry),
         ],
@@ -113,10 +99,7 @@ void main() {
     });
 
     test('moved reorders', () {
-      final layout = DesktopLayout.defaults.moved(
-        DesktopModuleId.recent,
-        0,
-      );
+      final layout = DesktopLayout.defaults.moved(DesktopModuleId.recent, 0);
       expect(layout.modules.first.id, DesktopModuleId.recent);
       expect(layout.modules[1].id, DesktopModuleId.header);
     });
@@ -136,10 +119,7 @@ void main() {
     });
 
     test('invalid code is rejected', () {
-      expect(
-        DesktopLayoutCode.decode('hello').status,
-        StyleCodeStatus.invalid,
-      );
+      expect(DesktopLayoutCode.decode('hello').status, StyleCodeStatus.invalid);
       expect(
         DesktopLayoutCode.decode('jotsy-bars:v1:abc').status,
         StyleCodeStatus.invalid,

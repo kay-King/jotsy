@@ -67,8 +67,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('card shows the comment count badge when there are comments',
-      (WidgetTester tester) async {
+  testWidgets('card shows the comment count badge when there are comments', (
+    WidgetTester tester,
+  ) async {
     await pumpList(tester, 3);
     expect(find.byKey(badgeKey), findsOneWidget);
     // 徽章里是留言数本身。
@@ -78,8 +79,9 @@ void main() {
     );
   });
 
-  testWidgets('card hides the badge when there are no comments',
-      (WidgetTester tester) async {
+  testWidgets('card hides the badge when there are no comments', (
+    WidgetTester tester,
+  ) async {
     await pumpList(tester, 0);
     expect(find.byKey(badgeKey), findsNothing);
   });

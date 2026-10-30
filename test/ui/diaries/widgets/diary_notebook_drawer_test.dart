@@ -12,10 +12,7 @@ void main() {
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            drawer: DiaryNotebookDrawer(),
-            body: SizedBox(),
-          ),
+          home: Scaffold(drawer: DiaryNotebookDrawer(), body: SizedBox()),
         ),
       ),
     );

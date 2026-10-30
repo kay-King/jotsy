@@ -163,11 +163,7 @@ class DiaryCardMetaStyle {
     _put(json, 'bigDate', bigDate, d.bigDate);
     _put(json, 'inlineDate', inlineDate, d.inlineDate);
     _put(json, 'mediaBadge', mediaBadge, d.mediaBadge);
-    _putObject(
-      json,
-      'dateAccent',
-      dateAccent._toJson(d.dateAccent),
-    );
+    _putObject(json, 'dateAccent', dateAccent._toJson(d.dateAccent));
     _put(json, 'showMood', showMood, d.showMood);
     _put(json, 'showWeather', showWeather, d.showWeather);
     _putEnum(json, 'indicatorStyle', indicatorStyle, d.indicatorStyle);

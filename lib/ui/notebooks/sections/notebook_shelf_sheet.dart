@@ -182,8 +182,7 @@ class _NotebookShelfState extends ConsumerState<NotebookShelf> {
               onTap: () => _select(const NotebookShelfResult.selectAll()),
             ),
             _UnfiledRow(
-              onTap: () =>
-                  _select(const NotebookShelfResult.selectUnfiled()),
+              onTap: () => _select(const NotebookShelfResult.selectUnfiled()),
             ),
             if (notebooks == null)
               const SizedBox(height: 160, child: DelayedLoadingIndicator())
@@ -283,9 +282,7 @@ class _UnfiledRow extends ConsumerWidget {
     // 没有未收录日记时不占一行。
     if (count == 0) return const SizedBox.shrink();
     return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       leading: FaIcon(
         FontAwesomeIcons.inbox,
         size: 20,

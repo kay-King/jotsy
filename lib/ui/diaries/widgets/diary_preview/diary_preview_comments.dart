@@ -112,9 +112,7 @@ class _DiaryPreviewCommentsSectionState
               child: Text(l10n.commonCancel),
             ),
             TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.error,
-              ),
+              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(l10n.commonDelete),
             ),
@@ -301,12 +299,8 @@ class _DiaryPreviewCommentsSectionState
               child: Text(l10n.diaryCommentsDelete),
             ),
           ],
-          builder:
-              (
-                BuildContext context,
-                ExpressiveMenuAnchorState menu,
-                _,
-              ) => IconButton(
+          builder: (BuildContext context, ExpressiveMenuAnchorState menu, _) =>
+              IconButton(
                 tooltip: l10n.diaryCommentsEdit,
                 visualDensity: VisualDensity.compact,
                 onPressed: menu.open,
@@ -334,8 +328,9 @@ class _EditCommentDialog extends StatefulWidget {
 }
 
 class _EditCommentDialogState extends State<_EditCommentDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialContent);
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialContent,
+  );
 
   @override
   void dispose() {
@@ -355,9 +350,7 @@ class _EditCommentDialogState extends State<_EditCommentDialog> {
         minLines: 1,
         maxLines: 4,
         decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       actions: <Widget>[
@@ -369,9 +362,7 @@ class _EditCommentDialogState extends State<_EditCommentDialog> {
           child: Text(l10n.commonCancel),
         ),
         TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.primary,
-          ),
+          style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
           onPressed: () => Navigator.of(context).pop(_controller.text),
           child: Text(l10n.commonSave),
         ),

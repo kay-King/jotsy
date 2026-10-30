@@ -112,7 +112,11 @@ Finder _sheetScrollable() => find
 /// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
 Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(finder, 120, scrollable: _sheetScrollable());
+    await tester.scrollUntilVisible(
+      finder,
+      120,
+      scrollable: _sheetScrollable(),
+    );
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
@@ -120,7 +124,11 @@ Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
 
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(finder, 120, scrollable: _sheetScrollable());
+    await tester.scrollUntilVisible(
+      finder,
+      120,
+      scrollable: _sheetScrollable(),
+    );
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();

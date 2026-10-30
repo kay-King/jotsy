@@ -88,9 +88,7 @@ class AppFeaturesPage extends ConsumerWidget {
                 title: l10n.settingsFeaturesAnniversaries,
                 subtitle: l10n.settingsFeaturesAnniversariesSubtitle,
                 value: features.anniversaries,
-                onChanged: writer(
-                  (v) => features.copyWith(anniversaries: v),
-                ),
+                onChanged: writer((v) => features.copyWith(anniversaries: v)),
               ),
             ],
           ),
@@ -130,9 +128,7 @@ class AppFeaturesPage extends ConsumerWidget {
                   title: l10n.settingsFeaturesSwipeArchive,
                   subtitle: l10n.settingsFeaturesSwipeArchiveSubtitle,
                   value: features.swipeArchive,
-                  onChanged: writer(
-                    (v) => features.copyWith(swipeArchive: v),
-                  ),
+                  onChanged: writer((v) => features.copyWith(swipeArchive: v)),
                 ),
             ],
           ),

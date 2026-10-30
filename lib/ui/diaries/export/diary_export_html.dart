@@ -284,8 +284,10 @@ class DiaryHtmlWriter {
       headingOffset: titleLevel,
     );
     if (entry.comments.isNotEmpty) {
-      out.write('<section class="comments">\n<h${titleLevel + 1}>留言'
-          '（${entry.comments.length}）</h${titleLevel + 1}>\n<ul>\n');
+      out.write(
+        '<section class="comments">\n<h${titleLevel + 1}>留言'
+        '（${entry.comments.length}）</h${titleLevel + 1}>\n<ul>\n',
+      );
       for (final comment in entry.comments) {
         out.write('<li>${_text(comment.content)}</li>\n');
       }

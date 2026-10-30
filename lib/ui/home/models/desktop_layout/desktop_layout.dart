@@ -53,9 +53,7 @@ class DesktopModuleSpec {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DesktopModuleSpec &&
-          other.id == id &&
-          other.visible == visible;
+      other is DesktopModuleSpec && other.id == id && other.visible == visible;
 
   @override
   int get hashCode => Object.hash(id, visible);
@@ -163,8 +161,7 @@ class DesktopLayout {
   DesktopLayout withVisibility(DesktopModuleId id, bool visible) {
     return DesktopLayout(
       modules: <DesktopModuleSpec>[
-        for (final m in modules)
-          m.id == id ? m.copyWith(visible: visible) : m,
+        for (final m in modules) m.id == id ? m.copyWith(visible: visible) : m,
       ],
     );
   }

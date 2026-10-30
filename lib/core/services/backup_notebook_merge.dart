@@ -89,9 +89,7 @@ class BackupNotebookMerge {
         if (row.parentId != null && !ids.contains(row.parentId)) row.id,
     ];
     if (dangling.isEmpty) return;
-    await (db.update(
-      db.notebooks,
-    )..where((t) => t.id.isIn(dangling))).write(
+    await (db.update(db.notebooks)..where((t) => t.id.isIn(dangling))).write(
       const NotebooksCompanion(parentId: Value(null)),
     );
   }

@@ -68,9 +68,11 @@ class DesktopRecent extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           if (recent.isEmpty)
-            _DesktopRecentEmpty(onWrite: () async {
-              await runDiaryCreateEntryFlow(context, ref);
-            })
+            _DesktopRecentEmpty(
+              onWrite: () async {
+                await runDiaryCreateEntryFlow(context, ref);
+              },
+            )
           else
             for (var i = 0; i < recent.length; i++) ...<Widget>[
               if (i > 0) const SizedBox(height: 14),

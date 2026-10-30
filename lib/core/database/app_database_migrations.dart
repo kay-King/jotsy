@@ -204,9 +204,7 @@ ADD COLUMN capsule_locked_at INTEGER NULL
   /// 重复加列会报错，先查 `PRAGMA table_info` 确认。只加列，已有日记本的
   /// `parent_id` 全是 NULL（顶级），不改任何已有数据。
   Future<void> _migrateAddNotebookParent(Migrator migrator) async {
-    final columns = await customSelect(
-      "PRAGMA table_info('notebooks')",
-    ).get();
+    final columns = await customSelect("PRAGMA table_info('notebooks')").get();
     final hasParentId = columns.any(
       (row) => row.read<String>('name') == 'parent_id',
     );

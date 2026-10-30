@@ -315,9 +315,9 @@ class _NotebookContentsPageState extends ConsumerState<NotebookContentsPage> {
 
   /// 面包屑 / 子本列表跳转：push 新的内容页（可返回），不用替换当前页。
   void _openNotebook(BuildContext context, String notebookId) {
-    Navigator.of(context).push(
-      NotebookContentsPage.route(notebookId: notebookId),
-    );
+    Navigator.of(
+      context,
+    ).push(NotebookContentsPage.route(notebookId: notebookId));
   }
 
   void _toggle(String diaryId) {

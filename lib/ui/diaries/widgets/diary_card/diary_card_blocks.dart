@@ -162,11 +162,12 @@ class DiaryCardBlocks extends StatelessWidget {
                   mark: markHost == DiaryCardBlock.eyebrow ? mark : null,
                 )
               : null,
-        DiaryCardBlock.title => title == null
-            ? null
-            : (useInlineDateRow
-                  ? _inlineTitleRow(context, title, mark, lines)
-                  : _title(title, mark)),
+        DiaryCardBlock.title =>
+          title == null
+              ? null
+              : (useInlineDateRow
+                    ? _inlineTitleRow(context, title, mark, lines)
+                    : _title(title, mark)),
         // 标签已收进底栏（与日期、时间同行），不再单独成行。
         DiaryCardBlock.tags => null,
         // 日期与标题同行时摘要收进标题行右侧那一列，不再单独成行；
@@ -270,9 +271,7 @@ class DiaryCardBlocks extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: constraints.maxWidth * 0.5,
-              ),
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.5),
               child: lines.bigDate(context),
             ),
             SizedBox(width: 14 * scale),
@@ -282,7 +281,10 @@ class DiaryCardBlocks extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
-                    children: [Expanded(child: titleText), mark],
+                    children: [
+                      Expanded(child: titleText),
+                      mark,
+                    ],
                   ),
                   if (previewText != null) ...[
                     SizedBox(height: 6 * scale),

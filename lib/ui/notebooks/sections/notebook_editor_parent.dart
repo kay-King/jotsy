@@ -57,12 +57,10 @@ class NotebookEditorParentSection extends ConsumerWidget {
     final l10n = context.l10n;
     // 候选：手动本，排除自己与后代（防环）。新建时 id 为 null，不过滤自己。
     final selfId = controller.notebookId;
-    final tree = NotebookTree(
-      <NotebookNode>[
-        for (final n in notebooks)
-          if (n.isManual) NotebookNode(n.id, n.row.parentId),
-      ],
-    );
+    final tree = NotebookTree(<NotebookNode>[
+      for (final n in notebooks)
+        if (n.isManual) NotebookNode(n.id, n.row.parentId),
+    ]);
     final excluded = <String>{
       if (selfId != null) ...<String>{selfId, ...tree.descendantsOf(selfId)},
     };
@@ -103,12 +101,10 @@ class NotebookEditorParentSection extends ConsumerWidget {
                   notebook: candidate,
                   depth: tree.ancestorsOf(candidate.id).length,
                   selected: controller.parentId == candidate.id,
-                  onTap: () =>
-                      Navigator.of(context).pop<String>(candidate.id),
+                  onTap: () => Navigator.of(context).pop<String>(candidate.id),
                 ),
               SizedBox(
-                height:
-                    AppSpacing.l + MediaQuery.paddingOf(context).bottom,
+                height: AppSpacing.l + MediaQuery.paddingOf(context).bottom,
               ),
             ],
           ),

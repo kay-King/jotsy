@@ -288,10 +288,7 @@ void main() {
       expect(find.byType(SettingsPage), findsOneWidget);
       await tester.pumpAndSettle();
 
-      expect(_navLabels(tester), <String>[
-        l10n.navDiaries,
-        l10n.navSettings,
-      ]);
+      expect(_navLabels(tester), <String>[l10n.navDiaries, l10n.navSettings]);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       expect(_homePage(tester), 1);
       expect(find.byType(SettingsPage), findsOneWidget);

@@ -64,9 +64,7 @@ mixin _AppDatabaseDiaryScopeSql on _$AppDatabase {
           variables.add(Variable<String>(ids.single));
         } else {
           // 嵌套：父本范围含子本的日记（自己 + 后代）。
-          sql.writeln(
-            '  AND sn.notebook_id IN (${_placeholders(ids.length)})',
-          );
+          sql.writeln('  AND sn.notebook_id IN (${_placeholders(ids.length)})');
           variables.addAll(_stringVariables(ids));
         }
         // 只有手动本有成员行，sn 必是手动本；本子自己私密时显示全部成员

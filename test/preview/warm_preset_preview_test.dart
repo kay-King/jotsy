@@ -154,15 +154,12 @@ List<DiaryWithTags> _diaries({
     String? cover,
     String? image,
   }) {
-    final embeds = image == null
-        ? ''
-        : '{"insert":{"image":"$image"}},';
+    final embeds = image == null ? '' : '{"insert":{"image":"$image"}},';
     return Diary(
       id: id.hashCode,
       diaryId: 'warm_$id',
       title: title,
-      content:
-          '[$embeds{"insert":"$text\\n"}]',
+      content: '[$embeds{"insert":"$text\\n"}]',
       contentText: text,
       metadata: '{}',
       cover: cover,

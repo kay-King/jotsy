@@ -149,9 +149,7 @@ class DiaryCardStylePreviewToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        Expanded(
-          child: Center(child: _modeSegments(context)),
-        ),
+        Expanded(child: Center(child: _modeSegments(context))),
         _brightnessButton(context),
       ],
     );
@@ -229,8 +227,9 @@ class DiaryCardStylePreviewToolbar extends StatelessWidget {
           tooltip: isLight
               ? l10n.styleEditorPreviewDark
               : l10n.styleEditorPreviewLight,
-          onPressed: () => controller.previewBrightness =
-              isLight ? Brightness.dark : Brightness.light,
+          onPressed: () => controller.previewBrightness = isLight
+              ? Brightness.dark
+              : Brightness.light,
           icon: FaIcon(
             isLight ? FontAwesomeIcons.moon : FontAwesomeIcons.sun,
             size: 18,

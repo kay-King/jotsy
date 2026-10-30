@@ -266,12 +266,10 @@ final homeNotebookScopeResolutionProvider =
       // key 稳定；只有手动本参与嵌套）。
       List<String>? descendantIds;
       if (!notebook.isSmart && notebooks != null) {
-        final tree = NotebookTree(
-          <NotebookNode>[
-            for (final n in notebooks)
-              if (!n.isSmart) NotebookNode(n.id, n.row.parentId),
-          ],
-        );
+        final tree = NotebookTree(<NotebookNode>[
+          for (final n in notebooks)
+            if (!n.isSmart) NotebookNode(n.id, n.row.parentId),
+        ]);
         final ids = tree.selfAndDescendants(notebook.id).toList()..sort();
         descendantIds = ids.length > 1 ? ids : null;
       }

@@ -140,26 +140,28 @@ void main() {
     expect(_indentBefore(tester, '第二段文字'), isNull);
   });
 
-  testWidgets('editable editor shows indent and typing does not pollute delta',
-      (tester) async {
-    final controller = quill.QuillController(
-      document: quill.Document.fromJson(<Map<String, Object?>>[
-        <String, Object?>{'insert': 'hello\n'},
-      ]),
-      selection: const TextSelection.collapsed(offset: 0),
-    );
-    addTearDown(controller.dispose);
-    const typography = DiaryTypography(firstLineIndent: 2);
-    await _pump(tester, controller, typography);
-    // 编辑器里也能看到缩进占位。
-    expect(_indentBefore(tester, 'hello'), 32);
-    // 在行首打字：Delta 里不应多出空格，占位是纯视觉的。
-    controller.document.insert(0, 'X');
-    await tester.pump();
-    expect(controller.document.toPlainText(), startsWith('Xhello'));
-    expect(controller.document.toPlainText(), isNot(contains('  Xhello')));
-    expect(_indentBefore(tester, 'Xhello'), 32);
-  });
+  testWidgets(
+    'editable editor shows indent and typing does not pollute delta',
+    (tester) async {
+      final controller = quill.QuillController(
+        document: quill.Document.fromJson(<Map<String, Object?>>[
+          <String, Object?>{'insert': 'hello\n'},
+        ]),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+      addTearDown(controller.dispose);
+      const typography = DiaryTypography(firstLineIndent: 2);
+      await _pump(tester, controller, typography);
+      // 编辑器里也能看到缩进占位。
+      expect(_indentBefore(tester, 'hello'), 32);
+      // 在行首打字：Delta 里不应多出空格，占位是纯视觉的。
+      controller.document.insert(0, 'X');
+      await tester.pump();
+      expect(controller.document.toPlainText(), startsWith('Xhello'));
+      expect(controller.document.toPlainText(), isNot(contains('  Xhello')));
+      expect(_indentBefore(tester, 'Xhello'), 32);
+    },
+  );
 
   testWidgets('newline in editor keeps indent on the new line', (tester) async {
     final controller = quill.QuillController(

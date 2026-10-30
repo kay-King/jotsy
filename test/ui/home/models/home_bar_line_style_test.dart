@@ -87,7 +87,6 @@ void main() {
         line,
       );
     });
-
   });
 
   group('HomeBarStyle with lines', () {

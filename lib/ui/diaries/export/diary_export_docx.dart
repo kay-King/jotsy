@@ -346,11 +346,11 @@ class DiaryDocxWriter {
           // 1 字 = 当前字号，逻辑像素按 96 DPI 换 twip（1px = 15twip，
           // 与字距的换算同口径）；w:firstLine 是相对左缩进的首行偏移，
           // 与 Quill 的段缩进（block.indent）叠加，不互相覆盖。
-          final firstLine = typography.firstLineIndent > 0 &&
+          final firstLine =
+              typography.firstLineIndent > 0 &&
                   (block.align == ExportAlign.start ||
                       block.align == ExportAlign.justify)
-              ? (typography.firstLineIndent * typography.fontSize * 15)
-                  .round()
+              ? (typography.firstLineIndent * typography.fontSize * 15).round()
               : null;
           b.paragraph(
             align: block.align,

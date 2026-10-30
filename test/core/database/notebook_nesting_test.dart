@@ -109,10 +109,7 @@ void main() {
 
     test('mergeNotebook 时子本上移一级', () async {
       final grandparent = await db.createNotebook(name: '祖父');
-      final source = await db.createNotebook(
-        name: '源本',
-        parentId: grandparent,
-      );
+      final source = await db.createNotebook(name: '源本', parentId: grandparent);
       final target = await db.createNotebook(name: '目标');
       final child = await db.createNotebook(name: '子本', parentId: source);
       await db.mergeNotebook(sourceId: source, targetId: target);

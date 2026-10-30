@@ -357,8 +357,7 @@ class _DesktopPageState extends ConsumerState<DesktopPage> {
               // 只有“那年今日”会打开日记：在这几篇里左右翻。
               sequence: DiaryPreviewSequence(
                 ids: <String>[
-                  for (final item in viewData.onThisDayDiaries)
-                    item.diaryId,
+                  for (final item in viewData.onThisDayDiaries) item.diaryId,
                 ],
               ),
             );
@@ -463,9 +462,9 @@ class _DesktopLayoutEmptyState extends ConsumerWidget {
         children: <Widget>[
           Text(
             l10n.desktopLayoutEmptyTitle,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
@@ -482,8 +481,7 @@ class _DesktopLayoutEmptyState extends ConsumerWidget {
               if (settings == null) return;
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) =>
-                      DesktopLayoutPage(settingsService: settings),
+                  builder: (_) => DesktopLayoutPage(settingsService: settings),
                 ),
               );
             },

@@ -112,10 +112,12 @@ void main() {
     );
 
     final typed = extractor.resolveTypedMediaSources(diary);
-    expect(
-      typed.map((media) => media.source),
-      ['/cover.jpg', '/first.jpg', '/clip.mp4', '/rec.m4a'],
-    );
+    expect(typed.map((media) => media.source), [
+      '/cover.jpg',
+      '/first.jpg',
+      '/clip.mp4',
+      '/rec.m4a',
+    ]);
     expect(typed.map((media) => media.kind), [
       GalleryMediaKind.image,
       GalleryMediaKind.image,
@@ -155,10 +157,7 @@ void main() {
     );
 
     final typed = extractor.resolveTypedMediaSources(diary);
-    expect(
-      typed.map((media) => media.source),
-      ['/legacy.mp4', '/valid.jpg'],
-    );
+    expect(typed.map((media) => media.source), ['/legacy.mp4', '/valid.jpg']);
     expect(typed.map((media) => media.kind), [
       GalleryMediaKind.video,
       GalleryMediaKind.image,

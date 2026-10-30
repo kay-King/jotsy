@@ -517,9 +517,7 @@ class _ExploreMediaGalleryPageState
   /// 页里“打开日记”带 diaryId 回来，画廊页再打开那篇日记。
   Future<void> _openVideoPage(ExploreMediaItem item) async {
     final diaryId = await Navigator.of(context).push<String>(
-      MaterialPageRoute<String>(
-        builder: (_) => GalleryVideoPage(item: item),
-      ),
+      MaterialPageRoute<String>(builder: (_) => GalleryVideoPage(item: item)),
     );
     if (diaryId != null && mounted) {
       unawaited(_openDiary(diaryId));
