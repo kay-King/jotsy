@@ -14,7 +14,6 @@ import 'package:node_diary/ui/settings/sections/diary_code_block_style/diary_cod
 import 'package:node_diary/ui/settings/sections/diary_code_block_style/diary_code_theme_card.dart';
 import 'package:node_diary/ui/settings/sections/settings_editor_section.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
-import 'package:node_diary/ui/widgets/app_top_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../support/diary_drafts_harness.dart';
@@ -69,12 +68,16 @@ Future<SettingsService> _pump(
 DiaryCodeBlockStyle _stored(SettingsService settings) =>
     DiaryCodeBlockStyle.decode(settings.diaryCodeBlockStyleRaw);
 
+/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
 Future<void> _openTab(WidgetTester tester, String label) async {
-  await tester.tap(find.widgetWithText(Tab, label));
+  final button = find.text(label);
+  await tester.ensureVisible(button);
+  await tester.pumpAndSettle();
+  await tester.tap(button);
   await tester.pumpAndSettle();
 }
 
-/// 选项列表是懒构建的：目标还没进树时先在当前标签页里向下滚动。
+/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
 Future<void> _reveal(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
     await tester.scrollUntilVisible(
@@ -82,7 +85,7 @@ Future<void> _reveal(WidgetTester tester, Finder finder) async {
       120,
       scrollable: find
           .descendant(
-            of: find.byType(TabBarView),
+            of: find.byType(BottomSheet),
             matching: find.byWidgetPredicate(
               (widget) =>
                   widget is Scrollable &&
@@ -99,6 +102,19 @@ Future<void> _reveal(WidgetTester tester, Finder finder) async {
 Finder _themeCard(DiaryCodeThemeId id) => find.byWidgetPredicate(
   (widget) => widget is DiaryCodeThemeCard && widget.theme == id,
 );
+
+/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+Future<void> _closeSheet(WidgetTester tester) async {
+  await tester.tap(find.byTooltip(_l10n.commonClose));
+  await tester.pumpAndSettle();
+}
+
+/// 打开左上角悬浮菜单，返回其中"重置"菜单项的 Finder。
+Future<Finder> _openMenu(WidgetTester tester) async {
+  await tester.tap(find.byTooltip(_l10n.codeBlockStyleTitle));
+  await tester.pumpAndSettle();
+  return find.widgetWithText(MenuItemButton, _l10n.commonReset);
+}
 
 void main() {
   testWidgets('the preview renders the sample code blocks', (tester) async {
@@ -118,6 +134,7 @@ void main() {
 
   testWidgets('tapping a theme card persists it', (tester) async {
     final settings = await _pump(tester);
+    await _openTab(tester, _l10n.codeBlockStyleTabTheme);
     expect(
       tester
           .widget<DiaryCodeThemeCard>(_themeCard(DiaryCodeThemeId.app))
@@ -142,6 +159,7 @@ void main() {
     tester,
   ) async {
     final settings = await _pump(tester);
+    await _openTab(tester, _l10n.codeBlockStyleTabTheme);
     await tester.tap(find.text(_l10n.codeBlockBrightnessDark));
     await tester.pumpAndSettle();
     expect(_stored(settings).brightness, DiaryCodeBrightness.dark);
@@ -152,11 +170,8 @@ void main() {
     (tester) async {
       final settings = await _pump(tester);
       final toggle = find.byTooltip(_l10n.styleEditorPreviewDark);
-      // 在标题栏里，与“重置”同一行，不为它单独占一行挤占预览。
-      expect(
-        find.descendant(of: find.byType(AppTopBar), matching: toggle),
-        findsOneWidget,
-      );
+      // 在悬浮工具条里，不为它单独占一行挤占预览。
+      expect(toggle, findsOneWidget);
       await tester.tap(toggle);
       await tester.pumpAndSettle();
       expect(find.byTooltip(_l10n.styleEditorPreviewLight), findsOneWidget);
@@ -251,12 +266,14 @@ void main() {
 
   testWidgets('reset restores the defaults and can be undone', (tester) async {
     final settings = await _pump(tester);
+    await _openTab(tester, _l10n.codeBlockStyleTabTheme);
     await _reveal(tester, _themeCard(DiaryCodeThemeId.dracula));
     await tester.tap(_themeCard(DiaryCodeThemeId.dracula));
     await tester.pumpAndSettle();
     expect(_stored(settings).theme, DiaryCodeThemeId.dracula);
 
-    await tester.tap(find.widgetWithText(TextButton, _l10n.commonReset));
+    await _closeSheet(tester);
+    await tester.tap(await _openMenu(tester));
     await tester.pumpAndSettle();
     expect(settings.diaryCodeBlockStyleRaw, isNull);
 

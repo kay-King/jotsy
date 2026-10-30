@@ -335,9 +335,7 @@ class _ColorDot extends StatelessWidget {
           height: 20,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [colorScheme.primary, colorScheme.tertiary],
-            ),
+            color: colorScheme.primary,
           ),
         );
       case _DotVariant.none:

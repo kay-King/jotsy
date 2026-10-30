@@ -586,7 +586,7 @@ String _compileDate(
 /// Delta 的历史正文）的节点写作 `"type":"image"`，一并认出。
 List<String> _mediaPatterns(NotebookMediaKind kind) => switch (kind) {
   NotebookMediaKind.image => const <String>['%"image":%', '%"type":"image"%'],
-  NotebookMediaKind.audio => const <String>['%"audio":%'],
+  NotebookMediaKind.audio => const <String>['%"audio":%', '%"type":"audio"%'],
   NotebookMediaKind.video => const <String>['%"video":%', '%"type":"video"%'],
   NotebookMediaKind.attachment => const <String>[
     '%"attachment":%',
