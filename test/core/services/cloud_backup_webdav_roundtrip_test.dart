@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/audio_embed_codec.dart';
-import 'package:node_diary/core/database/file_embed_codec.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_media.dart';
 import 'package:node_diary/core/services/diary_audio_storage_service.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/core/services/backup_import_models.dart';

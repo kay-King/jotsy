@@ -5,6 +5,7 @@ import 'package:flutter_quill/quill_delta.dart';
 
 import 'diary_blocks/diary_blocks_codec.dart';
 import 'diary_blocks/diary_blocks_from_delta.dart';
+import 'diary_blocks/diary_blocks_media.dart';
 import 'diary_blocks/diary_blocks_to_delta.dart';
 import 'file_embed_codec.dart';
 
@@ -106,15 +107,23 @@ bool diaryDocumentHasVisibleContent(quill.Document document) {
 }
 
 /// Drafts can contain only an attachment, whose plain-text mirror is empty.
-/// Inspect actual Delta embeds rather than counting arbitrary JSON metadata.
+/// Inspect actual embeds rather than counting arbitrary JSON metadata:
+/// Quill Delta ops for the legacy format, block media for the block format.
 bool diaryContentHasEmbeddedContent(String rawContent) {
   try {
-    final delta = jsonDecode(rawContent);
-    if (delta is! List) return false;
-    return delta.any(
-      (op) =>
-          op is Map && op['insert'] is Map && (op['insert'] as Map).isNotEmpty,
-    );
+    final decoded = jsonDecode(rawContent);
+    if (decoded is List) {
+      return decoded.any(
+        (op) =>
+            op is Map && op['insert'] is Map && (op['insert'] as Map).isNotEmpty,
+      );
+    }
+    if (decoded is Map) {
+      // 块文档按媒体嵌入判定；纯元数据 Map（如 {"path": ...}）不是文档，
+      // diaryContentMedia 对它返回空，正好是 false。
+      return diaryContentMedia(rawContent).isNotEmpty;
+    }
+    return false;
   } on FormatException {
     return false;
   }

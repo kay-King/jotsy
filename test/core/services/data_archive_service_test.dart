@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/database/audio_embed_codec.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_media.dart';
 import 'package:node_diary/core/services/data_archive_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:path/path.dart' as p;
