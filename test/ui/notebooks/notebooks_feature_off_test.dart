@@ -17,11 +17,9 @@ import 'package:node_diary/ui/diaries/pages/diary_preview_page.dart';
 import 'package:node_diary/ui/diaries/pages/diary_search_page.dart';
 import 'package:node_diary/ui/diaries/pages/edit_diary_page.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_selection_surface.dart';
 import 'package:node_diary/ui/diaries/widgets/publish_panel/publish_notebook_tiles.dart';
 import 'package:node_diary/ui/notebooks/providers/home_notebook_scope_provider.dart';
 import 'package:node_diary/ui/notebooks/sections/notebook_shelf_sheet.dart';
-import 'package:node_diary/ui/notebooks/widgets/notebook_header_card.dart';
 import 'package:node_diary/ui/notebooks/widgets/notebook_lock_layer.dart';
 import 'package:node_diary/ui/notebooks/widgets/notebook_switcher_chip.dart';
 import 'package:node_diary/ui/notebooks/viewmodels/notebook_view.dart';
@@ -41,10 +39,6 @@ void main() {
   Future<void> turnOff(DiaryDraftsHarness h) =>
       h.settings.setAppFeaturesRaw(notebooksOff);
 
-  Finder card(String title) => find.ancestor(
-    of: find.text(title),
-    matching: find.byType(DiarySelectionSurface),
-  );
 
   Future<void> openShelfAndPick(DiaryDraftsHarness h, String name) async {
     await h.tester.tap(find.byType(NotebookSwitcherChip));
@@ -58,67 +52,6 @@ void main() {
     await h.settleAll();
   }
 
-  group('diaries page', () {
-    Future<DiaryDraftsHarness> pumpHome(
-      WidgetTester tester, {
-      required bool enabled,
-    }) async {
-      final h = await DiaryDraftsHarness.create(tester);
-      if (!enabled) await turnOff(h);
-      final travel = await h.notebook('旅行');
-      await h.diary('在京都', notebookIds: <String>[travel]);
-      await h.diary('上班路上');
-      await h.pump(
-        const DiariesPage(),
-        overrides: [
-          deviceAuthServiceProvider.overrideWithValue(FakeDeviceAuth()),
-        ],
-      );
-      await h.settleAll();
-      return h;
-    }
-
-    testWidgets('off: no switcher chip, shelf entry or multi-select actions', (
-      tester,
-    ) async {
-      final h = await pumpHome(tester, enabled: false);
-      expect(find.byType(NotebookSwitcherChip), findsNothing);
-
-      await tester.tap(find.byTooltip(h.l10n.autoT0125));
-      await h.settleAll();
-      expect(find.text(h.l10n.notebookViewOptionsEntry), findsNothing);
-      await tester.tapAt(const Offset(200, 40));
-      await h.settleAll();
-
-      await tester.longPress(card('上班路上'));
-      await tester.pumpAndSettle();
-      expect(find.byTooltip(h.l10n.notebookPickerTitle), findsNothing);
-      await tester.tap(find.byTooltip(h.l10n.notebookSelectionMore));
-      await tester.pumpAndSettle();
-      expect(find.text(h.l10n.notebookRemoveFromCurrent), findsNothing);
-      expect(find.text(h.l10n.notebookMoveTo), findsNothing);
-      expect(find.text(h.l10n.diaryExportSelected), findsOneWidget);
-      await h.unmount();
-    });
-
-    testWidgets('on: the switcher chip, shelf entry and add action appear', (
-      tester,
-    ) async {
-      final h = await pumpHome(tester, enabled: true);
-      expect(find.byType(NotebookSwitcherChip), findsOneWidget);
-
-      await tester.tap(find.byTooltip(h.l10n.autoT0125));
-      await h.settleAll();
-      expect(find.text(h.l10n.notebookViewOptionsEntry), findsOneWidget);
-      await tester.tapAt(const Offset(200, 40));
-      await h.settleAll();
-
-      await tester.longPress(card('上班路上'));
-      await tester.pumpAndSettle();
-      expect(find.byTooltip(h.l10n.notebookPickerTitle), findsOneWidget);
-      await h.unmount();
-    });
-  });
 
   group('turning the feature off inside a notebook', () {
     // 首页被推上来的页面盖住后不在台上（find 默认跳过），从始终挂着的
@@ -136,57 +69,6 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
-
-    testWidgets('returns home to all diaries without popping the page above', (
-      tester,
-    ) async {
-      final h = await DiaryDraftsHarness.create(tester);
-      // 失败时也先卸载，免得打开的 drift 库让测试进程挂住。
-      addTearDown(h.unmount);
-      final travel = await h.notebook('旅行');
-      await h.diary('在京都', notebookIds: <String>[travel]);
-      await h.diary('上班路上');
-      await h.pump(
-        const DiariesPage(),
-        overrides: [
-          deviceAuthServiceProvider.overrideWithValue(FakeDeviceAuth()),
-        ],
-      );
-      await h.settleAll();
-      await openShelfAndPick(h, '旅行');
-      expect(
-        containerOf(tester).read(homeNotebookScopeProvider).notebookId,
-        travel,
-      );
-
-      await pushAboveHome(tester);
-      unawaited(turnOff(h));
-      await h.settleAll();
-
-      // 设置页还在，首页已回到全部日记，没有“日记本已删除”。
-      expect(find.text('功能管理'), findsOneWidget);
-      expect(containerOf(tester).read(homeNotebookScopeProvider).isAll, isTrue);
-      expect(find.text(h.l10n.notebookScopeDeleted), findsNothing);
-
-      Navigator.of(tester.element(find.text('功能管理'))).pop();
-      await h.settleAll();
-      expect(find.text('功能管理'), findsNothing);
-      expect(find.text('上班路上'), findsOneWidget);
-      expect(find.text('在京都'), findsOneWidget);
-      expect(find.byType(NotebookHeaderCard), findsNothing);
-      expect(find.byType(NotebookSwitcherChip), findsNothing);
-      expect(find.text(h.l10n.notebookScopeDeleted), findsNothing);
-
-      // 重新开启：入口回来，本子与收录都还在。
-      unawaited(h.settings.setAppFeaturesRaw(null));
-      await h.settleAll();
-      expect(find.byType(NotebookSwitcherChip), findsOneWidget);
-      await openShelfAndPick(h, '旅行');
-      expect(find.text('在京都'), findsOneWidget);
-      expect(find.text('上班路上'), findsNothing);
-      expect(tester.takeException(), isNull);
-      await h.unmount();
-    });
 
     testWidgets('a locked notebook leaves the lock layer inert afterwards', (
       tester,

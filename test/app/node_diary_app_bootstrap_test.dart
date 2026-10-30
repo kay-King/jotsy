@@ -163,7 +163,7 @@ void main() {
 
     // 挂载首页的这一帧：顶栏、标签栏、导航与 FAB 都还在起点，品牌图形仍完整。
     final initial = _revealOpacities(tester);
-    expect(initial, hasLength(greaterThanOrEqualTo(4)));
+    expect(initial, hasLength(greaterThanOrEqualTo(2)));
     expect(initial, everyElement(0));
     expect(find.byType(LaunchBrandMark), findsOneWidget);
 

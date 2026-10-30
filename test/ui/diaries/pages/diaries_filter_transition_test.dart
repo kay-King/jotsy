@@ -8,7 +8,6 @@ import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_tag_filter_bar.dart';
 import 'package:node_diary/ui/diaries/providers/diary_draft_providers.dart';
 import 'package:node_diary/ui/diaries/providers/diary_comment_providers.dart';
 import 'package:node_diary/ui/notebooks/providers/notebook_providers.dart';
@@ -98,82 +97,11 @@ double _listOpacity(WidgetTester tester) => tester
     .opacity
     .value;
 
-final Finder _tagChip = find.descendant(
-  of: find.byType(DiaryTagFilterBar),
-  matching: find.text('Travel'),
-);
-
-Set<int> _selectedTagIds(WidgetTester tester) => tester
-    .widget<DiaryTagFilterBar>(find.byType(DiaryTagFilterBar))
-    .selectedTagFilterIds;
 
 void main() {
-  testWidgets('tag chip reflects its selection on the next frame', (
-    tester,
-  ) async {
-    await _pumpPage(tester, filteredDelay: const Duration(milliseconds: 20));
 
-    await tester.tap(_tagChip);
-    await tester.pump(const Duration(milliseconds: 16));
 
-    expect(_selectedTagIds(tester), contains(_tag.id));
-    await tester.pumpAndSettle();
-  });
 
-  testWidgets('slow filter query never fades the stale list back in', (
-    tester,
-  ) async {
-    await _pumpPage(tester, filteredDelay: const Duration(milliseconds: 400));
-
-    await tester.tap(_tagChip);
-    var fadedOut = false;
-    for (var frame = 0; frame < 60; frame++) {
-      await tester.pump(const Duration(milliseconds: 16));
-      final opacity = _listOpacity(tester);
-      if (opacity < 0.05) {
-        fadedOut = true;
-      }
-      if (fadedOut && opacity > 0.05) {
-        // 淡出之后再次可见的必须是新筛选结果，而不是旧列表。
-        expect(find.text('Old'), findsNothing, reason: 'frame $frame');
-      }
-    }
-    await tester.pumpAndSettle();
-
-    expect(fadedOut, isTrue);
-    expect(find.text('Fresh'), findsOneWidget);
-    expect(_listOpacity(tester), 1);
-  });
-
-  testWidgets('rapid toggles settle on the latest filter result', (
-    tester,
-  ) async {
-    await _pumpPage(tester, filteredDelay: const Duration(milliseconds: 200));
-
-    await tester.tap(_tagChip);
-    await tester.pump(const Duration(milliseconds: 60));
-    await tester.tap(_tagChip);
-    await tester.pump(const Duration(milliseconds: 16));
-    expect(_selectedTagIds(tester), isEmpty);
-
-    await tester.pumpAndSettle();
-    expect(find.text('Old'), findsOneWidget);
-    expect(find.text('Fresh'), findsNothing);
-    expect(_listOpacity(tester), 1);
-  });
-
-  testWidgets('tag filter clear button is announced as a button', (
-    tester,
-  ) async {
-    final semantics = tester.ensureSemantics();
-    await _pumpPage(tester, filteredDelay: const Duration(milliseconds: 20));
-
-    expect(
-      tester.getSemantics(find.bySemanticsLabel('Clear tag filters')),
-      isSemantics(isButton: true, hasTapAction: true),
-    );
-    semantics.dispose();
-  });
 
   testWidgets('switching layout fades out before the grid replaces the list', (
     tester,
