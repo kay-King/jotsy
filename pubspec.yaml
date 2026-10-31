@@ -29,12 +29,6 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   flutter_quill: ^11.6.0
   flutter_quill_extensions: ^11.0.0
-  # AppFlowy 编辑器（块编辑器迁移中）：固定到 main 的提交 01eccc6，
-  # pub 的 6.2.0 缺少 Flutter ≥ 3.44 的输入接口修复（上游 #1204）。
-  appflowy_editor:
-    git:
-      url: https://github.com/AppFlowy-IO/appflowy-editor.git
-      ref: 01eccc6ee36bd07698bd80915289fe7070478cd2
   file_picker: ^10.3.10
   smooth_sheets: ^0.17.0
   geolocator: ^14.0.2
