@@ -294,7 +294,7 @@
   "@settingsMoodOptionsTitle": {
     "description": "Setting title for customizing the fixed 10 mood emojis."
   },
-  "settingsMoodOptionsSubtitle": "Customize 10 mood choices",
+  "settingsMoodOptionsSubtitle": "Customize 10 mood choices and colors",
   "@settingsMoodOptionsSubtitle": {
     "description": "Subtitle for mood emoji setting entry."
   },
@@ -324,6 +324,27 @@
       }
     },
     "description": "Error message when saving mood emoji settings fails."
+  },
+  "settingsMoodColorPickerTitle": "Choose mood color",
+  "@settingsMoodColorPickerTitle": {
+    "description": "Title of the mood color picker."
+  },
+  "settingsMoodColorPickerRecommended": "Suggested",
+  "@settingsMoodColorPickerRecommended": {
+    "description": "Mood color picker: suggested colors section title."
+  },
+  "settingsMoodColorPickerMore": "More colors",
+  "@settingsMoodColorPickerMore": {
+    "description": "Mood color picker: more colors section title."
+  },
+  "settingsMoodColorSemanticLabel": "Color of mood {index}",
+  "@settingsMoodColorSemanticLabel": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      }
+    },
+    "description": "Accessibility label of a mood color swatch."
   },
   "settingsDataPrivacy": "Data & Privacy",
   "@settingsDataPrivacy": {
@@ -747,6 +768,26 @@
   "@aboutQqFeedbackGroupSubtitle": {
     "description": "QQ feedback group number shown on the About page."
   },
+  "aboutChangelog": "Changelog",
+  "@aboutChangelog": {
+    "description": "About page: changelog entry title."
+  },
+  "aboutChangelogSubtitle": "Past updates, readable offline",
+  "@aboutChangelogSubtitle": {
+    "description": "About page: changelog entry subtitle."
+  },
+  "changelogTitle": "Changelog",
+  "@changelogTitle": {
+    "description": "Changelog page title."
+  },
+  "changelogExpandAll": "Show all",
+  "@changelogExpandAll": {
+    "description": "Changelog card: expand to show the full notes."
+  },
+  "changelogCollapse": "Collapse",
+  "@changelogCollapse": {
+    "description": "Changelog card: collapse the full notes."
+  },
   "aboutQqFeedbackGroupCopied": "QQ group number copied to clipboard",
   "@aboutQqFeedbackGroupCopied": {
     "description": "Snackbar shown after copying the QQ feedback group number."
@@ -980,6 +1021,38 @@
   "appLockAuthReason": "Please authenticate to unlock the app",
   "@appLockAuthReason": {
     "description": "Reason shown in the system authentication prompt for app lock."
+  },
+  "diaryMentionNoMatch": "No matching diaries or notebooks",
+  "@diaryMentionNoMatch": {
+    "description": "Empty state of the @ mention candidate menu: nothing matches the query."
+  },
+  "linkCardSlashItem": "Diary card",
+  "@linkCardSlashItem": {
+    "description": "Slash menu item that inserts a diary link card block."
+  },
+  "linkCardPickTitle": "Choose a diary to insert",
+  "@linkCardPickTitle": {
+    "description": "Title of the diary picker sheet opened from the slash menu diary card item."
+  },
+  "linkCardPickSearchHint": "Search diary titles",
+  "@linkCardPickSearchHint": {
+    "description": "Hint of the search field in the diary card picker sheet."
+  },
+  "linkCardOpen": "Open diary",
+  "@linkCardOpen": {
+    "description": "Menu item on a diary link card: open the linked diary."
+  },
+  "linkCardDelete": "Delete card",
+  "@linkCardDelete": {
+    "description": "Menu item on a diary link card: remove the card block from the text."
+  },
+  "linkCardMissing": "This diary no longer exists",
+  "@linkCardMissing": {
+    "description": "Placeholder on a diary link card whose linked diary cannot be read."
+  },
+  "backlinksTitle": "Diaries mentioning this one",
+  "@backlinksTitle": {
+    "description": "Section title at the end of the preview listing diaries that link to this one."
   },
   "autoT0001": "Loading app",
   "@autoT0001": {
@@ -2590,6 +2663,18 @@
   "diaryToolbarOverflowDivider": "Tools below go into More",
   "@diaryToolbarOverflowDivider": {
     "description": "Divider in the toolbar order settings page. Tools above it stay on the editor toolbar row; tools below it are in the More panel, based on the current screen width."
+  },
+  "diaryToolbarInsertTable": "Insert table",
+  "@diaryToolbarInsertTable": {
+    "description": "Toolbar action for inserting a table into diary content."
+  },
+  "diaryToolbarToggleList": "Toggle block",
+  "@diaryToolbarToggleList": {
+    "description": "Toolbar action for inserting a collapsible toggle block."
+  },
+  "diaryToolbarCallout": "Callout",
+  "@diaryToolbarCallout": {
+    "description": "Toolbar action for inserting a callout block."
   },
   "backupBusyInspect": "Reading file...",
   "@backupBusyInspect": {
@@ -7515,6 +7600,34 @@
   "diaryPreviewStyleLongImageFull": "Full",
   "@diaryPreviewStyleLongImageFull": {
     "description": "Long images: show the whole image at column width."
+  },
+  "diaryPreviewStyleColorIntensity": "Color intensity",
+  "@diaryPreviewStyleColorIntensity": {
+    "description": "Diary preview style settings: color intensity for the mood seed."
+  },
+  "diaryPreviewStyleColorIntensityHint": "How strongly the mood color is applied; Soft looks close to before.",
+  "@diaryPreviewStyleColorIntensityHint": {
+    "description": "Diary preview style settings: note under color intensity."
+  },
+  "diaryPreviewStyleIntensitySoft": "Soft",
+  "@diaryPreviewStyleIntensitySoft": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleIntensityOriginal": "Original",
+  "@diaryPreviewStyleIntensityOriginal": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleIntensityVivid": "Vivid",
+  "@diaryPreviewStyleIntensityVivid": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleTintPaper": "Tint paper with seed",
+  "@diaryPreviewStyleTintPaper": {
+    "description": "Diary preview style settings: tint the theme paper with the seed color."
+  },
+  "diaryPreviewStyleTintPaperSubtitle": "Only applies when the paper is the theme paper.",
+  "@diaryPreviewStyleTintPaperSubtitle": {
+    "description": "Diary preview style settings: note under tint paper with seed."
   },
   "diaryDraftsTitle": "Drafts",
   "@diaryDraftsTitle": {

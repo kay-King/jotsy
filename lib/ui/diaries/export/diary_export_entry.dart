@@ -1,7 +1,9 @@
+import 'package:appflowy_editor/appflowy_editor.dart' as af;
 import 'package:flutter/foundation.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/content_codec.dart';
+import '../../../core/database/diary_blocks/diary_blocks_from_delta.dart';
 import '../../../utils/text_stats.dart';
 import '../models/diary_context_info.dart';
 import 'diary_export_blocks.dart';
@@ -9,8 +11,10 @@ import 'diary_export_book.dart';
 
 /// 一篇待导出日记的全部素材，从详情解析一次，各写出器只读不改。
 ///
-/// [deltaOps] 保留给 PDF（经 flutter_quill_to_pdf 渲染，样式更全），其余
-/// 格式统一读 [blocks]。旧版正文由 [decodeDiaryContentToDocument] 转成 Delta。
+/// [document] 为 AppFlowy Document（PDF 直接渲染）；[blocks] 为
+/// [ExportBlockParser] 解析的块（Markdown / HTML / Word / 纯文本等格式用）；
+/// [deltaOps] 保留给仍需 Delta 的旧链路。旧版正文由
+/// [decodeDiaryContentToAppFlowyDocument] 收敛三代格式。
 @immutable
 class DiaryExportEntry {
   const DiaryExportEntry({
@@ -18,6 +22,7 @@ class DiaryExportEntry {
     required this.title,
     required this.createdAt,
     required this.updatedAt,
+    required this.document,
     required this.deltaOps,
     required this.blocks,
     required this.wordCount,
@@ -34,6 +39,7 @@ class DiaryExportEntry {
       title: diary.title,
       createdAt: diary.createdAt,
       updatedAt: diary.updatedAt,
+      document: decodeDiaryContentToAppFlowyDocument(diary.content),
       deltaOps: decodeDiaryContentToDocument(diary.content).toDelta().toJson(),
       wordCount: DiaryWordCounts.of(
         diaryId: diary.diaryId,
@@ -52,6 +58,7 @@ class DiaryExportEntry {
     required DateTime createdAt,
     required DateTime updatedAt,
     required List<dynamic> deltaOps,
+    af.Document? document,
     int? wordCount,
     List<String> tagNames = const <String>[],
     String? cover,
@@ -59,11 +66,15 @@ class DiaryExportEntry {
   }) {
     final blocks = ExportBlockParser.parse(deltaOps);
     final normalizedCover = cover?.trim();
+    // 测试等只给 deltaOps 的调用方：从 Delta 经块文档转出 AppFlowy Document，
+    // 保证 PDF 写出器能拿到真实内容；正式链路一律经 fromDetail 传入。
+    final afDocument = document ?? _documentFromDeltaOps(deltaOps);
     return DiaryExportEntry(
       diaryId: diaryId,
       title: title.trim(),
       createdAt: createdAt,
       updatedAt: updatedAt,
+      document: afDocument,
       deltaOps: List<dynamic>.unmodifiable(deltaOps),
       blocks: blocks,
       wordCount:
@@ -83,12 +94,27 @@ class DiaryExportEntry {
     );
   }
 
+  /// 从 Quill Delta ops 经块文档转出 AppFlowy Document（测试兼容用）。
+  static af.Document _documentFromDeltaOps(List<dynamic> deltaOps) {
+    try {
+      final blocks = diaryBlocksFromQuillOps(
+        deltaOps.cast<Object?>(),
+      );
+      return af.Document.fromJson(blocks);
+    } catch (_) {
+      return af.Document.blank();
+    }
+  }
+
   final String diaryId;
 
   /// 去掉首尾空白的标题，可能为空（写出器回落“无标题”）。
   final String title;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// AppFlowy Document：PDF 写出器直接渲染，不经过 Quill。
+  final af.Document document;
   final List<dynamic> deltaOps;
   final List<ExportBlock> blocks;
 

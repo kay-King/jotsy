@@ -31,6 +31,9 @@ enum DiaryToolbarItem {
   link,
   currentTime,
   recording,
+  table,
+  toggleList,
+  callout,
 }
 
 /// 默认工具栏顺序（当用户未配置或配置异常时兜底）。
@@ -59,6 +62,10 @@ const List<DiaryToolbarItem> kDefaultDiaryToolbarOrder = <DiaryToolbarItem>[
   DiaryToolbarItem.indent,
   DiaryToolbarItem.inlineCode,
   DiaryToolbarItem.codeBlock,
+  // v0.10.0 新工具：排在后半段。
+  DiaryToolbarItem.table,
+  DiaryToolbarItem.toggleList,
+  DiaryToolbarItem.callout,
 ];
 
 extension DiaryToolbarItemX on DiaryToolbarItem {
@@ -88,6 +95,9 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.link => 'link',
       DiaryToolbarItem.currentTime => 'current_time',
       DiaryToolbarItem.recording => 'recording',
+      DiaryToolbarItem.table => 'table',
+      DiaryToolbarItem.toggleList => 'toggle_list',
+      DiaryToolbarItem.callout => 'callout',
     };
   }
 
@@ -117,6 +127,9 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.link => FontAwesomeIcons.link,
       DiaryToolbarItem.currentTime => FontAwesomeIcons.clock,
       DiaryToolbarItem.recording => FontAwesomeIcons.microphone,
+      DiaryToolbarItem.table => FontAwesomeIcons.table,
+      DiaryToolbarItem.toggleList => FontAwesomeIcons.squareCaretDown,
+      DiaryToolbarItem.callout => FontAwesomeIcons.circleInfo,
     };
   }
 
@@ -145,6 +158,9 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.link => l10n.autoT0024,
       DiaryToolbarItem.currentTime => l10n.diaryToolbarInsertCurrentTime,
       DiaryToolbarItem.recording => l10n.diaryToolbarRecording,
+      DiaryToolbarItem.table => l10n.diaryToolbarInsertTable,
+      DiaryToolbarItem.toggleList => l10n.diaryToolbarToggleList,
+      DiaryToolbarItem.callout => l10n.diaryToolbarCallout,
     };
   }
 }

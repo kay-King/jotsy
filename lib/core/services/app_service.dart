@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/provider_retention.dart';
 import '../database/app_database.dart';
+import '../../ui/settings/models/mood_palette.dart';
 import 'amap_config_channel.dart';
 import 'app_update_service.dart';
 import 'cloud_backup_service.dart';
@@ -103,18 +104,41 @@ final weatherServiceProvider = FutureProvider<QWeatherWeatherService?>((
 ///
 /// SettingsService 通过 ValueNotifier 暴露局部设置变化，这里桥接成 Riverpod
 /// StreamProvider，让发布/编辑面板、日历和探索页能在用户保存配置后即时刷新。
+/// 符号唯一来源是心情色板，这里监听色板 notifier。
 final moodOptionsProvider = StreamProvider<List<String>>((Ref ref) async* {
   final settings = await ref.watch(settingsServiceProvider.future);
-  yield settings.moodOptions;
+  yield settings.moodPalette.symbols;
 
   final controller = StreamController<List<String>>();
   void listener() {
-    controller.add(settings.moodOptions);
+    controller.add(settings.moodPalette.symbols);
   }
 
-  settings.moodOptionsRawNotifier.addListener(listener);
+  settings.moodPaletteRawNotifier.addListener(listener);
   ref.onDispose(() {
-    settings.moodOptionsRawNotifier.removeListener(listener);
+    settings.moodPaletteRawNotifier.removeListener(listener);
+    unawaited(controller.close());
+  });
+
+  yield* controller.stream;
+});
+
+/// 当前心情色板（符号 + 颜色）provider。
+///
+/// 预览页配色基调选“心情”时按这里的颜色着色；与 [moodOptionsProvider] 同一
+/// notifier 驱动，两处读取永远一致。
+final moodPaletteProvider = StreamProvider<MoodPalette>((Ref ref) async* {
+  final settings = await ref.watch(settingsServiceProvider.future);
+  yield settings.moodPalette;
+
+  final controller = StreamController<MoodPalette>();
+  void listener() {
+    controller.add(settings.moodPalette);
+  }
+
+  settings.moodPaletteRawNotifier.addListener(listener);
+  ref.onDispose(() {
+    settings.moodPaletteRawNotifier.removeListener(listener);
     unawaited(controller.close());
   });
 

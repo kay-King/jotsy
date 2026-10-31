@@ -503,7 +503,7 @@ abstract class AppLocalizations {
   /// Subtitle for mood emoji setting entry.
   ///
   /// In en, this message translates to:
-  /// **'Customize 10 mood choices'**
+  /// **'Customize 10 mood choices and colors'**
   String get settingsMoodOptionsSubtitle;
 
   /// Label for one mood emoji input slot.
@@ -523,6 +523,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save mood emojis failed: {error}'**
   String settingsMoodOptionsSaveFailed(String error);
+
+  /// Title of the mood color picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose mood color'**
+  String get settingsMoodColorPickerTitle;
+
+  /// Mood color picker: suggested colors section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get settingsMoodColorPickerRecommended;
+
+  /// Mood color picker: more colors section title.
+  ///
+  /// In en, this message translates to:
+  /// **'More colors'**
+  String get settingsMoodColorPickerMore;
+
+  /// Accessibility label of a mood color swatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Color of mood {index}'**
+  String settingsMoodColorSemanticLabel(String index);
 
   /// Settings entry label for data and privacy section.
   ///
@@ -1070,6 +1094,36 @@ abstract class AppLocalizations {
   /// **'678136434'**
   String get aboutQqFeedbackGroupSubtitle;
 
+  /// About page: changelog entry title.
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog'**
+  String get aboutChangelog;
+
+  /// About page: changelog entry subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Past updates, readable offline'**
+  String get aboutChangelogSubtitle;
+
+  /// Changelog page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Changelog'**
+  String get changelogTitle;
+
+  /// Changelog card: expand to show the full notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get changelogExpandAll;
+
+  /// Changelog card: collapse the full notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get changelogCollapse;
+
   /// Snackbar shown after copying the QQ feedback group number.
   ///
   /// In en, this message translates to:
@@ -1363,6 +1417,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please authenticate to unlock the app'**
   String get appLockAuthReason;
+
+  /// Empty state of the @ mention candidate menu: nothing matches the query.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching diaries or notebooks'**
+  String get diaryMentionNoMatch;
+
+  /// Slash menu item that inserts a diary link card block.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary card'**
+  String get linkCardSlashItem;
+
+  /// Title of the diary picker sheet opened from the slash menu diary card item.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a diary to insert'**
+  String get linkCardPickTitle;
+
+  /// Hint of the search field in the diary card picker sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Search diary titles'**
+  String get linkCardPickSearchHint;
+
+  /// Menu item on a diary link card: open the linked diary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open diary'**
+  String get linkCardOpen;
+
+  /// Menu item on a diary link card: remove the card block from the text.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete card'**
+  String get linkCardDelete;
+
+  /// Placeholder on a diary link card whose linked diary cannot be read.
+  ///
+  /// In en, this message translates to:
+  /// **'This diary no longer exists'**
+  String get linkCardMissing;
+
+  /// Section title at the end of the preview listing diaries that link to this one.
+  ///
+  /// In en, this message translates to:
+  /// **'Diaries mentioning this one'**
+  String get backlinksTitle;
 
   /// Auto-generated metadata for autoT0001.
   ///
@@ -3469,6 +3571,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tools below go into More'**
   String get diaryToolbarOverflowDivider;
+
+  /// Toolbar action for inserting a table into diary content.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert table'**
+  String get diaryToolbarInsertTable;
+
+  /// Toolbar action for inserting a collapsible toggle block.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle block'**
+  String get diaryToolbarToggleList;
+
+  /// Toolbar action for inserting a callout block.
+  ///
+  /// In en, this message translates to:
+  /// **'Callout'**
+  String get diaryToolbarCallout;
 
   /// Busy label while the selected backup or diary file is read and checked before choosing how to import it.
   ///
@@ -10063,6 +10183,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full'**
   String get diaryPreviewStyleLongImageFull;
+
+  /// Diary preview style settings: color intensity for the mood seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Color intensity'**
+  String get diaryPreviewStyleColorIntensity;
+
+  /// Diary preview style settings: note under color intensity.
+  ///
+  /// In en, this message translates to:
+  /// **'How strongly the mood color is applied; Soft looks close to before.'**
+  String get diaryPreviewStyleColorIntensityHint;
+
+  /// Diary preview style settings: color intensity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get diaryPreviewStyleIntensitySoft;
+
+  /// Diary preview style settings: color intensity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get diaryPreviewStyleIntensityOriginal;
+
+  /// Diary preview style settings: color intensity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Vivid'**
+  String get diaryPreviewStyleIntensityVivid;
+
+  /// Diary preview style settings: tint the theme paper with the seed color.
+  ///
+  /// In en, this message translates to:
+  /// **'Tint paper with seed'**
+  String get diaryPreviewStyleTintPaper;
+
+  /// Diary preview style settings: note under tint paper with seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Only applies when the paper is the theme paper.'**
+  String get diaryPreviewStyleTintPaperSubtitle;
 
   /// Title of the drafts page; also the entry name in the home header and settings.
   ///

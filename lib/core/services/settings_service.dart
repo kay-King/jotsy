@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'diary_typography.dart';
+import '../../ui/settings/models/mood_palette.dart';
 
 export 'diary_typography.dart';
 
@@ -40,18 +41,10 @@ class SettingsService {
   static const int maxDiaryCardTagLimit = 20;
 
   static const int moodOptionCount = 10;
-  static const List<String> defaultMoodOptions = <String>[
-    '😭',
-    '😢',
-    '😞',
-    '😕',
-    '😐',
-    '🙂',
-    '😊',
-    '😄',
-    '😀',
-    '🤩',
-  ];
+
+  /// 默认心情符号（从低落到高兴）；唯一来源是 [MoodPalette.defaultSymbols]，
+  /// 这里只做兼容别名。
+  static const List<String> defaultMoodOptions = MoodPalette.defaultSymbols;
   SettingsService._({
     required this._prefs,
     required ThemeMode mode,
@@ -69,6 +62,7 @@ class SettingsService {
     required String? diaryToolbarHiddenItemsRaw,
     required String? diaryToolbarCurrentTimeFormatRaw,
     required String? moodOptionsRaw,
+    required String? moodPaletteRaw,
     required String? calendarDisplayOptionsRaw,
     required String? diaryCardStyleRaw,
     required String? diaryPreviewStyleRaw,
@@ -113,6 +107,7 @@ class SettingsService {
          diaryToolbarCurrentTimeFormatRaw,
        ),
        moodOptionsRawNotifier = ValueNotifier<String?>(moodOptionsRaw),
+       moodPaletteRawNotifier = ValueNotifier<String?>(moodPaletteRaw),
        calendarDisplayOptionsRawNotifier = ValueNotifier<String?>(
          calendarDisplayOptionsRaw,
        ),
@@ -161,6 +156,10 @@ class SettingsService {
   final ValueNotifier<String?> diaryToolbarHiddenItemsRawNotifier;
   final ValueNotifier<String?> diaryToolbarCurrentTimeFormatRawNotifier;
   final ValueNotifier<String?> moodOptionsRawNotifier;
+
+  /// 心情色板（单个 JSON 字符串：10 个符号 + 10 个颜色）；解析与默认值由
+  /// [MoodPalette] 负责，服务层只保存原文。
+  final ValueNotifier<String?> moodPaletteRawNotifier;
 
   /// 日历页显示选项（单个 JSON 字符串）；解析与默认值由日历模块负责，
   /// 服务层只保存原文，不依赖 UI 模型。
@@ -234,6 +233,9 @@ class SettingsService {
   static const _keyDiaryToolbarCurrentTimeFormat =
       'app.settings.diary_toolbar_current_time_format';
   static const _keyMoodOptions = 'app.settings.mood_options';
+
+  /// 心情色板：10 个心情符号 + 各自的颜色，单个 JSON 键，随备份导出。
+  static const _keyMoodPalette = 'app.settings.mood_palette';
   static const _keyTagFilterMemoryEnabled =
       'app.settings.tag_filter_memory_enabled';
   static const _keyDayPhotoSuggestionsEnabled =
@@ -347,6 +349,7 @@ class SettingsService {
           prefs.getString(_keyDiaryToolbarCurrentTimeFormat) ??
           _defaultDiaryToolbarCurrentTimeFormat,
       moodOptionsRaw: prefs.getString(_keyMoodOptions),
+      moodPaletteRaw: prefs.getString(_keyMoodPalette),
       calendarDisplayOptionsRaw: prefs.getString(_keyCalendarDisplayOptions),
       diaryCardStyleRaw: storedDiaryCardStyle is String
           ? storedDiaryCardStyle
@@ -431,6 +434,23 @@ class SettingsService {
   String? get diaryToolbarCurrentTimeFormatRaw =>
       diaryToolbarCurrentTimeFormatRawNotifier.value;
   String? get moodOptionsRaw => moodOptionsRawNotifier.value;
+
+  /// 心情色板原文（单个 JSON 字符串）；null 表示未自定义。
+  String? get moodPaletteRaw => moodPaletteRawNotifier.value;
+
+  /// 当前心情色板。旧版只有符号键（`_keyMoodOptions`）时迁移符号、颜色沿用
+  /// 默认；下次保存时写入新键并清理旧键。
+  MoodPalette get moodPalette {
+    final raw = moodPaletteRawNotifier.value;
+    if (raw != null) {
+      return MoodPalette.decode(raw);
+    }
+    final legacyRaw = _prefs.getString(_keyMoodOptions);
+    if (legacyRaw != null) {
+      return MoodPalette(symbols: decodeMoodOptions(legacyRaw));
+    }
+    return MoodPalette.defaults;
+  }
   String? get calendarDisplayOptionsRaw =>
       calendarDisplayOptionsRawNotifier.value;
   String? get diaryCardStyleRaw => diaryCardStyleRawNotifier.value;
@@ -449,8 +469,8 @@ class SettingsService {
   String? get profileAvatarPath => profileAvatarPathNotifier.value;
   String get profileBio => profileBioNotifier.value;
   String? get profileCoverPath => profileCoverPathNotifier.value;
-  List<String> get moodOptions =>
-      decodeMoodOptions(moodOptionsRawNotifier.value);
+  /// 当前 10 个心情符号；唯一来源是心情色板（旧符号键在首次读取时迁移）。
+  List<String> get moodOptions => moodPalette.symbols;
   int get diaryCardTagLimit => diaryCardTagLimitNotifier.value;
   String? get tagOrderRaw => _prefs.getString(_keyTagOrder);
 
@@ -590,15 +610,43 @@ class SettingsService {
     );
   }
 
-  Future<void> setMoodOptions(List<String> options) async {
-    final encoded = encodeMoodOptions(options);
-    moodOptionsRawNotifier.value = encoded;
-    await _prefs.setString(_keyMoodOptions, encoded);
+  /// 保存心情色板；与默认完全相同时移除该键。保存后旧符号键不再使用，
+  /// 一并清理，避免两处符号打架。
+  Future<void> setMoodPalette(MoodPalette palette) async {
+    final encoded = palette.encode();
+    moodPaletteRawNotifier.value = encoded;
+    if (encoded == null) {
+      await _writePreference(_prefs.remove(_keyMoodPalette));
+    } else {
+      await _writePreference(_prefs.setString(_keyMoodPalette, encoded));
+    }
+    if (_prefs.containsKey(_keyMoodOptions)) {
+      await _prefs.remove(_keyMoodOptions);
+      moodOptionsRawNotifier.value = null;
+    }
   }
 
+  /// 备份恢复用的原始值写入：先解码再保存，损坏的值按默认处理、不原样落盘；
+  /// null 表示恢复默认（删键）。
+  Future<void> setMoodPaletteRaw(String? raw) async {
+    await setMoodPalette(MoodPalette.decode(raw));
+  }
+
+  /// 重置心情色板：符号与颜色一起恢复默认。
+  Future<void> resetMoodPalette() async {
+    await setMoodPalette(MoodPalette.defaults);
+  }
+
+  /// 兼容旧调用：只改符号，颜色保持当前色板的值。
+  Future<void> setMoodOptions(List<String> options) async {
+    await setMoodPalette(
+      MoodPalette(symbols: options, colors: moodPalette.colors),
+    );
+  }
+
+  /// 兼容旧调用：只重置符号，颜色保持当前色板的值。
   Future<void> resetMoodOptions() async {
-    moodOptionsRawNotifier.value = null;
-    await _prefs.remove(_keyMoodOptions);
+    await setMoodPalette(MoodPalette(colors: moodPalette.colors));
   }
 
   /// 保存日历显示选项；空值移除该键，回到默认选项。

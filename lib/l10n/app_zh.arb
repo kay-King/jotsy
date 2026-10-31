@@ -294,7 +294,7 @@
   "@settingsMoodOptionsTitle": {
     "description": "设置项：自定义发布/编辑面板中固定 10 个心情符号。"
   },
-  "settingsMoodOptionsSubtitle": "自定义 10 个心情候选",
+  "settingsMoodOptionsSubtitle": "自定义 10 个心情候选与颜色",
   "@settingsMoodOptionsSubtitle": {
     "description": "心情符号设置入口副标题。"
   },
@@ -324,6 +324,27 @@
       }
     },
     "description": "心情符号设置保存失败提示。"
+  },
+  "settingsMoodColorPickerTitle": "选择心情颜色",
+  "@settingsMoodColorPickerTitle": {
+    "description": "Title of the mood color picker."
+  },
+  "settingsMoodColorPickerRecommended": "推荐",
+  "@settingsMoodColorPickerRecommended": {
+    "description": "Mood color picker: suggested colors section title."
+  },
+  "settingsMoodColorPickerMore": "更多颜色",
+  "@settingsMoodColorPickerMore": {
+    "description": "Mood color picker: more colors section title."
+  },
+  "settingsMoodColorSemanticLabel": "心情 {index} 的颜色",
+  "@settingsMoodColorSemanticLabel": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      }
+    },
+    "description": "Accessibility label of a mood color swatch."
   },
   "settingsDataPrivacy": "数据与隐私",
   "@settingsDataPrivacy": {
@@ -747,6 +768,26 @@
   "@aboutQqFeedbackGroupSubtitle": {
     "description": "About 页面 QQ 反馈群群号。"
   },
+  "aboutChangelog": "更新日志",
+  "@aboutChangelog": {
+    "description": "About page: changelog entry title."
+  },
+  "aboutChangelogSubtitle": "查看历次版本更新，离线可看",
+  "@aboutChangelogSubtitle": {
+    "description": "About page: changelog entry subtitle."
+  },
+  "changelogTitle": "更新日志",
+  "@changelogTitle": {
+    "description": "Changelog page title."
+  },
+  "changelogExpandAll": "展开全部",
+  "@changelogExpandAll": {
+    "description": "Changelog card: expand to show the full notes."
+  },
+  "changelogCollapse": "收起",
+  "@changelogCollapse": {
+    "description": "Changelog card: collapse the full notes."
+  },
   "aboutQqFeedbackGroupCopied": "QQ群号已复制到剪贴板",
   "@aboutQqFeedbackGroupCopied": {
     "description": "About 页面复制 QQ 反馈群群号后的提示。"
@@ -980,6 +1021,38 @@
   "appLockAuthReason": "请验证身份以解锁应用",
   "@appLockAuthReason": {
     "description": "应用锁系统验证弹窗中的原因说明。"
+  },
+  "diaryMentionNoMatch": "没有匹配的日记或日记本",
+  "@diaryMentionNoMatch": {
+    "description": "Empty state of the @ mention candidate menu: nothing matches the query."
+  },
+  "linkCardSlashItem": "日记卡片",
+  "@linkCardSlashItem": {
+    "description": "Slash menu item that inserts a diary link card block."
+  },
+  "linkCardPickTitle": "选择要插入的日记",
+  "@linkCardPickTitle": {
+    "description": "Title of the diary picker sheet opened from the slash menu diary card item."
+  },
+  "linkCardPickSearchHint": "搜索日记标题",
+  "@linkCardPickSearchHint": {
+    "description": "Hint of the search field in the diary card picker sheet."
+  },
+  "linkCardOpen": "打开日记",
+  "@linkCardOpen": {
+    "description": "Menu item on a diary link card: open the linked diary."
+  },
+  "linkCardDelete": "删除卡片",
+  "@linkCardDelete": {
+    "description": "Menu item on a diary link card: remove the card block from the text."
+  },
+  "linkCardMissing": "这篇日记不存在或已删除",
+  "@linkCardMissing": {
+    "description": "Placeholder on a diary link card whose linked diary cannot be read."
+  },
+  "backlinksTitle": "提到这篇的日记",
+  "@backlinksTitle": {
+    "description": "Section title at the end of the preview listing diaries that link to this one."
   },
   "autoT0001": "应用加载中",
   "@autoT0001": {
@@ -2590,6 +2663,18 @@
   "diaryToolbarOverflowDivider": "以下收进「更多」",
   "@diaryToolbarOverflowDivider": {
     "description": "Divider in the toolbar order settings page. Tools above it stay on the editor toolbar row; tools below it are in the More panel, based on the current screen width."
+  },
+  "diaryToolbarInsertTable": "插入表格",
+  "@diaryToolbarInsertTable": {
+    "description": "Toolbar action for inserting a table into diary content."
+  },
+  "diaryToolbarToggleList": "折叠块",
+  "@diaryToolbarToggleList": {
+    "description": "Toolbar action for inserting a collapsible toggle block."
+  },
+  "diaryToolbarCallout": "提示块",
+  "@diaryToolbarCallout": {
+    "description": "Toolbar action for inserting a callout block."
   },
   "backupBusyInspect": "正在读取文件...",
   "@backupBusyInspect": {
@@ -7515,6 +7600,34 @@
   "diaryPreviewStyleLongImageFull": "完整显示",
   "@diaryPreviewStyleLongImageFull": {
     "description": "长图显示：按列宽完整展开在正文里。"
+  },
+  "diaryPreviewStyleColorIntensity": "着色强度",
+  "@diaryPreviewStyleColorIntensity": {
+    "description": "Diary preview style settings: color intensity for the mood seed."
+  },
+  "diaryPreviewStyleColorIntensityHint": "心情颜色着色的浓淡程度，柔和与改版前观感接近。",
+  "@diaryPreviewStyleColorIntensityHint": {
+    "description": "Diary preview style settings: note under color intensity."
+  },
+  "diaryPreviewStyleIntensitySoft": "柔和",
+  "@diaryPreviewStyleIntensitySoft": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleIntensityOriginal": "原色",
+  "@diaryPreviewStyleIntensityOriginal": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleIntensityVivid": "鲜明",
+  "@diaryPreviewStyleIntensityVivid": {
+    "description": "Diary preview style settings: color intensity option."
+  },
+  "diaryPreviewStyleTintPaper": "纸张随基调染色",
+  "@diaryPreviewStyleTintPaper": {
+    "description": "Diary preview style settings: tint the theme paper with the seed color."
+  },
+  "diaryPreviewStyleTintPaperSubtitle": "只在纸张为主题底色时生效。",
+  "@diaryPreviewStyleTintPaperSubtitle": {
+    "description": "Diary preview style settings: note under tint paper with seed."
   },
   "diaryDraftsTitle": "草稿箱",
   "@diaryDraftsTitle": {

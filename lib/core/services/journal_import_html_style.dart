@@ -44,6 +44,14 @@ Map<String, Object?> journalHtmlInlineStyle(
   if (RegExp(r'text-decoration[^;]*line-through').hasMatch(lower)) {
     result['strike'] = true;
   }
+  final verticalAlign = journalStyleValue(style, 'vertical-align');
+  if (verticalAlign == 'super') {
+    result['script'] = 'super';
+  } else if (verticalAlign == 'sub') {
+    result['script'] = 'sub';
+  } else if (verticalAlign == 'baseline') {
+    result.remove('script');
+  }
   _setColor(result, 'color', journalStyleValue(style, 'color'), text: true);
   _setColor(
     result,

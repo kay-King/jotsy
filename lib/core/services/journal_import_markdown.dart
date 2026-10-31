@@ -50,6 +50,10 @@ class JournalMarkdownConverter {
   /// 来源里的标签不跨行配对，残留的开标签不能把格式带到下一行。
   final Map<String, int> _htmlFormats = <String, int>{};
 
+  /// 当前行内尚未闭合的上标/下标（`<sup>` → super，`<sub>` → sub），
+  /// 每行开始时清空；内层覆盖外层。
+  String? _htmlScript;
+
   /// 当前行内尚未闭合、带值的 HTML 格式（颜色、背景、字号），按开标签顺序
   /// 排列，内层覆盖外层；同样每行开始时清空。
   final List<({String name, Map<String, Object?> style})> _htmlStyles =
@@ -118,6 +122,7 @@ class JournalMarkdownConverter {
     }
     final (content, attributes) = _classify(line);
     _htmlFormats.clear();
+    _htmlScript = null;
     _htmlStyles.clear();
     final before = writer.lineCount;
     _inline(_inlineParser.parseInline(content), const {}, attributes);
@@ -135,7 +140,7 @@ class JournalMarkdownConverter {
     if (heading != null) {
       _listIndents.clear();
       final level = heading.group(1)!.length;
-      return (heading.group(2)!, {'header': level > 3 ? 3 : level});
+      return (heading.group(2)!, {'header': level.clamp(1, 6)});
     }
     final quote = _quote.firstMatch(line);
     if (quote != null) {
@@ -242,6 +247,15 @@ class JournalMarkdownConverter {
   void _htmlTag(md.Element node, Map<String, Object?> line) {
     final closing = node.attributes['closing'] == 'true';
     final name = node.attributes['name']!;
+    // 上标/下标：带值的 script 属性，内层覆盖外层。
+    if (name == 'sup' || name == 'sub') {
+      if (closing) {
+        _htmlScript = null;
+      } else {
+        _htmlScript = name == 'sup' ? 'super' : 'sub';
+      }
+      return;
+    }
     final attribute = switch (name) {
       'b' || 'strong' => 'bold',
       'i' || 'em' => 'italic',
@@ -295,14 +309,17 @@ class JournalMarkdownConverter {
     }
   }
 
-  Map<String, Object?> _withHtml(Map<String, Object?> inline) =>
-      _htmlFormats.isEmpty && _htmlStyles.isEmpty
-      ? inline
-      : {
-          ...inline,
-          for (final key in _htmlFormats.keys) key: true,
-          for (final entry in _htmlStyles) ...entry.style,
-        };
+  Map<String, Object?> _withHtml(Map<String, Object?> inline) {
+    final script = _htmlScript;
+    return _htmlFormats.isEmpty && _htmlStyles.isEmpty && script == null
+        ? inline
+        : {
+            ...inline,
+            for (final key in _htmlFormats.keys) key: true,
+            if (script != null) 'script': script,
+            for (final entry in _htmlStyles) ...entry.style,
+          };
+  }
 
   /// 图片/音视频引用：经 [resolveEmbed] 转为嵌入；解析不了的本地引用丢弃，
   /// http(s) 图片保留原地址。

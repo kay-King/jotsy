@@ -4,80 +4,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'diary_export_blocks.dart';
 import 'diary_export_pdf_text_effects.dart';
 
-/// PDF 行内格式适配：保留送入插件前的片段边界，以免插件把任意两个
-/// 非空属性表当成相同样式合并。插件仍负责块布局、列表、引用和代码块。
-/// 仅读取已清洗的 Delta；不读取设置、不改原文，也不处理媒体 IO。
-class DiaryPdfInlineSource {
-  DiaryPdfInlineSource(List<dynamic> ops) {
-    final text = StringBuffer();
-    for (final raw in ops) {
-      if (raw is! Map || raw['insert'] is! String) {
-        continue;
-      }
-      final value = raw['insert'] as String;
-      if (value.isEmpty) {
-        continue;
-      }
-      final attributes = raw['attributes'];
-      _runs.add((
-        start: text.length,
-        text: value,
-        attributes: attributes is Map
-            ? Map<String, dynamic>.from(attributes)
-            : const <String, dynamic>{},
-      ));
-      text.write(value);
-    }
-    _text = text.toString();
-  }
-
-  final _runs = <({int start, String text, Map<String, dynamic> attributes})>[];
-  late final String _text;
-  int _offset = 0;
-  int _run = 0;
-
-  /// 按插件实际请求的文字消费原始片段。空行、图片行的换行可能不产生
-  /// 回调，所以从当前游标向前匹配，而不能假设每行恰有一次回调；重复的
-  /// 文字也依次消费，不按内容去重。标题回调同样调用这里保持游标同步。
-  List<ExportInline> take(String text) {
-    if (text.isEmpty) {
-      return const <ExportInline>[];
-    }
-    final start = _text.indexOf(text, _offset);
-    if (start < 0) {
-      throw StateError('PDF text does not match the prepared diary Delta');
-    }
-    final end = start + text.length;
-    final result = <ExportInline>[];
-    while (_run < _runs.length) {
-      final run = _runs[_run];
-      final runEnd = run.start + run.text.length;
-      if (runEnd <= start) {
-        _run++;
-        continue;
-      }
-      if (run.start >= end) {
-        break;
-      }
-      result.add(
-        ExportInline.fromAttributes(
-          run.text.substring(
-            (start - run.start).clamp(0, run.text.length),
-            (end - run.start).clamp(0, run.text.length),
-          ),
-          run.attributes,
-        ),
-      );
-      if (runEnd >= end) {
-        break;
-      }
-      _run++;
-    }
-    _offset = end;
-    return result;
-  }
-}
-
+/// PDF 行内格式构建：把 [ExportInline] 转为带样式的 [pw.TextSpan]。
+///
+/// 由 [DiaryPdfAppFlowyRenderer] 调用，行内样式已在解析时确定。
 pw.TextSpan buildDiaryPdfInline(
   ExportInline run,
   pw.TextStyle base, {

@@ -1,10 +1,13 @@
 part of 'diary_preview_style.dart';
 
-/// 页面与顶栏：配色基调、纸张、边距、正文宽度、顶栏、阅读进度与回到顶部。
+/// 页面与顶栏：配色基调、着色强度、纸张染色、纸张、边距、正文宽度、顶栏、
+/// 阅读进度与回到顶部。
 @immutable
 class DiaryPreviewPageStyle {
   const DiaryPreviewPageStyle({
     this.colorSeed = DiaryPreviewColorSeed.app,
+    this.colorIntensity = DiaryPreviewColorIntensity.soft,
+    this.tintPaper = false,
     this.paper = DiaryPreviewPaper.theme,
     this.horizontalPadding = 16,
     this.limitWidth = false,
@@ -19,6 +22,12 @@ class DiaryPreviewPageStyle {
   });
 
   final DiaryPreviewColorSeed colorSeed;
+
+  /// 配色基调为“心情”时的着色强度。
+  final DiaryPreviewColorIntensity colorIntensity;
+
+  /// 纸张为主题底色时，是否染上一点基调颜色。
+  final bool tintPaper;
 
   final DiaryPreviewPaper paper;
   final double horizontalPadding;
@@ -36,6 +45,8 @@ class DiaryPreviewPageStyle {
 
   DiaryPreviewPageStyle copyWith({
     DiaryPreviewColorSeed? colorSeed,
+    DiaryPreviewColorIntensity? colorIntensity,
+    bool? tintPaper,
     DiaryPreviewPaper? paper,
     double? horizontalPadding,
     bool? limitWidth,
@@ -50,6 +61,8 @@ class DiaryPreviewPageStyle {
   }) {
     return DiaryPreviewPageStyle(
       colorSeed: colorSeed ?? this.colorSeed,
+      colorIntensity: colorIntensity ?? this.colorIntensity,
+      tintPaper: tintPaper ?? this.tintPaper,
       paper: paper ?? this.paper,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       limitWidth: limitWidth ?? this.limitWidth,
@@ -76,6 +89,12 @@ class DiaryPreviewPageStyle {
         json['colorSeed'],
         d.colorSeed,
       ),
+      colorIntensity: StyleJson.enumByName(
+        DiaryPreviewColorIntensity.values,
+        json['colorIntensity'],
+        d.colorIntensity,
+      ),
+      tintPaper: StyleJson.boolean(json['tintPaper'], d.tintPaper),
       paper: StyleJson.enumByName(
         DiaryPreviewPaper.values,
         json['paper'],
@@ -127,6 +146,13 @@ class DiaryPreviewPageStyle {
     const d = DiaryPreviewPageStyle();
     final json = <String, Object>{};
     StyleJson.putEnum(json, 'colorSeed', colorSeed, d.colorSeed);
+    StyleJson.putEnum(
+      json,
+      'colorIntensity',
+      colorIntensity,
+      d.colorIntensity,
+    );
+    StyleJson.put(json, 'tintPaper', tintPaper, d.tintPaper);
     StyleJson.putEnum(json, 'paper', paper, d.paper);
     StyleJson.put(
       json,
@@ -155,6 +181,8 @@ class DiaryPreviewPageStyle {
   bool operator ==(Object other) {
     return other is DiaryPreviewPageStyle &&
         other.colorSeed == colorSeed &&
+        other.colorIntensity == colorIntensity &&
+        other.tintPaper == tintPaper &&
         other.paper == paper &&
         other.horizontalPadding == horizontalPadding &&
         other.limitWidth == limitWidth &&
@@ -171,6 +199,8 @@ class DiaryPreviewPageStyle {
   @override
   int get hashCode => Object.hash(
     colorSeed,
+    colorIntensity,
+    tintPaper,
     paper,
     horizontalPadding,
     limitWidth,

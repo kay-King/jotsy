@@ -40,12 +40,23 @@ class DiaryPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 日记链接（行内 `diary://` 链接 / 日记卡片 / 反向链接）点按后按 id
+    // 再打开一篇预览页。
+    void openDiary(String diaryId) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => DiaryPreviewPage(diaryId: diaryId),
+        ),
+      );
+    }
+
     final sequence = this.sequence;
     if (sequence == null || !sequence.canPage) {
       return DiaryPreviewView(
         diaryId: diaryId,
         initialDetail: initialDetail,
         coverHero: coverHero,
+        onOpenDiary: openDiary,
       );
     }
     return DiaryPreviewPager(
@@ -53,6 +64,7 @@ class DiaryPreviewPage extends StatelessWidget {
       diaryId: diaryId,
       initialDetail: initialDetail,
       coverHero: coverHero,
+      onOpenDiary: openDiary,
     );
   }
 }

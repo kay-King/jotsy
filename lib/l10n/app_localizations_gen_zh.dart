@@ -222,7 +222,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsMoodOptionsTitle => '心情符号';
 
   @override
-  String get settingsMoodOptionsSubtitle => '自定义 10 个心情候选';
+  String get settingsMoodOptionsSubtitle => '自定义 10 个心情候选与颜色';
 
   @override
   String settingsMoodOptionsSlotLabel(String index) {
@@ -237,6 +237,20 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String settingsMoodOptionsSaveFailed(String error) {
     return '保存心情符号失败: $error';
+  }
+
+  @override
+  String get settingsMoodColorPickerTitle => '选择心情颜色';
+
+  @override
+  String get settingsMoodColorPickerRecommended => '推荐';
+
+  @override
+  String get settingsMoodColorPickerMore => '更多颜色';
+
+  @override
+  String settingsMoodColorSemanticLabel(String index) {
+    return '心情 $index 的颜色';
   }
 
   @override
@@ -540,6 +554,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutQqFeedbackGroupSubtitle => '678136434';
 
   @override
+  String get aboutChangelog => '更新日志';
+
+  @override
+  String get aboutChangelogSubtitle => '查看历次版本更新，离线可看';
+
+  @override
+  String get changelogTitle => '更新日志';
+
+  @override
+  String get changelogExpandAll => '展开全部';
+
+  @override
+  String get changelogCollapse => '收起';
+
+  @override
   String get aboutQqFeedbackGroupCopied => 'QQ群号已复制到剪贴板';
 
   @override
@@ -706,6 +735,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appLockAuthReason => '请验证身份以解锁应用';
+
+  @override
+  String get diaryMentionNoMatch => '没有匹配的日记或日记本';
+
+  @override
+  String get linkCardSlashItem => '日记卡片';
+
+  @override
+  String get linkCardPickTitle => '选择要插入的日记';
+
+  @override
+  String get linkCardPickSearchHint => '搜索日记标题';
+
+  @override
+  String get linkCardOpen => '打开日记';
+
+  @override
+  String get linkCardDelete => '删除卡片';
+
+  @override
+  String get linkCardMissing => '这篇日记不存在或已删除';
+
+  @override
+  String get backlinksTitle => '提到这篇的日记';
 
   @override
   String get autoT0001 => '应用加载中';
@@ -1843,6 +1896,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryToolbarOverflowDivider => '以下收进「更多」';
+
+  @override
+  String get diaryToolbarInsertTable => '插入表格';
+
+  @override
+  String get diaryToolbarToggleList => '折叠块';
+
+  @override
+  String get diaryToolbarCallout => '提示块';
 
   @override
   String get backupBusyInspect => '正在读取文件...';
@@ -5449,6 +5511,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diaryPreviewStyleLongImageFull => '完整显示';
+
+  @override
+  String get diaryPreviewStyleColorIntensity => '着色强度';
+
+  @override
+  String get diaryPreviewStyleColorIntensityHint => '心情颜色着色的浓淡程度，柔和与改版前观感接近。';
+
+  @override
+  String get diaryPreviewStyleIntensitySoft => '柔和';
+
+  @override
+  String get diaryPreviewStyleIntensityOriginal => '原色';
+
+  @override
+  String get diaryPreviewStyleIntensityVivid => '鲜明';
+
+  @override
+  String get diaryPreviewStyleTintPaper => '纸张随基调染色';
+
+  @override
+  String get diaryPreviewStyleTintPaperSubtitle => '只在纸张为主题底色时生效。';
 
   @override
   String get diaryDraftsTitle => '草稿箱';

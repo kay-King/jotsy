@@ -38,6 +38,7 @@ import 'package:node_diary/ui/diaries/controllers/diary_code_block_editing.dart'
 import 'package:node_diary/ui/diaries/controllers/diary_video_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_audio_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_day_photos_controller.dart';
+import 'package:node_diary/ui/diaries/controllers/diary_preview_navigation.dart';
 import 'package:node_diary/ui/diaries/pages/publish_diary_page.dart';
 import 'package:node_diary/utils/optional_text.dart';
 import 'package:node_diary/ui/diaries/providers/diary_detail_provider.dart';
@@ -46,6 +47,7 @@ import 'package:node_diary/ui/diaries/providers/diary_typography_provider.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_first_line_indent.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_text_appearance.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_floating_toolbar_surface.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_mention/diary_mention_popup.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_recording_panel.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_media_import_overlay.dart';
@@ -140,6 +142,9 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   final _titleController = TextEditingController();
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _contentFocusNode = FocusNode();
+  // @ 提及 / 块菜单浮层：编辑器滚动时经它重算锚点位置。
+  final GlobalKey<DiaryMentionPopupState> _mentionPopupKey =
+      GlobalKey<DiaryMentionPopupState>();
   // 包住悬浮工具栏：颜色面板里的颜色代码输入框拿到焦点时，正文与标题都失焦，
   // 工具栏仍须留着（它的显示条件含“正在编辑”），否则输入框随之卸载。
   // 自身不可获得焦点，只用来判断焦点是否在工具栏内。
@@ -791,6 +796,9 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
         placeholder: placeholder,
         paragraphSpacing: typography.paragraphSpacing,
         baseFontSize: typography.fontSize,
+        // 日记卡片块点“打开日记”：按 id 再开一篇预览页。
+        onOpenDiary: (String diaryId) =>
+            unawaited(openDiaryPreviewById(context, diaryId)),
       ),
       characterShortcutEvents: [
         _diaryCodeBlockEnterEvent,
@@ -1105,16 +1113,30 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
             children: <Widget>[
               // 软键盘“选择”模式的方向键在 Flutter 3.47 上只会移动光标，这里
               // 为标题与正文补回扩选（见 [SoftKeyboardSelectionKeys]）。
-              SoftKeyboardSelectionKeys(
-                child: _buildEditor(
-                  context,
-                  resolveBottomSpacer: resolveEditorBottomSpacer,
-                  contentLocked: _isEditPanelExpanded || _recordingPanelOpen,
-                  appearance: ref.watch(diaryTextAppearanceProvider),
-                  templatesEnabled: templatesEnabled,
-                  showFloatingToolbar: showFloatingToolbar,
-                  toolbarStacked: toolbarStacked,
+              // 编辑器滚动时 @ 浮层的锚点跟随光标（见 refreshAnchor）。
+              NotificationListener<ScrollNotification>(
+                onNotification: (_) {
+                  _mentionPopupKey.currentState?.refreshAnchor();
+                  return false;
+                },
+                child: SoftKeyboardSelectionKeys(
+                  child: _buildEditor(
+                    context,
+                    resolveBottomSpacer: resolveEditorBottomSpacer,
+                    contentLocked: _isEditPanelExpanded || _recordingPanelOpen,
+                    appearance: ref.watch(diaryTextAppearanceProvider),
+                    templatesEnabled: templatesEnabled,
+                    showFloatingToolbar: showFloatingToolbar,
+                    toolbarStacked: toolbarStacked,
+                  ),
                 ),
+              ),
+              // @ 提及与 / 块菜单的输入浮层：锚点跟随光标，不吃手势。
+              DiaryMentionPopup(
+                key: _mentionPopupKey,
+                editorState: _editorState,
+                excludeDiaryId: widget.diaryId,
+                editorFocusNode: _contentFocusNode,
               ),
               if (showEditMetaPanel &&
                   (!showFloatingToolbar ||
@@ -1571,10 +1593,11 @@ Map<String, BlockComponentBuilder> _diaryBlockComponentBuilders({
   required String placeholder,
   required double paragraphSpacing,
   required double baseFontSize,
+  ValueChanged<String>? onOpenDiary,
 }) {
   return <String, BlockComponentBuilder>{
     ...standardBlockComponentBuilderMap,
-    ...buildDiaryBlockComponentBuilders(),
+    ...buildDiaryBlockComponentBuilders(onOpenDiary: onOpenDiary),
     ParagraphBlockKeys.type: ParagraphBlockComponentBuilder(
       configuration: const BlockComponentConfiguration().copyWith(
         placeholderText: (_) => placeholder,

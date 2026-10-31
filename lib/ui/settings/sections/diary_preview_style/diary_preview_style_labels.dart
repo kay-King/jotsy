@@ -105,6 +105,27 @@ String diaryPreviewPaperLabel(AppLocalizations l10n, DiaryPreviewPaper paper) =>
       DiaryPreviewPaper.ink => l10n.diaryPreviewStylePaperInk,
     };
 
+/// 着色强度三档的图标 + 标签。
+List<ExpressiveIconChoice<DiaryPreviewColorIntensity>>
+diaryPreviewIntensityChoices(AppLocalizations l10n) =>
+    <ExpressiveIconChoice<DiaryPreviewColorIntensity>>[
+      ExpressiveIconChoice<DiaryPreviewColorIntensity>(
+        value: DiaryPreviewColorIntensity.soft,
+        icon: FontAwesomeIcons.feather,
+        label: l10n.diaryPreviewStyleIntensitySoft,
+      ),
+      ExpressiveIconChoice<DiaryPreviewColorIntensity>(
+        value: DiaryPreviewColorIntensity.original,
+        icon: FontAwesomeIcons.droplet,
+        label: l10n.diaryPreviewStyleIntensityOriginal,
+      ),
+      ExpressiveIconChoice<DiaryPreviewColorIntensity>(
+        value: DiaryPreviewColorIntensity.vivid,
+        icon: FontAwesomeIcons.fire,
+        label: l10n.diaryPreviewStyleIntensityVivid,
+      ),
+    ];
+
 List<ExpressiveIconChoice<DiaryPreviewCoverMode>> diaryPreviewCoverModeChoices(
   AppLocalizations l10n,
 ) => <ExpressiveIconChoice<DiaryPreviewCoverMode>>[

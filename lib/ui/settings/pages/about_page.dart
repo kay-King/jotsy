@@ -17,6 +17,7 @@ import '../widgets/external_link.dart';
 import '../widgets/support_developer_sheet.dart';
 import '../widgets/settings_card_group.dart';
 import 'app_update_page.dart';
+import 'changelog_page.dart';
 
 /// 关于页面：以阅读化卡片布局展示应用信息、核心入口与协议信息。
 class AboutPage extends ConsumerStatefulWidget {
@@ -191,6 +192,20 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                           ),
                           const SettingsCardGroupDivider(),
                           const _CheckUpdateTile(),
+                          const SettingsCardGroupDivider(),
+                          _AboutActionTile(
+                            icon: FontAwesomeIcons.clockRotateLeft,
+                            title: l10n.aboutChangelog,
+                            subtitle: l10n.aboutChangelogSubtitle,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const ChangelogPage(),
+                                ),
+                              );
+                            },
+                          ),
                           const SettingsCardGroupDivider(),
                           _AboutActionTile(
                             icon: FontAwesomeIcons.bug,

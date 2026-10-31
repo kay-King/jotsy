@@ -238,7 +238,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsMoodOptionsTitle => 'Mood emojis';
 
   @override
-  String get settingsMoodOptionsSubtitle => 'Customize 10 mood choices';
+  String get settingsMoodOptionsSubtitle =>
+      'Customize 10 mood choices and colors';
 
   @override
   String settingsMoodOptionsSlotLabel(String index) {
@@ -253,6 +254,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String settingsMoodOptionsSaveFailed(String error) {
     return 'Save mood emojis failed: $error';
+  }
+
+  @override
+  String get settingsMoodColorPickerTitle => 'Choose mood color';
+
+  @override
+  String get settingsMoodColorPickerRecommended => 'Suggested';
+
+  @override
+  String get settingsMoodColorPickerMore => 'More colors';
+
+  @override
+  String settingsMoodColorSemanticLabel(String index) {
+    return 'Color of mood $index';
   }
 
   @override
@@ -575,6 +590,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutQqFeedbackGroupSubtitle => '678136434';
 
   @override
+  String get aboutChangelog => 'Changelog';
+
+  @override
+  String get aboutChangelogSubtitle => 'Past updates, readable offline';
+
+  @override
+  String get changelogTitle => 'Changelog';
+
+  @override
+  String get changelogExpandAll => 'Show all';
+
+  @override
+  String get changelogCollapse => 'Collapse';
+
+  @override
   String get aboutQqFeedbackGroupCopied =>
       'QQ group number copied to clipboard';
 
@@ -748,6 +778,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockAuthReason => 'Please authenticate to unlock the app';
+
+  @override
+  String get diaryMentionNoMatch => 'No matching diaries or notebooks';
+
+  @override
+  String get linkCardSlashItem => 'Diary card';
+
+  @override
+  String get linkCardPickTitle => 'Choose a diary to insert';
+
+  @override
+  String get linkCardPickSearchHint => 'Search diary titles';
+
+  @override
+  String get linkCardOpen => 'Open diary';
+
+  @override
+  String get linkCardDelete => 'Delete card';
+
+  @override
+  String get linkCardMissing => 'This diary no longer exists';
+
+  @override
+  String get backlinksTitle => 'Diaries mentioning this one';
 
   @override
   String get autoT0001 => 'Loading app';
@@ -1920,6 +1974,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryToolbarOverflowDivider => 'Tools below go into More';
+
+  @override
+  String get diaryToolbarInsertTable => 'Insert table';
+
+  @override
+  String get diaryToolbarToggleList => 'Toggle block';
+
+  @override
+  String get diaryToolbarCallout => 'Callout';
 
   @override
   String get backupBusyInspect => 'Reading file...';
@@ -5984,6 +6047,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryPreviewStyleLongImageFull => 'Full';
+
+  @override
+  String get diaryPreviewStyleColorIntensity => 'Color intensity';
+
+  @override
+  String get diaryPreviewStyleColorIntensityHint =>
+      'How strongly the mood color is applied; Soft looks close to before.';
+
+  @override
+  String get diaryPreviewStyleIntensitySoft => 'Soft';
+
+  @override
+  String get diaryPreviewStyleIntensityOriginal => 'Original';
+
+  @override
+  String get diaryPreviewStyleIntensityVivid => 'Vivid';
+
+  @override
+  String get diaryPreviewStyleTintPaper => 'Tint paper with seed';
+
+  @override
+  String get diaryPreviewStyleTintPaperSubtitle =>
+      'Only applies when the paper is the theme paper.';
 
   @override
   String get diaryDraftsTitle => 'Drafts';

@@ -29,6 +29,8 @@ class BackupSettings {
     'calendarDisplayOptionsRaw': settingsService.calendarDisplayOptionsRaw,
     'diaryCardStyleRaw': settingsService.diaryCardStyleRaw,
     'diaryPreviewStyleRaw': settingsService.diaryPreviewStyleRaw,
+    // 心情色板：符号 + 颜色，单个 JSON 键，随备份导出。
+    'moodPaletteRaw': settingsService.moodPaletteRaw,
     'diaryCodeBlockStyleRaw': settingsService.diaryCodeBlockStyleRaw,
     'homeBarStyleRaw': settingsService.homeBarStyleRaw,
     'desktopLayoutRaw': settingsService.desktopLayoutRaw,
@@ -180,6 +182,17 @@ class BackupSettings {
     if (settingsNode.containsKey('diaryPreviewStyleRaw')) {
       final previewStyleRaw = settingsNode['diaryPreviewStyleRaw'];
       await settingsService.setDiaryPreviewStyleRaw(switch (previewStyleRaw) {
+        null => null,
+        String value => value,
+        Map<dynamic, dynamic> value => jsonEncode(value),
+        _ => null,
+      });
+    }
+
+    // 心情色板同上：旧版备份没有时保留本机色板，显式 null 时恢复默认。
+    if (settingsNode.containsKey('moodPaletteRaw')) {
+      final moodPaletteRaw = settingsNode['moodPaletteRaw'];
+      await settingsService.setMoodPaletteRaw(switch (moodPaletteRaw) {
         null => null,
         String value => value,
         Map<dynamic, dynamic> value => jsonEncode(value),

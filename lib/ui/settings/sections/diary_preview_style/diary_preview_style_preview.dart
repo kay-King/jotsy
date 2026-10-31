@@ -8,11 +8,12 @@ import '../../../../app/theme/seeded_theme_cache.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/database/diary_blocks/diary_blocks_appflowy.dart';
 import '../../../../core/database/diary_blocks/diary_blocks_schema.dart';
+import '../../../../core/services/app_service.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../diaries/providers/diary_card_style_provider.dart';
 import '../../../diaries/providers/diary_preview_style_provider.dart';
 import '../../../diaries/viewmodels/diary_preview_resolved_style.dart';
 import '../../../diaries/viewmodels/diary_preview_view_data.dart';
+import '../../../settings/models/mood_palette.dart';
 import '../../../diaries/widgets/diary_preview/diary_pager_view.dart';
 import '../../../diaries/widgets/diary_preview/diary_preview_content.dart';
 import '../../../diaries/widgets/diary_preview/diary_preview_neighbors.dart';
@@ -149,7 +150,8 @@ class _SamplePageState extends ConsumerState<_SamplePage> {
       appSeed: widget.appSeed,
       screenSize: MediaQuery.sizeOf(context),
       reduceMotion: MediaQuery.disableAnimationsOf(context),
-      moodOptions: ref.watch(diaryCardMoodOptionsProvider),
+      moodPalette:
+          ref.watch(moodPaletteProvider).value ?? MoodPalette.defaults,
       moodEmoji: _viewData.moodEmoji,
       firstTagColor: detail.tags.isEmpty ? null : detail.tags.first.color,
     );

@@ -18,11 +18,13 @@ bool looksLikeJournalHtml(String text) => RegExp(
 /// 保留本应用正文能渲染的格式：粗体、斜体、下划线、删除线、行内代码、链接、
 /// 文字颜色与背景色（`color` / `background-color`、`<font color>`、`<mark>`）、
 /// 字号（`font-size`、`<font size>`、`<big>` / `<small>`，换算成三档）、标题
-/// （最多三级）、有序/无序/待办列表与缩进、引用、代码块、段落对齐（
-/// `text-align`、`align` 属性、`<center>`）与分隔线（`<hr>`）。颜色、字号与
-/// 对齐的换算规则见 journal_import_style.dart（来源的默认墨色不导入，全文
-/// 占比最大的字号视为正文字号）；字体一律丢弃，正文字体只跟随本应用的排版
-/// 设置。
+/// （1~6 级）、上标 / 下标（`<sup>` / `<sub>`、CSS `vertical-align`，记为行内
+/// `script` 属性）、有序/无序/待办列表与缩进、引用、代码块、段落对齐（
+/// `text-align`、`align` 属性、`<center>`）与分隔线（`<hr>`）。`<details>` /
+/// `<summary>` 折叠块展开为普通内容（标题加粗）；`<table>` 表格展开为文字
+/// （单元格以空格分隔、行以换行分隔），保证不丢数据。颜色、字号与对齐的换算
+/// 规则见 journal_import_style.dart（来源的默认墨色不导入，全文占比最大的
+/// 字号视为正文字号）；字体一律丢弃，正文字体只跟随本应用的排版设置。
 ///
 /// 空白按 HTML 规则合并；空的 `<p></p>` 保留为空行（Journey 用它表示段间
 /// 空行），`<br>` 结束当前行。`<img>`、`<video>`、`<audio>` 经 [resolveEmbed]
@@ -110,6 +112,16 @@ class JournalHtmlConverter {
         }, block);
       case 's' || 'strike' || 'del':
         _visitChildren(node, {..._styled(node, inline), 'strike': true}, block);
+      case 'sup':
+        _visitChildren(node, {
+          ..._styled(node, inline),
+          'script': 'super',
+        }, block);
+      case 'sub':
+        _visitChildren(node, {
+          ..._styled(node, inline),
+          'script': 'sub',
+        }, block);
       case 'code' || 'kbd' || 'samp' || 'tt':
         _visitChildren(
           node,
@@ -164,7 +176,7 @@ class JournalHtmlConverter {
           node,
           _styled(node, inline),
           block,
-          _aligned(node, block).withAttribute('header', level > 3 ? 3 : level),
+          _aligned(node, block).withAttribute('header', level),
         );
       case 'blockquote':
         _visitBlock(
@@ -191,6 +203,17 @@ class JournalHtmlConverter {
           _aligned(node, block),
           blankWhenEmpty: true,
         );
+      case 'details':
+        // 折叠块：本应用暂无 toggle_list 块类型，展开为普通内容，
+        // summary 标题加粗，保证不丢数据。
+        _visitBlock(node, inline, block, _aligned(node, block));
+      case 'summary':
+        _visitBlock(
+          node,
+          {..._styled(node, inline), 'bold': true},
+          block,
+          _aligned(node, block),
+        );
       case 'div' ||
           'section' ||
           'article' ||
@@ -213,8 +236,6 @@ class JournalHtmlConverter {
           'tr' ||
           'form' ||
           'fieldset' ||
-          'details' ||
-          'summary' ||
           'body' ||
           'html':
         _visitBlock(node, _styled(node, inline), block, _aligned(node, block));

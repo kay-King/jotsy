@@ -14,6 +14,7 @@ import '../../models/time_capsule.dart';
 import '../../providers/diary_typography_provider.dart';
 import '../../viewmodels/diary_preview_resolved_style.dart';
 import '../../viewmodels/diary_preview_view_data.dart';
+import 'diary_backlinks.dart';
 import 'diary_preview_body.dart';
 import 'diary_preview_comments.dart';
 import 'diary_preview_header.dart';
@@ -78,6 +79,7 @@ class DiaryPreviewContent extends ConsumerWidget {
     this.notebooks = const <NotebookView>[],
     this.onOpenNotebook,
     this.showComments = true,
+    this.onOpenDiary,
   });
 
   final DiaryWithTags detail;
@@ -118,6 +120,10 @@ class DiaryPreviewContent extends ConsumerWidget {
   /// 是否在正文下方挂留言区：正式预览页为 true；设置页的样式预览用示例
   /// 日记（不是真实日记），关闭，避免对着示例 id 读写留言表。
   final bool showComments;
+
+  /// 点按日记链接（`diary://` 行内链接 / 日记卡片 / 反向链接）：按业务 id
+  /// 打开那篇日记；null 时不可点按。
+  final ValueChanged<String>? onOpenDiary;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -251,6 +257,7 @@ class DiaryPreviewContent extends ConsumerWidget {
                   textSelection: behavior.textSelection,
                   longImageMode: behavior.longImageMode,
                   textColor: resolved.bodyColor,
+                  onOpenDiary: onOpenDiary,
                 ),
                 if (metaAtEnd) ...<Widget>[
                   const SizedBox(height: 20),
@@ -271,6 +278,11 @@ class DiaryPreviewContent extends ConsumerWidget {
                   const SizedBox(height: 24),
                   DiaryPreviewCommentsSection(diaryId: diary.diaryId),
                 ],
+                // 反向链接：提到这篇的日记（没有时不占位）。
+                DiaryBacklinksSection(
+                  diaryId: diary.diaryId,
+                  onOpenDiary: onOpenDiary,
+                ),
               ],
             ],
           ),

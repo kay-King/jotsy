@@ -168,6 +168,7 @@ class DiaryExportController {
           createdAt: entry.createdAt,
           updatedAt: entry.updatedAt,
           deltaOps: entry.deltaOps,
+          document: entry.document,
           blocks: entry.blocks,
           wordCount: entry.wordCount,
           tagNames: entry.tagNames,

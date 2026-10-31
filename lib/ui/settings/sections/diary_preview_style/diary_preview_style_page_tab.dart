@@ -57,6 +57,22 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
               ),
             ),
             SettingsChoiceTile(
+              title: l10n.diaryPreviewStyleColorIntensity,
+              subtitle: l10n.diaryPreviewStyleColorIntensityHint,
+              child: ExpressiveIconChoiceRow<DiaryPreviewColorIntensity>(
+                choices: diaryPreviewIntensityChoices(l10n),
+                selected: page.colorIntensity,
+                onSelected: (DiaryPreviewColorIntensity intensity) =>
+                    commit(page.copyWith(colorIntensity: intensity)),
+              ),
+            ),
+            SettingsSwitchTile(
+              title: l10n.diaryPreviewStyleTintPaper,
+              subtitle: l10n.diaryPreviewStyleTintPaperSubtitle,
+              value: page.tintPaper,
+              onChanged: (bool v) => commit(page.copyWith(tintPaper: v)),
+            ),
+            SettingsChoiceTile(
               title: l10n.diaryPreviewStylePaper,
               child: Wrap(
                 spacing: 4,

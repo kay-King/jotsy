@@ -3,8 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/seeded_theme_cache.dart';
-import '../../../core/services/settings_service.dart';
-import '../../widgets/mood_band_palette.dart';
+import '../../settings/models/mood_palette.dart';
 import '../models/diary_preview_style/diary_preview_style.dart';
 
 /// 预览页样式在当前主题、屏幕与这篇日记下的具体取值。
@@ -18,6 +17,9 @@ import '../models/diary_preview_style/diary_preview_style.dart';
 ///   装配的另一套主题（深色纸上是深色主题），信息栏、胶囊、引用条、勾选框等
 ///   所有语义色一起变化，不会出现深色纸上的深色文字；
 /// - 默认样式（跟随应用 + 主题底色）原样返回应用主题，渲染与改版前一致；
+/// - 基调为“心情”时，种子色取自心情色板（[MoodPalette]）里这篇日记心情对应
+///   的颜色，再按着色强度（[DiaryPreviewPageStyle.colorIntensity]）调整；
+/// - “纸张随基调染色”打开、且纸张为主题底色时，底色染上一点种子色；
 /// - 正文与标题一律用主题色，不再支持自定义颜色。
 @immutable
 class DiaryPreviewResolvedStyle {
@@ -49,7 +51,7 @@ class DiaryPreviewResolvedStyle {
     required Color appSeed,
     required Size screenSize,
     required bool reduceMotion,
-    required List<String> moodOptions,
+    required MoodPalette moodPalette,
     String? moodEmoji,
     int? firstTagColor,
   }) {
@@ -59,16 +61,15 @@ class DiaryPreviewResolvedStyle {
     final pageBrightness = paper == null
         ? appBrightness
         : ThemeData.estimateBrightnessForColor(paper);
-    final seed = switch (page.colorSeed) {
+    Color? seed = switch (page.colorSeed) {
       DiaryPreviewColorSeed.app => null,
-      DiaryPreviewColorSeed.mood => _moodColor(
-        appTheme.colorScheme,
-        moodEmoji,
-        moodOptions,
-      ),
+      DiaryPreviewColorSeed.mood => _moodColor(moodEmoji, moodPalette),
       DiaryPreviewColorSeed.tag =>
         firstTagColor == null ? null : Color(firstTagColor),
     };
+    if (seed != null && page.colorSeed == DiaryPreviewColorSeed.mood) {
+      seed = _applyIntensity(seed, page.colorIntensity);
+    }
     final themed = seed != null || pageBrightness != appBrightness;
     final theme = themed
         ? SeededThemeCache.of(
@@ -77,7 +78,16 @@ class DiaryPreviewResolvedStyle {
             reduceMotion: reduceMotion,
           )
         : appTheme;
-    final background = paper ?? theme.colorScheme.surface;
+    var background = paper ?? theme.colorScheme.surface;
+    if (paper == null && page.tintPaper && seed != null) {
+      // 纸张随基调染色：只在纸张为主题底色时，把一点种子色叠到底色上；
+      // 深色主题下染色稍浓，保证看得出。
+      final light = pageBrightness == Brightness.light;
+      background = Color.alphaBlend(
+        seed.withValues(alpha: light ? 0.06 : 0.10),
+        background,
+      );
+    }
 
     final width = screenSize.width;
     final maxContentWidth = page.limitWidth ? page.contentWidth : null;
@@ -145,22 +155,31 @@ class DiaryPreviewResolvedStyle {
     return Color(light ? preset.$1 : preset.$2);
   }
 
-  static Color? _moodColor(
-    ColorScheme scheme,
-    String? moodEmoji,
-    List<String> moodOptions,
+  static Color? _moodColor(String? moodEmoji, MoodPalette moodPalette) {
+    return moodPalette.colorForSymbol(moodEmoji);
+  }
+
+  /// 着色强度：柔和去饱和并提亮（与改版前观感接近），原色不动，鲜明加饱和。
+  static Color _applyIntensity(
+    Color color,
+    DiaryPreviewColorIntensity intensity,
   ) {
-    final mood = moodEmoji?.trim();
-    if (mood == null || mood.isEmpty) {
-      return null;
+    switch (intensity) {
+      case DiaryPreviewColorIntensity.original:
+        return color;
+      case DiaryPreviewColorIntensity.vivid:
+        final hsl = HSLColor.fromColor(color);
+        return hsl
+            .withSaturation((hsl.saturation * 1.3).clamp(0.0, 1.0))
+            .toColor();
+      case DiaryPreviewColorIntensity.soft:
+        final hsl = HSLColor.fromColor(color);
+        return hsl
+            .withSaturation(hsl.saturation * 0.45)
+            .withLightness(
+              (hsl.lightness + (1.0 - hsl.lightness) * 0.3).clamp(0.0, 1.0),
+            )
+            .toColor();
     }
-    final weight = SettingsService.buildMoodWeightMap(moodOptions)[mood];
-    if (weight == null) {
-      return null;
-    }
-    return MoodBandPalette.color(
-      scheme,
-      MoodBandPalette.bandForWeight(weight),
-    ).withValues(alpha: 1);
   }
 }

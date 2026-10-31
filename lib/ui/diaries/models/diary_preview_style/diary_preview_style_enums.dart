@@ -8,6 +8,12 @@ library;
 /// [tag] 取首个标签的颜色。没有心情或标签时回到应用主题色。
 enum DiaryPreviewColorSeed { app, mood, tag }
 
+/// 配色基调为“心情”时的着色强度：[soft] 柔和（去饱和、提亮，默认，与改版
+/// 前观感接近）；[original] 原色（直接用心情颜色）；[vivid] 鲜明（加饱和）。
+///
+/// 枚举名即持久化值，只能在末尾追加新值，旧版本读到不认识的值时回退默认。
+enum DiaryPreviewColorIntensity { soft, original, vivid }
+
 /// 纸张（页面底色）：[theme] 为主题底色（改版前的样子），其余为内置纸色。
 /// 纸色与主题深浅相反时整页换成同一配色的另一种明暗，保证文字可读。
 enum DiaryPreviewPaper { theme, warm, sepia, mint, gray, ink }

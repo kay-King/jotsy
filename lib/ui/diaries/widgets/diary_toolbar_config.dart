@@ -8,9 +8,12 @@ import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_newline.dart';
+import 'package:node_diary/ui/diaries/models/diary_table_block.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_layout.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_preferences.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_time_format.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_callout_block/diary_callout_block.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_toggle_block/diary_toggle_block.dart';
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
 import 'package:node_diary/ui/widgets/expressive_state_blend.dart';
 
@@ -88,7 +91,10 @@ bool isDiaryToolbarItemActive(DiaryToolbarItem item, EditorState editorState) {
     DiaryToolbarItem.video ||
     DiaryToolbarItem.attachment ||
     DiaryToolbarItem.currentTime ||
-    DiaryToolbarItem.recording => false,
+    DiaryToolbarItem.recording ||
+    DiaryToolbarItem.table ||
+    DiaryToolbarItem.toggleList ||
+    DiaryToolbarItem.callout => false,
   };
 }
 
@@ -386,6 +392,25 @@ Widget buildDiaryToolbarItemButton(
             : foreground,
       ),
       onPressed: mediaImportBusy ? null : onRecordingPressed,
+    ),
+    // v0.10.0 新增：表格 / 折叠块 / 提示块（实现见各模块的 helper）。
+    DiaryToolbarItem.table => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(insertDiaryTableBlock(editorState)),
+    ),
+    DiaryToolbarItem.toggleList => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(insertDiaryToggleBlock(editorState)),
+    ),
+    DiaryToolbarItem.callout => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(insertDiaryCalloutBlock(editorState)),
     ),
     // 文字颜色 / 背景颜色走 DiaryToolbarColorButton，代码块走
     // DiaryToolbarCodeBlockButton，不会进到这里。

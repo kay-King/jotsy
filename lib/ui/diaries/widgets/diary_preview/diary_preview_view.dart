@@ -14,6 +14,7 @@ import '../../../home/widgets/home_hint_visibility_scope.dart';
 import '../../../notebooks/controllers/notebook_navigation.dart';
 import '../../../notebooks/providers/notebook_providers.dart';
 import '../../../notebooks/viewmodels/notebook_view.dart';
+import '../../../settings/models/mood_palette.dart';
 import '../../../settings/providers/app_features_provider.dart';
 import '../../../widgets/action_loading_overlay.dart';
 import '../../../widgets/app_top_bar.dart';
@@ -25,7 +26,6 @@ import '../../controllers/diary_todo_autosave_controller.dart';
 import '../../models/diary_preview_result.dart';
 import '../../models/time_capsule.dart';
 import '../../pages/locked_diary_page.dart';
-import '../../providers/diary_card_style_provider.dart';
 import '../../providers/diary_detail_provider.dart';
 import '../../providers/diary_preview_style_provider.dart';
 import '../../sections/diary_typography_sheet.dart';
@@ -62,6 +62,7 @@ class DiaryPreviewView extends ConsumerStatefulWidget {
     this.coverHeroTag,
     this.paging,
     this.onBusyChanged,
+    this.onOpenDiary,
   });
 
   final String diaryId;
@@ -84,6 +85,10 @@ class DiaryPreviewView extends ConsumerStatefulWidget {
 
   /// 导出、分享长图等忙碌态变化时回调。
   final ValueChanged<bool>? onBusyChanged;
+
+  /// 点按日记链接（`diary://` 行内链接 / 日记卡片 / 反向链接）：按业务 id
+  /// 打开那篇日记；null 时不可点按。
+  final ValueChanged<String>? onOpenDiary;
 
   @override
   ConsumerState<DiaryPreviewView> createState() => _DiaryPreviewViewState();
@@ -317,7 +322,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
       appSeed: ref.watch(appThemeSeedColorProvider),
       screenSize: MediaQuery.sizeOf(context),
       reduceMotion: MediaQuery.disableAnimationsOf(context),
-      moodOptions: ref.watch(diaryCardMoodOptionsProvider),
+      moodPalette: ref.watch(moodPaletteProvider).value ?? MoodPalette.defaults,
       moodEmoji: viewData.moodEmoji,
       firstTagColor: detail.tags.isEmpty ? null : detail.tags.first.color,
     );
@@ -353,6 +358,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
               ? (NotebookView notebook) =>
                     unawaited(openNotebookFromAnywhere(context, ref, notebook))
               : null,
+          onOpenDiary: widget.onOpenDiary,
           onOpenImage: _openImageViewer,
           actions: DiaryPreviewActions(
             onOpenTypography: () => showDiaryTypographySheet(context),

@@ -36,6 +36,7 @@ class DiaryPreviewBody extends StatelessWidget {
     this.textSelection = true,
     this.longImageMode = DiaryPreviewLongImageMode.fold,
     this.textColor,
+    this.onOpenDiary,
   });
 
   final Document document;
@@ -59,6 +60,10 @@ class DiaryPreviewBody extends StatelessWidget {
   /// 通过对比度检查的自定义正文颜色；null 用主题正文色。
   final Color? textColor;
 
+  /// 点按日记链接（`diary://` 行内链接 / 日记卡片 / 反向链接）：按业务 id
+  /// 打开那篇日记；null 时不可点按。
+  final ValueChanged<String>? onOpenDiary;
+
   @override
   Widget build(BuildContext context) {
     final hasVisibleContent = diaryAppFlowyDocumentHasVisibleContent(document);
@@ -71,6 +76,7 @@ class DiaryPreviewBody extends StatelessWidget {
         onToggleTodo: onToggleTodo,
         textSelection: textSelection,
         longImageMode: longImageMode,
+        onOpenDiary: onOpenDiary,
       );
     } else if (showEmptyHint) {
       body = Text(

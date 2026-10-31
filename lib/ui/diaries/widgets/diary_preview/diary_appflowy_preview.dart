@@ -11,12 +11,19 @@ import '../../../../core/database/diary_blocks/diary_blocks_schema.dart';
 import '../../../../core/database/audio_embed_codec.dart';
 import '../../../../core/database/content_codec.dart';
 import '../../../../core/database/file_embed_codec.dart';
+import '../../../../core/services/app_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/widgets/home_hint_visibility_scope.dart';
+import '../../../notebooks/controllers/notebook_navigation.dart';
+import '../../../notebooks/viewmodels/notebook_view.dart';
 import '../../../widgets/image_viewer_hero.dart';
+import '../diary_link_card/diary_link_card.dart';
+import '../diary_link_card/diary_link_card_preview.dart';
+import '../diary_mention/diary_mention_trigger.dart';
 import '../../models/diary_code_block/diary_code_highlighter.dart';
 import '../../models/diary_code_block/diary_code_language.dart';
 import '../../models/diary_code_block/diary_code_theme.dart';
+import '../../models/diary_table_block.dart';
 import '../../models/diary_image_embed_data.dart';
 import '../../models/diary_preview_style/diary_preview_style.dart';
 import '../../providers/diary_code_block_style_provider.dart';
@@ -25,8 +32,10 @@ import '../../viewmodels/diary_first_line_indent.dart';
 import '../../viewmodels/diary_text_appearance.dart';
 import '../diary_attachment_tile.dart';
 import '../diary_audio_player.dart';
+import '../diary_callout_block/diary_callout_block.dart';
 import '../diary_code_block/diary_code_block_header_painter.dart';
 import '../diary_image_embed_builder.dart';
+import '../diary_toggle_block/diary_toggle_block.dart';
 import '../diary_video_player.dart';
 
 /// 预览页正文的 AppFlowy 只读渲染：把 [Document] 逐块建成 widget 树。
@@ -60,6 +69,7 @@ class DiaryAppFlowyPreview extends ConsumerWidget {
     this.onToggleTodo,
     this.textSelection = true,
     this.longImageMode = DiaryPreviewLongImageMode.fold,
+    this.onOpenDiary,
   });
 
   final Document document;
@@ -79,6 +89,10 @@ class DiaryAppFlowyPreview extends ConsumerWidget {
   /// 正文长图折叠还是完整显示。
   final DiaryPreviewLongImageMode longImageMode;
 
+  /// 点按日记链接（`diary://` 行内链接 / 日记卡片）：按业务 id 打开那篇
+  /// 日记；null 时卡片与行内日记链接不可点按。
+  final ValueChanged<String>? onOpenDiary;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final codeStyle = ref.watch(diaryCodeBlockStyleProvider);
@@ -90,6 +104,7 @@ class DiaryAppFlowyPreview extends ConsumerWidget {
       importedFontFamily: importedFontFamily,
     );
     final styles = _PreviewTextStyles.resolve(context, appearance);
+    final onOpenDiary = this.onOpenDiary;
     final ctx = _BlockBuildContext(
       appearance: appearance,
       styles: styles,
@@ -97,19 +112,16 @@ class DiaryAppFlowyPreview extends ConsumerWidget {
       onOpenImage: onOpenImage,
       onToggleTodo: onToggleTodo,
       foldLongImages: longImageMode == DiaryPreviewLongImageMode.fold,
+      onOpenDiary: onOpenDiary,
+      onOpenHref: (href) =>
+          unawaited(_openPreviewHref(context, ref, href, onOpenDiary)),
     );
     final children = document.root.children;
     Widget body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         for (var i = 0; i < children.length; i++)
-          _buildBlock(
-            context,
-            children[i],
-            ctx,
-            index: i,
-            siblings: children,
-          ),
+          _buildBlock(context, children[i], ctx, index: i, siblings: children),
       ],
     );
     if (textSelection) {
@@ -135,6 +147,8 @@ class _BlockBuildContext {
     required this.onOpenImage,
     required this.onToggleTodo,
     required this.foldLongImages,
+    required this.onOpenDiary,
+    required this.onOpenHref,
   });
 
   final DiaryTextAppearance appearance;
@@ -143,6 +157,38 @@ class _BlockBuildContext {
   final void Function(String source, ImageViewerHero? hero)? onOpenImage;
   final void Function(Node node, bool checked)? onToggleTodo;
   final bool foldLongImages;
+
+  /// 点按日记卡片 / 行内日记链接时按 id 打开日记；null 时不可点按。
+  final ValueChanged<String>? onOpenDiary;
+
+  /// 行内链接点按：`diary://` / `notebook://` 走应用内跳转，其余走
+  /// url_launcher（见 [_openPreviewHref]）。
+  final void Function(String href) onOpenHref;
+}
+
+/// 预览页行内链接点按：日记链接直接打开那篇日记，日记本链接回到首页打开
+/// 那本（经 [openNotebookFromAnywhere]，含上锁本的验证），其余走
+/// url_launcher（Quill 时代的默认行为）。
+Future<void> _openPreviewHref(
+  BuildContext context,
+  WidgetRef ref,
+  String href,
+  ValueChanged<String>? onOpenDiary,
+) async {
+  final link = parseDiaryLinkHref(href);
+  final diaryId = link?.diaryId;
+  if (diaryId != null) {
+    onOpenDiary?.call(diaryId);
+    return;
+  }
+  final notebookId = link?.notebookId;
+  if (notebookId != null) {
+    final row = await ref.read(appDatabaseProvider).getNotebook(notebookId);
+    if (row == null || !context.mounted) return;
+    await openNotebookFromAnywhere(context, ref, NotebookView(row));
+    return;
+  }
+  await _launchHref(href);
 }
 
 /// 正文位置的文本样式：Quill `DefaultStyles` 经 `buildDiaryQuillStyles`
@@ -188,19 +234,16 @@ class _PreviewTextStyles {
       letterSpacing: typography.letterSpacing,
     );
 
-    TextStyle heading(
-      double size,
-      double letterSpacing,
-      double height,
-    ) => TextStyle(
-      color: baseColor,
-      fontFamily: family,
-      fontSize: size,
-      fontWeight: FontWeight.bold,
-      letterSpacing: letterSpacing + typography.letterSpacing,
-      height: height,
-      decoration: TextDecoration.none,
-    );
+    TextStyle heading(double size, double letterSpacing, double height) =>
+        TextStyle(
+          color: baseColor,
+          fontFamily: family,
+          fontSize: size,
+          fontWeight: FontWeight.bold,
+          letterSpacing: letterSpacing + typography.letterSpacing,
+          height: height,
+          decoration: TextDecoration.none,
+        );
 
     // Quill 默认的标题字号、字重、字间距与行距（见 DefaultStyles）。
     final headings = <TextStyle>[
@@ -292,6 +335,18 @@ Widget _buildBlock(
       return _AudioBlock(node: node);
     case kDiaryBlockAttachment:
       return _AttachmentBlock(node: node);
+    case TableBlockKeys.type:
+      // v0.10.0 表格：只读渲染（实现见子代理）。
+      return DiaryTableBlockPreview(node: node, textStyle: ctx.styles.body);
+    case kDiaryToggleBlockType:
+      // v0.10.0 折叠块：只读渲染（实现见子代理）。
+      return DiaryToggleBlockPreview(node: node, textStyle: ctx.styles.body);
+    case kDiaryCalloutBlockType:
+      // v0.10.0 提示块：只读渲染（实现见子代理）。
+      return DiaryCalloutBlockPreview(node: node, textStyle: ctx.styles.body);
+    case kDiaryLinkCardBlockType:
+      // v0.10.0 日记卡片：只读渲染，点按打开被链的日记。
+      return DiaryLinkCardPreview(node: node, onOpenDiary: ctx.onOpenDiary);
     default:
       // 认不出的块类型（未知嵌入、更新版本写入的新块）：Quill 时代没有
       // 对应的渲染器，这里同样不占位；子块照常渲染，避免丢内容。
@@ -375,10 +430,7 @@ class _ParagraphBlock extends StatelessWidget {
       typography,
       ctx,
       firstLineIndent: indent
-          ? buildFirstLineIndentLeading(
-              indentWidth,
-              typography.fontSize ?? 16,
-            )
+          ? buildFirstLineIndentLeading(indentWidth, typography.fontSize ?? 16)
           : null,
     );
     return Padding(
@@ -484,10 +536,7 @@ class _ListItemBlock extends StatelessWidget {
     } else if (type == kDiaryBlockNumberedList) {
       final number = _itemNumber();
       markerWidth = _numberPointWidth(fontSize, _runLength());
-      leading = Text(
-        _numberMarker(number, depth),
-        style: body,
-      );
+      leading = Text(_numberMarker(number, depth), style: body);
     } else {
       markerWidth = fontSize * 2;
       leading = Text('•', style: body);
@@ -565,11 +614,21 @@ String _toAlpha(int n) {
 
 String _toRoman(int n) {
   if (n <= 0) return '';
-  const arabian = <int>[
-    1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1,
-  ];
+  const arabian = <int>[1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
   const roman = <String>[
-    'm', 'cm', 'd', 'cd', 'c', 'xc', 'l', 'xl', 'x', 'ix', 'v', 'iv', 'i',
+    'm',
+    'cm',
+    'd',
+    'cd',
+    'c',
+    'xc',
+    'l',
+    'xl',
+    'x',
+    'ix',
+    'v',
+    'iv',
+    'i',
   ];
   final buffer = StringBuffer();
   var value = n;
@@ -672,10 +731,7 @@ class _QuoteBlock extends StatelessWidget {
     final styles = ctx.styles;
     final span = _buildDeltaSpan(context, node.delta, styles.quote, ctx);
     return Padding(
-      padding: EdgeInsets.only(
-        left: depth * styles.fontSize,
-        top: 6,
-      ),
+      padding: EdgeInsets.only(left: depth * styles.fontSize, top: 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -773,7 +829,8 @@ class _CodeBlockState extends State<_CodeBlock> {
       widget.node.attributes[kDiaryBlockLanguageKey],
     );
     if (choice.isPlain) return l10n.codeBlockLanguagePlain;
-    final id = choice.languageId ??
+    final id =
+        choice.languageId ??
         (widget.ctx.code.autoDetect
             ? DiaryCodeHighlighter.instance.detect(text)
             : null);
@@ -799,12 +856,14 @@ class _CodeBlockState extends State<_CodeBlock> {
     final l10n = context.l10n;
     // 标题栏高度固定，限制系统字号的放大倍数，语言名不至于撑出标题栏
     //（与 Quill 时代的 DiaryCodeBlockChrome 一致）。
-    final textScaler = MediaQuery.textScalerOf(context).clamp(
-      maxScaleFactor: 2,
-    );
-    final labelStyle = (Theme.of(context).textTheme.labelMedium ??
-            const TextStyle())
-        .copyWith(fontSize: 12, fontWeight: FontWeight.w600);
+    final textScaler = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: 2);
+    final labelStyle =
+        (Theme.of(context).textTheme.labelMedium ?? const TextStyle()).copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        );
     DiaryCodeBlockHeaderPainter? headerPainter;
     if (look.header) {
       headerPainter = _headerPainter ??= DiaryCodeBlockHeaderPainter(
@@ -865,23 +924,14 @@ class _CodeBlockState extends State<_CodeBlock> {
                   ? null
                   : look.style.header
                   ? Border(
-                      left: BorderSide(
-                        color: look.palette.border,
-                        width: 0.8,
-                      ),
-                      right: BorderSide(
-                        color: look.palette.border,
-                        width: 0.8,
-                      ),
+                      left: BorderSide(color: look.palette.border, width: 0.8),
+                      right: BorderSide(color: look.palette.border, width: 0.8),
                       bottom: BorderSide(
                         color: look.palette.border,
                         width: 0.8,
                       ),
                     )
-                  : Border.all(
-                      color: look.palette.border,
-                      width: 0.8,
-                    ),
+                  : Border.all(color: look.palette.border, width: 0.8),
             ),
             // 主体内容区上方 16dp 内边距（标题栏绘制层假定的值）。
             padding: const EdgeInsets.fromLTRB(0, 16, 12, 16),
@@ -895,10 +945,7 @@ class _CodeBlockState extends State<_CodeBlock> {
                       if (look.lineNumbers)
                         SizedBox(
                           width: numberWidth,
-                          child: Text(
-                            '${i + 1}',
-                            style: numberStyle,
-                          ),
+                          child: Text('${i + 1}', style: numberStyle),
                         )
                       else
                         const SizedBox(width: 12),
@@ -991,12 +1038,7 @@ class _HeaderCustomPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    painter.paint(
-      canvas,
-      Offset.zero & size,
-      label: label,
-      copied: copied,
-    );
+    painter.paint(canvas, Offset.zero & size, label: label, copied: copied);
   }
 
   @override
@@ -1047,9 +1089,7 @@ TextSpan _highlightedLineSpan(
     position = to;
   }
   if (position < lineEnd) {
-    children.add(
-      TextSpan(text: line.substring(position - lineStart)),
-    );
+    children.add(TextSpan(text: line.substring(position - lineStart)));
   }
   if (children.isEmpty) {
     return TextSpan(text: line, style: codeStyle);
@@ -1075,15 +1115,14 @@ class _ImageBlock extends StatelessWidget {
       );
     }
     final open = ctx.onOpenImage;
-    final heroTag = open == null ? null : ImageViewerHeroTag('diary_body', node.id);
+    final heroTag = open == null
+        ? null
+        : ImageViewerHeroTag('diary_body', node.id);
     final image = Builder(
       builder: (imageContext) => GestureDetector(
         onTap: open == null
             ? null
-            : () => open(
-                  source,
-                  _captureHero(imageContext, heroTag!),
-                ),
+            : () => open(source, _captureHero(imageContext, heroTag!)),
         child: DiaryEmbeddedImage(
           source: source,
           bounds: diaryImageEmbedBounds(node),
@@ -1204,9 +1243,7 @@ TextSpan _buildDeltaSpan(
   InlineSpan? firstLineIndent,
   int headingLevel = 0,
 }) {
-  final children = <InlineSpan>[
-    if (firstLineIndent != null) firstLineIndent,
-  ];
+  final children = <InlineSpan>[if (firstLineIndent != null) firstLineIndent];
   if (delta != null) {
     for (final op in delta) {
       if (op is! TextInsert) continue;
@@ -1253,8 +1290,8 @@ TextSpan _spanForInsert(
       color: styles.linkColor,
       decoration: TextDecoration.underline,
     );
-    recognizer = TapGestureRecognizer()
-      ..onTap = () => _launchHref(href);
+    // 日记链接走应用内跳转（见 _openPreviewHref），其余走 url_launcher。
+    recognizer = TapGestureRecognizer()..onTap = () => ctx.onOpenHref(href);
   }
   if (attributes[kDiaryInlineCode] == true) {
     style = style.merge(_inlineCodeStyleFor(code, headingLevel));

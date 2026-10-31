@@ -40,12 +40,16 @@ class DiaryPreviewPager extends ConsumerStatefulWidget {
     required this.diaryId,
     this.initialDetail,
     this.coverHero,
+    this.onOpenDiary,
   });
 
   final DiaryPreviewSequence sequence;
   final String diaryId;
   final DiaryWithTags? initialDetail;
   final ImageViewerHero? coverHero;
+
+  /// 点按日记链接：按业务 id 打开那篇日记；null 时不可点按。
+  final ValueChanged<String>? onOpenDiary;
 
   @override
   ConsumerState<DiaryPreviewPager> createState() => _DiaryPreviewPagerState();
@@ -227,6 +231,7 @@ class _DiaryPreviewPagerState extends ConsumerState<DiaryPreviewPager> {
           initialDetail: _detailOf(id),
           coverHero: initial ? widget.coverHero : null,
           ownsCoverHero: false,
+          onOpenDiary: widget.onOpenDiary,
           coverHeroTag: initial
               ? null
               : ImageViewerHeroTag('diary_preview_pager_cover', id),
