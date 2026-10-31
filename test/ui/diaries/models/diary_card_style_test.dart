@@ -385,7 +385,7 @@ void main() {
       // 无封面时封面区放暖色日期卡片当封面（奶油底 + 陶土橘字），
       // 通栏同宽，有封面和无封面的卡片外框宽度一致。
       expect(warm.content.coverFallback, DiaryCardCoverFallback.dateBlock);
-      expect(warm.typography.titleScale, 0.92);
+      expect(warm.typography.titleScale, 0.88);
       expect(warm.typography.previewScale, 1.0);
       expect(warm.list.coverPosition, DiaryCardCoverPosition.top);
       expect(

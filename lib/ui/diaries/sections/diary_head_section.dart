@@ -25,8 +25,8 @@ enum DiaryLayoutMode { list, waterfall }
 ///   用弹出菜单）。
 class DiaryHeadSection extends StatelessWidget {
   // ==================== 头部过渡动画常量 ====================
-  static const double _headerContentHeight = 52;
-  static const double _searchPreviewHeight = 40;
+  static const double _headerContentHeight = 56;
+  static const double _searchPreviewHeight = 44;
 
   const DiaryHeadSection({
     super.key,
@@ -47,8 +47,6 @@ class DiaryHeadSection extends StatelessWidget {
     required this.onOpenViewOptions,
     required this.onOpenSearchPage,
     this.searchHint,
-    required this.hasActiveFilter,
-    required this.onOpenFilter,
     required this.onOpenDrawer,
   });
 
@@ -80,12 +78,6 @@ class DiaryHeadSection extends StatelessWidget {
 
   /// 搜索条占位文字；null 时用默认文案（在日记本里时为“在「旅行」中搜索”）。
   final String? searchHint;
-
-  /// 是否有生效的筛选（非“全部日记”范围或选中了标签）：有则筛选图标变主题色 + 小圆点。
-  final bool hasActiveFilter;
-
-  /// 打开筛选面板（BottomSheet：日记本切换 + 标签多选 + 清除）。
-  final VoidCallback onOpenFilter;
 
   /// 打开左侧边栏（日记本列表）。
   final VoidCallback onOpenDrawer;
@@ -232,7 +224,7 @@ class DiaryHeadSection extends StatelessWidget {
           onPressed: onOpenDrawer,
           icon: Icon(
             Icons.menu_outlined,
-            size: 20,
+            size: 24,
             color: colorScheme.onSurface,
           ),
         ),
@@ -251,8 +243,6 @@ class DiaryHeadSection extends StatelessWidget {
           draftCount: draftCount,
           onOpenArchived: onOpenArchived,
           onOpenViewOptions: onOpenViewOptions,
-          hasActiveFilter: hasActiveFilter,
-          onOpenFilter: onOpenFilter,
         ),
       ],
     );
@@ -310,7 +300,7 @@ class _SearchPreview extends StatelessWidget {
               children: [
                 Icon(
                   Icons.search_outlined,
-                  size: 16,
+                  size: 20,
                   color: colorScheme.onSurface,
                 ),
                 const SizedBox(width: 10),
@@ -339,16 +329,12 @@ class _TrailingActions extends StatelessWidget {
     required this.draftCount,
     required this.onOpenArchived,
     required this.onOpenViewOptions,
-    required this.hasActiveFilter,
-    required this.onOpenFilter,
   });
 
   final VoidCallback onOpenDrafts;
   final int draftCount;
   final VoidCallback onOpenArchived;
   final VoidCallback onOpenViewOptions;
-  final bool hasActiveFilter;
-  final VoidCallback onOpenFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -356,17 +342,6 @@ class _TrailingActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          tooltip: context.l10n.diaryFilterTitle,
-          onPressed: onOpenFilter,
-          icon: Icon(
-            Icons.filter_list_outlined,
-            size: 20,
-            color: hasActiveFilter
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant,
-          ),
-        ),
         IconButton(
           tooltip: context.l10n.diaryDraftsTitle,
           onPressed: onOpenDrafts,
@@ -379,7 +354,7 @@ class _TrailingActions extends StatelessWidget {
             textColor: colorScheme.onPrimary,
             child: Icon(
               Icons.edit_note_outlined,
-              size: 20,
+              size: 24,
               color: colorScheme.onSurface,
             ),
           ),
@@ -389,14 +364,14 @@ class _TrailingActions extends StatelessWidget {
           onPressed: onOpenArchived,
           icon: Icon(
             Icons.archive_outlined,
-            size: 20,
+            size: 24,
             color: colorScheme.onSurface,
           ),
         ),
         IconButton(
           tooltip: context.l10n.autoT0125,
           onPressed: onOpenViewOptions,
-          icon: Icon(Icons.more_vert, size: 20, color: colorScheme.onSurface),
+          icon: Icon(Icons.more_vert, size: 24, color: colorScheme.onSurface),
         ),
       ],
     );

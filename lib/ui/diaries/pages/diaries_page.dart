@@ -504,14 +504,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                                       currentNotebook,
                                                     ),
                                                   ),
-                                            hasActiveFilter:
-                                                !scopeResolution.isAll ||
-                                                filterState
-                                                    .selectedTagIds
-                                                    .isNotEmpty,
-                                            onOpenFilter: () => unawaited(
-                                              _openFilterSheet(context),
-                                            ),
                                             onOpenDrawer: () => Scaffold.of(
                                               context,
                                             ).openDrawer(),

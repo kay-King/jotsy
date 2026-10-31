@@ -324,7 +324,7 @@ abstract final class DiaryCardPresets {
   /// 底栏是“大日期数字 + 月份星期”配标题（不显示正文摘要与心情天气），
   /// 像一张暖色调的当日卡片；只作可选预设，默认样式仍是经典。
   /// 暖阳（原版 Vivido 时间线卡片）：奶油底、陶土橘大日期、通栏大图。
-  /// 排法照原版 TimelineCard：封面通栏在上（高约卡宽 0.55）；内容行
+  /// 排法照原版 TimelineCard：封面通栏在上（列表 96 / 瀑布流 84）；内容行
   /// 是大日期块在左、标题 + 两行摘要在右；媒体数是右下角的圆角徽章，
   /// 没有底栏（不显示字数、标签与时间）。无封面时封面区放暖色日期卡片
   /// 当封面（奶油底 + 陶土橘字，不用经典预设那种蓝色），通栏同宽，
@@ -344,7 +344,7 @@ abstract final class DiaryCardPresets {
       shadow: DiaryCardShadowStyle.soft,
     ),
     typography: DiaryCardTypography(
-      titleScale: 0.92,
+      titleScale: 0.88,
       previewScale: 1.0,
       lineHeight: DiaryCardLineHeight.standard,
     ),
@@ -368,23 +368,25 @@ abstract final class DiaryCardPresets {
     ),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 120,
+      coverHeight: 96,
       coverDivider: false,
-      coverGap: 10,
-      paddingH: 16,
-      paddingV: 12,
-      elementGap: 6,
+      coverGap: 8,
+      paddingH: 14,
+      paddingV: 10,
+      cardGap: 6,
+      elementGap: 5,
       previewMaxLines: 2,
       metaPosition: DiaryCardMetaPosition.footer,
     ),
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 100,
+      coverHeight: 84,
       coverDivider: false,
-      coverGap: 10,
-      paddingH: 14,
-      paddingV: 12,
-      elementGap: 6,
+      coverGap: 8,
+      paddingH: 12,
+      paddingV: 10,
+      cardGap: 6,
+      elementGap: 5,
       previewMaxLines: 2,
       metaPosition: DiaryCardMetaPosition.footer,
     ),

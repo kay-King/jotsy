@@ -9,6 +9,7 @@ import '../../notebooks/providers/notebook_providers.dart';
 import '../../notebooks/sections/notebook_shelf_sheet.dart';
 import '../../notebooks/viewmodels/notebook_view.dart';
 import '../../settings/pages/settings_page.dart';
+import '../providers/diary_filters.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 
 /// 日记页左侧边栏：日记本列表（照 moodiary CategoryDrawer 模式改造）。
@@ -113,8 +114,12 @@ class DiaryNotebookDrawer extends ConsumerWidget {
     final counts = countsAsync.value ?? const <String, int>{};
     final unfiledCount = unfiledCountAsync.value ?? 0;
     final totalCount = totalCountAsync.value;
+    final tagsAsync = ref.watch(tagListProvider);
+    final selectedTagIds = ref.watch(diaryFilterProvider).selectedTagIds;
 
     return Drawer(
+      // 比默认 304 窄一点，用户反馈之前太宽。
+      width: 280,
       backgroundColor: colorScheme.surface,
       child: SafeArea(
         child: Column(
@@ -199,6 +204,60 @@ class DiaryNotebookDrawer extends ConsumerWidget {
                       onTap: () => _enterUnfiled(context, ref),
                     ),
                   ],
+                  // 标签分组：多选筛选，不关抽屉（和顶栏筛选 BottomSheet 行为一致）。
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 8, 2),
+                    child: Row(
+                      children: [
+                        Text(
+                          l10n.diaryFilterTags,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                        const Spacer(),
+                        if (selectedTagIds.isNotEmpty)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () => ref
+                                .read(diaryFilterProvider.notifier)
+                                .clearTags(),
+                            child: Text(l10n.diaryFilterClear),
+                          ),
+                      ],
+                    ),
+                  ),
+                  ...tagsAsync.when(
+                    data: (tags) => [
+                      for (final tag in tags)
+                        _TagTile(
+                          tag: tag,
+                          selected: selectedTagIds.contains(tag.id),
+                          onToggle: (selected) => ref
+                              .read(diaryFilterProvider.notifier)
+                              .toggleTag(tag.id, selected),
+                        ),
+                    ],
+                    loading: () => const [
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ),
+                    ],
+                    error: (_, _) => const <Widget>[],
+                  ),
                 ],
               ),
             ),
@@ -300,6 +359,74 @@ class _DrawerTile extends StatelessWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 标签行：复选框 + 标签名（含颜色点），点选切换筛选，不关抽屉。
+class _TagTile extends StatelessWidget {
+  const _TagTile({
+    required this.tag,
+    required this.selected,
+    required this.onToggle,
+  });
+
+  final Tag tag;
+  final bool selected;
+  final void Function(bool selected) onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
+      child: Material(
+        color: selected
+            ? colorScheme.primaryContainer.withValues(alpha: 0.5)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => onToggle(!selected),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(tag.color),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    tag.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                Checkbox(
+                  value: selected,
+                  activeColor: colorScheme.primary,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  onChanged: (value) {
+                    if (value != null) {
+                      onToggle(value);
+                    }
+                  },
+                ),
               ],
             ),
           ),

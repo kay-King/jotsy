@@ -32,8 +32,6 @@ Widget _host({
       draftCount: draftCount,
       onOpenViewOptions: () {},
       onOpenSearchPage: () {},
-      hasActiveFilter: false,
-      onOpenFilter: () {},
       onOpenDrawer: () {},
     ),
   ),
