@@ -16,6 +16,19 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// 强制所有子项目（含第三方插件）使用 compileSdk 34，
+// 否则 keyboard_height_plugin（compileSdk 31）会因 AndroidX 依赖要求 33/34 而构建失败
+subprojects {
+    afterEvaluate {
+        if (project.hasProperty("android")) {
+            val android = project.extensions.findByName("android")
+            if (android is com.android.build.gradle.BaseExtension) {
+                android.compileSdkVersion(34)
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
