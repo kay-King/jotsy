@@ -43,7 +43,11 @@ import 'locked_diary_page.dart';
 ///   了。所以只留顶部回弹：顶部下拉可越界（封面跟着拉伸放大、松手
 ///   弹回），底部夹住不越界，松手即停。
 class TimelinePage extends ConsumerStatefulWidget {
-  const TimelinePage({super.key});
+  const TimelinePage({super.key, this.showBackButton = true});
+
+  /// 是否显示 SliverAppBar 左上角的返回按钮：从桌面快捷入口点进来时
+  /// 显示（默认），作为底部 Tab 嵌入首页时不显示（首页没有可返回的上一页）。
+  final bool showBackButton;
 
   @override
   ConsumerState<TimelinePage> createState() => _TimelinePageState();
@@ -260,17 +264,19 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
             // 松手随回弹恢复——仿朋友圈下拉封面放大的效果。
             stretch: true,
             backgroundColor: colors.surface,
-            leading: IconButton(
-              tooltip: l10n.commonBack,
-              onPressed: () => Navigator.of(context).maybePop(),
-              // 描边 Material 图标：顶栏图标用户明确要描边 Material 风，
-              // 且 FontAwesome 在预览字体里常渲染成方框。
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                size: 18,
-                color: Colors.white,
-              ),
-            ),
+            leading: widget.showBackButton
+                ? IconButton(
+                    tooltip: l10n.commonBack,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    // 描边 Material 图标：顶栏图标用户明确要描边 Material 风，
+                    // 且 FontAwesome 在预览字体里常渲染成方框。
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                  )
+                : null,
             flexibleSpace: FlexibleSpaceBar(
               stretchModes: const <StretchMode>[StretchMode.zoomBackground],
               background: Stack(

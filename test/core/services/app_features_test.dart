@@ -44,6 +44,7 @@ void main() {
     test('round-trips every non-default combination field', () {
       const features = AppFeatures(
         desktop: false,
+        timeline: false,
         anniversaries: false,
         templates: false,
         swipeArchive: false,
@@ -53,6 +54,7 @@ void main() {
       expect(raw, isNotNull);
       expect((jsonDecode(raw!) as Map).keys, <String>[
         'desktop',
+        'timeline',
         'notebooks',
         'anniversaries',
         'templates',

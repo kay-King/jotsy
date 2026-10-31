@@ -21,6 +21,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navDesktop => '桌面';
 
   @override
+  String get navTimeline => '时间线';
+
+  @override
   String get commonCancel => '取消';
 
   @override
@@ -2948,6 +2951,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleEditorPanelExpanded => '已展开';
+
+  @override
+  String get styleEditorSettingsTitle => '样式设置';
 
   @override
   String get diaryCardStyleSharedGroup => '所有布局';
@@ -7451,6 +7457,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsFeaturesDesktopSubtitle => '问候、统计与快捷入口，一目了然';
+
+  @override
+  String get settingsFeaturesTimelineSubtitle => '朋友圈式时间线，单独一个底部 Tab';
 
   @override
   String get settingsFeaturesFeaturesGroup => '功能';

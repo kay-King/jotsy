@@ -93,7 +93,7 @@ abstract final class DiaryCardPresets {
     meta: DiaryCardMetaStyle(dateFormat: DiaryCardDateFormat.full),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 200,
+      coverHeight: 160,
       coverDivider: false,
       coverGap: 14,
       paddingH: 18,
@@ -104,7 +104,7 @@ abstract final class DiaryCardPresets {
     ),
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 180,
+      coverHeight: 144,
       coverDivider: false,
       coverGap: 10,
       paddingH: 14,
@@ -163,7 +163,7 @@ abstract final class DiaryCardPresets {
     content: DiaryCardContentStyle(collage: true),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 200,
+      coverHeight: 160,
       coverDivider: false,
       coverGap: 14,
       paddingH: 16,
@@ -174,7 +174,7 @@ abstract final class DiaryCardPresets {
     ),
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.background,
-      coverHeight: 252,
+      coverHeight: 200,
       coverGap: 10,
       // 底板半透明度：0.85 时底板几乎不透白，照片当背景却只剩顶部
       // 一截能看，底部像贴了一条白带。降到 0.4，照片透过底板仍清
@@ -208,7 +208,7 @@ abstract final class DiaryCardPresets {
       coverSide: 88,
       coverShape: DiaryCardCoverShape.portrait,
       coverRadius: 4,
-      coverHeight: 160,
+      coverHeight: 128,
       coverGap: 14,
       paddingH: 16,
       paddingV: 16,
@@ -219,7 +219,7 @@ abstract final class DiaryCardPresets {
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
       coverRadius: 4,
-      coverHeight: 120,
+      coverHeight: 96,
       coverInset: true,
       coverGap: 10,
       paddingH: 12,
@@ -244,7 +244,7 @@ abstract final class DiaryCardPresets {
       coverPosition: DiaryCardCoverPosition.start,
       coverSide: 96,
       coverRadius: 14,
-      coverHeight: 160,
+      coverHeight: 128,
       coverGap: 14,
       paddingH: 16,
       paddingV: 14,
@@ -297,7 +297,7 @@ abstract final class DiaryCardPresets {
     ),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.bottom,
-      coverHeight: 160,
+      coverHeight: 128,
       coverDivider: false,
       coverGap: 12,
       paddingH: 16,
@@ -309,7 +309,7 @@ abstract final class DiaryCardPresets {
     ),
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 140,
+      coverHeight: 112,
       coverGap: 10,
       paddingH: 14,
       paddingV: 12,

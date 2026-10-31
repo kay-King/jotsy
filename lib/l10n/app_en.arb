@@ -14,6 +14,8 @@
   },
   "navDesktop": "Desktop",
   "@navDesktop": {"description": "Bottom bar label for the Desktop tab."},
+  "navTimeline": "Timeline",
+  "@navTimeline": {"description": "Bottom bar label for the Timeline tab."},
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Auto-generated metadata for commonCancel."
@@ -4247,6 +4249,10 @@
   "styleEditorPanelExpanded": "Expanded",
   "@styleEditorPanelExpanded": {
     "description": "Diary card style settings: screen reader state when the options panel is expanded over the preview."
+  },
+  "styleEditorSettingsTitle": "Style settings",
+  "@styleEditorSettingsTitle": {
+    "description": "Style editor pages (card, preview, home bar, code block): accessibility label of the top Style settings button."
   },
   "diaryCardStyleSharedGroup": "All layouts",
   "@diaryCardStyleSharedGroup": {
@@ -10514,6 +10520,8 @@
   },
   "settingsFeaturesDesktopSubtitle": "Greeting, stats and shortcuts at a glance",
   "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},
+  "settingsFeaturesTimelineSubtitle": "Moments-style timeline as its own bottom tab",
+  "@settingsFeaturesTimelineSubtitle": {"description": "Feature management subtitle for the Timeline tab."},
   "settingsFeaturesFeaturesGroup": "Diary features",
   "@settingsFeaturesFeaturesGroup": {
     "description": "Features page: group title for diary features that can be turned off."

@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../widgets/app_top_bar.dart';
 import '../../../widgets/expressive_menu/expressive_menu.dart';
+import 'style_editor_common.dart';
 
 /// 样式编辑页（卡片样式、预览页样式、代码块样式、导航栏样式）共用的页面外壳。
 ///
-/// 全屏实时预览：预览占满整个屏幕，所有控制按钮都悬浮在预览上、不占固定位置。
-/// - 左上角悬浮菜单按钮：点开展开菜单（页面标题、返回、重置）；
-/// - 顶部悬浮预览工具条：各页自定（如列表/瀑布流切换、页码点、明暗切换），与
-///   菜单按钮同行；
-/// - 底部悬浮分类按钮：一排独立小按钮，点一个弹 BottomSheet（Salt 白卡）显示
-///   该分类的选项，改动即时生效、关掉即可。
+/// 全屏实时预览：预览占满整个屏幕，底部完全空出来；顶部悬浮一排小按钮，
+/// 统一 40 大小、8 间距，小屏也放得下：
+/// - 左上角菜单按钮：返回、标题、重置收进菜单；
+/// - 中间预览工具条：各页自定（如列表/瀑布流切换、页码点），占满剩余宽度；
+/// - 右上角「样式设置」按钮：点开选项整页，所有分类按区块上下排列，
+///   原来 BottomSheet 里的选项直接搬过来，改动即时生效。
 ///
-/// 标签页之间没有横滑：选项直接按分类进 BottomSheet。状态与写入由各页的编辑
-/// 控制器负责（[listenable]），外壳只管布局。
+/// 状态与写入由各页的编辑控制器负责（[listenable]），外壳只管布局。
 class StyleEditorScaffold extends StatelessWidget {
   const StyleEditorScaffold({
     super.key,
@@ -35,6 +36,8 @@ class StyleEditorScaffold extends StatelessWidget {
   final Listenable listenable;
   final bool Function() isDefault;
   final VoidCallback onReset;
+
+  /// 选项整页里的分类：标题行与对应区块。
   final List<String> tabs;
   final List<Widget> Function() tabViews;
 
@@ -48,119 +51,65 @@ class StyleEditorScaffold extends StatelessWidget {
   final List<Widget> Function(BuildContext context)? actionsBuilder;
 
   /// 实时预览：[showToolbar] 恒为 false（工具条已悬浮在顶部）；[bottomPadding]
-  /// 为底部悬浮按钮条预留的高度，预览末尾多留这段、内容不被按钮条盖住。
+  /// 保留给各预览组件复用，脚手架恒传 0（底部已无悬浮按钮条）。
   final Widget Function({
     required bool showToolbar,
     required double bottomPadding,
   })
   previewBuilder;
 
-  /// 底部悬浮按钮条给预览预留的高度。
-  static const double _bottomBarReserve = 76;
+  /// 顶栏悬浮小按钮的统一尺寸：40 白圆，比原来小一圈，给预览让地方，
+  /// 仍在可点范围内。
+  static const double _topButtonSize = 40;
 
-  /// 点分类按钮：弹 BottomSheet 显示该分类的选项（Salt 白卡）。
-  ///
-  /// 各 tab 页内部的选项逻辑一点不动，只是换了个入口。
-  Future<void> _openTabSheet(BuildContext context, int index) {
-    final label = tabs[index];
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  /// 顶栏按钮之间的统一间距。
+  static const double _topButtonGap = 8;
+
+  /// 白色圆形悬浮按钮外壳（Salt 风：白底圆、无边框、轻微阴影；不用
+  /// Material.elevation，阴影重会显出深色描边）。
+  Widget _circleButton({required Widget child}) {
+    return SizedBox(
+      width: _topButtonSize,
+      height: _topButtonSize,
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 10,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: child,
+        ),
       ),
-      builder: (BuildContext sheetContext) {
-        final size = MediaQuery.sizeOf(sheetContext);
-        final l10n = sheetContext.l10n;
-        return Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: size.width >= 720 ? 640 : double.infinity,
-            ),
-            // sheet 里包自己的 ScaffoldMessenger + Scaffold：各 tab 页经
-            // showStyleEditorUndoSnackBar 弹的提示（套用、重置、导入等）走
-            // 最近的 messenger，显示在 sheet 内部；否则会被底下的页面
-            // Scaffold 接住、藏在 modal 遮罩后面看不见、点不到。
-            child: ScaffoldMessenger(
-              child: Scaffold(
-                backgroundColor: Theme.of(sheetContext).colorScheme.surface,
-                body: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    child: SizedBox(
-                      height: size.height * 0.78,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  label,
-                                  style: Theme.of(sheetContext)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                              IconButton(
-                                tooltip: l10n.commonClose,
-                                onPressed: () =>
-                                    Navigator.of(sheetContext).pop(),
-                                icon: const Icon(Icons.close),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // tab 页内部不自己监听控制器：包一层 ListenableBuilder，
-                          // 控制器变化时重建该分类的选项（与原来 TabBarView 在
-                          // ListenableBuilder 里重建 tabViews() 一致）。
-                          Expanded(
-                            child: ListenableBuilder(
-                              listenable: listenable,
-                              builder: (BuildContext _, Widget? __) =>
-                                  tabViews()[index],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
-  /// 左上角悬浮菜单按钮：返回、标题、重置都收进菜单，点开显示。
-  ///
-  /// Salt 风：白底圆、无边框、轻微阴影；不用 Material.elevation（阴影重会
-  /// 显出深色描边），与底部悬浮分类按钮同式。
+  /// 左上角菜单按钮：返回、标题、重置都收进菜单，点开显示。
   Widget _menuButton(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
+    return _circleButton(
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          iconButtonTheme: IconButtonThemeData(
+            style: IconButton.styleFrom(
+              minimumSize: const Size(_topButtonSize, _topButtonSize),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: EdgeInsets.zero,
+            ),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
+        ),
         child: ExpressiveMenuButton(
           tooltip: title,
-          icon: const Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_vert, size: 20),
           placement: ExpressiveMenuPlacement.start,
           items: <Widget>[
             // 标题不可点，只起标识作用。
@@ -190,57 +139,30 @@ class StyleEditorScaffold extends StatelessWidget {
     );
   }
 
-  /// 底部悬浮分类按钮条：独立小按钮横排，超宽时可横滑。
-  ///
-  /// Salt 风：白底胶囊、无边框、轻微阴影，深灰字；不用 Material.elevation
-  ///（阴影重会显出深色描边）。水波纹保留。
-  Widget _tabButtonBar(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Center(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            for (int i = 0; i < tabs.length; i++) ...<Widget>[
-              if (i > 0) const SizedBox(width: 8),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const <BoxShadow>[
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () => _openTabSheet(context, i),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Text(
-                        tabs[i],
-                        style: textTheme.labelLarge?.copyWith(
-                          color: const Color(0xFF5A534E),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
+  /// 右上角「样式设置」按钮：打开选项整页。
+  Widget _settingsButton(BuildContext context) {
+    return _circleButton(
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => _openSettingsPage(context),
+        child: Tooltip(
+          message: context.l10n.styleEditorSettingsTitle,
+          child: const Center(child: Icon(Icons.tune_outlined, size: 20)),
+        ),
+      ),
+    );
+  }
+
+  /// 选项整页：所有分类按区块上下排列，各区块内就是原来 BottomSheet
+  /// 里的选项（直接复用各 tab 页）。
+  void _openSettingsPage(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _StyleEditorSettingsPage(
+          title: title,
+          tabs: tabs,
+          tabViews: tabViews,
+          listenable: listenable,
         ),
       ),
     );
@@ -248,20 +170,19 @@ class StyleEditorScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actions = actionsBuilder?.call(context) ?? const <Widget>[];
     return Scaffold(
       body: ListenableBuilder(
         listenable: listenable,
         builder: (BuildContext context, Widget? child) {
           return Stack(
             children: <Widget>[
-              // 全屏预览。
+              // 全屏预览：底部完全空出来。
               Positioned.fill(
-                child: previewBuilder(
-                  showToolbar: false,
-                  bottomPadding: _bottomBarReserve,
-                ),
+                child: previewBuilder(showToolbar: false, bottomPadding: 0),
               ),
-              // 顶部悬浮：菜单按钮 + 预览工具条 + 操作按钮。
+              // 顶部悬浮：菜单按钮 + 预览工具条 + 操作按钮 + 样式设置按钮，
+              // 间距统一 8，视觉平衡、小屏也放得下。
               Positioned(
                 top: 0,
                 left: 0,
@@ -273,32 +194,111 @@ class StyleEditorScaffold extends StatelessWidget {
                     child: Row(
                       children: <Widget>[
                         _menuButton(context),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: _topButtonGap),
                         Expanded(
                           child:
                               toolbarBuilder?.call(context) ??
                               const SizedBox.shrink(),
                         ),
-                        ...?actionsBuilder?.call(context),
+                        for (final Widget action in actions) ...<Widget>[
+                          const SizedBox(width: _topButtonGap),
+                          action,
+                        ],
+                        const SizedBox(width: _topButtonGap),
+                        _settingsButton(context),
                       ],
                     ),
                   ),
                 ),
               ),
-              // 底部悬浮：分类按钮条。
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SafeArea(
-                  top: false,
-                  minimum: const EdgeInsets.only(bottom: 12),
-                  child: _tabButtonBar(context),
-                ),
-              ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// 点右上角「样式设置」打开的选项整页。
+///
+/// 所有分类按区块上下排列，每个区块的标题是分类名、内容是该 tab 页的
+/// 全部选项（包 [StyleEditorEmbeddedScope]，tab 内部不再自己滚动）。
+/// 改动即时生效，返回即回到全屏预览。
+class _StyleEditorSettingsPage extends StatelessWidget {
+  const _StyleEditorSettingsPage({
+    required this.title,
+    required this.tabs,
+    required this.tabViews,
+    required this.listenable,
+  });
+
+  final String title;
+  final List<String> tabs;
+  final List<Widget> Function() tabViews;
+  final Listenable listenable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // 仓库统一紧凑标题栏：64 高、返回键为 < 风格（angleLeft 18）。
+      appBar: AppTopBar(title: Text(title)),
+      body: ListenableBuilder(
+        listenable: listenable,
+        builder: (BuildContext context, Widget? _) {
+          final views = tabViews();
+          final bottomInset = MediaQuery.paddingOf(context).bottom;
+          return StyleEditorEmbeddedScope(
+            child: ListView.builder(
+              padding: EdgeInsets.fromLTRB(0, 4, 0, 24 + bottomInset),
+              itemCount: tabs.length,
+              itemBuilder: (BuildContext context, int index) {
+                return _SettingsSection(
+                  label: tabs[index],
+                  child: views[index],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 选项整页里的一个分类区块：蓝色小标题 + 该分类的全部选项。
+///
+/// 标题样式与 [SettingsCardGroup] 的卡内标题一致（Salt 蓝、w400），
+/// tab 页内部的白卡分组原样保留，不套第二层卡。
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+            child: Text(
+              label,
+              style: textTheme.titleMedium?.copyWith(
+                fontSize: 15,
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0.1,
+              ),
+            ),
+          ),
+          child,
+        ],
       ),
     );
   }

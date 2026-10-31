@@ -128,7 +128,7 @@ void main() {
     // 设置页不显示全局 FAB。
     await tester.tap(_navItem(l10n.navSettings));
     await tester.pumpAndSettle();
-    expect(_homePage(tester), 2);
+    expect(_homePage(tester), 3);
     expect(_createFabShown(tester), isFalse);
 
     await tester.tap(_navItem(l10n.navDiaries));
@@ -147,11 +147,11 @@ void main() {
     await tester.pump();
     for (var frame = 0; frame < 30; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
-      // 桌面(0) -> 设置(2)：不应再滑过日记(1)。
+      // 桌面(0) -> 设置(3)：不应再滑过日记(1)。
       expect(_homePage(tester), greaterThanOrEqualTo(1), reason: '$frame');
     }
     await tester.pumpAndSettle();
-    expect(_homePage(tester), 2);
+    expect(_homePage(tester), 3);
     await _unmount(tester);
   });
 
@@ -164,7 +164,7 @@ void main() {
 
     await tester.tap(_navItem(l10n.navSettings));
     await tester.pump();
-    expect(_homePage(tester), 2);
+    expect(_homePage(tester), 3);
     await tester.pumpAndSettle();
     await _unmount(tester);
   });

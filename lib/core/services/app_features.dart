@@ -1,6 +1,6 @@
 // 功能管理开关（设置 → 功能管理）。
 //
-// 职责：描述用户可整体关闭的功能——桌面 Tab、日记本、纪念日、
+// 职责：描述用户可整体关闭的功能——桌面 Tab、时间线 Tab、日记本、纪念日、
 // 日记模板、时间胶囊、侧滑归档——是否开启；默认全部开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
 //
@@ -17,6 +17,7 @@ import 'dart:convert';
 class AppFeatures {
   const AppFeatures({
     this.desktop = true,
+    this.timeline = true,
     this.notebooks = true,
     this.anniversaries = true,
     this.templates = true,
@@ -29,6 +30,9 @@ class AppFeatures {
 
   /// 桌面 Tab。
   final bool desktop;
+
+  /// 时间线 Tab（朋友圈式时间线页）。
+  final bool timeline;
 
   /// 日记本。
   final bool notebooks;
@@ -51,6 +55,7 @@ class AppFeatures {
   bool get anniversariesEnabled => anniversaries;
 
   static const _keyDesktop = 'desktop';
+  static const _keyTimeline = 'timeline';
   static const _keyNotebooks = 'notebooks';
   static const _keyAnniversaries = 'anniversaries';
   static const _keyTemplates = 'templates';
@@ -77,6 +82,7 @@ class AppFeatures {
 
     return AppFeatures(
       desktop: read(_keyDesktop, defaults.desktop),
+      timeline: read(_keyTimeline, defaults.timeline),
       notebooks: read(_keyNotebooks, defaults.notebooks),
       anniversaries: read(_keyAnniversaries, defaults.anniversaries),
       templates: read(_keyTemplates, defaults.templates),
@@ -91,6 +97,7 @@ class AppFeatures {
     if (this == defaults) return null;
     return jsonEncode(<String, bool>{
       _keyDesktop: desktop,
+      _keyTimeline: timeline,
       _keyNotebooks: notebooks,
       _keyAnniversaries: anniversaries,
       _keyTemplates: templates,
@@ -101,6 +108,7 @@ class AppFeatures {
 
   AppFeatures copyWith({
     bool? desktop,
+    bool? timeline,
     bool? notebooks,
     bool? anniversaries,
     bool? templates,
@@ -109,6 +117,7 @@ class AppFeatures {
   }) {
     return AppFeatures(
       desktop: desktop ?? this.desktop,
+      timeline: timeline ?? this.timeline,
       notebooks: notebooks ?? this.notebooks,
       anniversaries: anniversaries ?? this.anniversaries,
       templates: templates ?? this.templates,
@@ -121,6 +130,7 @@ class AppFeatures {
   bool operator ==(Object other) =>
       other is AppFeatures &&
       other.desktop == desktop &&
+      other.timeline == timeline &&
       other.notebooks == notebooks &&
       other.anniversaries == anniversaries &&
       other.templates == templates &&
@@ -130,6 +140,7 @@ class AppFeatures {
   @override
   int get hashCode => Object.hash(
     desktop,
+    timeline,
     notebooks,
     anniversaries,
     templates,
@@ -139,7 +150,7 @@ class AppFeatures {
 
   @override
   String toString() =>
-      'AppFeatures(desktop: $desktop, '
+      'AppFeatures(desktop: $desktop, timeline: $timeline, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
       'templates: $templates, timeCapsules: $timeCapsules, '
       'swipeArchive: $swipeArchive)';

@@ -51,6 +51,12 @@ void main() {
     expect(stored(h), AppFeatures.defaults);
     expect(h.settings.appFeaturesRaw, isNull);
 
+    await toggle(tester, l10n.navTimeline);
+    expect(stored(h).timeline, isFalse);
+    await toggle(tester, l10n.navTimeline);
+    expect(stored(h), AppFeatures.defaults);
+    expect(h.settings.appFeaturesRaw, isNull);
+
     await toggle(tester, l10n.settingsFeaturesAnniversaries);
     expect(stored(h).anniversaries, isFalse);
     await toggle(tester, l10n.settingsFeaturesTemplates);
@@ -78,13 +84,15 @@ void main() {
     await h.pump(const AppFeaturesPage());
     final l10n = h.l10n;
 
-    // 「页面」组顺序：桌面、纪念日；「功能」组在其后。
+    // 「页面」组顺序：桌面、时间线、纪念日；「功能」组在其后。
     final desktopY = tester.getTopLeft(switchTile(l10n.navDesktop)).dy;
+    final timelineY = tester.getTopLeft(switchTile(l10n.navTimeline)).dy;
     final anniversaryY = tester
         .getTopLeft(switchTile(l10n.settingsFeaturesAnniversaries))
         .dy;
     final notebooksY = tester.getTopLeft(switchTile(l10n.notebookTitle)).dy;
-    expect(desktopY, lessThan(anniversaryY));
+    expect(desktopY, lessThan(timelineY));
+    expect(timelineY, lessThan(anniversaryY));
     expect(anniversaryY, lessThan(notebooksY));
 
     // 与桌面平齐（用户 2026-10-24：从属缩进在卡里读起来像没对齐）。
@@ -178,9 +186,9 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // 功能管理里 6 个开关（桌面/日记本/纪念日/模板/时间胶囊/侧滑归档；
+      // 功能管理里 7 个开关（桌面/时间线/日记本/纪念日/模板/时间胶囊/侧滑归档；
       // 探索与日历已并进首页，不再有开关）。
-      expect(find.byType(SettingsSwitchTile), findsNWidgets(6));
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(7));
     });
   }
 

@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Desktop'**
   String get navDesktop;
 
+  /// Bottom bar label for the Timeline tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get navTimeline;
+
   /// Auto-generated metadata for commonCancel.
   ///
   /// In en, this message translates to:
@@ -5365,6 +5371,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expanded'**
   String get styleEditorPanelExpanded;
+
+  /// Style editor pages (card, preview, home bar, code block): accessibility label of the top Style settings button.
+  ///
+  /// In en, this message translates to:
+  /// **'Style settings'**
+  String get styleEditorSettingsTitle;
 
   /// Diary card style settings: group title for options that apply to both list and waterfall layouts.
   ///
@@ -13621,6 +13633,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Greeting, stats and shortcuts at a glance'**
   String get settingsFeaturesDesktopSubtitle;
+
+  /// Feature management subtitle for the Timeline tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Moments-style timeline as its own bottom tab'**
+  String get settingsFeaturesTimelineSubtitle;
 
   /// Features page: group title for diary features that can be turned off.
   ///

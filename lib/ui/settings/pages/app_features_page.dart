@@ -81,6 +81,13 @@ class AppFeaturesPage extends ConsumerWidget {
                 value: features.desktop,
                 onChanged: writer((v) => features.copyWith(desktop: v)),
               ),
+              const SettingsCardGroupDivider(),
+              SettingsSwitchTile(
+                title: l10n.navTimeline,
+                subtitle: l10n.settingsFeaturesTimelineSubtitle,
+                value: features.timeline,
+                onChanged: writer((v) => features.copyWith(timeline: v)),
+              ),
               // 纪念日以前挂在日历开关下面（SettingsReveal），日历并进首页
               // 后不再有日历开关，纪念日改成平级的一项。
               const SettingsCardGroupDivider(),

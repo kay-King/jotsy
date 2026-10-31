@@ -52,53 +52,109 @@ class SettingsThemeSection extends StatelessWidget {
                                       children: <Widget>[
                                         Padding(
                                           padding: const EdgeInsets.all(16),
-                                          child:
-                                              ExpressiveButtonGroup<ThemeMode>(
-                                                selected: <ThemeMode>{mode},
-                                                onSelectionChanged:
-                                                    (Set<ThemeMode> selection) {
-                                                      final next =
-                                                          selection.firstOrNull;
-                                                      if (next != null) {
-                                                        settingsService
-                                                            .setThemeMode(next);
-                                                      }
-                                                    },
-                                                segments:
-                                                    <ButtonSegment<ThemeMode>>[
-                                                      ButtonSegment<ThemeMode>(
-                                                        value: ThemeMode.system,
-                                                        label: Text(
-                                                          l10n.autoT0046,
-                                                        ),
-                                                        icon: const FaIcon(
-                                                          FontAwesomeIcons
-                                                              .circleHalfStroke,
-                                                          size: 18,
-                                                        ),
-                                                      ),
-                                                      ButtonSegment<ThemeMode>(
-                                                        value: ThemeMode.light,
-                                                        label: Text(
-                                                          l10n.autoT0047,
-                                                        ),
-                                                        icon: const FaIcon(
-                                                          FontAwesomeIcons.sun,
-                                                          size: 18,
-                                                        ),
-                                                      ),
-                                                      ButtonSegment<ThemeMode>(
-                                                        value: ThemeMode.dark,
-                                                        label: Text(
-                                                          l10n.autoT0048,
-                                                        ),
-                                                        icon: const FaIcon(
-                                                          FontAwesomeIcons.moon,
-                                                          size: 18,
-                                                        ),
-                                                      ),
-                                                    ],
+                                          // 横排三段式：白底圆角轨道 + 轻微阴影，选中段 Salt 蓝底白字，
+                                          // 与样式编辑器里的“列表/瀑布流”分段同式。minSegmentWidth
+                                          // 调小保证三段始终横排（图标 + 两字标签）。
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              boxShadow: const <BoxShadow>[
+                                                BoxShadow(
+                                                  color: Color(0x14000000),
+                                                  blurRadius: 10,
+                                                  offset: Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Theme(
+                                              data: Theme.of(context).copyWith(
+                                                colorScheme: Theme.of(context)
+                                                    .colorScheme
+                                                    .copyWith(
+                                                      // 轨道白底；选中片 Salt 蓝、选中字白。
+                                                      // 只影响这一棵子树。
+                                                      surfaceContainerHigh:
+                                                          Colors.white,
+                                                      surfaceContainerLowest:
+                                                          const Color(
+                                                            0xFF0470E6,
+                                                          ),
+                                                      onSurface: Colors.white,
+                                                    ),
                                               ),
+                                              child:
+                                                  ExpressiveButtonGroup<
+                                                    ThemeMode
+                                                  >(
+                                                    minSegmentWidth: 72,
+                                                    selected: <ThemeMode>{mode},
+                                                    onSelectionChanged:
+                                                        (
+                                                          Set<ThemeMode>
+                                                          selection,
+                                                        ) {
+                                                          final next = selection
+                                                              .firstOrNull;
+                                                          if (next != null) {
+                                                            settingsService
+                                                                .setThemeMode(
+                                                                  next,
+                                                                );
+                                                          }
+                                                        },
+                                                    segments:
+                                                        <
+                                                          ButtonSegment<
+                                                            ThemeMode
+                                                          >
+                                                        >[
+                                                          ButtonSegment<
+                                                            ThemeMode
+                                                          >(
+                                                            value: ThemeMode
+                                                                .system,
+                                                            label: Text(
+                                                              l10n.autoT0046,
+                                                            ),
+                                                            icon: const FaIcon(
+                                                              FontAwesomeIcons
+                                                                  .circleHalfStroke,
+                                                              size: 18,
+                                                            ),
+                                                          ),
+                                                          ButtonSegment<
+                                                            ThemeMode
+                                                          >(
+                                                            value:
+                                                                ThemeMode.light,
+                                                            label: Text(
+                                                              l10n.autoT0047,
+                                                            ),
+                                                            icon: const FaIcon(
+                                                              FontAwesomeIcons
+                                                                  .sun,
+                                                              size: 18,
+                                                            ),
+                                                          ),
+                                                          ButtonSegment<
+                                                            ThemeMode
+                                                          >(
+                                                            value:
+                                                                ThemeMode.dark,
+                                                            label: Text(
+                                                              l10n.autoT0048,
+                                                            ),
+                                                            icon: const FaIcon(
+                                                              FontAwesomeIcons
+                                                                  .moon,
+                                                              size: 18,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                  ),
+                                            ),
+                                          ),
                                         ),
                                         _TabSwitchCurveSelector(
                                           selectedCurveType: curveType,

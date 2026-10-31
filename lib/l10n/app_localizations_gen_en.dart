@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navDesktop => 'Desktop';
 
   @override
+  String get navTimeline => 'Timeline';
+
+  @override
   String get commonCancel => 'Cancel';
 
   @override
@@ -3311,6 +3314,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleEditorPanelExpanded => 'Expanded';
+
+  @override
+  String get styleEditorSettingsTitle => 'Style settings';
 
   @override
   String get diaryCardStyleSharedGroup => 'All layouts';
@@ -8295,6 +8301,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsFeaturesDesktopSubtitle =>
       'Greeting, stats and shortcuts at a glance';
+
+  @override
+  String get settingsFeaturesTimelineSubtitle =>
+      'Moments-style timeline as its own bottom tab';
 
   @override
   String get settingsFeaturesFeaturesGroup => 'Diary features';

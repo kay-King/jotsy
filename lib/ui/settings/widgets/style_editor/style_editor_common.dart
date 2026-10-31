@@ -60,9 +60,16 @@ class StyleEditorTabList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // 被嵌进选项整页（[StyleEditorEmbeddedScope]）时：自己不再滚动，
+    // 只按内容撑开、随外层一起滚；内外边距由整页的区块负责。
+    final embedded = StyleEditorEmbeddedScope.of(context);
+    final bottomInset = embedded ? 0.0 : MediaQuery.paddingOf(context).bottom;
     return ListView(
-      padding: EdgeInsets.fromLTRB(0, 16, 0, 24 + bottomInset),
+      shrinkWrap: embedded,
+      physics: embedded ? const NeverScrollableScrollPhysics() : null,
+      padding: embedded
+          ? EdgeInsets.zero
+          : EdgeInsets.fromLTRB(0, 16, 0, 24 + bottomInset),
       children: <Widget>[
         for (var i = 0; i < children.length; i++) ...<Widget>[
           if (i > 0) const SizedBox(height: 16),
@@ -71,6 +78,21 @@ class StyleEditorTabList extends StatelessWidget {
       ],
     );
   }
+}
+
+/// 标记样式编辑的 tab 页被嵌进选项整页：此时 [StyleEditorTabList]
+/// 不再自己滚动，只按内容撑开、随外层一起滚。
+///
+/// 各 tab 页内部不改，整页在外层包一层这个即可。
+class StyleEditorEmbeddedScope extends InheritedWidget {
+  const StyleEditorEmbeddedScope({super.key, required super.child});
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<StyleEditorEmbeddedScope>() !=
+      null;
+
+  @override
+  bool updateShouldNotify(StyleEditorEmbeddedScope oldWidget) => false;
 }
 
 /// 可撤销的操作提示（套用、重置、导入、删除）。经

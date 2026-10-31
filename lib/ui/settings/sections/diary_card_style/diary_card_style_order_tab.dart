@@ -10,6 +10,7 @@ import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../widgets/expressive_reorder_proxy.dart';
 import '../../../widgets/triple_bar_drag_handle.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
+import '../../widgets/style_editor/style_editor_common.dart';
 import 'diary_card_style_labels.dart';
 
 /// “排序”标签页：拖动调整卡片正文各区块（日期行、标题、标签、摘要、底栏）
@@ -41,8 +42,14 @@ class DiaryCardStyleOrderTab extends StatelessWidget {
     final blocks = style.content.blocks;
     final isDefaultOrder = _sameOrder(blocks, DiaryCardBlock.values);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // 被嵌进选项整页时：不自己滚动、按内容撑开（见 StyleEditorEmbeddedScope）。
+    final embedded = StyleEditorEmbeddedScope.of(context);
     return ReorderableListView.builder(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + bottomInset),
+      shrinkWrap: embedded,
+      physics: embedded ? const NeverScrollableScrollPhysics() : null,
+      padding: embedded
+          ? const EdgeInsets.fromLTRB(16, 0, 16, 0)
+          : EdgeInsets.fromLTRB(16, 12, 16, 24 + bottomInset),
       buildDefaultDragHandles: false,
       proxyDecorator: expressiveReorderProxyDecorator,
       header: Padding(

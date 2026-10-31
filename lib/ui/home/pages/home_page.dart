@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
+import 'package:node_diary/ui/diaries/pages/timeline_page.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_create_entry_flow.dart';
 import 'package:node_diary/ui/home/controllers/home_bar_scroll_hider.dart';
 import 'package:node_diary/ui/home/pages/desktop_page.dart';
@@ -255,6 +256,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             pageBackgroundColor: Theme.of(context).colorScheme.surface,
             onCreateActionChanged: _diariesCreateActionChanged,
             onFabVisibilityChanged: _diariesFabVisibilityChanged,
+          ),
+          HomeTab.timeline => const TimelinePage(
+            key: PageStorageKey<String>('tab_timeline'),
+            showBackButton: false,
           ),
           HomeTab.settings => SettingsPage(
             key: const PageStorageKey<String>('tab_settings'),

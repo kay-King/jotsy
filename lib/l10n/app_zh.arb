@@ -14,6 +14,8 @@
   },
   "navDesktop": "桌面",
   "@navDesktop": {"description": "Bottom bar label for the Desktop tab."},
+  "navTimeline": "时间线",
+  "@navTimeline": {"description": "Bottom bar label for the Timeline tab."},
   "commonCancel": "取消",
   "@commonCancel": {
     "description": "Auto-generated metadata for commonCancel."
@@ -4247,6 +4249,10 @@
   "styleEditorPanelExpanded": "已展开",
   "@styleEditorPanelExpanded": {
     "description": "日记卡片样式设置页：选项面板展开到顶部、盖住预览时的读屏状态。"
+  },
+  "styleEditorSettingsTitle": "样式设置",
+  "@styleEditorSettingsTitle": {
+    "description": "样式编辑页（卡片样式、预览页样式、导航栏样式、代码块样式）顶部“样式设置”按钮的无障碍提示。"
   },
   "diaryCardStyleSharedGroup": "所有布局",
   "@diaryCardStyleSharedGroup": {
@@ -10514,6 +10520,8 @@
   },
   "settingsFeaturesDesktopSubtitle": "问候、统计与快捷入口，一目了然",
   "@settingsFeaturesDesktopSubtitle": {"description": "Feature management subtitle for the Desktop page."},
+  "settingsFeaturesTimelineSubtitle": "朋友圈式时间线，单独一个底部 Tab",
+  "@settingsFeaturesTimelineSubtitle": {"description": "功能管理页：时间线开关的说明。"},
   "settingsFeaturesFeaturesGroup": "功能",
   "@settingsFeaturesFeaturesGroup": {
     "description": "功能管理页：可关闭的日记功能分组标题。"
