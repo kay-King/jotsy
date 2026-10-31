@@ -1,6 +1,8 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+
+/// 正文末尾为「更多」面板额外让出的空间，高度跟随 [extent]。
 import 'package:node_diary/app/theme/expressive_motion.dart';
 
 /// 正文末尾为「更多」面板额外让出的空间，高度跟随 [extent]。
@@ -73,35 +75,27 @@ class _DiaryToolbarPanelReserveState extends State<DiaryToolbarPanelReserve>
   }
 }
 
-/// 把正文里 [position] 处的光标滚到底部遮挡物上方。
+/// 把正文里的光标滚到底部遮挡物上方。
 ///
-/// 悬浮工具栏是叠在正文上的浮层，正文视口并不知道底部被遮住了多少：这里把
-/// 光标矩形向下延长 [coveredHeight] 再交给 showOnScreen，视口只在光标确实被
-/// 挡住时滚动，而且只滚到刚好露出为止；与面板展开同时长同曲线，看起来是面板
-/// 把正文推了上去。编辑器尚未布局时什么也不做。
+/// 悬浮工具栏叠在正文之上，正文视口并不知道底部被遮住了多少。AppFlowy
+/// 编辑器在选区变化时自己保证光标可见（这一点与 Quill 不同，不需要手动揭示），
+/// 这里只需补偿底部浮层（悬浮工具栏 + 展开的面板）遮住的高度：经编辑器的滚动
+/// 服务把内容再往上推 [coveredHeight]，看起来是面板把正文推了上去。编辑器
+/// 尚未挂载滚动服务时什么也不做。
+///
+/// 注意：正文以不可滚动方式嵌在页面滚动容器里时（日记编辑页），光标跟随由
+/// `DiaryCaretFollowController` 统一负责，见该控制器的 AppFlowy 迁移。
 void revealDiaryCaretAbove(
-  GlobalKey<quill.EditorState> editorKey, {
-  required TextPosition position,
+  EditorState editorState, {
   required double coveredHeight,
   required Duration duration,
 }) {
-  final editor = editorKey.currentState;
-  if (editor == null || !editor.mounted) {
+  final scrollService = editorState.service.scrollService;
+  if (scrollService == null) {
     return;
   }
-  final renderEditor = editor.renderEditor;
-  if (!renderEditor.attached || !renderEditor.hasSize) {
-    return;
-  }
-  final caret = renderEditor.getLocalRectForCaret(position);
-  renderEditor.showOnScreen(
-    rect: Rect.fromLTRB(
-      caret.left,
-      caret.top,
-      caret.right,
-      caret.bottom + coveredHeight,
-    ),
+  scrollService.scrollTo(
+    scrollService.dy + coveredHeight,
     duration: duration,
-    curve: ExpressiveMotion.effects,
   );
 }

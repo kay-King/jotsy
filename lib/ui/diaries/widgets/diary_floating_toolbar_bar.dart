@@ -39,7 +39,7 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
             width: cellWidth,
             child: Center(
               child: DiaryToolbarMoreButton(
-                controller: widget.controller,
+                editorState: widget.editorState,
                 overflow: layout.overflow,
                 expanded: _moreExpanded,
                 recordingOpen: widget.recordingOpen,
@@ -80,7 +80,7 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
     final Widget tool;
     if (colorTarget != null) {
       tool = DiaryToolbarColorButton(
-        controller: widget.controller,
+        editorState: widget.editorState,
         target: colorTarget,
         selected:
             !inMorePanel &&
@@ -92,7 +92,7 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
       );
     } else if (item == DiaryToolbarItem.codeBlock) {
       tool = DiaryToolbarCodeBlockButton(
-        controller: widget.controller,
+        editorState: widget.editorState,
         panelOpen:
             !inMorePanel && _panel == _ToolbarPanel.code && !_panelFromMore,
         tooltip: item.label(context.l10n),
@@ -100,19 +100,16 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
       );
     } else {
       final mediaImportController = widget.mediaImportController;
-      tool = quill.QuillSimpleToolbar(
-        controller: widget.controller,
-        config: buildDiaryToolbarItemConfig(
-          context,
-          item,
-          widget.controller,
-          currentTimeFormatPattern: widget.currentTimeFormatPattern,
-          onRecordingPressed: widget.onRecordingPressed,
-          recordingOpen: widget.recordingOpen,
-          onMediaPressed: widget.onMediaPressed,
-          activeMediaKind: mediaImportController?.activeKind,
-          mediaImportBusy: mediaImportController?.isBusy ?? false,
-        ),
+      tool = buildDiaryToolbarItemButton(
+        context,
+        item,
+        widget.editorState,
+        currentTimeFormatPattern: widget.currentTimeFormatPattern,
+        onRecordingPressed: widget.onRecordingPressed,
+        recordingOpen: widget.recordingOpen,
+        onMediaPressed: widget.onMediaPressed,
+        activeMediaKind: mediaImportController?.activeKind,
+        mediaImportBusy: mediaImportController?.isBusy ?? false,
       );
     }
     return SizedBox(

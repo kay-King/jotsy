@@ -1,8 +1,14 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 /// 播放、拖动和弹窗期间临时释放编辑焦点，手势结束后恢复正文获取焦点的能力。
 /// 不清空选区；恢复 canRequestFocus 不会主动把键盘重新拉起。
+///
+/// AppFlowy 迁移说明：原来找上层的 `QuillEditor` 拿 focusNode / controller / 选区，
+/// 现在找 `AppFlowyEditor` 拿 [EditorState] 与 `focusNode`（后者可能为 null，
+/// 此时只保护选区）。选区恢复直接赋值，不经过 uiEvent 的聚焦路径（与原来
+/// `ignoreFocusOnTextChange` 的作用一致），不会把键盘重新拉起。只读正文里
+/// 没有 `AppFlowyEditor` 祖先时退化为空操作。
 class DiaryPlaybackInteractionGuard extends StatefulWidget {
   const DiaryPlaybackInteractionGuard({super.key, required this.child});
   final Widget child;
@@ -17,51 +23,49 @@ class _DiaryPlaybackInteractionGuardState
   final _pointers = <int>{};
   FocusNode? _editorFocus;
   bool _couldRequestFocus = false;
-  quill.QuillController? _editorController;
-  TextSelection? _selection;
+  EditorState? _editorState;
+  Selection? _selection;
 
   void _onDown(PointerDownEvent event) {
     _pointers.add(event.pointer);
-    if (_editorFocus != null) return;
-    final editor = context.findAncestorWidgetOfExactType<quill.QuillEditor>();
+    if (_editorState != null) return;
+    final editor = context.findAncestorWidgetOfExactType<AppFlowyEditor>();
     if (editor == null) return;
-    _editorFocus = editor.focusNode;
-    _editorController = editor.controller;
-    _selection = editor.controller.selection;
-    _couldRequestFocus = editor.focusNode.canRequestFocus;
-    editor.focusNode.canRequestFocus = false;
+    _editorState = editor.editorState;
+    _selection = editor.editorState.selection;
+    final focusNode = editor.focusNode;
+    if (focusNode != null) {
+      _editorFocus = focusNode;
+      _couldRequestFocus = focusNode.canRequestFocus;
+      focusNode.canRequestFocus = false;
+    }
   }
 
   void _onEnd(PointerEvent event) {
     _pointers.remove(event.pointer);
-    // Quill 的透明识别器会在子控件之后收到 tapUp，需等整帧完成再恢复焦点。
+    // 选择服务在手势结束后更新选区，需等整帧完成再恢复。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _pointers.isEmpty) _restore();
     });
   }
 
   void _restore({bool restoreSelection = true}) {
-    final node = _editorFocus;
-    _editorFocus = null;
-    final controller = _editorController;
-    _editorController = null;
+    final editorState = _editorState;
+    _editorState = null;
     final selection = _selection;
     _selection = null;
-    if (node?.context?.mounted ?? false) {
-      // 连续播放/暂停会被 Quill 当作双击选择词语。保留 tapDown 以维持其
-      // 内部手势状态，再在同一帧末恢复原选区，防止播放器改变正文光标。
-      if (restoreSelection &&
-          controller != null &&
-          selection != null &&
-          controller.selection != selection) {
-        controller.ignoreFocusOnTextChange = true;
-        try {
-          controller.updateSelection(selection, quill.ChangeSource.local);
-        } finally {
-          controller.ignoreFocusOnTextChange = false;
-        }
-      }
-      node!.canRequestFocus = _couldRequestFocus;
+    final focusNode = _editorFocus;
+    _editorFocus = null;
+    // 连续播放/暂停可能改变正文选区：恢复手势开始时的选区。直接赋值只重画
+    // 光标，不走聚焦路径，不会把键盘重新拉起。
+    if (restoreSelection &&
+        editorState != null &&
+        selection != null &&
+        editorState.selection != selection) {
+      editorState.selection = selection;
+    }
+    if (focusNode != null && (focusNode.context?.mounted ?? false)) {
+      focusNode.canRequestFocus = _couldRequestFocus;
     }
   }
 

@@ -10,11 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 ///   不硬编码黑白、不用渐变与旧加载圈；
 /// - 工具栏里的代码块面板、语言选项与按钮不开对话框、底部面板或路由（会抢走
 ///   正文焦点、收起键盘，工具栏随之消失）；
-/// - 只有 `attachDiaryCodeBlockEditing` 能改写 `QuillController.onReplaceText`，
-///   之后再赋值会把代码块的回车处理覆盖掉。
+/// - Quill 的 `onReplaceText` 钩子已随 AppFlowy 迁移移除：任何源码不得再给
+///   它赋值（代码块回车改走 [handleDiaryCodeBlockEnter]，由调用方在回车键
+///   处理入口先调）。
 void main() {
-  const editingFile =
-      'lib/ui/diaries/controllers/diary_code_block_editing.dart';
   const codeBlockDirs = <String>[
     'lib/ui/diaries/widgets/diary_code_block/',
     'lib/ui/diaries/models/diary_code_block/',
@@ -94,22 +93,13 @@ void main() {
     );
   });
 
-  test('only attachDiaryCodeBlockEditing assigns onReplaceText', () {
+  test('no source assigns onReplaceText (the Quill hook is gone)', () {
+    // AppFlowy 迁移后代码块回车改走 handleDiaryCodeBlockEnter，Quill 的
+    // onReplaceText 钩子已不存在：任何源码都不该再出现对它的赋值。
     final assignment = RegExp(r'\bonReplaceText\s*(?:\?\?)?=(?!=)');
-    final others = libFiles.where(
-      (File file) => normalize(file.path) != editingFile,
-    );
     expect(
-      offenders(others, <String, RegExp>{'onReplaceText =': assignment}),
+      offenders(libFiles, <String, RegExp>{'onReplaceText =': assignment}),
       isEmpty,
-    );
-    // 自检：规则本身能认出那一处赋值，避免正则写错后永远放行。
-    expect(
-      offenders(
-        <File>[File(editingFile)],
-        <String, RegExp>{'onReplaceText =': assignment},
-      ),
-      isNotEmpty,
     );
   });
 }

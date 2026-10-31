@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
@@ -128,10 +129,7 @@ void main() {
         child: MaterialApp(
           theme: expressiveTestTheme(Brightness.light),
           locale: const Locale('en'),
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            quill.FlutterQuillLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: existing != null
               ? EditDiaryPage(diaryId: existing)
@@ -150,12 +148,13 @@ void main() {
 
   List<String> imageEmbeds(WidgetTester tester) {
     final document = tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .controller
+        .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+        .editorState
         .document;
     return <String>[
-      for (final op in document.toDelta().toList())
-        if (op.data case {'image': final String path}) path,
+      for (final node in document.root.children)
+        if (node.type == kDiaryBlockImage)
+          node.attributes[kDiaryBlockUrlKey].toString(),
     ];
   }
 

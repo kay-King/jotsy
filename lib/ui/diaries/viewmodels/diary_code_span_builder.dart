@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
+import '../../../core/database/diary_blocks/diary_blocks_schema.dart';
 import '../controllers/diary_code_language_tracker.dart';
 import '../models/diary_code_block/diary_code_block_newline.dart';
 import '../models/diary_code_block/diary_code_highlighter.dart';
@@ -12,40 +12,35 @@ import '../models/diary_code_block/diary_code_language.dart';
 import '../models/diary_code_block/diary_code_theme.dart';
 import 'diary_code_block_look.dart';
 
-// 把代码块的语法高亮、字体与行号接进 flutter_quill 的渲染钩子。
+// 把代码块的语法高亮接进 AppFlowy 的文本渲染。
 //
-// 输入：解析好的 [DiaryCodeBlockLook] 与该控制器的 [DiaryCodeLanguageTracker]。
-// 输出：交给 `QuillEditorConfig` 的三个回调——
-// - textSpanBuilder：代码块里的文字按高亮区间拆成带颜色的子 span；
-// - customStyleBuilder：语言值为字符串的代码块行补上代码字体（见下）；
-// - customLeadingBlockBuilder：行号用代码块配色。
+// 输入：编辑器按 delta 建出的文本 span、代码块节点、解析好的
+// [DiaryCodeBlockLook] 与该编辑器的 [DiaryCodeLanguageTracker]。
+// 输出：[buildDiaryCodeSpan] 把整块 span 按高亮区间重新拆成带颜色的子
+// span，供代码块组件的 `textSpanDecorator` 使用。
 // 副作用：无（识别结果的防抖由 tracker 负责）。
 //
-// flutter_quill 的约束与对策：
-// - textSpanBuilder 按叶子（一段同样式的文字）调用，平常 nodeOffset 为 0、
-//   text 为整段；输入法组字时同一叶子被调用 3 次，分别是组字前、组字中、
-//   组字后的切片，nodeOffset 为切片在叶子内的起点。高亮按“整块文本”的
-//   区间计算，切片在块内的位置 = 行在块内的偏移 + 叶子在行内的偏移 +
-//   nodeOffset，三次调用都对得上。
-// - 带嵌入的行传入的是克隆出来、没有父节点的叶子，定位不到块，按默认
-//   方式渲染（只是不着色，文字仍是代码字体）。
-// - 高亮必须看整块（多行字符串、块注释跨行），而每一行、每个叶子都会
-//   调用一次；整块文本、语言与高亮区间按“帧”缓存在 Block 上，同一帧里
-//   只算一次，避免长代码块每帧 O(行数²) 地拼接文本。
-// - text_line.dart 只在块属性值恰为 `true` 时给行套代码样式；语言值是字符串
-//   （'python'、'plain'）的块会丢掉代码字体。customStyleBuilder 会遍历行
-//   属性，在那里为字符串值补上同一份代码样式。
+// 与 Quill 时代的差异：原来是 `textSpanBuilder` 钩子按叶子（一段同样式
+// 的文字）调用；AppFlowy 时代是 `textSpanDecorator`，拿到整块建好的
+// span 再整体变换。语义不变：
+// - 高亮必须看整块（多行字符串、块注释跨行），区间按“帧”缓存在节点上，
+//   同一帧里只算一次，避免长代码块每帧 O(行数²) 地拼接文本；
+// - 叶子自带文字色（用户手动上色）时尊重用户的颜色，只保留注释的斜体；
+// - 空隙不设样式，继承代码文字样式；
+// - 超限的块不拼接、不识别、不着色；
+// - 变换前后纯文本必须与 delta 一致（光标偏移按它定位），对不上时原样
+//   返回，只是不着色。
 
 /// 代码块用于高亮的语言：明确指定的语言 id；'plain' 不高亮；未指定时按
 /// [autoDetect] 取自动识别结果（关闭时不高亮）。
 String? resolveDiaryCodeHighlightLanguage(
-  quill.Block block,
+  Node block,
   String blockText, {
   required bool autoDetect,
   required DiaryCodeLanguageTracker tracker,
 }) {
   final choice = DiaryCodeLanguageChoice.fromAttributeValue(
-    block.style.attributes[quill.Attribute.codeBlock.key]?.value,
+    block.attributes[kDiaryBlockLanguageKey],
   );
   if (choice.isPlain) {
     tracker.cancelPendingFor(block);
@@ -63,12 +58,65 @@ String? resolveDiaryCodeHighlightLanguage(
   return tracker.languageFor(block, blockText);
 }
 
-/// 代码块文字的 span 构建器；代码块以外的文字原样交给 quill 默认实现。
-quill.TextSpanBuilder buildDiaryCodeSpanBuilder(
-  DiaryCodeBlockLook look,
-  DiaryCodeLanguageTracker tracker,
-) {
-  final memo = Expando<_BlockFrame>('diaryCodeBlockFrame');
+/// 代码块文字的高亮变换：把 [span] 按语法高亮区间拆成带颜色的子 span。
+///
+/// [span] 是编辑器按节点 delta 建出的文本；根样式换成代码文字样式
+/// （[DiaryCodeBlockLook.codeTextStyle]），空隙继承它。delta 里带
+/// `font_color` 的叶子只叠 token 的字形（如注释斜体），颜色保留用户的。
+///
+/// 非代码块节点原样返回；纯文本对不上 delta、超限块或无高亮时根样式仍
+/// 换成代码文字样式（保证等宽字体），只是不着色。
+TextSpan buildDiaryCodeSpan(
+  TextSpan span, {
+  required Node node,
+  required DiaryCodeBlockLook look,
+  required DiaryCodeLanguageTracker tracker,
+}) {
+  TextSpan styled(TextSpan source) => source.style == look.codeTextStyle
+      ? source
+      : TextSpan(
+          text: source.text,
+          style: look.codeTextStyle,
+          children: source.children,
+          recognizer: source.recognizer,
+          mouseCursor: source.mouseCursor,
+          semanticsLabel: source.semanticsLabel,
+        );
+
+  if (!isDiaryCodeBlock(node)) {
+    return span;
+  }
+  final delta = node.delta;
+  final text = span.toPlainText();
+  // 变换前后纯文本必须与 delta 一致，否则光标偏移对不上：按默认方式渲染
+  //（只是不着色）。
+  if (delta == null || text != delta.toPlainText()) {
+    return styled(span);
+  }
+  if (text.isEmpty) {
+    return styled(span);
+  }
+  // 先看结构尺寸，超限块不识别。delta 长度是 cheap 检查；行数要扫文本，
+  // 只在长度通过后才算。否则即使高亮器稍后拒绝，巨大粘贴仍会在每次按键 /
+  // 重建时复制整块文本。
+  if (delta.length > DiaryCodeHighlighter.maxLength + 1 ||
+      _lineCount(text) > DiaryCodeHighlighter.maxLines) {
+    tracker.cancelPendingFor(node);
+    return styled(span);
+  }
+  final language = resolveDiaryCodeHighlightLanguage(
+    node,
+    text,
+    autoDetect: look.autoDetect,
+    tracker: tracker,
+  );
+  final tokens = language == null
+      ? DiaryCodeTokens.empty
+      : _tokensFor(node, text, language);
+  if (tokens.isEmpty) {
+    return styled(span);
+  }
+
   final palette = look.palette;
   final tokenStyles = <DiaryCodeTokenRole, TextStyle>{
     for (final role in DiaryCodeTokenRole.values)
@@ -82,83 +130,44 @@ quill.TextSpanBuilder buildDiaryCodeSpanBuilder(
           : TextStyle(fontStyle: tokenStyle.fontStyle),
   };
 
-  DiaryCodeTokens tokensFor(quill.Block block) {
-    final epoch = _currentFrameEpoch();
-    if (epoch != null) {
-      final cached = memo[block];
-      if (cached != null && cached.epoch == epoch) {
-        return cached.tokens;
-      }
-    }
-    // 先看 Quill 的结构尺寸，超限块不拼接整份正文、不识别语言。否则即使
-    // 高亮器稍后拒绝，巨大粘贴仍会在每次按键/重建时复制整块文本。
-    if (block.length > DiaryCodeHighlighter.maxLength + 1 ||
-        block.childCount > DiaryCodeHighlighter.maxLines) {
-      tracker.cancelPendingFor(block);
-      if (epoch != null) {
-        memo[block] = _BlockFrame(epoch, DiaryCodeTokens.empty);
-      }
-      return DiaryCodeTokens.empty;
-    }
-    final text = diaryCodeBlockText(block);
-    final language = resolveDiaryCodeHighlightLanguage(
-      block,
-      text,
-      autoDetect: look.autoDetect,
-      tracker: tracker,
-    );
-    final tokens = language == null
-        ? DiaryCodeTokens.empty
-        : DiaryCodeHighlighter.instance.tokens(text, language);
-    if (epoch != null) {
-      memo[block] = _BlockFrame(epoch, tokens);
-    }
-    return tokens;
+  final leaves = _leavesOf(span);
+  // 叶子拼起来必须等于整块文本，否则偏移对不上，原样返回。
+  if (leaves.map((leaf) => leaf.text ?? '').join('') != text) {
+    return styled(span);
   }
 
-  return (
-    BuildContext context,
-    quill.Node node,
-    int nodeOffset,
-    String text,
-    TextStyle? style,
-    GestureRecognizer? recognizer,
-  ) {
-    InlineSpan fallback() => quill.defaultSpanBuilder(
-      context,
-      node,
-      nodeOffset,
-      text,
-      style,
-      recognizer,
-    );
+  // 用户手动上色的区间：delta 里带 font_color 属性的 TextInsert 范围。
+  // 注意不能看叶子样式的颜色——AppFlowyRichText 给每个叶子都带了默认文字
+  // 色（textStyleConfiguration.text），看样式会恒为真、高亮色永远上不去。
+  final coloredRanges = <_IntRange>[];
+  var insertOffset = 0;
+  for (final op in delta) {
+    if (op is TextInsert) {
+      final end = insertOffset + op.text.length;
+      if (op.attributes?[kDiaryInlineTextColor] != null) {
+        coloredRanges.add(_IntRange(insertOffset, end));
+      }
+      insertOffset = end;
+    }
+  }
+  bool hasUserColor(int start, int end) =>
+      coloredRanges.any((range) => range.start < end && start < range.end);
 
-    if (text.isEmpty || node is! quill.QuillText) {
-      return fallback();
-    }
-    final line = node.parent;
-    if (line is! quill.Line) {
-      return fallback();
-    }
-    final block = line.parent;
-    if (!isDiaryCodeBlock(block)) {
-      return fallback();
-    }
-    final tokens = tokensFor(block! as quill.Block);
-    if (tokens.isEmpty) {
-      return fallback();
-    }
-
-    final start = line.offset + node.offset + nodeOffset;
-    final end = start + text.length;
-    final keepColor =
-        node.style.attributes[quill.Attribute.color.key]?.value != null;
+  final children = <InlineSpan>[];
+  var blockOffset = 0;
+  for (final leaf in leaves) {
+    final leafText = leaf.text ?? '';
+    final start = blockOffset;
+    final end = start + leafText.length;
+    blockOffset = end;
+    final keepColor = hasUserColor(start, end);
+    final recognizer = leaf.recognizer;
     final cursor = recognizer == null ? null : SystemMouseCursors.click;
-    final children = <InlineSpan>[];
+    final pieces = <InlineSpan>[];
     var position = start;
-    // 空隙不设样式，继承外层 span（即 quill 传入的 style，组字时含下划线）。
+    // 空隙不设样式，继承外层 span（代码文字样式）。
     TextSpan piece(int from, int to, TextStyle? pieceStyle) => TextSpan(
-      text: text.substring(from - start, to - start),
+      text: leafText.substring(from - start, to - start),
       style: pieceStyle,
       recognizer: recognizer,
       mouseCursor: cursor,
@@ -167,9 +176,9 @@ quill.TextSpanBuilder buildDiaryCodeSpanBuilder(
       final from = math.max(token.start, start);
       final to = math.min(token.end, end);
       if (from > position) {
-        children.add(piece(position, from, null));
+        pieces.add(piece(position, from, null));
       }
-      children.add(
+      pieces.add(
         piece(
           from,
           to,
@@ -178,66 +187,49 @@ quill.TextSpanBuilder buildDiaryCodeSpanBuilder(
       );
       position = to;
     }
-    if (children.isEmpty) {
-      return fallback();
-    }
     if (position < end) {
-      children.add(piece(position, end, null));
+      pieces.add(piece(position, end, null));
     }
-    return TextSpan(style: style, children: children);
-  };
-}
-
-/// 语言值为字符串的代码块行补上代码样式（quill 只认值为 `true` 的块）。
-TextStyle Function(quill.Attribute) buildDiaryCodeCustomStyleBuilder(
-  DiaryCodeBlockLook look,
-) {
-  final code = look.codeTextStyle;
-  return (quill.Attribute attribute) =>
-      attribute.key == quill.Attribute.codeBlock.key &&
-          attribute.value is String
-      ? code
-      : const TextStyle();
-}
-
-/// 代码块行号：沿用 quill 的行号排版，颜色换成代码块配色的行号色。其余
-/// 行（列表、待办）与关闭行号时返回 null，走 quill 默认实现。
-quill.LeadingBlockNodeBuilder buildDiaryCodeLeadingBuilder(
-  DiaryCodeBlockLook look,
-) {
-  final color = look.palette.lineNumber;
-  return (quill.Node node, quill.LeadingConfig config) {
-    if (!look.lineNumbers) {
-      return null;
-    }
-    final value = config.attrs[quill.Attribute.codeBlock.key]?.value;
-    if (value == null || value == false) {
-      return null;
-    }
-    final style = config.style;
-    final width = config.width;
-    final padding = config.padding;
-    if (style == null || width == null || padding == null) {
-      return null;
-    }
-    // getIndexNumberByIndent 会改写 indentLevelCounts，必须在确定接管之后
-    // 才读，且只读一次（返回 null 时 quill 的默认实现还会再读一遍）。
-    final index = config.index == null ? null : config.getIndexNumberByIndent;
-    if (index == null) {
-      return null;
-    }
-    return quill.QuillNumberPoint(
-      index: index,
-      indentLevelCounts: config.indentLevelCounts,
-      count: config.count,
-      style: style.copyWith(color: color),
-      attrs: config.attrs,
-      width: width,
-      padding: padding,
-      // 代码行号不带点（“1” 而非有序列表的 “1.”），与编辑器的行号一致。
-      withDot: false,
+    children.add(
+      pieces.isEmpty
+          ? leaf
+          : TextSpan(
+              style: leaf.style,
+              recognizer: recognizer,
+              mouseCursor: cursor,
+              children: pieces,
+            ),
     );
-  };
+  }
+  return TextSpan(style: look.codeTextStyle, children: children);
+}
+
+/// [span] 的纯文本叶子（按 delta 建出的 span 是按行内 op 排平的，
+///
+/// 递归以防万一）。WidgetSpan 等非文本叶子会被外层的纯文本 guard 拦掉。
+List<TextSpan> _leavesOf(TextSpan span) {
+  final children = span.children;
+  if (children == null || children.isEmpty) {
+    final text = span.text;
+    return text == null || text.isEmpty ? const <TextSpan>[] : <TextSpan>[span];
+  }
+  final leaves = <TextSpan>[];
+  for (final child in children) {
+    if (child is TextSpan) {
+      leaves.addAll(_leavesOf(child));
+    }
+  }
+  return leaves;
+}
+
+int _lineCount(String text) => '\n'.allMatches(text).length + 1;
+
+/// 半开区间 [start, end)：用户上色区间的定位用。
+class _IntRange {
+  const _IntRange(this.start, this.end);
+
+  final int start;
+  final int end;
 }
 
 /// 某个块在某一帧算出的高亮区间。
@@ -247,6 +239,10 @@ class _BlockFrame {
   final int epoch;
   final DiaryCodeTokens tokens;
 }
+
+final Expando<_BlockFrame> _frames = Expando<_BlockFrame>(
+  'diaryCodeBlockFrame',
+);
 
 int _frameEpoch = 0;
 bool _frameEpochBumpScheduled = false;
@@ -268,4 +264,19 @@ int? _currentFrameEpoch() {
     }, debugLabel: 'diaryCodeBlockFrameEpoch');
   }
   return _frameEpoch;
+}
+
+DiaryCodeTokens _tokensFor(Node node, String text, String language) {
+  final epoch = _currentFrameEpoch();
+  if (epoch != null) {
+    final cached = _frames[node];
+    if (cached != null && cached.epoch == epoch) {
+      return cached.tokens;
+    }
+  }
+  final tokens = DiaryCodeHighlighter.instance.tokens(text, language);
+  if (epoch != null) {
+    _frames[node] = _BlockFrame(epoch, tokens);
+  }
+  return tokens;
 }

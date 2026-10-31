@@ -1,53 +1,54 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/database/app_database.dart';
-import '../../../../core/database/content_codec.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../utils/precise_time_formatter.dart';
 import '../../../../utils/relative_time_formatter.dart';
 import '../../../widgets/image_viewer_hero.dart';
 import '../../models/diary_preview_style/diary_preview_style.dart';
 import '../../models/time_capsule.dart';
-import '../../viewmodels/diary_first_line_indent.dart';
-import '../../viewmodels/diary_quill_styles.dart';
 import '../../viewmodels/diary_text_appearance.dart';
-import '../diary_mobile_toolbar.dart';
+import 'diary_appflowy_preview.dart';
 
-/// 预览页正文：只读 Quill，没有可见内容时显示空正文提示（可关）。
+/// 预览页正文：只读的 AppFlowy 块渲染，没有可见内容时显示空正文提示
+///（可关）。
 ///
-/// 首行缩进只在这里垫出来（[diaryFirstLineIndentWidth]）：段落首个文字
-/// span 前插定宽占位，原文 Delta 不动，待办勾选仍写回原控制器。
+/// 首行缩进只在渲染层垫出来（[diaryFirstLineIndentWidth]）：段落首个文字
+/// span 前插定宽占位，原文 Delta 不动，待办勾选经 EditorState 事务写回。
 ///
 /// 是否有正文不能只看 contentText（纯文本镜像），否则“仅图片正文”会被误判
-/// 为空：统一按 Quill 文档是否存在可见内容判断，图片、视频与其他嵌入都算
-/// 正文。Quill 样式必须在正文位置生成（[DiaryQuillStylesBuilder]），这里在
+/// 为空：统一按文档是否存在可见内容判断（见
+/// [diaryAppFlowyDocumentHasVisibleContent]），图片、视频与其他嵌入都算
+/// 正文。正文样式必须在正文位置生成（[DiaryAppFlowyPreview]），这里在
 /// Scaffold 之下，取得到主题的正文样式；自定义正文颜色经 [DefaultTextStyle]
-/// 传给 Quill（段落、标题都从它取色），字号与行距仍只来自正文排版设置。
+/// 传给渲染层（段落、标题都从它取色），字号与行距仍只来自正文排版设置。
 class DiaryPreviewBody extends StatelessWidget {
   const DiaryPreviewBody({
     super.key,
-    required this.controller,
+    required this.document,
     required this.appearance,
     required this.onOpenImage,
+    this.onToggleTodo,
     this.showEmptyHint = true,
-    this.todoToggle = true,
     this.textSelection = true,
     this.longImageMode = DiaryPreviewLongImageMode.fold,
     this.textColor,
   });
 
-  final quill.QuillController controller;
+  final Document document;
   final DiaryTextAppearance appearance;
 
   /// 点按正文图片：来源与点按处抓取的共享元素。
   final void Function(String source, ImageViewerHero? hero) onOpenImage;
-  final bool showEmptyHint;
 
-  /// 允许勾选待办（关闭后勾选框只读）。
-  final bool todoToggle;
+  /// 待办勾选变化：调用方把 `checked` 写回 EditorState；null 时复选框只读
+  ///（对应旧版 `todoToggle` 为 false）。
+  final void Function(Node node, bool checked)? onToggleTodo;
+
+  final bool showEmptyHint;
 
   /// 允许长按选择文字。
   final bool textSelection;
@@ -60,37 +61,16 @@ class DiaryPreviewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasVisibleContent = diaryDocumentHasVisibleContent(
-      controller.document,
-    );
+    final hasVisibleContent = diaryAppFlowyDocumentHasVisibleContent(document);
     Widget body;
     if (hasVisibleContent) {
-      body = DiaryQuillStylesBuilder(
+      body = DiaryAppFlowyPreview(
+        document: document,
         appearance: appearance,
-        controller: controller,
-        builder: (BuildContext context, DiaryQuillLook look) {
-          return quill.QuillEditor.basic(
-            controller: controller,
-            config: look.configure(
-              quill.QuillEditorConfig(
-                autoFocus: false,
-                scrollable: false,
-                padding: EdgeInsets.zero,
-                showCursor: false,
-                checkBoxReadOnly: !todoToggle,
-                enableInteractiveSelection: textSelection,
-                embedBuilders: buildDiaryQuillEmbedBuilders(
-                  onImageOpen: onOpenImage,
-                  foldLongImages:
-                      longImageMode == DiaryPreviewLongImageMode.fold,
-                ),
-              ),
-              firstLineIndentWidth: diaryFirstLineIndentWidth(
-                appearance.typography,
-              ),
-            ),
-          );
-        },
+        onOpenImage: onOpenImage,
+        onToggleTodo: onToggleTodo,
+        textSelection: textSelection,
+        longImageMode: longImageMode,
       );
     } else if (showEmptyHint) {
       body = Text(

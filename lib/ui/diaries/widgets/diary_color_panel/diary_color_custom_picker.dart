@@ -1,5 +1,7 @@
+import 'dart:async' show unawaited;
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:node_diary/ui/diaries/models/diary_text_colors.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_color_panel/diary_color_hex_input.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_color_panel/diary_color_preview.dart';
@@ -24,8 +26,8 @@ const double _kDefaultBackgroundAlpha = 0x4D / 0xFF;
 /// 颜色面板的「自定义」页：饱和度 / 亮度面 + 色相条（背景色另有不透明度条）
 /// + 所见即所得预览 + 颜色代码输入框。
 ///
-/// - 输入：正文控制器、目标、选区当前颜色 [current]（由面板随选区刷新）；
-/// - 输出：拖动中只改面板里的预览，松手才经 `formatSelection` 写入正文
+/// - 输入：正文编辑器状态、目标、选区当前颜色 [current]（由面板随选区刷新）；
+/// - 输出：拖动中只改面板里的预览，松手才经 `applyDiaryColorAttributes` 写入正文
 ///   （每次松手一步撤销），随后经 [onSave] 存进我的颜色；
 /// - 保存按“一次调色”合并：在同一个选区上接连松手 / 应用代码，后一次替换
 ///   前一次存下的颜色（`replacing`），调色途中的中间色不会一个个堆进我的
@@ -38,14 +40,14 @@ const double _kDefaultBackgroundAlpha = 0x4D / 0xFF;
 ///   色相条不会跳回红色。
 ///
 /// 颜色代码的焦点交接：手指按下输入框时记下当前焦点（正文编辑器），应用代码
-/// 或开始拖动色谱时把焦点还给它——先写入、再还焦点：光标未选中文字时 Quill
-/// 把颜色记在 `toggledStyle` 里等下一次输入套用，还焦点只重新接上输入连接、
+/// 或开始拖动色谱时把焦点还给它——先写入、再还焦点：光标未选中文字时
+/// AppFlowy 把颜色记在 `toggledStyle` 里等下一次输入套用，还焦点只重新接上输入连接、
 /// 不改选区，待套用的颜色得以保留。输入框因用户点了别处而失焦时不应用、
 /// 不抢回焦点，色谱回到输入前的颜色（选区有颜色时跟到选区）。
 class DiaryColorCustomPicker extends StatefulWidget {
   const DiaryColorCustomPicker({
     super.key,
-    required this.controller,
+    required this.editorState,
     required this.target,
     required this.current,
     required this.active,
@@ -53,7 +55,7 @@ class DiaryColorCustomPicker extends StatefulWidget {
     required this.onSave,
   });
 
-  final quill.QuillController controller;
+  final EditorState editorState;
   final DiaryColorTarget target;
   final DiaryColorValue current;
 
@@ -91,7 +93,7 @@ class _DiaryColorCustomPickerState extends State<DiaryColorCustomPicker> {
   /// 这次调色新存进我的颜色的那一个，以及当时的选区：再在同一选区上写入时
   /// 替换它。新的一次调色（选区变化、换目标）不替换。
   Color? _sessionColor;
-  TextSelection? _sessionSelection;
+  Selection? _sessionSelection;
 
   bool get _isBackground => widget.target == DiaryColorTarget.background;
 
@@ -171,13 +173,18 @@ class _DiaryColorCustomPickerState extends State<DiaryColorCustomPicker> {
   void _apply(Color color) {
     if (widget.current.matches(color)) return;
     _syncedArgb = color.toARGB32();
-    widget.controller.formatSelection(widget.target.attributeFor(color));
+    unawaited(
+      applyDiaryColorAttributes(
+        widget.editorState,
+        widget.target.attributeFor(color),
+      ),
+    );
     _save(color);
   }
 
   /// 存进我的颜色，同一次调色替换先前存下的那一个（见类注释）。
   void _save(Color color) {
-    final selection = widget.controller.selection;
+    final selection = widget.editorState.selection;
     final previous = _sessionColor;
     final replacing = previous != null && selection == _sessionSelection
         ? previous

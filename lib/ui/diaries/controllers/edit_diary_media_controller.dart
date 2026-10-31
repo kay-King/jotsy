@@ -5,14 +5,14 @@ part of 'package:node_diary/ui/diaries/pages/edit_diary_page.dart';
 extension EditDiaryMediaFlow on EditDiaryController {
   Future<void> importMedia(DiaryMediaKind kind) async {
     if (_state._saving || _state._recordingPanelOpen) return;
-    final controller = _state._contentController;
+    final editorState = _state._editorState;
     final route = ModalRoute.of(_state.context);
     final outcome = await _state._mediaImportController.pickAndInsert(
-      controller: controller,
+      editorState: editorState,
       kind: kind,
       isCurrent: () =>
           _state.mounted &&
-          identical(_state._contentController, controller) &&
+          identical(_state._editorState, editorState) &&
           !_state._saving &&
           (route?.isCurrent ?? true),
     );
@@ -44,17 +44,17 @@ extension EditDiaryDayPhotosFlow on EditDiaryController {
     final photos = dayPhotos.selectedPhotos;
     if (photos.isEmpty) return;
     final library = dayPhotos.library;
-    final controller = _state._contentController;
+    final editorState = _state._editorState;
     final route = ModalRoute.of(_state.context);
     final missing = <DayPhoto>{};
     final DiaryMediaImportOutcome outcome;
     try {
       outcome = await _state._mediaImportController.pickAndInsert(
-        controller: controller,
+        editorState: editorState,
         kind: DiaryMediaKind.image,
         isCurrent: () =>
             _state.mounted &&
-            identical(_state._contentController, controller) &&
+            identical(_state._editorState, editorState) &&
             !_state._saving &&
             (route?.isCurrent ?? true),
         picker: (_) async {

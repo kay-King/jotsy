@@ -1,20 +1,22 @@
 import 'dart:async';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:node_diary/ui/diaries/widgets/diary_toolbar_panel_reserve.dart';
+import 'package:node_diary/app/theme/expressive_motion.dart';
 
 /// 编辑页正文的光标跟随：打字、用键盘移动或扩展选区、软键盘弹起之后，把
 /// 光标保持在底部浮层（悬浮工具栏、「更多」面板、元数据面板）上方。
 ///
-/// 为什么不用 Quill 自带的：正文以 `scrollable: false` 嵌在页面的滚动容器里
-/// （标题与正文一起滚动），Quill 的光标揭示只滚动交给它的 scrollController，
-/// 而那个控制器不挂在任何视口上，于是在底部打字时新内容落到键盘与工具栏
-/// 下面。这里改在页面视口里揭示（[revealDiaryCaretAbove]），并把浮层高度算进去。
+/// 为什么不用编辑器自带的：编辑器自带的光标揭示只把光标滚到视口边缘，
+/// 不知道底部被悬浮工具栏等浮层盖住了多少。这里取光标矩形并向下延长
+/// [coveredHeight] 再揭示（[_revealCaretAbove]），视口只在光标确实被挡住
+/// 时滚动，而且只滚到刚好露出为止。
 ///
-/// - 触发：正文选区变化且正文有焦点；软键盘弹起（变高）的每一帧。只改格式、
-///   勾选待办这类选区不动的变化不滚动，免得把用户正在看的位置拽回光标处。
+/// - 触发：正文选区变化且正文有焦点；软键盘弹起（变高）的每一帧；调用方
+///   手动调用 [revealCurrentCaret]（如「更多」面板展开这种不改变选区的场景）。
+///   只改格式、勾选待办这类选区不动的变化不滚动，免得把用户正在看的位置
+///   拽回光标处。
 /// - 软键盘弹起时与 Flutter 自带输入框（EditableText.didChangeMetrics）一样，
 ///   每帧高度变大都立即（不带动画）揭示一次，光标随键盘一起被顶上去；不能只等
 ///   高度停稳再揭示：真机上键盘动画的节奏各不相同，点了底部的字、键盘弹起后
@@ -25,15 +27,19 @@ import 'package:node_diary/ui/diaries/widgets/diary_toolbar_panel_reserve.dart';
 ///   滚动范围已更新。
 /// - 副作用：只滚动外层视口，不改选区与文档；正文失焦（录音面板、元数据面板
 ///   展开）或控制器已销毁时什么也不做。
+///
+/// AppFlowy 迁移说明：原来监听 `QuillController` 的通知并用
+/// `RenderEditor.getLocalRectForCaret` 取光标矩形；现在监听
+/// `EditorState.selectionNotifier`，光标矩形经块节点的 `Selectable`
+/// 取（[SelectableMixin.getCursorRectInPosition]），揭示仍走
+/// `RenderObject.showOnScreen` 把光标滚到遮挡物上方。
 class DiaryCaretFollowController {
   DiaryCaretFollowController({
-    required this.editorKey,
     required this.focusNode,
     required this.coveredHeight,
     required this.revealDuration,
   });
 
-  final GlobalKey<quill.EditorState> editorKey;
   final FocusNode focusNode;
 
   /// 视口底部当前被浮层盖住的高度，与正文滚动容器的底部占位同源。
@@ -43,13 +49,13 @@ class DiaryCaretFollowController {
   /// 为 0）。软键盘弹起时的揭示不用它：每帧跟随键盘，再加动画只会落后一拍。
   final Duration Function() revealDuration;
 
-  /// 软键盘高度逐帧变化、还可能回弹，停稳后再补一次揭示（与 Quill 自身对键盘
+  /// 软键盘高度逐帧变化、还可能回弹，停稳后再补一次揭示（与编辑器自身对键盘
   /// 高度的去抖一致）。这是去抖计时，不是动画时长。
   static const Duration _keyboardSettleDelay = Duration(milliseconds: 100);
 
-  quill.QuillController? _controller;
-  TextSelection? _lastSelection;
-  TextPosition? _pendingTarget;
+  EditorState? _editorState;
+  Selection? _lastSelection;
+  Position? _pendingTarget;
   // 同一帧里只要有一次来自键盘弹起，这一帧的揭示就不带动画。
   bool _pendingImmediate = false;
   bool _revealScheduled = false;
@@ -57,26 +63,27 @@ class DiaryCaretFollowController {
   double? _lastKeyboardInset;
   bool _disposed = false;
 
-  /// 绑定（或换绑）正文控制器：编辑模式回填详情、新建模式恢复草稿时页面会
-  /// 换一个新实例。旧实例此时可能已销毁，QuillController 允许销毁后移除监听。
-  void attach(quill.QuillController controller) {
-    if (identical(_controller, controller)) {
+  /// 绑定（或换绑）正文编辑器状态：编辑模式回填详情、新建模式恢复草稿时
+  /// 页面会换一个新实例。旧实例此时可能已释放，移除监听是安全的。
+  void attach(EditorState editorState) {
+    if (identical(_editorState, editorState)) {
       return;
     }
-    _controller?.removeListener(_handleContentChanged);
-    _controller = controller..addListener(_handleContentChanged);
-    _lastSelection = controller.selection;
+    _editorState?.selectionNotifier.removeListener(_handleSelectionChanged);
+    _editorState = editorState
+      ..selectionNotifier.addListener(_handleSelectionChanged);
+    _lastSelection = editorState.selection;
   }
 
-  void _handleContentChanged() {
-    final controller = _controller;
-    if (controller == null) {
+  void _handleSelectionChanged() {
+    final editorState = _editorState;
+    if (editorState == null) {
       return;
     }
-    final selection = controller.selection;
+    final selection = editorState.selection;
     final previous = _lastSelection;
     _lastSelection = selection;
-    if (selection == previous || !selection.isValid || !focusNode.hasFocus) {
+    if (selection == null || selection == previous || !focusNode.hasFocus) {
       return;
     }
     final target = _revealTarget(previous, selection);
@@ -85,20 +92,22 @@ class DiaryCaretFollowController {
     }
   }
 
-  static TextPosition? _revealTarget(
-    TextSelection? previous,
-    TextSelection selection,
+  /// 选区在动的那一端：AppFlowy 的 Selection 已按文档顺序归一化
+  /// （start 在前、end 在后），对应原来 TextSelection 的 base / extent。
+  static Position? _revealTarget(
+    Selection? previous,
+    Selection selection,
   ) {
     if (selection.isCollapsed) {
-      return selection.extent;
+      return selection.end;
     }
-    final baseMoved = previous?.baseOffset != selection.baseOffset;
-    final extentMoved = previous?.extentOffset != selection.extentOffset;
-    if (extentMoved && !baseMoved) {
-      return selection.extent;
+    final startMoved = previous?.start != selection.start;
+    final endMoved = previous?.end != selection.end;
+    if (endMoved && !startMoved) {
+      return selection.end;
     }
-    if (baseMoved && !extentMoved) {
-      return selection.base;
+    if (startMoved && !endMoved) {
+      return selection.start;
     }
     return null;
   }
@@ -120,17 +129,18 @@ class DiaryCaretFollowController {
   }
 
   void _revealCaretNow() {
-    final selection = _controller?.selection;
+    final editorState = _editorState;
+    final selection = editorState?.selection;
     if (_disposed ||
+        editorState == null ||
         selection == null ||
-        !selection.isValid ||
         !focusNode.hasFocus) {
       return;
     }
-    _scheduleReveal(selection.extent, immediate: true);
+    _scheduleReveal(selection.end, immediate: true);
   }
 
-  void _scheduleReveal(TextPosition target, {bool immediate = false}) {
+  void _scheduleReveal(Position target, {bool immediate = false}) {
     _pendingTarget = target;
     _pendingImmediate = _pendingImmediate || immediate;
     if (_revealScheduled) {
@@ -147,23 +157,92 @@ class DiaryCaretFollowController {
     _revealScheduled = false;
     final target = _pendingTarget;
     final immediate = _pendingImmediate;
+    final editorState = _editorState;
     _pendingTarget = null;
     _pendingImmediate = false;
-    if (_disposed || target == null || !focusNode.hasFocus) {
+    if (_disposed || target == null || editorState == null) {
       return;
     }
-    revealDiaryCaretAbove(
-      editorKey,
-      position: target,
+    if (!focusNode.hasFocus) {
+      return;
+    }
+    _revealCaretAbove(
+      editorState,
+      target,
       coveredHeight: coveredHeight(),
       duration: immediate ? Duration.zero : revealDuration(),
+    );
+  }
+
+  /// 不改变选区的场景下手动揭示一次当前光标（如「更多」面板展开时）：
+  /// 展开不改变选区，选区监听不会触发，调用方在留白生效的下一帧调这里。
+  /// 编辑标题时光标不在正文里（[focusNode] 无焦点）时什么也不做。
+  void revealCurrentCaret({required Duration duration}) {
+    final editorState = _editorState;
+    if (_disposed || editorState == null || !focusNode.hasFocus) {
+      return;
+    }
+    final selection = editorState.selection;
+    if (selection == null) {
+      return;
+    }
+    _revealCaretAbove(
+      editorState,
+      selection.end,
+      coveredHeight: coveredHeight(),
+      duration: duration,
+    );
+  }
+
+  /// 把 [target] 处的光标滚到底部遮挡物上方。
+  ///
+  /// 悬浮工具栏是叠在正文上的浮层，正文视口并不知道底部被遮住了多少：这里把
+  /// 光标矩形向下延长 [coveredHeight] 再交给 showOnScreen，视口只在光标确实被
+  /// 挡住时滚动，而且只滚到刚好露出为止。目标节点尚未布局时什么也不做。
+  void _revealCaretAbove(
+    EditorState editorState,
+    Position target, {
+    required double coveredHeight,
+    required Duration duration,
+  }) {
+    final node = editorState.document.nodeAtPath(target.path);
+    final selectable = node?.selectable;
+    final renderBox = node?.renderBox;
+    if (selectable == null ||
+        renderBox == null ||
+        !renderBox.attached ||
+        !renderBox.hasSize) {
+      return;
+    }
+    final localCaret = selectable.getCursorRectInPosition(
+      target,
+      shiftWithBaseOffset: true,
+    );
+    if (localCaret == null) {
+      return;
+    }
+    final caretRect = selectable.transformRectToGlobal(
+      localCaret,
+      shiftWithBaseOffset: true,
+    );
+    final topLeft = renderBox.globalToLocal(caretRect.topLeft);
+    final bottomRight = renderBox.globalToLocal(caretRect.bottomRight);
+    renderBox.showOnScreen(
+      rect: Rect.fromLTRB(
+        topLeft.dx,
+        topLeft.dy,
+        bottomRight.dx,
+        bottomRight.dy + coveredHeight,
+      ),
+      duration: duration,
+      curve: ExpressiveMotion.effects,
     );
   }
 
   void dispose() {
     _disposed = true;
     _keyboardSettleTimer?.cancel();
-    _controller?.removeListener(_handleContentChanged);
-    _controller = null;
+    _editorState?.selectionNotifier.removeListener(_handleSelectionChanged);
+    _editorState = null;
   }
 }

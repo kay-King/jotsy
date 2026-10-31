@@ -45,14 +45,24 @@ class EditDiaryController {
     return _state.context.l10n.formatDateTimeMinute(publishAt);
   }
 
-  /// 替换正文控制器时同步管理监听，避免旧控制器泄漏。
-  void replaceContentController(quill.QuillController nextController) {
+  /// 替换正文编辑器状态时同步管理订阅，避免旧状态泄漏。
+  ///
+  /// AppFlowy 迁移说明：原来换掉整个 `QuillController`（监听、释放、重挂）；
+  /// 现在换掉整个 `EditorState`——旧状态的事务订阅取消并释放，新状态重新
+  /// 订阅事务、挂上光标跟随。调用方在 setState 里调，编辑器按实例重建。
+  void replaceEditorState(EditorState nextEditorState) {
     _state._mediaImportController.cancel();
-    _state._contentController.removeListener(onCreateDraftInputChanged);
-    _state._contentController.dispose();
-    _state._contentController = nextController;
-    _state._contentController.addListener(onCreateDraftInputChanged);
-    _state._caretFollow.attach(nextController);
+    _state._editorTransactionSubscription?.cancel();
+    final oldEditorState = _state._editorState;
+    _state._editorState = nextEditorState;
+    _state._subscribeEditorTransactions(nextEditorState);
+    _state._caretFollow.attach(nextEditorState);
+    // 旧状态推迟到下一帧释放：树里 AppFlowy 内部 widget（_IgnoreEditorSelectionGesture
+    // 等）在本帧重建/手势中仍会访问旧状态的 selectionNotifier，同步释放会抛
+    // use-after-dispose。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      oldEditorState.dispose();
+    });
   }
 
   /// 新建模式保存草稿，已有笔记直接自动保存；详情回填阶段不触发写入。
@@ -141,15 +151,11 @@ class EditDiaryController {
         return false;
       }
 
-      // 优先恢复富文本文档；若 JSON 不可用则降级为纯文本，保证可读可编辑。
-      quill.Document restoredDocument;
-      try {
-        restoredDocument = decodeDiaryContentToDocument(
-          restoredDraft.contentDocJson,
-        );
-      } catch (_) {
-        restoredDocument = documentFromPlainText(restoredDraft.contentText);
-      }
+      // 优先恢复富文本文档；块文档解码兼容三代历史格式，失败时回到空文档，
+      // 保证可读可编辑（见 decodeDiaryContentToAppFlowyDocument）。
+      final restoredDocument = _ensureEditableDocument(
+        decodeDiaryContentToAppFlowyDocument(restoredDraft.contentDocJson),
+      );
 
       final restoredMeta = DiaryMetaDraft.fromNewDiaryDraft(
         restoredDraft.copyWith(
@@ -171,12 +177,13 @@ class EditDiaryController {
               ? restoredMeta.copyWith(capsule: _state._meta.value.capsule)
               : restoredMeta,
         );
-        replaceContentController(
-          quill.QuillController(
-            document: restoredDocument,
-            selection: const TextSelection.collapsed(offset: 0),
-          ),
-        );
+        final restoredEditorState = EditorState(document: restoredDocument);
+        if (restoredDocument.root.children.isNotEmpty) {
+          restoredEditorState.selection = Selection.collapsed(
+            Position(path: const [0], offset: 0),
+          );
+        }
+        replaceEditorState(restoredEditorState);
       });
       _state._syncDayPhotos();
       return true;
@@ -201,7 +208,7 @@ class EditDiaryController {
   bool validateDraft() {
     final title = _state._titleController.text.trim();
     if (title.isEmpty &&
-        !diaryDocumentHasVisibleContent(_state._contentController.document)) {
+        !appFlowyDocumentHasVisibleContent(_state._editorState.document)) {
       unawaited(
         HomeHintVisibilityScope.showTrackedSnackBar(
           context: _state.context,

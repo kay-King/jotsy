@@ -1,6 +1,6 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
@@ -53,19 +53,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  quill.QuillEditor currentEditor(WidgetTester tester) =>
-      tester.widget<quill.QuillEditor>(find.byType(quill.QuillEditor));
+  AppFlowyEditor currentEditor(WidgetTester tester) =>
+      tester.widget<AppFlowyEditor>(find.byType(AppFlowyEditor));
 
   double editorBottomPadding(WidgetTester tester) {
-    final scrollView = tester.widget<SingleChildScrollView>(
-      find
-          .ancestor(
-            of: find.byType(quill.QuillEditor),
-            matching: find.byType(SingleChildScrollView),
-          )
-          .first,
+    final spacer = tester.widget<SizedBox>(
+      find.byKey(const ValueKey('diary-editor-page-reserve')),
     );
-    return (scrollView.padding! as EdgeInsets).bottom;
+    return spacer.height ?? 0;
   }
 
   Future<void> unmount(WidgetTester tester) async {
@@ -73,7 +68,7 @@ void main() {
     await tester.pump(Duration.zero);
   }
 
-  testWidgets('keyboard inset animation does not recreate the Quill editor', (
+  testWidgets('keyboard inset animation does not recreate the editor', (
     tester,
   ) async {
     await pumpEditPage(tester);
@@ -89,7 +84,7 @@ void main() {
   });
 
   testWidgets(
-    'dragging the metadata panel updates the spacer without rebuilding Quill',
+    'dragging the metadata panel updates the spacer without rebuilding the editor',
     (tester) async {
       await pumpEditPage(tester);
       final editorBefore = currentEditor(tester);
@@ -103,7 +98,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
 
-      // 拖到一半（未越过展开阈值）：占位连续增长，Quill 实例不变。
+      // 拖到一半（未越过展开阈值）：占位连续增长，编辑器实例不变。
       expect(editorBottomPadding(tester), greaterThan(paddingBefore));
       expect(identical(currentEditor(tester), editorBefore), isTrue);
 

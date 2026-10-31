@@ -11,9 +11,9 @@ part of 'diary_floating_toolbar.dart';
 ///   收起，从「更多」打开的回到「更多」。
 extension _DiaryFloatingToolbarCode on _DiaryFloatingToolbarState {
   void _handleCodeBlockTool({required bool fromMore}) {
-    final controller = widget.controller;
-    if (!diarySelectionInCodeBlock(controller)) {
-      toggleDiaryCodeBlockOn(controller);
+    final editorState = widget.editorState;
+    if (!diarySelectionInCodeBlock(editorState)) {
+      unawaited(toggleDiaryCodeBlockOn(editorState));
       return;
     }
     if (!fromMore && _panel == _ToolbarPanel.code && !_panelFromMore) {
@@ -44,6 +44,6 @@ extension _DiaryFloatingToolbarCode on _DiaryFloatingToolbarState {
       });
       return;
     }
-    if (!diarySelectionInCodeBlock(widget.controller)) _closeCodePanel();
+    if (!diarySelectionInCodeBlock(widget.editorState)) _closeCodePanel();
   }
 }

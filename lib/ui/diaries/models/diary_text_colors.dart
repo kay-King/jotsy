@@ -1,6 +1,6 @@
 /// 正文文字色 / 背景色的纯数据模型：预设色板、属性值的读写与十六进制输入。
 ///
-/// - 输入：Quill 选区样式、文档 Delta、用户输入的颜色代码；
+/// - 输入：编辑器选区样式、文档 Delta、用户输入的颜色代码；
 /// - 输出：可比较的 [Color] 与写回正文的属性值；
 /// - 无副作用，不依赖 BuildContext。
 ///
@@ -11,7 +11,8 @@ library;
 
 import 'dart:ui' show Color;
 
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/journal_import_style.dart';
 
 /// 颜色面板正在编辑的是文字色还是背景色。
@@ -19,20 +20,18 @@ enum DiaryColorTarget {
   text,
   background;
 
-  /// 对应的 Quill 行内属性键（`color` / `background`）。
+  /// 对应的 AppFlowy 行内属性键（`font_color` / `bg_color`，与块文档
+  /// schema 一致）。
   String get attributeKey => switch (this) {
-    DiaryColorTarget.text => quill.Attribute.color.key,
-    DiaryColorTarget.background => quill.Attribute.background.key,
+    DiaryColorTarget.text => kDiaryInlineTextColor,
+    DiaryColorTarget.background => kDiaryInlineBackgroundColor,
   };
 
-  /// 写入 [color] 的属性；[color] 为 null 时是清除该属性。
-  quill.Attribute<String?> attributeFor(Color? color) {
-    final value = color == null ? null : encodeDiaryColor(color);
-    return switch (this) {
-      DiaryColorTarget.text => quill.ColorAttribute(value),
-      DiaryColorTarget.background => quill.BackgroundAttribute(value),
-    };
-  }
+  /// 写入 [color] 的行内属性；[color] 为 null 时是清除该属性（值为 null
+  /// 的键，调用方按 AppFlowy 惯例把 null 值写回即清除）。
+  Attributes attributeFor(Color? color) => <String, dynamic>{
+    attributeKey: color == null ? null : encodeDiaryColor(color),
+  };
 }
 
 /// 预设颜色：两种目标同序同下标，切换目标时色块原地变色而不重排。
@@ -79,7 +78,7 @@ final Color _journalHighlight = parseDiaryColorValue(journalHighlightColor)!;
 /// 选区在某个目标上的颜色状态。
 ///
 /// - [raw] 为 null：没有设置颜色（默认墨色 / 无背景）；
-/// - [raw] 有值但 [color] 为 null：设了颜色但读不懂（如 Quill 的颜色名），
+/// - [raw] 有值但 [color] 为 null：设了颜色但读不懂（如旧数据的颜色名），
 ///   面板不选中任何色块，颜色代码显示“自定义”；
 /// - 两者都有：可以比较与显示的颜色。
 class DiaryColorValue {
@@ -92,12 +91,12 @@ class DiaryColorValue {
     return DiaryColorValue._(raw, parseDiaryColorValue(raw));
   }
 
-  /// 从选区样式（`controller.getSelectionStyle().attributes`）里读取。
+  /// 从选区样式（行内属性表）里读取。
   factory DiaryColorValue.of(
-    Map<String, quill.Attribute> attributes,
+    Attributes attributes,
     DiaryColorTarget target,
   ) {
-    final value = attributes[target.attributeKey]?.value;
+    final value = attributes[target.attributeKey];
     return DiaryColorValue.parse(value is String ? value : null);
   }
 
@@ -187,23 +186,92 @@ String sanitizeDiaryHexInput(String input) => input
 
 /// 这篇日记里用过、但不是预设的颜色（按文档顺序去重，读不懂的值跳过）。
 ///
-/// 遍历整篇 Delta，只在面板打开、切换目标与回到色板时调用一次，不在每次
-/// 构建或按键时计算。
+/// 遍历整篇文档各文字块的 Delta，只在面板打开、切换目标与回到色板时调用
+/// 一次，不在每次构建或按键时计算。
 List<Color> collectDiaryDocumentColors(
-  quill.Document document,
+  Document document,
   DiaryColorTarget target,
 ) {
   final seen = <int>{};
   final result = <Color>[];
-  for (final operation in document.toDelta().toList()) {
-    final value = operation.attributes?[target.attributeKey];
-    final color = value is String ? parseDiaryColorValue(value) : null;
-    if (color == null || DiaryColorPreset.match(color, target) != null) {
-      continue;
+
+  void visitNode(Node node) {
+    final delta = node.delta;
+    if (delta != null) {
+      for (final operation in delta) {
+        final value = operation.attributes?[target.attributeKey];
+        final color = value is String ? parseDiaryColorValue(value) : null;
+        if (color == null || DiaryColorPreset.match(color, target) != null) {
+          continue;
+        }
+        if (seen.add(color.toARGB32())) result.add(color);
+      }
     }
-    if (seen.add(color.toARGB32())) result.add(color);
+    for (final child in node.children) {
+      visitNode(child);
+    }
+  }
+
+  visitNode(document.root);
+  return result;
+}
+
+/// 当前选区的行内属性表，供颜色按钮与颜色面板读取“当前颜色”。
+///
+/// - 折叠选区：没有待输入样式时看光标前一个字符（光标在行首时看第一个字符），
+///   与原来 `QuillController.getSelectionStyle` 的读取口径一致；
+/// - 选中文字：取选区起点所在文本片段的属性；
+/// - 待输入样式（`toggledStyle`，点色块后、打字前）最后合并、优先显示；值为
+///   null 的待输入样式表示清除，把对应键去掉。
+Attributes diarySelectionInlineAttributes(EditorState editorState) {
+  final selection = editorState.selection?.normalized;
+  if (selection == null) return const <String, dynamic>{};
+  final result = <String, dynamic>{};
+  var range = selection;
+  if (range.isCollapsed && range.start.offset > 0) {
+    range = range.copyWith(
+      start: range.start.copyWith(offset: range.start.offset - 1),
+    );
+  }
+  final delta = editorState.getNodeAtPath(range.start.path)?.delta;
+  if (delta != null) {
+    var offset = 0;
+    for (final op in delta.whereType<TextInsert>()) {
+      if (offset + op.length > range.start.offset) {
+        final attributes = op.attributes;
+        if (attributes != null) result.addAll(attributes);
+        break;
+      }
+      offset += op.length;
+    }
+  }
+  for (final entry in editorState.toggledStyle.entries) {
+    if (entry.value != null) {
+      result[entry.key] = entry.value;
+    } else {
+      result.remove(entry.key);
+    }
   }
   return result;
+}
+
+/// 把行内属性写进选区：选中文字时改写选中部分；折叠选区时记入待输入样式
+/// （`toggledStyle`，下一次输入时套用），与原来
+/// `QuillController.formatSelection` 的语义一致；值为 null 的键按 AppFlowy
+/// 惯例清除该属性。
+Future<void> applyDiaryColorAttributes(
+  EditorState editorState,
+  Attributes attributes,
+) async {
+  final selection = editorState.selection;
+  if (selection == null) return;
+  if (selection.isCollapsed) {
+    for (final entry in attributes.entries) {
+      editorState.updateToggledStyle(entry.key, entry.value);
+    }
+    return;
+  }
+  await editorState.formatDelta(selection, attributes);
 }
 
 /// 色板页的排布：列数、预设占几行，以及下方“我的颜色”一行。

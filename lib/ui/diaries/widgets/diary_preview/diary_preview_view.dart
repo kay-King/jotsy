@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 import '../../../../core/database/app_database.dart';
-import '../../../../core/database/content_codec.dart';
+import '../../../../core/database/diary_blocks/diary_blocks_appflowy.dart';
+import '../../../../core/database/diary_blocks/diary_blocks_schema.dart';
 import '../../../../core/services/app_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/widgets/home_hint_visibility_scope.dart';
@@ -45,7 +46,7 @@ import 'diary_preview_top_bar.dart';
 /// [DiaryTodoAutoSaveController]）、分享、导出与删除。
 ///
 /// 状态：详情查询返回前用入口数据渲染，返回后由最新数据接管；正文只在内容
-/// 变化时重建 Quill 控制器。
+/// 变化时重建 EditorState。
 ///
 /// 放在翻页器（`DiaryPreviewPager`）里时：[paging] 给出位置与相邻篇，
 /// [onBusyChanged] 报告导出 / 分享长图的忙碌态（翻页器据此暂停翻页），共享
@@ -99,9 +100,9 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
       )..addListener(_handleExportChanged);
   late final DiaryTodoAutoSaveController _todoAutoSave;
 
-  quill.QuillController? _controller;
+  EditorState? _editorState;
   String? _boundContentRaw;
-  StreamSubscription<quill.DocChange>? _docChanges;
+  StreamSubscription<EditorTransactionValue>? _docChanges;
   DiaryWithTags? _currentDetail;
   DiaryPreviewViewData? _viewData;
   bool _hadLoadedData = false;
@@ -116,7 +117,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
     final diaryId = widget.diaryId;
     _todoAutoSave = DiaryTodoAutoSaveController(
       readDetail: () => _currentDetail,
-      readDocument: () => _controller?.document,
+      readDocument: () => _editorState?.document,
       readDatabase: () => container.read(appDatabaseProvider),
       onSaved: () => container.invalidate(diaryDetailProvider(diaryId)),
     );
@@ -128,10 +129,10 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
     if (widget.ownsCoverHero) {
       widget.coverHero?.dispose();
     }
-    // 先于正文控制器释放：补写待办要读当下的文档。
+    // 先于正文状态释放：补写待办要读当下的文档。
     _todoAutoSave.dispose();
     _docChanges?.cancel();
-    _controller?.dispose();
+    _editorState?.dispose();
     _export
       ..removeListener(_handleExportChanged)
       ..dispose();
@@ -151,28 +152,30 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
     }
   }
 
-  /// 根据正文 JSON 绑定只读控制器；仅在内容变化时重建，避免 build 阶段重复
-  /// 构造 controller。
-  void _bindController(String contentRaw) {
-    if (_boundContentRaw == contentRaw && _controller != null) {
+  /// 根据正文 JSON 绑定只读的 EditorState；仅在内容变化时重建，避免 build
+  /// 阶段重复构造。
+  void _bindEditorState(String contentRaw) {
+    if (_boundContentRaw == contentRaw && _editorState != null) {
       return;
     }
     _docChanges?.cancel();
-    _controller?.dispose();
+    _editorState?.dispose();
     _boundContentRaw = contentRaw;
-    final controller = quill.QuillController(
-      document: decodeDiaryContentToDocument(contentRaw),
-      selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true,
-    );
-    _controller = controller;
-    _docChanges = controller.changes.listen((quill.DocChange change) {
-      // 预览页是只读模式，唯一允许的本地变更是待办勾选状态。
-      if (change.source != quill.ChangeSource.local) {
-        return;
-      }
+    final editorState = diaryEditorStateFromStoredJson(contentRaw);
+    _editorState = editorState;
+    _docChanges = editorState.transactionStream.listen((_) {
+      // 预览页是只读模式，唯一允许的本地变更是待办勾选状态（经事务写回）。
       _todoAutoSave.schedule();
     });
+  }
+
+  /// 待办勾选：经事务写回 EditorState（落库由自动保存控制器防抖执行）。
+  void _toggleTodo(Node node, bool checked) {
+    final editorState = _editorState;
+    if (editorState == null) return;
+    final transaction = editorState.transaction;
+    transaction.updateNode(node, {kDiaryBlockCheckedKey: checked});
+    unawaited(editorState.apply(transaction));
   }
 
   void _showHint(String message) {
@@ -252,8 +255,8 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
 
     // 入口（列表、搜索、日历）已持有同一篇日记的完整数据（分页查询包含正文与
     // 标签）：详情首查返回前直接用它渲染整页，路由滑入时就是完整内容，而不是
-    // 先出 1~2 帧空壳再整页硬切。查询返回后渲染同一结构；正文未变时 Quill
-    // 控制器不会重建，画面没有变化。
+    // 先出 1~2 帧空壳再整页硬切。查询返回后渲染同一结构；正文未变时
+    // EditorState 不会重建，画面没有变化。
     final initialDetail = widget.initialDetail;
     if (initialDetail != null &&
         !detailAsync.hasValue &&
@@ -299,7 +302,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
       return LockedDiaryPage(diaryId: widget.diaryId, initialDetail: detail);
     }
     _currentDetail = detail;
-    _bindController(detail.diary.content);
+    _bindEditorState(detail.diary.content);
     final viewData = DiaryPreviewViewData.resolve(
       detail.diary,
       previous: _viewData,
@@ -335,7 +338,8 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
         child: DiaryPreviewContent(
           detail: detail,
           viewData: viewData,
-          controller: _controller,
+          document: _editorState?.document,
+          onToggleTodo: behavior.todoToggle ? _toggleTodo : null,
           scrollController: _scrollController,
           resolved: resolved,
           behavior: behavior,

@@ -1,7 +1,8 @@
+import 'dart:async' show unawaited;
 import 'dart:math' as math;
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/app/theme/expressive_motion.dart';
 import 'package:node_diary/app/theme/expressive_surfaces.dart';
@@ -48,11 +49,11 @@ double diaryColorPanelNaturalHeight(
 /// 悬浮工具栏卡片内的颜色面板：表头（目标标题 + 色板 / 色系 / 自定义页签）与
 /// 当前页。
 ///
-/// - 输入：正文控制器、当前目标与页签、网格排布、我的颜色 [savedColors]
+/// - 输入：正文编辑器状态、当前目标与页签、网格排布、我的颜色 [savedColors]
 ///   （当前目标的，随保存实时更新）、本篇用过的颜色 [documentColors]（由
 ///   工具栏在面板打开、切换目标与回到色板时整理，这里不扫描文档）与色系页
 ///   上次看的色系 [materialFamily]；
-/// - 输出：色块经 `controller.formatSelection` 写入 `#AARRGGBB` 或清除属性；
+/// - 输出：色块经 `applyDiaryColorAttributes` 写入 `#AARRGGBB` 或清除属性；
 ///   色系页看的色系变了经 [onMaterialFamilyChanged] 交给工具栏记住；
 ///   我的颜色的增删（自定义页写入后保存、色板里移除或收藏）一律经
 ///   [onEditSavedColors] 交给 provider 在最新记录上执行；切换页签经
@@ -65,7 +66,7 @@ double diaryColorPanelNaturalHeight(
 class DiaryColorPanel extends StatelessWidget {
   const DiaryColorPanel({
     super.key,
-    required this.controller,
+    required this.editorState,
     required this.target,
     required this.mode,
     required this.onModeChanged,
@@ -79,7 +80,7 @@ class DiaryColorPanel extends StatelessWidget {
     this.onMaterialFamilyChanged,
   });
 
-  final quill.QuillController controller;
+  final EditorState editorState;
   final DiaryColorTarget target;
   final DiaryColorPanelMode mode;
   final ValueChanged<DiaryColorPanelMode> onModeChanged;
@@ -106,7 +107,9 @@ class DiaryColorPanel extends StatelessWidget {
   /// 点色块：写入颜色（null 为清除）；与选区当前值相同则不动正文。
   void _applySwatch(Color? color, DiaryColorValue current) {
     if (color == null ? current.isNone : current.matches(color)) return;
-    controller.formatSelection(target.attributeFor(color));
+    unawaited(
+      applyDiaryColorAttributes(editorState, target.attributeFor(color)),
+    );
   }
 
   @override
@@ -127,11 +130,14 @@ class DiaryColorPanel extends StatelessWidget {
         ),
         const SizedBox(height: kDiaryColorPanelHeaderGap),
         ListenableBuilder(
-          listenable: controller,
+          listenable: Listenable.merge(<Listenable>[
+            editorState.selectionNotifier,
+            editorState.toggledStyleNotifier,
+          ]),
           builder: (BuildContext context, Widget? child) => _buildPage(
             context,
             DiaryColorValue.of(
-              controller.getSelectionStyle().attributes,
+              diarySelectionInlineAttributes(editorState),
               target,
             ),
           ),
@@ -184,7 +190,7 @@ class DiaryColorPanel extends StatelessWidget {
         ),
         DiaryColorPanelMode.custom => DiaryColorCustomPicker(
           key: const ValueKey<DiaryColorPanelMode>(DiaryColorPanelMode.custom),
-          controller: controller,
+          editorState: editorState,
           target: target,
           current: current,
           active: active,

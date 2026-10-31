@@ -1,8 +1,9 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
@@ -49,10 +50,7 @@ void main() {
         child: MaterialApp(
           theme: expressiveTestTheme(Brightness.light),
           locale: const Locale('en'),
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            quill.FlutterQuillLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: page,
         ),
@@ -69,15 +67,10 @@ void main() {
   Finder toolbar() => find.byType(DiaryFloatingToolbar);
 
   double editorBottomPadding(WidgetTester tester) {
-    final scrollView = tester.widget<SingleChildScrollView>(
-      find
-          .ancestor(
-            of: find.byType(quill.QuillEditor),
-            matching: find.byType(SingleChildScrollView),
-          )
-          .first,
+    final spacer = tester.widget<SizedBox>(
+      find.byKey(const ValueKey('diary-editor-page-reserve')),
     );
-    return (scrollView.padding! as EdgeInsets).bottom;
+    return spacer.height ?? 0;
   }
 
   testWidgets('by default the toolbar waits for the on-screen keyboard', (
@@ -88,7 +81,7 @@ void main() {
       const EditDiaryPage(entryMode: EditDiaryEntryMode.create),
     );
     // 新建页进场后正文已有焦点，但没有软键盘（实体键盘输入时就是这样）。
-    expect(find.byType(quill.QuillEditor), findsOneWidget);
+    expect(find.byType(AppFlowyEditor), findsOneWidget);
     expect(toolbar(), findsNothing);
 
     // 在设置里打开后，回到编辑页立即生效。
@@ -120,30 +113,35 @@ void main() {
       );
 
       // 不聚焦也能排版：工具按钮直接作用在正文的选区上。
-      final controller = tester
-          .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-          .controller;
-      controller.replaceText(0, 0, 'hello', null);
-      controller.updateSelection(
-        const TextSelection(baseOffset: 0, extentOffset: 5),
-        quill.ChangeSource.local,
+      final editorState = tester
+          .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+          .editorState;
+      final node = editorState.document.root.children.first;
+      final insertTransaction = editorState.transaction;
+      insertTransaction.insertText(node, 0, 'hello');
+      await editorState.apply(insertTransaction);
+      editorState.selection = Selection(
+        start: Position(path: node.path, offset: 0),
+        end: Position(path: node.path, offset: 5),
       );
       await tester.pumpAndSettle();
       await tester.tap(
         find.descendant(
           of: toolbar(),
           matching: find.byWidgetPredicate(
+            // FaIconData 只是 IconData 的包装类，直接 == 比不到，按码点认。
             (widget) =>
-                widget is quill.QuillToolbarToggleStyleButton &&
-                widget.attribute == quill.Attribute.bold,
+                widget is FaIcon &&
+                widget.icon?.codePoint ==
+                    FontAwesomeIcons.bold.codePoint,
           ),
         ),
       );
       await tester.pumpAndSettle();
-      expect(
-        controller.getSelectionStyle().attributes,
-        contains(quill.Attribute.bold.key),
-      );
+      final styled = editorState.document.root.children.first.delta!
+          .whereType<TextInsert>()
+          .single;
+      expect(styled.attributes?['bold'], isTrue);
       expect(tester.takeException(), isNull);
       await unmount(tester);
     },
@@ -172,7 +170,7 @@ void main() {
       final toolbarState = tester.state(toolbar());
 
       // 点进正文、软键盘弹起：与默认一致，只剩工具栏贴着键盘。
-      await tester.tap(find.byType(quill.QuillEditor));
+      await tester.tap(find.byType(AppFlowyEditor));
       tester.view.viewInsets = const FakeViewPadding(bottom: 300);
       await tester.pumpAndSettle();
       expect(panel.collapsedHeader, findsNothing);
@@ -222,7 +220,7 @@ void main() {
     tester,
   ) async {
     await pumpPage(tester, EditDiaryPage(diaryId: diaryId));
-    await tester.tap(find.byType(quill.QuillEditor));
+    await tester.tap(find.byType(AppFlowyEditor));
     await tester.pumpAndSettle();
     expect(PublishPanelDriver(tester).collapsedHeader, findsOneWidget);
     expect(toolbar(), findsNothing);

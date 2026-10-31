@@ -1,9 +1,7 @@
-import 'dart:convert';
-
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:node_diary/core/database/content_codec.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/video_export_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/diary_playback_gestures.dart';
@@ -12,6 +10,9 @@ import 'package:node_diary/ui/diaries/widgets/diary_video_embed_builder.dart';
 import '../../../support/expressive_test_theme.dart';
 import '../../../support/fake_video_player.dart';
 
+/// AppFlowy 版：视频是独立块节点（[kDiaryBlockVideo]），键盘/焦点断言与
+/// Quill 时代一致——点视频控件不弹正文键盘、不动正文选区。
+
 void main() {
   for (final brightness in Brightness.values) {
     testWidgets(
@@ -19,49 +20,33 @@ void main() {
       (tester) async {
         final focus = FocusNode();
         final player = FakeVideoPlayer();
-        final controller = quill.QuillController(
-          document: decodeDiaryContentToDocument(
-            jsonEncode([
-              {
-                'insert': {'video': '/video.mp4'},
-              },
-              {'insert': '\n正文继续输入\n'},
-            ]),
-          ),
-          selection: const TextSelection.collapsed(offset: 2),
-        );
-        addTearDown(controller.dispose);
+        final editorState = _editorState();
+        addTearDown(editorState.dispose);
         addTearDown(focus.dispose);
         final service = _KeyboardCheckExportService();
         await tester.pumpWidget(
           MaterialApp(
             theme: expressiveTestTheme(brightness),
             locale: const Locale('zh'),
-            localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
-              quill.FlutterQuillLocalizations.delegate,
-            ],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Center(
                 child: SizedBox(
-                  width: 320,
-                  child: quill.QuillEditor.basic(
+                  width: 400,
+                  child: AppFlowyEditor(
+                    editorState: editorState,
                     focusNode: focus,
-                    controller: controller,
-                    config: quill.QuillEditorConfig(
-                      scrollable: false,
-                      onTapUp: (details, getPosition) => isDiaryPlaybackTap(
-                        controller,
-                        getPosition(details.globalPosition),
-                      ),
-                      embedBuilders: [
-                        DiaryVideoEmbedBuilder(
-                          playerFactory: (_) => player,
-                          exportService: service,
-                        ),
-                      ],
+                    editorStyle: EditorStyle.mobile(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
+                    blockComponentBuilders: {
+                      ...standardBlockComponentBuilderMap,
+                      kDiaryBlockVideo: DiaryVideoEmbedBuilder(
+                        playerFactory: (_) => player,
+                        exportService: service,
+                      ),
+                    },
                   ),
                 ),
               ),
@@ -69,14 +54,20 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        final selection = controller.selection;
+        // 选区在挂载后设置（挂载前设置会被编辑器初始化重置），键盘保持收起。
+        editorState.selection = Selection.collapsed(
+          Position(path: [1], offset: 0),
+        );
+        tester.testTextInput.hide();
+        await tester.pump();
+        final selection = editorState.selection;
         expect(tester.testTextInput.isVisible, isFalse);
         await tester.tap(find.byTooltip('播放视频').last);
         await tester.pumpAndSettle();
         expect(player.value.isPlaying, isTrue);
         expect(tester.testTextInput.isVisible, isFalse);
         expect(focus.hasFocus, isFalse);
-        expect(controller.selection, selection);
+        expect(editorState.selection, selection);
         await tester.tap(find.byTooltip('暂停视频'));
         await tester.pumpAndSettle();
         expect(player.value.isPlaying, isFalse);
@@ -107,7 +98,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.testTextInput.isVisible, isFalse);
         expect(focus.hasFocus, isFalse);
-        final editorRect = tester.getRect(find.byType(quill.QuillEditor));
+        final editorRect = tester.getRect(find.byType(AppFlowyEditor));
         await tester.tapAt(
           Offset(editorRect.left + 30, editorRect.bottom - 14),
         );
@@ -120,39 +111,29 @@ void main() {
     );
   }
 
-  test(
-    'video tap guard excludes body and empty lines immediately after a video',
-    () {
-      final controller = quill.QuillController(
-        document: decodeDiaryContentToDocument(
-          jsonEncode([
-            {
-              'insert': {'video': '/video.mp4'},
-            },
-            {'insert': '\n\ntext\n'},
-          ]),
-        ),
-        selection: const TextSelection.collapsed(offset: 0),
-      );
-      addTearDown(controller.dispose);
-      expect(
-        isDiaryPlaybackTap(controller, const TextPosition(offset: 0)),
-        isTrue,
-      );
-      expect(
-        isDiaryPlaybackTap(controller, const TextPosition(offset: 1)),
-        isTrue,
-      );
-      expect(
-        isDiaryPlaybackTap(controller, const TextPosition(offset: 2)),
-        isFalse,
-      );
-      expect(
-        isDiaryPlaybackTap(controller, const TextPosition(offset: 3)),
-        isFalse,
-      );
-    },
+  test('video tap guard only consumes the video node itself', () {
+    final editorState = _editorState();
+    addTearDown(editorState.dispose);
+    final videoNode = editorState.document.root.children[0];
+    final paragraphNode = editorState.document.root.children[1];
+    expect(isDiaryPlaybackTap(editorState, videoNode), isTrue);
+    expect(isDiaryPlaybackTap(editorState, paragraphNode), isFalse);
+  });
+}
+
+EditorState _editorState() {
+  final document = Document.blank();
+  document.insert(
+    [0],
+    [
+      Node(
+        type: kDiaryBlockVideo,
+        attributes: {kDiaryBlockUrlKey: '/video.mp4'},
+      ),
+    ],
   );
+  document.insert([1], [paragraphNode(text: '正文继续输入')]);
+  return EditorState(document: document);
 }
 
 class _KeyboardCheckExportService extends VideoExportService {

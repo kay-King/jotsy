@@ -1,84 +1,106 @@
-import 'dart:async';
 import 'dart:io';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/app/theme/app_radii.dart';
 import 'package:node_diary/app/theme/expressive_surfaces.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/diary_image_embed_data.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_image_options_menu.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_long_image_fold.dart';
 import 'package:node_diary/ui/widgets/expressive_image_frame.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
 import 'package:node_diary/ui/widgets/long_image/long_image_policy.dart';
 import 'package:node_diary/ui/widgets/long_image/long_image_source_builder.dart';
 
-/// 正文图片按独立块渲染，圆角、微边框与上下留白和视频/附件卡片保持同一节奏。
+/// 正文图片的 AppFlowy 块组件：注册到 `image` 类型节点的渲染器。
 ///
-/// 上游 `QuillEditorImageEmbedBuilder` 把图片当作行内 WidgetSpan 放进文本行：
-/// 直角、贴着文字基线、没有段间距，点按弹出的菜单里“缩放”打开它自带的
-/// PhotoView 页面。这里整体接管：
+/// UI 与 Quill 时代一致：图片独占一行，圆角、微边框与上下留白和视频/附件
+/// 卡片保持同一节奏。
 /// - 只读正文提供 [onImageOpen] 时点按直接进看图页：图片作为看图页的共享元素
 ///   来源，点按瞬间抓取画面并交给回调，看图页从图片原位展开；
-/// - 其余情况（编辑页、发布页预览）点按弹出 [showDiaryImageOptions]：查看、
-///   调整大小、复制、保存到相册、删除（只读时没有调整大小与删除）；
+/// - 可编辑时点按的图片菜单（查看、调整大小、复制、保存到相册、删除）随
+///   编辑器 UI 迁移再接入：旧菜单依赖 QuillController，这里暂不接线；
 /// - 缩放菜单写入的宽高只作为上限，见 [diaryImageEmbedBounds]；比列宽窄的
 ///   图片（缩小过或原图就小）靠行首对齐，所在行设了居中/居右时从之，见
 ///   [diaryImageEmbedAlignment]；
 /// - 长图（高 ≥ 宽 × 3）默认折叠显示（[DiaryLongImageFold]）；[foldLongImages]
 ///   为 false（预览页“长图显示：完整显示”）时按列宽完整展开
 ///   （[DiaryLongImageFull]）。
-class DiaryImageEmbedBuilder extends quill.EmbedBuilder {
-  const DiaryImageEmbedBuilder({this.onImageOpen, this.foldLongImages = true});
+class DiaryImageEmbedBuilder extends BlockComponentBuilder {
+  DiaryImageEmbedBuilder({this.onImageOpen, this.foldLongImages = true});
 
   final void Function(String imageSource, ImageViewerHero? hero)? onImageOpen;
   final bool foldLongImages;
 
   @override
-  String get key => quill.BlockEmbed.imageType;
+  BlockComponentWidget build(BlockComponentContext blockComponentContext) {
+    final node = blockComponentContext.node;
+    return _DiaryImageBlockWidget(
+      key: node.key,
+      node: node,
+      onImageOpen: onImageOpen,
+      foldLongImages: foldLongImages,
+    );
+  }
+}
 
-  /// 图片独占一行时走 EmbedProxy 块级布局；与文字同行的旧数据 Quill 仍按行内渲染。
-  @override
-  bool get expanded => true;
+class _DiaryImageBlockWidget extends BlockComponentStatelessWidget {
+  const _DiaryImageBlockWidget({
+    super.key,
+    required super.node,
+    super.configuration = const BlockComponentConfiguration(),
+    this.onImageOpen,
+    this.foldLongImages = true,
+  });
+
+  final void Function(String imageSource, ImageViewerHero? hero)? onImageOpen;
+  final bool foldLongImages;
 
   @override
-  Widget build(BuildContext context, quill.EmbedContext embedContext) {
-    final source = embedContext.node.value.data.toString();
-    final open = embedContext.readOnly ? onImageOpen : null;
-    // 标签按 embed 在文档中的位置区分：同一张图可能在正文里出现多次。
+  Widget build(BuildContext context) {
+    final attributes = node.attributes;
+    // 图片来源：块格式的 `data.url`（私有目录路径、http(s) 或 data URI）。
+    final source = attributes[kDiaryBlockUrlKey]?.toString() ?? '';
+    if (source.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 6),
+        child: _DiaryImageFallback(),
+      );
+    }
+    final editable =
+        context
+            .findAncestorWidgetOfExactType<AppFlowyEditor>()
+            ?.editorState
+            .editable ??
+        true;
+    final open = editable ? null : onImageOpen;
+    // 标签按节点 id 区分：同一张图可能在正文里出现多次。
     final heroTag = open == null
         ? null
-        : ImageViewerHeroTag('diary_body', embedContext.node.documentOffset);
+        : ImageViewerHeroTag('diary_body', node.id);
     final image = Builder(
       builder: (imageContext) => GestureDetector(
+        // 可编辑时的点按菜单随编辑器 UI 迁移再接入：旧的 showDiaryImageOptions
+        // 依赖 QuillController，不能直接复用。
         onTap: open == null
-            ? () => unawaited(
-                showDiaryImageOptions(
-                  imageContext,
-                  controller: embedContext.controller,
-                  node: embedContext.node,
-                  source: source,
-                  readOnly: embedContext.readOnly,
-                ),
-              )
+            ? null
             : () => open(source, _captureHero(imageContext, heroTag!)),
         child: DiaryEmbeddedImage(
           source: source,
-          bounds: diaryImageEmbedBounds(embedContext.node),
+          bounds: diaryImageEmbedBounds(node),
           heroTag: heroTag,
           foldLongImages: foldLongImages,
         ),
       ),
     );
-    if (embedContext.inline) return image;
     // 比列宽窄的图片靠行首（与正文文字左缘对齐），不再一律居中；heightFactor
     // 防止有界高度下 Align 撑满整行。
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Align(
-        alignment: diaryImageEmbedAlignment(embedContext.node),
+        alignment: diaryImageEmbedAlignment(node),
         heightFactor: 1,
         child: image,
       ),

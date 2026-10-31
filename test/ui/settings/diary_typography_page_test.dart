@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/services/diary_font_storage_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_typography_preview.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_appflowy_preview.dart';
 import 'package:node_diary/ui/settings/pages/diary_typography_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,19 +16,39 @@ const _wenKai = DiaryImportedFont(
   fileName: 'fwen.ttf',
 );
 
-/// 预览卡里正文实际使用的 Quill 段落样式。
-quill.DefaultTextBlockStyle _previewParagraph(WidgetTester tester) {
-  final editor = tester.widget<quill.QuillEditor>(
-    find.descendant(
-      of: find.byType(DiaryTypographyPreview),
-      matching: find.byType(quill.QuillEditor),
-    ),
-  );
-  return editor.config.customStyles!.paragraph!;
+/// 预览卡里正文第一段实际渲染的文本样式（AppFlowy 逐块渲染的根 span 样式）。
+TextStyle _previewBodyStyle(WidgetTester tester, AppLocalizations l10n) {
+  final firstLine = l10n.diaryTypographySampleBody.split('\n').first;
+  final candidates = find
+      .descendant(
+        of: find.byType(DiaryAppFlowyPreview),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              (widget.textSpan?.toPlainText() ?? '').contains(firstLine),
+        ),
+      )
+      .evaluate();
+  expect(candidates, hasLength(1));
+  return (candidates.single.widget as Text).textSpan!.style!;
 }
 
-TextStyle _previewParagraphStyle(WidgetTester tester) =>
-    _previewParagraph(tester).style;
+/// 预览卡里段落块底部的段间距（逐块渲染里段间距是段落的外边距）。
+double _previewParagraphSpacing(WidgetTester tester) {
+  final bottoms = tester
+      .widgetList<Padding>(
+        find.descendant(
+          of: find.byType(DiaryAppFlowyPreview),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Padding &&
+                widget.padding.resolve(TextDirection.ltr).bottom > 0,
+          ),
+        ),
+      )
+      .map((padding) => padding.padding.resolve(TextDirection.ltr).bottom);
+  return bottoms.isEmpty ? 0 : bottoms.first;
+}
 
 void main() {
   late SettingsService settings;
@@ -67,8 +86,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(settings.diaryTypography.fontSize, 17);
-      expect(_previewParagraphStyle(tester).fontSize, 17);
-      expect(_previewParagraphStyle(tester).fontFamily, 'sans-serif');
+      expect(_previewBodyStyle(tester, l10n).fontSize, 17);
+      expect(_previewBodyStyle(tester, l10n).fontFamily, 'sans-serif');
 
       await tester.tap(
         find.byTooltip(
@@ -109,14 +128,14 @@ void main() {
     await tester.pump();
 
     // 拖动中：预览按草稿排版，设置尚未提交。
-    final draftSpacing = _previewParagraph(tester).verticalSpacing.bottom;
+    final draftSpacing = _previewParagraphSpacing(tester);
     expect(draftSpacing, greaterThan(0));
     expect(settings.diaryTypography.paragraphSpacing, 0);
 
     await gesture.up();
     await tester.pumpAndSettle();
     expect(settings.diaryTypography.paragraphSpacing, draftSpacing);
-    expect(_previewParagraph(tester).verticalSpacing.bottom, draftSpacing);
+    expect(_previewParagraphSpacing(tester), draftSpacing);
   });
 
   testWidgets('deleting the font in use falls back to the bundled font', (
@@ -133,7 +152,7 @@ void main() {
     );
     final l10n = tester.element(find.byType(DiaryTypographyPage)).l10n;
     expect(
-      _previewParagraphStyle(tester).fontFamily,
+      _previewBodyStyle(tester, l10n).fontFamily,
       DiaryFontStorageService.familyFor(_wenKai.id),
     );
 
@@ -172,6 +191,6 @@ void main() {
     expect(find.text(l10n.diaryTypographyFontMissing), findsOneWidget);
     // 正文回落到环境主题字体（不覆盖字族）：测试主题是 material2021
     // 的平台字体 Roboto，真机上即系统字体。
-    expect(_previewParagraphStyle(tester).fontFamily, 'Roboto');
+    expect(_previewBodyStyle(tester, l10n).fontFamily, 'Roboto');
   });
 }

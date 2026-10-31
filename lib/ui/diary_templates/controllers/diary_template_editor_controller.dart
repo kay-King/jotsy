@@ -1,7 +1,10 @@
+import 'dart:async';
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import '../../../core/database/content_codec.dart';
+import '../../../core/database/diary_blocks/diary_blocks_to_delta.dart';
 import '../../diaries/models/diary_meta_draft.dart';
 import '../../diaries/models/time_capsule.dart';
 import '../../diaries/viewmodels/diary_meta_draft_controller.dart';
@@ -11,13 +14,18 @@ import '../models/diary_template_json.dart';
 import '../models/diary_template_recommend.dart';
 import 'diary_templates_controller.dart';
 
-/// 模板编辑页的草稿状态：各字段、正文 Quill 文档、未保存判断与保存。
+/// 模板编辑页的草稿状态：各字段、正文编辑器状态、未保存判断与保存。
 ///
 /// 输入：要编辑的模板（null 为新建；id 为空的模板是“另存为模板”预填的新
 /// 模板，同样算新建）。输出：[build] 出的模板与 [save] 的写入。
 ///
 /// 心情与精力借用一个只在本页使用的 [DiaryMetaDraftController]，从而直接复用
 /// 发布面板的心情、精力区块；其余字段由本控制器自己持有。
+///
+/// 正文是 AppFlowy [EditorState]（只允许文字与分隔线，见模板规则）；存档的
+/// [DiaryTemplate.bodyJson] 仍是 Delta 操作列表（与数据库、模板码、内置模板
+/// 共用格式）：读入时经块文档归一化为 AppFlowy Document，[build] 时投影回
+/// Delta 再经 [sanitizeDiaryTemplateOps] 白名单清洗。
 ///
 /// 未保存判断拿 [build] 的结果与基线比较：已保存的模板以它本身为基线（经同一
 /// 套编码归一，打开即离开不会误报）；新建与预填的模板以空白模板为基线，预填
@@ -28,11 +36,10 @@ class DiaryTemplateEditorController extends ChangeNotifier {
       name = TextEditingController(text: template?.name ?? ''),
       description = TextEditingController(text: template?.description ?? ''),
       titlePattern = TextEditingController(text: template?.titlePattern ?? ''),
-      body = quill.QuillController(
-        document: decodeDiaryContentToDocument(
+      body = EditorState(
+        document: decodeDiaryContentToAppFlowyDocument(
           template?.bodyJson ?? DiaryTemplate.emptyBodyJson,
         ),
-        selection: const TextSelection.collapsed(offset: 0),
       ),
       meta = DiaryMetaDraftController(
         DiaryMetaDraft(
@@ -53,17 +60,20 @@ class DiaryTemplateEditorController extends ChangeNotifier {
       description,
       titlePattern,
       meta,
-      body,
     ]) {
       listenable.addListener(notifyListeners);
     }
+    // EditorState 不是 Listenable：经事务流感知正文改动，驱动未保存判断。
+    _bodySubscription = body.transactionStream.listen((_) => notifyListeners());
   }
+
+  StreamSubscription<EditorTransactionValue>? _bodySubscription;
 
   String _id;
   final TextEditingController name;
   final TextEditingController description;
   final TextEditingController titlePattern;
-  final quill.QuillController body;
+  final EditorState body;
   final DiaryMetaDraftController meta;
   late DiaryTemplate _baseline;
 
@@ -144,7 +154,7 @@ class DiaryTemplateEditorController extends ChangeNotifier {
         DiaryTemplate.maxTitleLength,
       ),
       bodyJson: encodeDiaryTemplateBody(
-        sanitizeDiaryTemplateOps(body.document.toDelta().toJson()),
+        sanitizeDiaryTemplateOps(diaryBlocksToQuillOps(body.document.toJson())),
       ),
       tags: _tags,
       mood: metaValue.moodEmoji,
@@ -182,6 +192,7 @@ class DiaryTemplateEditorController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _bodySubscription?.cancel();
     name.dispose();
     description.dispose();
     titlePattern.dispose();

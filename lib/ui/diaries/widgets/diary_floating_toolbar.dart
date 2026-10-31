@@ -1,6 +1,8 @@
+import 'dart:async' show unawaited;
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:node_diary/app/theme/expressive_motion.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
@@ -29,7 +31,7 @@ enum _ToolbarPanel { none, more, color, code }
 /// 文字颜色 / 背景颜色在同一位置展开颜色面板，光标在代码块里时代码块工具
 /// 展开代码块面板。
 ///
-/// - 输入：工具顺序与隐藏项、正文控制器、各工具回调。卡片外观（表面、圆角、
+/// - 输入：工具顺序与隐藏项、正文编辑器状态（EditorState）、各工具回调。卡片外观（表面、圆角、
 ///   阴影）由编辑页提供，这里只排布卡片内的内容；
 /// - 输出：[onPanelExtentChanged] 报告面板展开后的目标高度（收起或卸载后为 0），
 ///   编辑页据此给正文末尾让位，并把光标滚到面板上方；
@@ -57,7 +59,7 @@ enum _ToolbarPanel { none, more, color, code }
 class DiaryFloatingToolbar extends StatefulWidget {
   const DiaryFloatingToolbar({
     super.key,
-    required this.controller,
+    required this.editorState,
     required this.order,
     this.hiddenItems = const <DiaryToolbarItem>{},
     this.currentTimeFormatPattern,
@@ -71,7 +73,7 @@ class DiaryFloatingToolbar extends StatefulWidget {
     this.onEditSavedColors,
   });
 
-  final quill.QuillController controller;
+  final EditorState editorState;
   final List<DiaryToolbarItem> order;
   final Set<DiaryToolbarItem> hiddenItems;
   final String? currentTimeFormatPattern;
@@ -142,15 +144,17 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_handleSelectionChanged);
+    widget.editorState.selectionNotifier.addListener(_handleSelectionChanged);
   }
 
   @override
   void didUpdateWidget(covariant DiaryFloatingToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_handleSelectionChanged);
-      widget.controller.addListener(_handleSelectionChanged);
+    if (oldWidget.editorState != widget.editorState) {
+      oldWidget.editorState.selectionNotifier.removeListener(
+        _handleSelectionChanged,
+      );
+      widget.editorState.selectionNotifier.addListener(_handleSelectionChanged);
     }
     // 录音面板打开时直接收起、不播收起动画：外层 AnimatedSize 会把“面板消失 +
     // 录音面板插入”当作一次尺寸变化统一补间；若内层同时逐帧收拢，外层只能
@@ -167,7 +171,9 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
   void dispose() {
     // 卸载发生在构建收尾阶段，此时回调会让编辑页在锁定的树上刷新，改到下一帧。
     _reportExtent(0, deferred: true);
-    widget.controller.removeListener(_handleSelectionChanged);
+    widget.editorState.selectionNotifier.removeListener(
+      _handleSelectionChanged,
+    );
     _panelAnimation.dispose();
     _panelController.dispose();
     super.dispose();
@@ -227,7 +233,7 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
 
   void _scanDocumentColors() {
     _documentColors = collectDiaryDocumentColors(
-      widget.controller.document,
+      widget.editorState.document,
       _colorTarget,
     );
   }
@@ -382,7 +388,7 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
   ) {
     return switch (content) {
       _ToolbarPanel.color => DiaryColorPanel(
-        controller: widget.controller,
+        editorState: widget.editorState,
         target: _colorTarget,
         mode: _colorMode,
         onModeChanged: _handleColorModeChanged,
@@ -397,7 +403,7 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
             _materialFamily = family,
       ),
       _ToolbarPanel.code => DiaryCodeBlockPanel(
-        controller: widget.controller,
+        editorState: widget.editorState,
         bodyHeight: _bodyHeight(_ToolbarPanel.code),
         onClose: _closeCodePanel,
       ),

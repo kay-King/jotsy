@@ -1,13 +1,18 @@
+import 'dart:async' show unawaited;
+import 'dart:ui' show lerpDouble;
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:node_diary/app/theme/expressive_controls.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_newline.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_layout.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_preferences.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_time_format.dart';
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
+import 'package:node_diary/ui/widgets/expressive_state_blend.dart';
 
 /// 工具按钮的可见尺寸；触控区经 padded tapTargetSize 扩到
 /// [kDiaryToolbarButtonExtent]。「更多」按钮复用同一尺寸。
@@ -18,34 +23,64 @@ const BoxConstraints kDiaryToolbarButtonConstraints = BoxConstraints(
   maxHeight: 32,
 );
 
+/// 选区是否触及代码块（折叠选区看光标所在块）。工具栏据此决定点按代码块
+/// 工具是“转为代码块”还是打开代码块面板，面板开着时据此判断是否该收起。
+bool diarySelectionInCodeBlock(EditorState editorState) {
+  final selection = editorState.selection;
+  if (selection == null) return false;
+  return diaryCodeBlocksInRange(editorState.document, selection).isNotEmpty;
+}
+
 /// 工具在当前选区上是否“正在生效”（加粗、引用、列表等），供「更多」按钮在
 /// 面板收起时提示：收进面板的工具虽然看不见，选中态不能跟着丢。
 /// 撤销、插入类等没有选中态的工具恒为 false。
-bool isDiaryToolbarItemActive(
-  DiaryToolbarItem item,
-  Map<String, quill.Attribute> attributes,
-) {
-  bool has(quill.Attribute attribute) =>
-      attributes[attribute.key]?.value != null;
-  final list = attributes[quill.Attribute.list.key]?.value;
+bool isDiaryToolbarItemActive(DiaryToolbarItem item, EditorState editorState) {
+  String? blockType() {
+    final selection = editorState.selection;
+    if (selection == null) return null;
+    return editorState.getNodeAtPath(selection.start.path)?.type;
+  }
+
   return switch (item) {
-    DiaryToolbarItem.bold => has(quill.Attribute.bold),
-    DiaryToolbarItem.italic => has(quill.Attribute.italic),
-    DiaryToolbarItem.underline => has(quill.Attribute.underline),
-    DiaryToolbarItem.strikeThrough => has(quill.Attribute.strikeThrough),
-    DiaryToolbarItem.inlineCode => has(quill.Attribute.inlineCode),
-    DiaryToolbarItem.textColor => has(quill.Attribute.color),
-    DiaryToolbarItem.backgroundColor => has(quill.Attribute.background),
-    DiaryToolbarItem.headerStyle => has(quill.Attribute.header),
-    DiaryToolbarItem.orderedList => list == quill.Attribute.ol.value,
-    DiaryToolbarItem.bulletList => list == quill.Attribute.ul.value,
-    DiaryToolbarItem.checkList =>
-      list == quill.Attribute.checked.value ||
-          list == quill.Attribute.unchecked.value,
-    DiaryToolbarItem.codeBlock => has(quill.Attribute.codeBlock),
-    DiaryToolbarItem.quote => has(quill.Attribute.blockQuote),
-    DiaryToolbarItem.indent => has(quill.Attribute.indent),
-    DiaryToolbarItem.link => has(quill.Attribute.link),
+    DiaryToolbarItem.bold => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineBold,
+    ),
+    DiaryToolbarItem.italic => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineItalic,
+    ),
+    DiaryToolbarItem.underline => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineUnderline,
+    ),
+    DiaryToolbarItem.strikeThrough => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineStrikethrough,
+    ),
+    DiaryToolbarItem.inlineCode => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineCode,
+    ),
+    DiaryToolbarItem.textColor => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineTextColor,
+    ),
+    DiaryToolbarItem.backgroundColor => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineBackgroundColor,
+    ),
+    DiaryToolbarItem.headerStyle => blockType() == kDiaryBlockHeading,
+    DiaryToolbarItem.orderedList => blockType() == kDiaryBlockNumberedList,
+    DiaryToolbarItem.bulletList => blockType() == kDiaryBlockBulletedList,
+    DiaryToolbarItem.checkList => blockType() == kDiaryBlockTodoList,
+    DiaryToolbarItem.codeBlock => diarySelectionInCodeBlock(editorState),
+    DiaryToolbarItem.quote => blockType() == kDiaryBlockQuote,
+    DiaryToolbarItem.indent => _isDiarySelectionIndented(editorState),
+    DiaryToolbarItem.link => _isDiaryInlineActive(
+      editorState,
+      kDiaryInlineHref,
+    ),
     DiaryToolbarItem.undo ||
     DiaryToolbarItem.redo ||
     DiaryToolbarItem.clearFormat ||
@@ -57,13 +92,131 @@ bool isDiaryToolbarItemActive(
   };
 }
 
-/// 仅负责 Quill 单项工具配置；文件选择与复制由媒体导入控制器处理。
+/// 选区在行内属性 [key] 上是否生效：折叠选区看待输入样式与光标前一个字符，
+/// 与 [EditorState.toggleAttribute] 的判定口径一致。
+bool _isDiaryInlineActive(EditorState editorState, String key) {
+  final selection = editorState.selection;
+  if (selection == null) return false;
+  final toggled = editorState.toggledStyle[key];
+  if (toggled != null) return toggled == true;
+  var range = selection.normalized;
+  if (range.isCollapsed) {
+    if (range.start.offset == 0) return false;
+    range = range.copyWith(
+      start: range.start.copyWith(offset: range.start.offset - 1),
+    );
+  }
+  final nodes = editorState.getNodesInSelection(range);
+  if (nodes.isEmpty) return false;
+  return nodes.allSatisfyInSelection(
+    range,
+    (delta) => delta.everyAttributes((attributes) => attributes[key] == true),
+  );
+}
+
+/// 选区起始块是否嵌在别的块下（块文档里缩进即嵌套）。
+bool _isDiarySelectionIndented(EditorState editorState) {
+  final selection = editorState.selection;
+  if (selection == null) return false;
+  final node = editorState.getNodeAtPath(selection.start.path);
+  final parent = node?.parent;
+  return parent != null && parent != editorState.document.root;
+}
+
+/// 悬浮工具栏的单个工具按钮：外观与文字颜色 / 更多 / 代码块按钮一致（32dp
+/// 可见、40dp 触控区、14dp 图标），选中态经 [ExpressiveStateBlend] 过渡到
+/// primaryContainer 小圆角方形。
+///
+/// - [editorState] 与 [isActive] 要么都给（开关按钮：随选区与待输入样式局部
+///   重建），要么都不给（普通动作按钮）；
+/// - [icon] 按选中过渡系数着色：[foreground] 为当前前景色。
+class _DiaryToolbarButton extends StatelessWidget {
+  const _DiaryToolbarButton({
+    required this.tooltip,
+    required this.icon,
+    this.onPressed,
+    this.editorState,
+    this.isActive,
+  });
+
+  final String tooltip;
+  final Widget Function(BuildContext context, Color foreground) icon;
+  final VoidCallback? onPressed;
+  final EditorState? editorState;
+  final bool Function()? isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final editorState = this.editorState;
+    final isActive = this.isActive;
+    // 开关按钮：选区变化（每次 transaction 落定都会通知）与待输入样式变化时
+    // 重算选中态。普通动作按钮直接画。
+    if (editorState == null || isActive == null) {
+      return _buildButton(context, false);
+    }
+    return ListenableBuilder(
+      listenable: Listenable.merge(<Listenable>[
+        editorState.selectionNotifier,
+        editorState.toggledStyleNotifier,
+      ]),
+      builder: (BuildContext context, Widget? child) =>
+          _buildButton(context, isActive()),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, bool active) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      selected: isActive == null ? null : active,
+      child: ExpressiveStateBlend(
+        active: active,
+        builder: (BuildContext context, double t, Widget? child) {
+          final foreground = Color.lerp(
+            colors.onSurface,
+            colors.onPrimaryContainer,
+            t,
+          )!;
+          return IconButton(
+            tooltip: tooltip,
+            onPressed: onPressed,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: kDiaryToolbarButtonConstraints,
+            style: ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.padded,
+              shape: WidgetStateProperty.resolveWith<OutlinedBorder>((states) {
+                final pressed = states.contains(WidgetState.pressed);
+                return RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    pressed ? lerpDouble(12, 8, t)! : lerpDouble(16, 12, t)!,
+                  ),
+                );
+              }),
+              backgroundColor: WidgetStatePropertyAll<Color>(
+                colors.primaryContainer.withValues(alpha: t),
+              ),
+              foregroundColor: WidgetStatePropertyAll<Color>(foreground),
+              iconColor: WidgetStatePropertyAll<Color>(foreground),
+            ),
+            icon: SizedBox.square(
+              dimension: 32,
+              child: Center(child: icon(context, foreground)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 单个工具项的按钮（AppFlowy 版）：调用方按 [diaryToolbarItemSlots] 预留宽度。
 /// 文字颜色与背景颜色不经这里（见 `DiaryToolbarColorButton`），代码块也不经
-/// 这里（见 `DiaryToolbarCodeBlockButton`）。
-quill.QuillSimpleToolbarConfig buildDiaryToolbarItemConfig(
+/// 这里（见 `DiaryToolbarCodeBlockButton`）；文件选择与复制由媒体导入控制器
+/// 处理。
+Widget buildDiaryToolbarItemButton(
   BuildContext context,
   DiaryToolbarItem item,
-  quill.QuillController controller, {
+  EditorState editorState, {
   String? currentTimeFormatPattern,
   VoidCallback? onRecordingPressed,
   bool recordingOpen = false,
@@ -71,72 +224,34 @@ quill.QuillSimpleToolbarConfig buildDiaryToolbarItemConfig(
   DiaryMediaKind? activeMediaKind,
   bool mediaImportBusy = false,
 }) {
-  final colorScheme = Theme.of(context).colorScheme;
-  // 显式固定移动端悬浮工具栏图标尺寸，避免受主题密度或系统缩放影响出现“放大”。
-  // tapTargetSize 同样写死：桌面平台主题默认 shrinkWrap，按钮会缩到 32dp，
-  // 与排布计算用的 kDiaryToolbarButtonExtent（40dp）对不上。
-  final compactIconTheme = quill.QuillIconTheme(
-    iconButtonUnselectedData: quill.IconButtonData(
-      iconSize: 16,
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.all(4),
-      color: colorScheme.onSurface,
-      disabledColor: colorScheme.onSurfaceVariant,
-      style: ButtonStyle(
-        tapTargetSize: MaterialTapTargetSize.padded,
-        shape: ExpressiveControls.shape,
-        foregroundColor: WidgetStatePropertyAll<Color>(colorScheme.onSurface),
-        iconColor: WidgetStatePropertyAll<Color>(colorScheme.onSurface),
-      ),
-      constraints: kDiaryToolbarButtonConstraints,
-    ),
-    iconButtonSelectedData: quill.IconButtonData(
-      iconSize: 16,
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.all(4),
-      color: colorScheme.onPrimaryContainer,
-      disabledColor: colorScheme.onSurfaceVariant,
-      style: ButtonStyle(
-        tapTargetSize: MaterialTapTargetSize.padded,
-        shape: WidgetStateProperty.resolveWith(
-          (states) => RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              states.contains(WidgetState.pressed) ? 8 : 12,
-            ),
-          ),
-        ),
-        foregroundColor: WidgetStatePropertyAll<Color>(
-          colorScheme.onPrimaryContainer,
-        ),
-        iconColor: WidgetStatePropertyAll<Color>(
-          colorScheme.onPrimaryContainer,
-        ),
-        backgroundColor: WidgetStatePropertyAll<Color>(
-          colorScheme.primaryContainer,
-        ),
-      ),
-      constraints: kDiaryToolbarButtonConstraints,
-    ),
+  final l10n = context.l10n;
+
+  /// 行内开关（加粗、斜体等）：选中态随选区，开按切换。
+  Widget inlineToggle(String key) => _DiaryToolbarButton(
+    editorState: editorState,
+    tooltip: item.label(l10n),
+    icon: (context, foreground) =>
+        FaIcon(item.iconData, size: 14, color: foreground),
+    isActive: () => _isDiaryInlineActive(editorState, key),
+    onPressed: () => unawaited(editorState.toggleAttribute(key)),
   );
 
-  // 按“单个工具项”生成开关矩阵，保证一个 QuillSimpleToolbar 只渲染一个按钮。
-  final showUndo = item == DiaryToolbarItem.undo;
-  final showRedo = item == DiaryToolbarItem.redo;
-  final showBold = item == DiaryToolbarItem.bold;
-  final showItalic = item == DiaryToolbarItem.italic;
-  final showUnderline = item == DiaryToolbarItem.underline;
-  final showStrikeThrough = item == DiaryToolbarItem.strikeThrough;
-  final showInlineCode = item == DiaryToolbarItem.inlineCode;
-  final showClearFormat = item == DiaryToolbarItem.clearFormat;
-  final showHeaderStyle = false;
-  final showOrderedList = item == DiaryToolbarItem.orderedList;
-  final showBulletList = item == DiaryToolbarItem.bulletList;
-  final showCheckList = item == DiaryToolbarItem.checkList;
-  final showQuote = item == DiaryToolbarItem.quote;
-  final showIndent = item == DiaryToolbarItem.indent;
-  final showLink = item == DiaryToolbarItem.link;
-  final showCurrentTime = item == DiaryToolbarItem.currentTime;
-  final showRecording = item == DiaryToolbarItem.recording;
+  /// 块开关（列表、引用、标题）：在块类型与普通段落之间切换。
+  Widget blockToggle(String blockType, Future<void> Function() onPressed) =>
+      _DiaryToolbarButton(
+        editorState: editorState,
+        tooltip: item.label(l10n),
+        icon: (context, foreground) =>
+            FaIcon(item.iconData, size: 14, color: foreground),
+        isActive: () =>
+            editorState.selection == null
+            ? false
+            : editorState
+                      .getNodeAtPath(editorState.selection!.start.path)
+                      ?.type ==
+                  blockType,
+        onPressed: () => unawaited(onPressed()),
+      );
 
   final mediaKind = switch (item) {
     DiaryToolbarItem.image => DiaryMediaKind.image,
@@ -144,166 +259,350 @@ quill.QuillSimpleToolbarConfig buildDiaryToolbarItemConfig(
     DiaryToolbarItem.attachment => DiaryMediaKind.attachment,
     _ => null,
   };
+  if (mediaKind != null) {
+    return _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) {
+        if (activeMediaKind == mediaKind) {
+          return ExpressiveLoadingIndicator(
+            size: 16,
+            semanticLabel: l10n.diaryMediaImporting,
+          );
+        }
+        final colors = Theme.of(context).colorScheme;
+        return FaIcon(
+          item.iconData,
+          size: 14,
+          color: mediaImportBusy || recordingOpen
+              ? colors.onSurfaceVariant
+              : colors.onSurface,
+        );
+      },
+      onPressed: mediaImportBusy || recordingOpen || onMediaPressed == null
+          ? null
+          : () => onMediaPressed(mediaKind),
+    );
+  }
 
-  // Quill 的 iconData API 仍只接受 Flutter IconData，因此仅在此边界解包
-  // FontAwesome 11 的 .data；设置预览继续使用同源 FaIconData + FaIcon。
-  final buttonOptions = quill.QuillSimpleToolbarButtonOptions(
-    base: quill.QuillToolbarBaseButtonOptions(
-      iconSize: 13,
-      iconButtonFactor: 1.2,
-      iconTheme: compactIconTheme,
+  return switch (item) {
+    DiaryToolbarItem.undo => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => editorState.undoManager.undo(),
     ),
-    undoHistory: quill.QuillToolbarHistoryButtonOptions(
-      iconData: FontAwesomeIcons.rotateLeft.data,
+    DiaryToolbarItem.redo => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => editorState.undoManager.redo(),
     ),
-    redoHistory: quill.QuillToolbarHistoryButtonOptions(
-      iconData: FontAwesomeIcons.rotateRight.data,
+    DiaryToolbarItem.bold => inlineToggle(kDiaryInlineBold),
+    DiaryToolbarItem.italic => inlineToggle(kDiaryInlineItalic),
+    DiaryToolbarItem.underline => inlineToggle(kDiaryInlineUnderline),
+    DiaryToolbarItem.strikeThrough => inlineToggle(kDiaryInlineStrikethrough),
+    DiaryToolbarItem.inlineCode => inlineToggle(kDiaryInlineCode),
+    DiaryToolbarItem.clearFormat => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(_clearDiaryInlineFormat(editorState)),
     ),
-    bold: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.bold.data,
+    DiaryToolbarItem.headerStyle => blockToggle(
+      kDiaryBlockHeading,
+      () => _cycleDiaryHeaderStyle(editorState),
     ),
-    italic: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.italic.data,
+    DiaryToolbarItem.orderedList => blockToggle(
+      kDiaryBlockNumberedList,
+      () => _toggleDiaryBlockType(editorState, kDiaryBlockNumberedList),
     ),
-    underLine: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.underline.data,
+    DiaryToolbarItem.bulletList => blockToggle(
+      kDiaryBlockBulletedList,
+      () => _toggleDiaryBlockType(editorState, kDiaryBlockBulletedList),
     ),
-    strikeThrough: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.strikethrough.data,
+    DiaryToolbarItem.checkList => blockToggle(
+      kDiaryBlockTodoList,
+      () => _toggleDiaryBlockType(editorState, kDiaryBlockTodoList),
     ),
-    inlineCode: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.code.data,
+    DiaryToolbarItem.quote => blockToggle(
+      kDiaryBlockQuote,
+      () => _toggleDiaryBlockType(editorState, kDiaryBlockQuote),
     ),
-    clearFormat: quill.QuillToolbarClearFormatButtonOptions(
-      iconData: FontAwesomeIcons.eraser.data,
+    // 「缩进」占两格：增 / 减两个按钮，中间隔 kDiaryToolbarIndentGap（排布
+    // 按 diaryToolbarItemExtent 计算，与原来一致）。
+    DiaryToolbarItem.indent => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        _DiaryToolbarButton(
+          tooltip: item.label(l10n),
+          icon: (context, foreground) => FaIcon(
+            FontAwesomeIcons.indent,
+            size: 14,
+            color: foreground,
+          ),
+          onPressed: () =>
+              unawaited(_shiftDiaryBlockIndent(editorState, increase: true)),
+        ),
+        const SizedBox(width: kDiaryToolbarIndentGap),
+        _DiaryToolbarButton(
+          tooltip: item.label(l10n),
+          icon: (context, foreground) => FaIcon(
+            FontAwesomeIcons.outdent,
+            size: 14,
+            color: foreground,
+          ),
+          onPressed: () =>
+              unawaited(_shiftDiaryBlockIndent(editorState, increase: false)),
+        ),
+      ],
     ),
-    listNumbers: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.listOl.data,
+    DiaryToolbarItem.link => _DiaryToolbarButton(
+      editorState: editorState,
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      isActive: () => _isDiaryInlineActive(editorState, kDiaryInlineHref),
+      onPressed: () => unawaited(_editDiaryLink(context, editorState)),
     ),
-    listBullets: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.listUl.data,
-    ),
-    toggleCheckList: quill.QuillToolbarToggleCheckListButtonOptions(
-      iconData: FontAwesomeIcons.squareCheck.data,
-    ),
-    quote: quill.QuillToolbarToggleStyleButtonOptions(
-      iconData: FontAwesomeIcons.quoteLeft.data,
-    ),
-    indentIncrease: quill.QuillToolbarIndentButtonOptions(
-      iconData: FontAwesomeIcons.indent.data,
-    ),
-    indentDecrease: quill.QuillToolbarIndentButtonOptions(
-      iconData: FontAwesomeIcons.outdent.data,
-    ),
-    linkStyle: quill.QuillToolbarLinkStyleButtonOptions(
-      iconData: FontAwesomeIcons.link.data,
-    ),
-  );
-
-  final customButtons = <quill.QuillToolbarCustomButtonOptions>[
-    if (mediaKind != null)
-      quill.QuillToolbarCustomButtonOptions(
-        icon: activeMediaKind == mediaKind
-            ? ExpressiveLoadingIndicator(
-                size: 16,
-                semanticLabel: context.l10n.diaryMediaImporting,
-              )
-            : FaIcon(
-                item.iconData,
-                size: 14,
-                color: mediaImportBusy || recordingOpen
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.onSurface,
-              ),
-        tooltip: item.label(context.l10n),
-        onPressed: mediaImportBusy || recordingOpen || onMediaPressed == null
-            ? null
-            : () => onMediaPressed(mediaKind),
-      ),
-    if (item == DiaryToolbarItem.headerStyle)
-      quill.QuillToolbarCustomButtonOptions(
-        icon: const FaIcon(FontAwesomeIcons.heading, size: 14),
-        tooltip: context.l10n.autoT0208,
-        onPressed: () => _cycleHeaderStyle(controller),
-      ),
-    if (showCurrentTime)
-      quill.QuillToolbarCustomButtonOptions(
-        icon: const FaIcon(FontAwesomeIcons.clock, size: 14),
-        tooltip: context.l10n.diaryToolbarInsertCurrentTime,
-        onPressed: () => insertDiaryToolbarCurrentTime(
+    DiaryToolbarItem.currentTime => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(
+        insertDiaryToolbarCurrentTime(
           context,
-          controller,
+          editorState,
           formatPattern: currentTimeFormatPattern,
         ),
       ),
-    if (showRecording)
-      quill.QuillToolbarCustomButtonOptions(
-        icon: FaIcon(
-          FontAwesomeIcons.microphone,
-          size: 14,
-          color: recordingOpen ? colorScheme.primary : colorScheme.onSurface,
-        ),
-        tooltip: context.l10n.diaryToolbarRecording,
-        onPressed: mediaImportBusy ? null : onRecordingPressed,
+    ),
+    DiaryToolbarItem.recording => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) => FaIcon(
+        item.iconData,
+        size: 14,
+        color: recordingOpen
+            ? Theme.of(context).colorScheme.primary
+            : foreground,
       ),
-  ];
+      onPressed: mediaImportBusy ? null : onRecordingPressed,
+    ),
+    // 文字颜色 / 背景颜色走 DiaryToolbarColorButton，代码块走
+    // DiaryToolbarCodeBlockButton，不会进到这里。
+    DiaryToolbarItem.textColor ||
+    DiaryToolbarItem.backgroundColor ||
+    DiaryToolbarItem.codeBlock ||
+    DiaryToolbarItem.image ||
+    DiaryToolbarItem.video ||
+    DiaryToolbarItem.attachment => const SizedBox.shrink(),
+  };
+}
 
-  return quill.QuillSimpleToolbarConfig(
-    // 使用 Wrap 模式，避免每个工具项内部再生成可横向滚动容器。
-    multiRowsDisplay: true,
-    // 「缩进」的增/减两个按钮靠它隔开，排布按同一间距计算缩进的宽度。
-    toolbarSectionSpacing: kDiaryToolbarIndentGap,
-    showDividers: false,
-    decoration: const BoxDecoration(color: Colors.transparent),
-    showFontFamily: false,
-    showFontSize: false,
-    showBoldButton: showBold,
-    showItalicButton: showItalic,
-    showSmallButton: false,
-    showUnderLineButton: showUnderline,
-    showLineHeightButton: false,
-    showStrikeThrough: showStrikeThrough,
-    showInlineCode: showInlineCode,
-    // 文字颜色 / 背景颜色由 DiaryToolbarColorButton 渲染，展开卡片内的颜色
-    // 面板；Quill 自带的取色对话框是新路由，会抢走正文焦点、收起键盘。
-    showColorButton: false,
-    showBackgroundColorButton: false,
-    showClearFormat: showClearFormat,
-    showAlignmentButtons: false,
-    showLeftAlignment: false,
-    showCenterAlignment: false,
-    showRightAlignment: false,
-    showJustifyAlignment: false,
-    showHeaderStyle: showHeaderStyle,
-    showListNumbers: showOrderedList,
-    showListBullets: showBulletList,
-    showListCheck: showCheckList,
-    // 代码块由 DiaryToolbarCodeBlockButton 渲染：在代码块里点按展开卡片内的
-    // 代码块面板（选语言、复制、退出），而不是 Quill 自带的开关。
-    showCodeBlock: false,
-    showQuote: showQuote,
-    showIndent: showIndent,
-    showLink: showLink,
-    showUndo: showUndo,
-    showRedo: showRedo,
-    showDirection: false,
-    showSearchButton: false,
-    showSubscript: false,
-    showSuperscript: false,
-    customButtons: customButtons,
-    buttonOptions: buttonOptions,
+/// 在 [blockType] 与普通段落之间切换选区触及的文字块（列表、引用、待办）。
+///
+/// 只改类型与必要的块属性（标题的 `level`、待办的 `checked`），其余属性
+/// （如对齐）原样保留；delta 原样保留。
+Future<void> _toggleDiaryBlockType(
+  EditorState editorState,
+  String blockType,
+) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null) return;
+  final node = editorState.getNodeAtPath(selection.start.path);
+  if (node == null || node.delta == null) return;
+  final isActive = node.type == blockType;
+  await editorState.formatNode(
+    selection,
+    (n) {
+      final attributes = Map<String, dynamic>.from(n.attributes);
+      attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
+      if (isActive) {
+        attributes.remove(kDiaryBlockLevelKey);
+        attributes.remove(kDiaryBlockCheckedKey);
+      } else if (blockType == kDiaryBlockTodoList) {
+        attributes[kDiaryBlockCheckedKey] = false;
+      }
+      return n.copyWith(
+        type: isActive ? kDiaryBlockParagraph : blockType,
+        attributes: attributes,
+      );
+    },
   );
 }
 
-void _cycleHeaderStyle(quill.QuillController controller) {
-  final currentHeader = controller
-      .getSelectionStyle()
-      .attributes[quill.Attribute.header.key];
-  final nextHeader = switch (currentHeader?.value) {
-    1 => quill.Attribute.h2,
-    2 => quill.Attribute.h3,
-    3 => quill.Attribute.header,
-    _ => quill.Attribute.h1,
+/// 标题级别循环：正文 → 一级 → 二级 → 三级 → 正文（与原来一致）。
+Future<void> _cycleDiaryHeaderStyle(EditorState editorState) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null) return;
+  final node = editorState.getNodeAtPath(selection.start.path);
+  if (node == null || node.delta == null) return;
+  final nextLevel = switch ((
+    node.type == kDiaryBlockHeading,
+    node.attributes[kDiaryBlockLevelKey],
+  )) {
+    (true, 1) => 2,
+    (true, 2) => 3,
+    (true, _) => 0,
+    (false, _) => 1,
   };
-  controller.formatSelection(nextHeader);
+  await editorState.formatNode(
+    selection,
+    (n) {
+      final attributes = Map<String, dynamic>.from(n.attributes);
+      attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
+      if (nextLevel == 0) {
+        attributes.remove(kDiaryBlockLevelKey);
+        return n.copyWith(
+          type: kDiaryBlockParagraph,
+          attributes: attributes,
+        );
+      }
+      attributes[kDiaryBlockLevelKey] = nextLevel;
+      return n.copyWith(type: kDiaryBlockHeading, attributes: attributes);
+    },
+  );
+}
+
+/// 缩进：块文档里缩进即嵌套（见 diary_blocks_from_delta）。
+///
+/// - 增加：把选区触及的顶层块逐个挂到各自前一个兄弟块的末尾；前一个块不能
+///   收子块、或是第一个块时跳过；
+/// - 减少：把嵌套块提为其父块的后一个兄弟（顶层块不动）。
+/// 操作暂存在同一个 transaction 里、文档不动，循环内读到的路径始终有效；
+/// 同一目标下接连移动时用已暂存的数量错开目标路径。
+Future<void> _shiftDiaryBlockIndent(
+  EditorState editorState, {
+  required bool increase,
+}) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null) return;
+  final document = editorState.document;
+  final nodes = editorState.getNodesInSelection(selection);
+  if (nodes.isEmpty) return;
+  final transaction = editorState.transaction;
+  final movedCounts = <String, int>{};
+  var changed = false;
+
+  Path shiftedTarget(Path base, String key) {
+    final extra = movedCounts[key] ?? 0;
+    movedCounts[key] = extra + 1;
+    var target = base;
+    for (var i = 0; i < extra; i++) {
+      target = target.next;
+    }
+    return target;
+  }
+
+  // 减少缩进按文档顺序（提上去的块保持原有先后），增加缩进倒序（先动的块
+  // 不影响后动块的前一个兄弟判断——路径都取自未改动的文档，顺序只影响
+  // 同一父块下多个块的目标错开）。
+  final ordered = increase ? nodes.reversed.toList() : nodes;
+  for (final node in ordered) {
+    final parent = node.parent;
+    if (parent == null) continue;
+    if (increase) {
+      if (parent != document.root) continue;
+      final path = node.path;
+      if (path.last == 0) continue;
+      final previous = document.nodeAtPath(path.previous);
+      if (previous == null ||
+          !kDiaryContainerBlockTypes.contains(previous.type)) {
+        continue;
+      }
+      final key = previous.path.join('/');
+      final extra = movedCounts[key] ?? 0;
+      movedCounts[key] = extra + 1;
+      transaction.moveNode(
+        Path.from([...previous.path, previous.children.length + extra]),
+        node,
+      );
+      changed = true;
+    } else {
+      if (parent == document.root) continue;
+      final target = shiftedTarget(parent.path.next, parent.path.join('/'));
+      transaction.moveNode(target, node);
+      changed = true;
+    }
+  }
+  if (changed) {
+    transaction.afterSelection = transaction.beforeSelection;
+    await editorState.apply(transaction);
+  }
+}
+
+/// 清除选区的全部行内格式（加粗、斜体、颜色、链接、字号等）。
+Future<void> _clearDiaryInlineFormat(EditorState editorState) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null || selection.isCollapsed) return;
+  await editorState.formatDelta(selection, <String, dynamic>{
+    kDiaryInlineBold: null,
+    kDiaryInlineItalic: null,
+    kDiaryInlineUnderline: null,
+    kDiaryInlineStrikethrough: null,
+    kDiaryInlineCode: null,
+    kDiaryInlineHref: null,
+    kDiaryInlineTextColor: null,
+    kDiaryInlineBackgroundColor: null,
+    kDiaryInlineSize: null,
+  });
+}
+
+/// 链接按钮：选区已有链接时清除；选中了文字且没有链接时弹输入框写入 `href`。
+///
+/// 对话框关闭后按关闭前的选区写入（对话框会抢走焦点，选区可能已变）。
+Future<void> _editDiaryLink(
+  BuildContext context,
+  EditorState editorState,
+) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null) return;
+  if (_isDiaryInlineActive(editorState, kDiaryInlineHref)) {
+    if (!selection.isCollapsed) {
+      await editorState.formatDelta(selection, <String, dynamic>{
+        kDiaryInlineHref: null,
+      });
+    }
+    return;
+  }
+  if (selection.isCollapsed) return;
+  final l10n = context.l10n;
+  final controller = TextEditingController(
+    text:
+        editorState.getDeltaAttributeValueInSelection<String>(
+          kDiaryInlineHref,
+          selection,
+        ) ??
+        '',
+  );
+  final url = await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: Text(l10n.autoT0024),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        keyboardType: TextInputType.url,
+        decoration: const InputDecoration(hintText: 'https://'),
+        onSubmitted: (String value) =>
+            Navigator.of(context).pop(value.trim()),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.commonCancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+          child: Text(l10n.commonSave),
+        ),
+      ],
+    ),
+  );
+  controller.dispose();
+  if (url == null || url.isEmpty) return;
+  final target = editorState.selection?.normalized ?? selection;
+  if (target.isCollapsed) return;
+  await editorState.formatDelta(target, <String, dynamic>{
+    kDiaryInlineHref: url,
+  });
 }

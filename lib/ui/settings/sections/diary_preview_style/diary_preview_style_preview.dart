@@ -1,10 +1,13 @@
+import 'dart:async';
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/seeded_theme_cache.dart';
 import '../../../../core/database/app_database.dart';
-import '../../../../core/database/content_codec.dart';
+import '../../../../core/database/diary_blocks/diary_blocks_appflowy.dart';
+import '../../../../core/database/diary_blocks/diary_blocks_schema.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/providers/diary_card_style_provider.dart';
 import '../../../diaries/providers/diary_preview_style_provider.dart';
@@ -115,11 +118,9 @@ class _SamplePage extends ConsumerStatefulWidget {
 }
 
 class _SamplePageState extends ConsumerState<_SamplePage> {
-  late final quill.QuillController _quill = quill.QuillController(
-    document: decodeDiaryContentToDocument(widget.detail.diary.content),
-    selection: const TextSelection.collapsed(offset: 0),
-    readOnly: true,
-  );
+  // 示例的待办只在本地勾选（不写库）：EditorState 持有文档，勾选经事务写回。
+  late final EditorState _editorState =
+      diaryEditorStateFromStoredJson(widget.detail.diary.content);
   final ScrollController _scroll = ScrollController();
   late final DiaryPreviewViewData _viewData = DiaryPreviewViewData.resolve(
     widget.detail.diary,
@@ -127,9 +128,15 @@ class _SamplePageState extends ConsumerState<_SamplePage> {
 
   @override
   void dispose() {
-    _quill.dispose();
+    _editorState.dispose();
     _scroll.dispose();
     super.dispose();
+  }
+
+  void _toggleTodo(Node node, bool checked) {
+    final transaction = _editorState.transaction;
+    transaction.updateNode(node, {kDiaryBlockCheckedKey: checked});
+    unawaited(_editorState.apply(transaction));
   }
 
   @override
@@ -153,7 +160,8 @@ class _SamplePageState extends ConsumerState<_SamplePage> {
       content: DiaryPreviewContent(
         detail: detail,
         viewData: _viewData,
-        controller: _quill,
+        document: _editorState.document,
+        onToggleTodo: controller.behavior.todoToggle ? _toggleTodo : null,
         scrollController: _scroll,
         resolved: resolved,
         behavior: controller.behavior,

@@ -2,43 +2,41 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/diary_code_block_editing.dart';
-import '../controllers/diary_code_language_tracker.dart';
 import '../models/diary_code_block/diary_code_block_style.dart';
 import '../providers/diary_code_block_style_provider.dart';
 import '../providers/diary_typography_provider.dart';
-import '../widgets/diary_code_block/diary_code_block_chrome.dart';
 import 'diary_code_block_look.dart';
-import 'diary_code_span_builder.dart';
-import 'diary_first_line_indent.dart';
 import 'diary_text_appearance.dart';
 
-/// 正文位置解析出的 Quill 外观：样式表、代码块外观与该控制器的语言识别
-/// 状态。各页面用 [configure] 把它们装进自己的 `QuillEditorConfig`。
+/// 正文位置解析出的 Quill 外观：样式表与代码块外观。各页面用 [configure]
+/// 把它们装进自己的 `QuillEditorConfig`。
+///
+/// AppFlowy 迁移说明：代码块的高亮、代码字体、行号与标题栏已迁至 AppFlowy
+/// 块组件（[DiaryCodeBlockComponentBuilder]，见
+/// `diary_code_block_chrome.dart`），不再经 Quill 的 `textSpanBuilder` /
+/// `customStyleBuilder` / `customLeadingBlockBuilder` 与标题栏渲染层接入；
+/// 这里只剩正文排版样式，供尚未迁到 AppFlowy 编辑器的页面使用。`code` /
+/// `inlineCode` 仍按代码块设置装配（PDF 导出走 flutter_quill 渲染，用到
+/// 它们），数据来自 [DiaryCodeBlockLook] 的纯数据。
 @immutable
 class DiaryQuillLook {
-  const DiaryQuillLook({
-    required this.styles,
-    required this.code,
-    required this.tracker,
-  });
+  const DiaryQuillLook({required this.styles, required this.code});
 
   final quill.DefaultStyles styles;
   final DiaryCodeBlockLook code;
-  final DiaryCodeLanguageTracker tracker;
 
-  /// 在页面自己的 [config] 上装入样式表与代码块的渲染钩子（高亮、代码
-  /// 字体、行号）。
+  /// 在页面自己的 [config] 上装入样式表。
   ///
   /// 经 `QuillEditorConfig.copyWith`：flutter_quill 11.6.0 的 copyWith 漏掉了
   /// `onSingleLongTap*` 与 `quillMagnifierBuilder`，页面若要用到这几个回调，
   /// 需要先在这里补上（断言兜底，防止被静默丢掉）。
   ///
-  /// [firstLineIndentWidth] 首行缩进宽度（逻辑像素）：为 0 时不包 span
-  /// 构建器。预览页与设置预览卡传只读渲染的宽度；编辑页传入后打字时实时
-  /// 显示缩进（只改渲染层 span，不动存档 Delta，光标行为与只读一致）。
+  /// [firstLineIndentWidth] 已不再使用：首行缩进改为记在块属性上
+  /// （[kFirstLineIndentAttribute]），由 AppFlowy 渲染层读取；Quill 页面
+  /// 的渲染随编辑器迁移再接入。参数保留以免调用方改动。
   quill.QuillEditorConfig configure(
     quill.QuillEditorConfig config, {
+    // ignore: avoid-unused-parameters
     double firstLineIndentWidth = 0,
   }) {
     assert(
@@ -48,16 +46,7 @@ class DiaryQuillLook {
           config.quillMagnifierBuilder == null,
       'QuillEditorConfig.copyWith drops these callbacks; pass them here.',
     );
-    final base = buildDiaryCodeSpanBuilder(code, tracker);
-    return config.copyWith(
-      customStyles: styles,
-      showCodeBlockLineNumbers: code.lineNumbers,
-      textSpanBuilder: firstLineIndentWidth > 0
-          ? buildFirstLineIndentSpanBuilder(base, firstLineIndentWidth)
-          : base,
-      customStyleBuilder: buildDiaryCodeCustomStyleBuilder(code),
-      customLeadingBlockBuilder: buildDiaryCodeLeadingBuilder(code),
-    );
+    return config.copyWith(customStyles: styles);
   }
 }
 
@@ -69,85 +58,39 @@ class DiaryQuillLook {
 /// 样式会让正文变红，因此各页面一律经本组件生成，不要在页面 build 里直接
 /// 调用 [buildDiaryQuillStyles]。主题或正文样式变化时本组件随依赖重建。
 ///
-/// 代码块外观同样在这里解析：本组件自己监听代码块样式设置、导入字体与
-/// [controller] 的语言识别结果，变化时自行重建。编辑页缓存了整棵编辑器
-/// （按控制器、主题与正文外观判断是否复用），代码块设置不在它的缓存键里，
-/// 也能即时生效。构建时顺带给 [controller] 挂上代码块的回车处理
-/// （`attachDiaryCodeBlockEditing`，重复挂载无副作用、只读时不接管）。
+/// 代码块外观同样在这里解析：本组件自己监听代码块样式设置与导入字体，
+/// 变化时自行重建。编辑页缓存了整棵编辑器（按控制器、主题与正文外观判断
+/// 是否复用），代码块设置不在它的缓存键里，也能即时生效。
 ///
-/// [builder] 返回的编辑器外包一层代码块标题栏（`DiaryCodeBlockChrome`，
-/// 语言名 + 复制按钮，随代码块样式设置开关）；编辑页、预览页、发布页、
-/// 模板编辑页与设置预览都经这里，因此写、读、发布时标题栏一致。
-class DiaryQuillStylesBuilder extends ConsumerStatefulWidget {
+/// [builder] 返回的编辑器即为页面正文；代码块的标题栏与高亮由 AppFlowy
+/// 块组件负责，不再包渲染层。
+class DiaryQuillStylesBuilder extends ConsumerWidget {
   const DiaryQuillStylesBuilder({
     super.key,
     required this.appearance,
-    required this.controller,
     required this.builder,
     this.codeBlockStyle,
-    this.scrollController,
+    @Deprecated(
+      '代码块回车处理已迁至 AppFlowy（handleDiaryCodeBlockEnter），'
+      '语言识别改走 EditorState，不再使用',
+    )
+    this.controller,
+    @Deprecated('代码块标题栏已迁至 AppFlowy 块组件，不再使用') this.scrollController,
   });
 
   final DiaryTextAppearance appearance;
-  final quill.QuillController controller;
   final Widget Function(BuildContext context, DiaryQuillLook look) builder;
 
   /// 覆盖代码块样式（设置页的实时预览用草稿）；null 时读已保存的设置
   /// `diaryCodeBlockStyleProvider`。
   final DiaryCodeBlockStyle? codeBlockStyle;
 
-  /// 编辑器自带滚动视图（`scrollable: true`）时传入同一个滚动控制器：代码块
-  /// 标题栏随滚动重画，并把从标题栏开始的竖向拖动交给它。不可滚动的编辑器
-  /// 不传（页面滚动视图会自己处理）。
+  final quill.QuillController? controller;
   final ScrollController? scrollController;
 
   @override
-  ConsumerState<DiaryQuillStylesBuilder> createState() =>
-      _DiaryQuillStylesBuilderState();
-}
-
-class _DiaryQuillStylesBuilderState
-    extends ConsumerState<DiaryQuillStylesBuilder> {
-  late DiaryCodeLanguageTracker _tracker;
-
-  @override
-  void initState() {
-    super.initState();
-    _bind(widget.controller);
-  }
-
-  @override
-  void didUpdateWidget(DiaryQuillStylesBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.controller, widget.controller)) {
-      _tracker.removeListener(_onLanguagesChanged);
-      _bind(widget.controller);
-    }
-  }
-
-  void _bind(quill.QuillController controller) {
-    attachDiaryCodeBlockEditing(controller);
-    _tracker = DiaryCodeLanguageTracker.of(controller)
-      ..addListener(_onLanguagesChanged);
-  }
-
-  /// 自动识别的语言变了：高亮钩子要换新的闭包（同一帧缓存随之失效），
-  /// 重建整棵编辑器。
-  void _onLanguagesChanged() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  @override
-  void dispose() {
-    _tracker.removeListener(_onLanguagesChanged);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final override = widget.codeBlockStyle;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final override = codeBlockStyle;
     final DiaryCodeBlockStyle style =
         override ?? ref.watch(diaryCodeBlockStyleProvider);
     final String? importedFamily;
@@ -164,23 +107,14 @@ class _DiaryQuillStylesBuilderState
     final code = DiaryCodeBlockLook.resolve(
       context,
       style: style,
-      appearance: widget.appearance,
+      appearance: appearance,
       importedFontFamily: importedFamily,
     );
-    // 标题栏关闭时也保留这一层（只是不画也不拦点按）：开关切换时编辑器的
-    // 父链不变，QuillEditor 不会被重建。
-    return DiaryCodeBlockChrome(
-      look: code,
-      controller: widget.controller,
-      tracker: _tracker,
-      scrollController: widget.scrollController,
-      child: widget.builder(
-        context,
-        DiaryQuillLook(
-          styles: buildDiaryQuillStyles(context, widget.appearance, code: code),
-          code: code,
-          tracker: _tracker,
-        ),
+    return builder(
+      context,
+      DiaryQuillLook(
+        styles: buildDiaryQuillStyles(context, appearance, code: code),
+        code: code,
       ),
     );
   }
@@ -258,8 +192,8 @@ quill.DefaultStyles buildDiaryQuillStyles(
     placeHolder: text(defaults.placeHolder, body),
     lists: lists?.copyWith(style: body(lists.style)),
     quote: text(defaults.quote, body),
-    code: code.blockStyle,
-    inlineCode: code.inlineStyle,
+    code: _quillCodeBlockStyle(code.blockStyle),
+    inlineCode: _quillInlineCodeStyle(code.inlineStyle),
     indent: paragraphBlock(defaults.indent),
     align: paragraphBlock(defaults.align),
     leading: text(defaults.leading, body),
@@ -269,5 +203,32 @@ quill.DefaultStyles buildDiaryQuillStyles(
     sizeSmall: TextStyle(fontSize: typography.fontSize * 0.85),
     sizeLarge: TextStyle(fontSize: typography.fontSize * 1.25),
     sizeHuge: TextStyle(fontSize: typography.fontSize * 1.5),
+  );
+}
+
+/// [DiaryCodeBlockContainerStyle] → Quill 的块样式：供尚未迁移的 Quill
+/// 页面与 PDF 导出（flutter_quill 渲染）使用。
+quill.DefaultTextBlockStyle _quillCodeBlockStyle(
+  DiaryCodeBlockContainerStyle style,
+) {
+  return quill.DefaultTextBlockStyle(
+    style.textStyle,
+    quill.HorizontalSpacing.zero,
+    quill.VerticalSpacing(style.topMargin, style.bottomMargin),
+    quill.VerticalSpacing.zero,
+    style.decoration,
+  );
+}
+
+/// [DiaryCodeInlineStyle] → Quill 的行内代码样式：同上。
+quill.InlineCodeStyle _quillInlineCodeStyle(DiaryCodeInlineStyle style) {
+  return quill.InlineCodeStyle(
+    // 迁移后 style 可空（只读渲染按字阶回落）；Quill 侧仍要求非空，给空样式。
+    style: style.style ?? const TextStyle(),
+    header1: style.header1,
+    header2: style.header2,
+    header3: style.header3,
+    backgroundColor: style.backgroundColor,
+    radius: style.radius,
   );
 }

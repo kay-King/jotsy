@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:node_diary/core/database/content_codec.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:node_diary/core/services/day_photo_library.dart';
@@ -25,12 +26,14 @@ void main() {
   String titleText(WidgetTester tester) =>
       tester.widget<TextField>(titleField()).controller!.text;
 
-  /// 正文由 Quill 以富文本绘制，不是 Text：直接读文档。
-  String bodyText(WidgetTester tester) => tester
-      .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-      .controller
-      .document
-      .toPlainText();
+  /// 正文由编辑器以块绘制，不是 Text：直接读文档。
+  String bodyText(WidgetTester tester) =>
+      extractPlainTextFromAppFlowyDocument(
+        tester
+            .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+            .editorState
+            .document,
+      );
 
   String todayDaily(DateTime day) =>
       '${DateFormat.yMMMMd('zh').format(day)} '

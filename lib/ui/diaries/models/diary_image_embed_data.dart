@@ -1,12 +1,13 @@
 import 'dart:convert' show base64Decode;
 import 'dart:io' show File;
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart'
     show AlignmentDirectional, BoxConstraints;
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 
-/// 把图片 embed 上记录的宽高解析为显示上限，而不是强制尺寸。
+/// 把图片块上记录的宽高解析为显示上限，而不是强制尺寸。
 ///
 /// 尺寸有两个来源：HTML 导入写入的独立 `width/height` 属性，以及上游缩放菜单
 /// 写入的 `style: "width: 300.0; height: 600.0; "`，后者覆盖前者，与上游
@@ -15,11 +16,11 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 /// 图片按原始比例放进去，圆角裁切才能贴合真实画面。上游绘制用 scaleDown，
 /// 本就不会放大小图，作为上限后可见画面尺寸与原先一致。
 /// 只识别纯数字与 px，百分比/vw 等单位按未设置处理，交给布局宽度兜底。
-BoxConstraints diaryImageEmbedBounds(quill.Node node) {
-  final attributes = node.style.attributes;
-  var width = _parseLength(attributes[quill.Attribute.width.key]?.value);
-  var height = _parseLength(attributes[quill.Attribute.height.key]?.value);
-  final style = attributes[quill.Attribute.style.key]?.value;
+BoxConstraints diaryImageEmbedBounds(Node node) {
+  final attributes = node.attributes;
+  var width = _parseLength(attributes['width']);
+  var height = _parseLength(attributes['height']);
+  final style = attributes['style'];
   if (style is String) {
     for (final declaration in style.split(';')) {
       final separator = declaration.indexOf(':');
@@ -40,19 +41,21 @@ BoxConstraints diaryImageEmbedBounds(quill.Node node) {
 }
 
 /// 比列宽窄的正文图片在行内的水平位置：默认靠行首（缩放菜单缩小后应贴着
-/// 正文左缘，而不是悬在中间）；所在行带对齐属性（导入的 HTML 居中/居右段落）
+/// 正文左缘，而不是悬在中间）；图片块带对齐（导入的 HTML 居中/居右段落）
 /// 时从之。上游缩放菜单只写宽高，不写对齐。
-AlignmentGeometry diaryImageEmbedAlignment(quill.Node node) {
-  final line = node.parent;
-  final align = line?.style.attributes[quill.Attribute.align.key]?.value;
+///
+/// Quill 时代对齐记在图片所在行上；块文档里图片是独立块，`align` 直接记在
+/// 图片块自己的 data 上（见 [kDiaryBlockAlignKey]）。
+AlignmentGeometry diaryImageEmbedAlignment(Node node) {
+  final align = node.attributes[kDiaryBlockAlignKey];
   return switch (align) {
-    'center' => Alignment.center,
-    'right' => Alignment.centerRight,
+    kDiaryAlignCenter => Alignment.center,
+    kDiaryAlignRight => Alignment.centerRight,
     _ => AlignmentDirectional.centerStart,
   };
 }
 
-/// 把缩放菜单的宽高写进图片 embed 的 `style` 属性，保留其中其他声明。
+/// 把缩放菜单的宽高写进图片块的 `style` 属性，保留其中其他声明。
 ///
 /// 与上游缩放菜单同一写法（`width: 300.0; height: 600.0; `），已有数据与上游
 /// 解析都按它读；读取时只作上限，见 [diaryImageEmbedBounds]。
@@ -69,16 +72,16 @@ String diaryImageStyleWithSize(
         .substring(separator + 1)
         .trim();
   }
-  declarations[quill.Attribute.width.key] = width.toString();
-  declarations[quill.Attribute.height.key] = height.toString();
+  declarations['width'] = width.toString();
+  declarations['height'] = height.toString();
   return declarations.entries
       .map((entry) => '${entry.key}: ${entry.value}; ')
       .join();
 }
 
-/// 图片 embed 当前的 `style` 属性（缩放菜单写入的宽高等）；没有时为 null。
-String? diaryImageStyleOf(quill.Node node) {
-  final style = node.style.attributes[quill.Attribute.style.key]?.value;
+/// 图片块当前的 `style` 属性（缩放菜单写入的宽高等）；没有时为 null。
+String? diaryImageStyleOf(Node node) {
+  final style = node.attributes['style'];
   return style is String ? style : null;
 }
 

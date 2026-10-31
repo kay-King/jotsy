@@ -1,19 +1,24 @@
 import 'dart:convert';
 
-import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:flutter_quill/quill_delta.dart';
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:node_diary/core/database/app_database.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_appflowy.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
 
 /// 简洁编辑器的发布与草稿流程。
 ///
 /// 发表：图片已在选图时拷进日记私有目录（草稿要引用稳定路径），这里只
-/// 组装 Delta → 写库。发表后调用方删掉对应草稿。
+/// 组装块文档 → 写库。发表后调用方删掉对应草稿。
 ///
 /// 草稿：与富文本草稿同存 `diary_drafts` 表，每次新建独立一行；用
 /// `simpleComposer: true` 标记，只有简洁编辑器会续写它（富文本入口
 /// 不认它，避免简洁草稿被富文本打开后丢掉简单形态）。自动保存由页面
 /// 经 `DebouncedAutoSaveController` 防抖驱动，本类只提供快照与读写。
+///
+/// AppFlowy 迁移说明：原来用 Quill Delta 组装/解析 `contentDocJson`，现在
+/// 直接读写块文档（与 AppFlowy `Document.toJson()` 同构）；旧的 Delta List
+/// 存量由 [diaryDocumentFromStoredJson] 在读取时归一化，照常能打开。
 class SimpleComposerController {
   SimpleComposerController(this.database);
 
@@ -104,33 +109,42 @@ class SimpleComposerController {
     return draft.toSnapshot();
   }
 
-  /// 正文 Delta：纯文本 + 每张图一个图片块（各占一行），与富文本编辑器
-  /// 插图的格式一致，日记页/时间线/预览都能正常渲染。
+  /// 正文块文档：纯文本记在一个段落节点里，每张图一个图片块节点（天然
+  /// 独占一行），与富文本编辑器插图的块格式一致，日记页/时间线/预览都
+  /// 能正常渲染。
   static String buildContentDocJson(String text, List<String> imagePaths) {
-    final delta = Delta();
+    final children = <Node>[];
     if (text.isNotEmpty) {
-      delta.insert('$text\n');
+      children.add(paragraphNode(text: text));
     }
     for (final path in imagePaths) {
-      delta.insert(quill.BlockEmbed.image(path));
-      delta.insert('\n');
+      children.add(
+        Node(
+          type: kDiaryBlockImage,
+          attributes: <String, dynamic>{kDiaryBlockUrlKey: path},
+        ),
+      );
     }
-    return jsonEncode(delta.toJson());
+    final document = Document(
+      root: Node(type: kDiaryBlockPage, children: children),
+    );
+    return diaryDocumentToStoredJson(document);
   }
 
-  /// 从一份 Delta JSON 里取出图片块的路径（续写草稿时还原九宫格）。
+  /// 从一份块文档 JSON 里取出图片块的路径（续写草稿时还原九宫格）。
   /// 解析失败或没有图片块时返回空列表。
   static List<String> imagePathsFromContentDocJson(String contentDocJson) {
     try {
-      final decoded = jsonDecode(contentDocJson);
-      if (decoded is! List) return const <String>[];
+      final document = diaryDocumentFromStoredJson(contentDocJson);
       final paths = <String>[];
-      for (final op in decoded) {
-        if (op is! Map) continue;
-        final insert = op['insert'];
-        if (insert is! Map) continue;
-        final image = insert['image'];
-        if (image is String && image.isNotEmpty) paths.add(image);
+      for (final node in document.root.children) {
+        if (node.type != kDiaryBlockImage) {
+          continue;
+        }
+        final url = node.attributes[kDiaryBlockUrlKey];
+        if (url is String && url.isNotEmpty) {
+          paths.add(url);
+        }
       }
       return paths;
     } catch (_) {
@@ -138,47 +152,49 @@ class SimpleComposerController {
     }
   }
 
-  /// 判断一份 Delta 能不能用简洁编辑器打开，能就返回纯文本与图片。
+  /// 判断一份块文档能不能用简洁编辑器打开，能就返回纯文本与图片。
   ///
-  /// 简洁编辑器只认纯文本 + 图片：任何文字带了属性（加粗、颜色、标题、
-  /// 列表等）、任何非图片的嵌入（视频、音频、附件等）或图片超 9 张，
-  /// 都返回 null（重新编辑时直进标准编辑器，不给选择）。正文不限字数，
-  /// 写多长都能用简洁编辑器重新打开。文本按操作顺序拼接，末尾的换行
-  /// 去掉；图片只取 image 块的路径。
+  /// 简洁编辑器只认纯文本段落 + 图片：任何文字带了行内属性（加粗、颜色
+  /// 等）、段落带了块属性（对齐等）、任何非段落/图片的块（标题、列表、
+  /// 代码块、视频、音频、附件、分隔线等）或图片超 9 张，都返回 null
+  /// （重新编辑时直进标准编辑器，不给选择）。正文不限字数，写多长都能
+  /// 用简洁编辑器重新打开。各段落按文档顺序以换行拼接，末尾的换行去掉；
+  /// 图片只取图片块的路径。
   static ({String text, List<String> images})? tryExtractSimpleContent(
     String contentDocJson,
   ) {
     try {
-      final decoded = jsonDecode(contentDocJson);
-      if (decoded is! List) return null;
+      final document = diaryDocumentFromStoredJson(contentDocJson);
       final textBuffer = StringBuffer();
       final images = <String>[];
-      for (final op in decoded) {
-        if (op is! Map<String, dynamic>) return null;
-        if (op.containsKey('retain') || op.containsKey('delete')) {
-          return null;
-        }
-        final insert = op['insert'];
-        final attributes = op['attributes'];
-        if (insert is String) {
-          // 带属性的文字（包括带块属性的换行，如标题、列表）都不认。
-          if (attributes != null) return null;
-          textBuffer.write(insert);
-        } else if (insert is Map<String, dynamic>) {
-          if (attributes != null) return null;
-          final image = insert['image'];
-          if (image is String && image.isNotEmpty) {
-            images.add(image);
-          } else {
-            // 视频、音频、附件等其他嵌入都不认。
+      for (final node in document.root.children) {
+        if (node.type == kDiaryBlockImage) {
+          final url = node.attributes[kDiaryBlockUrlKey];
+          if (url is! String || url.isEmpty) {
             return null;
           }
-        } else {
+          images.add(url);
+          continue;
+        }
+        if (!_isPlainParagraph(node)) {
           return null;
         }
+        final delta = node.delta;
+        if (delta == null) {
+          return null;
+        }
+        for (final op in delta) {
+          // 带行内属性的文字（加粗、颜色、链接等）都不认。
+          if (op.attributes != null && op.attributes!.isNotEmpty) {
+            return null;
+          }
+        }
+        textBuffer
+          ..write(delta.toPlainText())
+          ..write('\n');
       }
       var text = textBuffer.toString();
-      // 简洁编辑器发表时正文末尾带一个换行，这里还原成用户输入的样子。
+      // 简洁编辑器发表时正文按段落存，这里还原成用户输入的样子。
       while (text.endsWith('\n')) {
         text = text.substring(0, text.length - 1);
       }
@@ -187,6 +203,14 @@ class SimpleComposerController {
     } catch (_) {
       return null;
     }
+  }
+
+  /// 纯文本段落：只有段落类型、块属性里除了 `delta` 别无其他、没有子块。
+  static bool _isPlainParagraph(Node node) {
+    if (node.type != kDiaryBlockParagraph || node.children.isNotEmpty) {
+      return false;
+    }
+    return node.attributes.keys.every((key) => key == kDiaryBlockDeltaKey);
   }
 
   /// 找出最近一份简洁编辑器的草稿（按更新时间倒序，第一份带

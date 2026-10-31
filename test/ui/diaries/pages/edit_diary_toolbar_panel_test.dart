@@ -1,6 +1,6 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
@@ -43,10 +43,7 @@ void main() {
         child: MaterialApp(
           theme: expressiveTestTheme(Brightness.light),
           locale: const Locale('zh'),
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            quill.FlutterQuillLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const EditDiaryPage(entryMode: EditDiaryEntryMode.create),
         ),
@@ -64,39 +61,47 @@ void main() {
     tester,
   ) async {
     await pumpCreatePage(tester);
-    final controller = tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .controller;
-    controller.replaceText(
+    final editorState = tester
+        .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+        .editorState;
+    final firstNode = editorState.document.root.children.first;
+    final fillTransaction = editorState.transaction;
+    fillTransaction.replaceText(
+      firstNode,
       0,
-      0,
+      firstNode.delta!.length,
       List<String>.generate(40, (index) => 'line $index').join('\n'),
-      null,
     );
-    controller.updateSelection(
-      TextSelection.collapsed(offset: controller.document.length - 1),
-      quill.ChangeSource.local,
+    await editorState.apply(fillTransaction);
+    final endNode = editorState.document.root.children.first;
+    editorState.selection = Selection.collapsed(
+      Position(path: endNode.path, offset: endNode.delta!.length),
     );
     await tester.pumpAndSettle();
 
     // 停在正文末尾：最后一行刚好露在工具栏上方。
-    final body = find.byWidgetPredicate(
-      (widget) =>
-          widget is Scrollable && widget.axisDirection == AxisDirection.down,
+    final body = find.descendant(
+      of: find.byType(AppFlowyEditor),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ),
     );
     final position = tester.state<ScrollableState>(body.first).position;
     position.jumpTo(position.maxScrollExtent);
     await tester.pumpAndSettle();
 
-    final rawEditor = tester.state<quill.QuillRawEditorState>(
-      find.byType(quill.QuillRawEditor),
-    );
     double caretBottom() {
-      final renderEditor = rawEditor.renderEditor;
-      final caret = renderEditor.getLocalRectForCaret(
-        controller.selection.extent,
-      );
-      return renderEditor.localToGlobal(caret.bottomLeft).dy;
+      final selection = editorState.selection!;
+      final node = editorState.document.nodeAtPath(selection.end.path)!;
+      final selectable = node.selectable!;
+      final localCaret = selectable.getCursorRectInPosition(
+        selection.end,
+        shiftWithBaseOffset: true,
+      )!;
+      return selectable
+          .transformRectToGlobal(localCaret, shiftWithBaseOffset: true)
+          .bottom;
     }
 
     double toolbarTop() =>
@@ -126,9 +131,12 @@ void main() {
     await pumpCreatePage(tester);
     await tester.tap(find.byType(TextField).first);
     await tester.pumpAndSettle();
-    final body = find.byWidgetPredicate(
-      (widget) =>
-          widget is Scrollable && widget.axisDirection == AxisDirection.down,
+    final body = find.descendant(
+      of: find.byType(AppFlowyEditor),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ),
     );
     final position = tester.state<ScrollableState>(body.first).position;
     final offsetBefore = position.pixels;

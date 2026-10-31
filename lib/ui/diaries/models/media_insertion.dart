@@ -1,41 +1,35 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:appflowy_editor/appflowy_editor.dart';
 
 /// 视频/附件按独立块插入，保留选中的正文并把光标放到最后一个块后的空行。
-void insertDiaryMediaBlocks({
-  required quill.QuillController controller,
-  required List<quill.BlockEmbed> embeds,
-  required TextSelection selection,
-}) {
+///
+/// [embeds] 为调用方构造好的媒体块节点（如视频 / 附件块）。
+///
+/// AppFlowy 迁移说明：媒体是独立块节点，插入即独占一行，不会与前后正文合并；
+/// 原来为“视频自动补换行”做的多余空行扣除、以及 `skipRequestKeyboard`（那是
+/// QuillController 的专有行为）都不再需要。原来在光标处断行插入，这里改为
+/// 插在光标所在节点之后——正文不被删除（“保留选中的正文”不变），整段不断开。
+Future<void> insertDiaryMediaBlocks({
+  required EditorState editorState,
+  required List<Node> embeds,
+  required Selection selection,
+}) async {
   if (embeds.isEmpty) return;
-  controller.skipRequestKeyboard = true;
-  final maxOffset = controller.document.length - 1;
-  var index = selection.isValid ? selection.end.clamp(0, maxOffset) : maxOffset;
-  final text = controller.document.toPlainText();
-  if (index > 0 && text[index - 1] != '\n') {
-    controller.replaceText(index, 0, '\n', null, ignoreFocus: true);
-    index++;
-  }
+  final transaction = editorState.transaction;
+  final normalized = selection.normalized;
+  // 保留选中的正文：锚定在选区末端所在节点之后插入，不删除选区内容。
+  final anchor = editorState.getNodeAtPath(normalized.end.path);
+  var insertPath =
+      anchor == null
+          ? [editorState.document.root.children.length]
+          : anchor.path.next;
   for (final embed in embeds) {
-    // 先创建空块，保证视频的插入规则不会将后方正文与媒体块合并。
-    controller.replaceText(index, 0, '\n', null, ignoreFocus: true);
-    final lengthBeforeEmbed = controller.document.length;
-    controller.replaceText(index, 0, embed, null, ignoreFocus: true);
-    // Quill 的 compose 还会为视频自动补换行。按实际增长量去掉本次多余的
-    // 空行，不触碰用户原有换行，确保后续文件与光标的偏移恒为两个字符。
-    final extraNewlines = controller.document.length - lengthBeforeEmbed - 1;
-    if (extraNewlines > 0) {
-      controller.replaceText(
-        index + 2,
-        extraNewlines,
-        '',
-        null,
-        ignoreFocus: true,
-      );
-    }
-    index += 2;
+    transaction.insertNode(insertPath, embed);
+    insertPath = insertPath.next;
   }
-  controller.moveCursorToPosition(
-    index.clamp(0, controller.document.length - 1),
+  // 最后一个块后跟一个可编辑的空行，光标落到行首。
+  transaction.insertNode(insertPath, paragraphNode());
+  transaction.afterSelection = Selection.collapsed(
+    Position(path: insertPath, offset: 0),
   );
+  await editorState.apply(transaction);
 }

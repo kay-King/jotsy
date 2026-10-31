@@ -1,73 +1,72 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/diary_typography.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_code_language_tracker.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_style.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_theme.dart';
-import 'package:node_diary/ui/diaries/viewmodels/diary_quill_styles.dart';
+import 'package:node_diary/ui/diaries/viewmodels/diary_code_block_look.dart';
+import 'package:node_diary/ui/diaries/viewmodels/diary_code_span_builder.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_text_appearance.dart';
 
 import '../../../support/expressive_test_theme.dart';
 
 const _code = 'def greet(name):\n    return name';
 
-/// 一个代码块，属性值为 [value]（true / 'plain' / 语言 id）。
-quill.Document _codeDocument(Object value, {String text = _code}) {
-  final ops = <Map<String, Object?>>[];
-  for (final line in text.split('\n')) {
-    ops
-      ..add(<String, Object?>{'insert': line})
-      ..add(<String, Object?>{
-        'insert': '\n',
-        'attributes': <String, Object?>{'code-block': value},
-      });
+/// 一个代码块节点：`data.delta` 为整块代码（行间 `\n`），`data.language`
+/// 为 [language]（true / 'plain' / 语言 id；null 表示不写该属性）。
+Node _codeNode(Object? language, {String text = _code}) {
+  final delta = Delta();
+  final lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    if (i > 0) {
+      delta.insert('\n');
+    }
+    if (lines[i].isNotEmpty) {
+      delta.insert(lines[i]);
+    }
   }
-  return quill.Document.fromJson(ops);
+  return Node(
+    type: kDiaryBlockCode,
+    attributes: <String, dynamic>{
+      kDiaryBlockDeltaKey: delta.toJson(),
+      if (language != null) kDiaryBlockLanguageKey: language,
+    },
+  );
 }
 
-quill.QuillController _controller(quill.Document document) =>
-    quill.QuillController(
-      document: document,
-      selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true,
-    );
+EditorState _editorState(Node codeNode) {
+  return EditorState(
+    document: Document(
+      root: Node(type: kDiaryBlockPage, children: [codeNode]),
+    ),
+  );
+}
 
-/// 经 [DiaryQuillStylesBuilder] 渲染只读正文，返回解析出的外观。
-Future<DiaryQuillLook> _pump(
-  WidgetTester tester,
-  quill.QuillController controller, {
+/// 经 [DiaryCodeBlockLook.resolve] 解析代码块外观（与编辑器组件同一入口）。
+Future<DiaryCodeBlockLook> _pumpLook(
+  WidgetTester tester, {
   DiaryCodeBlockStyle style = DiaryCodeBlockStyle.defaults,
   Brightness brightness = Brightness.light,
 }) async {
-  late DiaryQuillLook captured;
+  late DiaryCodeBlockLook captured;
   await tester.pumpWidget(
     ProviderScope(
       child: MaterialApp(
         theme: expressiveTestTheme(brightness),
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          quill.FlutterQuillLocalizations.delegate,
-        ],
         home: Scaffold(
-          body: DiaryQuillStylesBuilder(
-            appearance: const DiaryTextAppearance(
-              typography: DiaryTypography(),
-            ),
-            controller: controller,
-            codeBlockStyle: style,
-            builder: (BuildContext context, DiaryQuillLook look) {
-              captured = look;
-              return quill.QuillEditor.basic(
-                controller: controller,
-                config: look.configure(
-                  const quill.QuillEditorConfig(
-                    autoFocus: false,
-                    scrollable: false,
-                    showCursor: false,
-                  ),
+          body: Builder(
+            builder: (BuildContext context) {
+              captured = DiaryCodeBlockLook.resolve(
+                context,
+                style: style,
+                appearance: const DiaryTextAppearance(
+                  typography: DiaryTypography(),
                 ),
               );
+              return const SizedBox.shrink();
             },
           ),
         ),
@@ -77,119 +76,137 @@ Future<DiaryQuillLook> _pump(
   return captured;
 }
 
-/// 正文里所有 RichText 的全部 TextSpan（含嵌套子 span）。
-List<TextSpan> _renderedSpans(WidgetTester tester) {
-  final spans = <TextSpan>[];
-  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
-    rich.text.visitChildren((InlineSpan span) {
-      if (span is TextSpan) {
-        spans.add(span);
+/// 编辑器按节点 delta 建出的文本 span（根样式为代码文字样式）。
+TextSpan _editorSpan(DiaryCodeBlockLook look, String text) {
+  return TextSpan(text: text, style: look.codeTextStyle);
+}
+
+/// 结果 span 里纯文本为 [text] 的叶子。
+Iterable<TextSpan> _leaves(TextSpan span, String text) {
+  final found = <TextSpan>[];
+  void visit(InlineSpan node) {
+    if (node is TextSpan) {
+      if (node.text == text) {
+        found.add(node);
       }
-      return true;
-    });
+      for (final child in node.children ?? const <InlineSpan>[]) {
+        visit(child);
+      }
+    }
   }
-  return spans;
+
+  visit(span);
+  return found;
 }
 
-/// 某行 RichText 的根 span（行样式在它上面）。
-TextSpan _lineRoot(WidgetTester tester, String lineText) {
-  return tester
-      .widgetList<RichText>(find.byType(RichText))
-      .map((rich) => rich.text)
-      .whereType<TextSpan>()
-      .firstWhere((span) => span.toPlainText() == lineText);
-}
+Color? _keyword(DiaryCodeBlockLook look) =>
+    look.palette.tokens[DiaryCodeTokenRole.keyword];
 
-Color? _keyword(DiaryQuillLook look) =>
-    look.code.palette.tokens[DiaryCodeTokenRole.keyword];
+/// 把代码块节点的文本换成 [text]（走事务，与编辑器输入同一条链路）。
+Future<void> _replaceCodeText(
+  EditorState editorState,
+  Node node,
+  String text,
+) async {
+  final transaction = editorState.transaction;
+  final oldLength = node.delta?.length ?? 0;
+  transaction.replaceText(node, 0, oldLength, text);
+  await editorState.apply(transaction);
+}
 
 void main() {
   for (final brightness in Brightness.values) {
     testWidgets('typing short code refreshes automatic highlighting in '
         '${brightness.name} mode', (tester) async {
-      final controller = _controller(_codeDocument(true, text: 'd'))
-        ..readOnly = false;
-      final look = await _pump(tester, controller, brightness: brightness);
-      var block = controller.document.root.children.first as quill.Block;
-      expect(look.tracker.lastDetected(block), isNull);
+      final look = await _pumpLook(tester, brightness: brightness);
+      final node = _codeNode(true, text: 'd');
+      final editorState = _editorState(node);
+      final tracker = DiaryCodeLanguageTracker.of(editorState);
+
+      expect(tracker.languageFor(node, 'd'), isNull);
+      expect(tracker.lastDetected(node), isNull);
 
       const python = 'def greet(name):';
-      controller.replaceText(
-        0,
-        1,
-        python,
-        const TextSelection.collapsed(offset: python.length),
-      );
-      await tester.pump();
-      expect(look.tracker.lastDetected(block), isNull);
+      await _replaceCodeText(editorState, node, python);
+      // 输入中沿用上次结果（不闪），停手后才重识别。
+      expect(tracker.languageFor(node, python), isNull);
+      expect(tracker.lastDetected(node), isNull);
       await tester.pump(DiaryCodeLanguageTracker.debounce);
-      await tester.pump();
-      expect(look.tracker.lastDetected(block), 'python');
+      expect(tracker.lastDetected(node), 'python');
       expect(
-        _renderedSpans(
-          tester,
-        ).singleWhere((span) => span.text == 'def').style?.color,
+        _leaves(
+          buildDiaryCodeSpan(
+            _editorSpan(look, python),
+            node: node,
+            look: look,
+            tracker: tracker,
+          ),
+          'def',
+        ).single.style?.color,
         _keyword(look),
       );
 
       const typescript = 'const count: number = 42;';
-      controller.replaceText(
-        0,
-        python.length,
-        typescript,
-        const TextSelection.collapsed(offset: typescript.length),
-      );
-      await tester.pump();
-      block = controller.document.root.children.first as quill.Block;
-      expect(look.tracker.lastDetected(block), 'python');
+      await _replaceCodeText(editorState, node, typescript);
+      expect(tracker.languageFor(node, typescript), 'python');
       await tester.pump(DiaryCodeLanguageTracker.debounce);
-      await tester.pump();
-      expect(look.tracker.lastDetected(block), 'typescript');
+      expect(tracker.lastDetected(node), 'typescript');
       expect(
-        _renderedSpans(
-          tester,
-        ).singleWhere((span) => span.text == 'const').style?.color,
+        _leaves(
+          buildDiaryCodeSpan(
+            _editorSpan(look, typescript),
+            node: node,
+            look: look,
+            tracker: tracker,
+          ),
+          'const',
+        ).single.style?.color,
         _keyword(look),
       );
-      await tester.pumpWidget(const SizedBox.shrink());
-      controller.dispose();
+      editorState.dispose();
     });
   }
 
   testWidgets('a python block colors its keywords with the palette', (
     tester,
   ) async {
-    final look = await _pump(tester, _controller(_codeDocument('python')));
+    final look = await _pumpLook(tester);
+    final node = _codeNode('python');
+    final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-    final def = _renderedSpans(tester).where((span) => span.text == 'def');
+    final result = buildDiaryCodeSpan(
+      _editorSpan(look, _code),
+      node: node,
+      look: look,
+      tracker: tracker,
+    );
+    final def = _leaves(result, 'def');
     expect(def, isNotEmpty);
     expect(def.first.style?.color, _keyword(look));
-  });
-
-  testWidgets('a string-valued block still gets the code font', (tester) async {
-    await _pump(tester, _controller(_codeDocument('python')));
-
-    final root = _lineRoot(tester, 'def greet(name):');
-    expect(root.style?.fontFamily, 'monospace');
+    // 根样式换成代码文字样式（等宽字体）。
+    expect(result.style?.fontFamily, 'monospace');
   });
 
   testWidgets('an unspecified block is plain when auto-detect is off', (
     tester,
   ) async {
-    await _pump(
+    final look = await _pumpLook(
       tester,
-      _controller(_codeDocument(true)),
       style: DiaryCodeBlockStyle.defaults.copyWith(autoDetect: false),
     );
+    final node = _codeNode(true);
+    final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-    final texts = _renderedSpans(tester).map((span) => span.text);
-    // 不高亮时整段叶子是一个 span，不会拆出 'def'。
-    expect(texts, contains('def greet(name):'));
-    expect(texts, isNot(contains('def')));
-    expect(
-      _lineRoot(tester, 'def greet(name):').style?.fontFamily,
-      'monospace',
+    final result = buildDiaryCodeSpan(
+      _editorSpan(look, _code),
+      node: node,
+      look: look,
+      tracker: tracker,
     );
+    // 不高亮时整块保持一个叶子（不断行），不会拆出 'def'。
+    expect(_leaves(result, _code), isNotEmpty);
+    expect(_leaves(result, 'def'), isEmpty);
+    expect(result.style?.fontFamily, 'monospace');
   });
 
   testWidgets('an unspecified block is highlighted by the detected language', (
@@ -207,138 +224,114 @@ void main() {
         'class Greeter(object):\n'
         '    def __init__(self):\n'
         '        self.count = 0';
-    final controller = _controller(_codeDocument(true, text: python));
-    final look = await _pump(tester, controller);
+    final look = await _pumpLook(tester);
+    final node = _codeNode(true, text: python);
+    final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-    final def = _renderedSpans(tester).where((span) => span.text == 'def');
+    expect(tracker.languageFor(node, python), 'python');
+
+    final result = buildDiaryCodeSpan(
+      _editorSpan(look, python),
+      node: node,
+      look: look,
+      tracker: tracker,
+    );
+    final def = _leaves(result, 'def');
     expect(def, isNotEmpty);
     expect(def.first.style?.color, _keyword(look));
-    expect(
-      look.tracker.lastDetected(
-        controller.document.root.children.first as quill.Block,
-      ),
-      'python',
-    );
   });
 
   testWidgets('a plain block is never highlighted', (tester) async {
-    await _pump(tester, _controller(_codeDocument('plain')));
+    final look = await _pumpLook(tester);
+    final node = _codeNode('plain');
+    final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-    final texts = _renderedSpans(tester).map((span) => span.text);
-    expect(texts, contains('def greet(name):'));
-    expect(texts, isNot(contains('def')));
+    final result = buildDiaryCodeSpan(
+      _editorSpan(look, _code),
+      node: node,
+      look: look,
+      tracker: tracker,
+    );
+    // 纯文本块不高亮：整块保持一个叶子，不会拆出 'def'。
+    expect(_leaves(result, _code), isNotEmpty);
+    expect(_leaves(result, 'def'), isEmpty);
   });
 
-  testWidgets('line numbers use the palette color and can be turned off', (
-    tester,
-  ) async {
-    final controller = _controller(_codeDocument('python'));
-    final look = await _pump(tester, controller);
-
-    final points = tester.widgetList<quill.QuillNumberPoint>(
-      find.byType(quill.QuillNumberPoint),
-    );
-    expect(points, hasLength(2));
-    for (final point in points) {
-      expect(point.style.color, look.code.palette.lineNumber);
-    }
-
-    await _pump(
-      tester,
-      controller,
-      style: DiaryCodeBlockStyle.defaults.copyWith(lineNumbers: false),
-    );
-    expect(find.byType(quill.QuillNumberPoint), findsNothing);
-  });
-
-  group('span builder called directly', () {
-    late DiaryQuillLook look;
-    late BuildContext context;
-    late quill.TextSpanBuilder builder;
-
-    Future<quill.Document> setUpDocument(
-      WidgetTester tester,
-      quill.Document document,
-    ) async {
-      look = await _pump(tester, _controller(document));
-      context = tester.element(find.byType(quill.QuillEditor));
-      builder = look.configure(const quill.QuillEditorConfig()).textSpanBuilder;
-      return document;
-    }
-
-    quill.QuillText firstLeaf(quill.Document document, {int line = 0}) {
-      final block = document.root.children.first as quill.Block;
-      final target = block.children.elementAt(line) as quill.Line;
-      return target.children.first as quill.QuillText;
-    }
-
-    List<TextSpan> children(InlineSpan span) =>
-        ((span as TextSpan).children ?? const <InlineSpan>[])
-            .cast<TextSpan>()
-            .toList();
-
-    testWidgets('composing slices map to offsets inside the block', (
-      tester,
-    ) async {
-      final document = await setUpDocument(tester, _codeDocument('python'));
-      final leaf = firstLeaf(document);
-      const style = TextStyle(decoration: TextDecoration.underline);
-
-      // 组字中的切片：叶子内第 1 个字符起的 'ef g'。
-      final span = builder(context, leaf, 1, 'ef g', style, null);
-      expect(span.toPlainText(), 'ef g');
-      expect((span as TextSpan).style, style);
-      final parts = children(span);
-      expect(parts.first.text, 'ef');
-      expect(parts.first.style?.color, _keyword(look));
-
-      // 第二行的切片同样按块内偏移取色：'return' 是关键字。
-      final second = firstLeaf(document, line: 1);
-      final returnSpan = builder(context, second, 4, 'return', null, null);
-      expect(children(returnSpan).single.text, 'return');
-      expect(children(returnSpan).single.style?.color, _keyword(look));
-    });
-
+  group('span decorator called directly', () {
     testWidgets('a leaf with its own color keeps it', (tester) async {
-      final document = await setUpDocument(
-        tester,
-        quill.Document.fromJson(<Map<String, Object?>>[
-          <String, Object?>{
-            'insert': 'def',
-            'attributes': <String, Object?>{'color': '#FFFF0000'},
-          },
-          <String, Object?>{'insert': ' greet():'},
-          <String, Object?>{
-            'insert': '\n',
-            'attributes': <String, Object?>{'code-block': 'python'},
-          },
-        ]),
+      final look = await _pumpLook(tester);
+      // 用户手动上色的区域（delta 里带 font_color）：不高亮上色，
+      // 只叠 token 的字形；没上色的区域正常高亮。
+      // 注意：编辑器给每个叶子都带默认文字色，keepColor 只看 delta 属性。
+      final node = Node(
+        type: kDiaryBlockCode,
+        attributes: <String, dynamic>{
+          kDiaryBlockDeltaKey:
+              (Delta()
+                    ..insert('def f():\n    ')
+                    ..insert(
+                      'return',
+                      attributes: <String, dynamic>{
+                        kDiaryInlineTextColor: '#FFFF0000',
+                      },
+                    )
+                    ..insert(' 1'))
+                  .toJson(),
+          kDiaryBlockLanguageKey: 'python',
+        },
       );
-      final leaf = firstLeaf(document);
-      const style = TextStyle(color: Color(0xFFFF0000));
+      final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-      final span = builder(context, leaf, 0, 'def', style, null);
-      final parts = children(span);
-      expect(parts.single.text, 'def');
-      expect(parts.single.style?.color, isNull);
-      expect((span as TextSpan).style?.color, const Color(0xFFFF0000));
+      const leafStyle = TextStyle(color: Color(0xFF123456));
+      final result = buildDiaryCodeSpan(
+        const TextSpan(
+          style: leafStyle,
+          children: [
+            // 模拟编辑器建出的叶子：都带默认文字色。
+            TextSpan(text: 'def f():\n    ', style: leafStyle),
+            TextSpan(text: 'return', style: leafStyle),
+            TextSpan(text: ' 1', style: leafStyle),
+          ],
+        ),
+        node: node,
+        look: look,
+        tracker: tracker,
+      );
+      // 没上色的关键字正常着色。
+      expect(_leaves(result, 'def').single.style?.color, _keyword(look));
+      // 上色的关键字不上高亮色（piece 无样式，继承叶子的用户色）。
+      final ret = _leaves(result, 'return').single;
+      expect(ret.style?.color, isNot(_keyword(look)));
     });
 
-    testWidgets('a detached (cloned) leaf falls back to the default span', (
+    testWidgets('a non-code node returns the span unchanged', (tester) async {
+      final look = await _pumpLook(tester);
+      final node = Node(type: kDiaryBlockParagraph);
+      final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
+      const span = TextSpan(text: 'hello');
+
+      expect(
+        buildDiaryCodeSpan(span, node: node, look: look, tracker: tracker),
+        same(span),
+      );
+    });
+
+    testWidgets('a span whose text mismatches the delta is not highlighted', (
       tester,
     ) async {
-      await setUpDocument(tester, _codeDocument('python'));
+      final look = await _pumpLook(tester);
+      final node = _codeNode('python');
+      final tracker = DiaryCodeLanguageTracker.of(_editorState(node));
 
-      final span = builder(
-        context,
-        quill.QuillText('def x'),
-        0,
-        'def x',
-        null,
-        null,
+      // 纯文本与 delta 对不上（光标偏移会错位）：只换根样式，不着色。
+      final result = buildDiaryCodeSpan(
+        const TextSpan(text: 'stale text'),
+        node: node,
+        look: look,
+        tracker: tracker,
       );
-      expect((span as TextSpan).text, 'def x');
-      expect(span.children, isNull);
+      expect(result.style, look.codeTextStyle);
+      expect(result.children, isNull);
     });
   });
 }

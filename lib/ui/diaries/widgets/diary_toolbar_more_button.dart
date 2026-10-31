@@ -1,7 +1,7 @@
 import 'dart:ui' show lerpDouble;
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/app/theme/expressive_motion.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
@@ -16,18 +16,18 @@ import 'package:node_diary/ui/widgets/expressive_state_blend.dart';
 ///   小圆角，表明面板正开着、再点一下收起；
 /// - 面板收起时，若收进面板的某个工具正在生效（光标在引用、列表里，或正在
 ///   录音），右上角亮一个小圆点，状态不会因为工具被收起来而看不见。圆点只
-///   监听正文控制器，随选区变化局部重建，不牵动整条工具栏。
+///   监听正文编辑器状态，随选区变化局部重建，不牵动整条工具栏。
 class DiaryToolbarMoreButton extends StatelessWidget {
   const DiaryToolbarMoreButton({
     super.key,
-    required this.controller,
+    required this.editorState,
     required this.overflow,
     required this.expanded,
     required this.onPressed,
     this.recordingOpen = false,
   });
 
-  final quill.QuillController controller;
+  final EditorState editorState;
 
   /// 收在面板里的工具，用于判断要不要亮圆点。
   final List<DiaryToolbarItem> overflow;
@@ -36,10 +36,10 @@ class DiaryToolbarMoreButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   bool _hasActiveOverflow() {
-    final attributes = controller.getSelectionStyle().attributes;
+    final editorState = this.editorState;
     return overflow.any(
       (DiaryToolbarItem item) =>
-          isDiaryToolbarItemActive(item, attributes) ||
+          isDiaryToolbarItemActive(item, editorState) ||
           (item == DiaryToolbarItem.recording && recordingOpen),
     );
   }
@@ -93,7 +93,10 @@ class DiaryToolbarMoreButton extends StatelessWidget {
       },
     );
     return ListenableBuilder(
-      listenable: controller,
+      listenable: Listenable.merge(<Listenable>[
+        editorState.selectionNotifier,
+        editorState.toggledStyleNotifier,
+      ]),
       child: button,
       builder: (BuildContext context, Widget? button) {
         final showDot = !expanded && _hasActiveOverflow();

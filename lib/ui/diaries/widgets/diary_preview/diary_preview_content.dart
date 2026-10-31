@@ -1,7 +1,7 @@
 import 'dart:ui' as ui show Image;
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/database/app_database.dart';
@@ -51,7 +51,7 @@ class DiaryPreviewActions {
 /// 预览页的整页内容：顶栏、头图、标题、信息栏与正文组成的滚动视图，版式全部
 /// 来自 [DiaryPreviewResolvedStyle]。
 ///
-/// 输入：已解封的日记、它的派生数据与只读 Quill 控制器、解析后的样式与阅读
+/// 输入：已解封的日记、它的派生数据与正文 [Document]、解析后的样式与阅读
 /// 行为，以及顶栏动作与看图回调；不读写数据库，也不持有状态，设置页的实时
 /// 预览可以直接复用。默认样式下产出的部件结构与改版前逐项相同。
 ///
@@ -63,12 +63,13 @@ class DiaryPreviewContent extends ConsumerWidget {
     super.key,
     required this.detail,
     required this.viewData,
-    required this.controller,
+    required this.document,
     required this.scrollController,
     required this.resolved,
     required this.behavior,
     required this.actions,
     required this.onOpenImage,
+    this.onToggleTodo,
     this.coverHeroTag,
     this.coverPlaceholder,
     this.staticCover = false,
@@ -82,13 +83,16 @@ class DiaryPreviewContent extends ConsumerWidget {
   final DiaryWithTags detail;
   final DiaryPreviewViewData viewData;
 
-  /// 正文控制器；尚未绑定时为 null（正文区不占位）。
-  final quill.QuillController? controller;
+  /// 正文文档；尚未绑定时为 null（正文区不占位）。
+  final Document? document;
   final ScrollController scrollController;
   final DiaryPreviewResolvedStyle resolved;
   final DiaryPreviewBehavior behavior;
   final DiaryPreviewActions actions;
   final DiaryPreviewImageOpener onOpenImage;
+
+  /// 待办勾选变化（写回 EditorState 并落库）；null 时复选框只读。
+  final void Function(Node node, bool checked)? onToggleTodo;
 
   /// 头图的共享元素标签；null 时不建立 Hero。
   final Object? coverHeroTag;
@@ -149,7 +153,7 @@ class DiaryPreviewContent extends ConsumerWidget {
             onOpenNotebook: onOpenNotebook,
           )
         : null;
-    final controller = this.controller;
+    final controller = document;
     final editedLabel = style.body.showLastEdited
         ? diaryPreviewEditedLabel(l10n, diary, style.body.editedFormat)
         : null;
@@ -238,12 +242,12 @@ class DiaryPreviewContent extends ConsumerWidget {
                 const SizedBox.shrink()
               else ...<Widget>[
                 DiaryPreviewBody(
-                  controller: controller,
+                  document: controller,
                   appearance: appearance,
                   onOpenImage: (source, hero) =>
                       onOpenImage(images, source, hero),
+                  onToggleTodo: onToggleTodo,
                   showEmptyHint: style.body.showEmptyHint,
-                  todoToggle: behavior.todoToggle,
                   textSelection: behavior.textSelection,
                   longImageMode: behavior.longImageMode,
                   textColor: resolved.bodyColor,

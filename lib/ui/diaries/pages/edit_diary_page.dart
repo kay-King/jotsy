@@ -7,13 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:node_diary/ui/widgets/delayed_loading_indicator.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/core/database/app_database.dart';
 import 'package:node_diary/core/database/content_codec.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/app_service.dart';
 import 'package:node_diary/core/services/day_photo_library.dart';
 import 'package:node_diary/core/services/settings_service.dart';
@@ -25,7 +26,6 @@ import 'package:node_diary/ui/diaries/models/time_capsule.dart';
 import 'package:node_diary/ui/diaries/models/edit_diary_snapshot.dart';
 import 'package:node_diary/ui/diaries/models/publish_metadata_composer.dart';
 import 'package:node_diary/ui/diaries/models/recording_insertion.dart';
-import 'package:node_diary/ui/diaries/models/diary_playback_gestures.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_location_preference.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_meta_actions.dart';
 import 'package:node_diary/ui/diaries/models/diary_meta_draft.dart';
@@ -34,6 +34,7 @@ import 'package:node_diary/ui/diaries/controllers/diary_recording_controller.dar
 import 'package:node_diary/ui/diaries/controllers/debounced_auto_save_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_media_import_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_caret_follow_controller.dart';
+import 'package:node_diary/ui/diaries/controllers/diary_code_block_editing.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_video_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_audio_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_day_photos_controller.dart';
@@ -42,7 +43,6 @@ import 'package:node_diary/utils/optional_text.dart';
 import 'package:node_diary/ui/diaries/providers/diary_detail_provider.dart';
 import 'package:node_diary/ui/diaries/providers/diary_saved_colors_provider.dart';
 import 'package:node_diary/ui/diaries/providers/diary_typography_provider.dart';
-import 'package:node_diary/ui/diaries/viewmodels/diary_quill_styles.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_first_line_indent.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_text_appearance.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_floating_toolbar_surface.dart';
@@ -149,18 +149,17 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     skipTraversal: true,
   );
   final RouteEntranceWaiter _routeEntranceWaiter = RouteEntranceWaiter();
-  final ScrollController _contentScrollController = ScrollController();
-  final ScrollController _editorInnerScrollController = ScrollController();
-  // 用于取光标矩形：「更多」面板展开时把光标滚到面板上方。
-  final GlobalKey<quill.EditorState> _quillEditorKey =
-      GlobalKey<quill.EditorState>();
   // 悬浮工具栏「更多」面板的目标高度（收起为 0），驱动正文末尾的额外留白。
   final ValueNotifier<double> _toolbarPanelExtent = ValueNotifier<double>(0);
-  // 打字、键盘扩选与软键盘弹起时把光标保持在底部浮层上方（正文不自带滚动）。
+  // 打字、键盘扩选与软键盘弹起时把光标保持在底部浮层上方（编辑器自带的
+  // 揭示不知道浮层盖住了多少）。
   late final DiaryCaretFollowController _caretFollow;
   // 最近一次构建是否显示了悬浮工具栏：帧末的光标揭示据此取与这一帧布局一致
   // 的遮挡高度（见 [_editorBottomCover]）。
   bool _floatingToolbarShown = false;
+  // 首行缩进落盘宽度（pt）：build 里按帧缓存。_currentContentDocJson 在
+  // dispose→flush 时也会读，那时 ref 已不可用，不能在 getter 里 ref.read。
+  double _firstLineIndentWidth = 0;
   // 同上，工具栏是否叠在元数据面板收起栏上方（见 [_toolbarStacksOnMetaPanel]）。
   bool _floatingToolbarStacked = false;
   final DiaryRecordingController _recordingController =
@@ -179,7 +178,13 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   SettingsService? _dayPhotoSettings;
 
   // ==================== 发布上下文草稿字段 ====================
-  late quill.QuillController _contentController;
+  // 正文编辑器状态：AppFlowy Document 即块文档（见 content_codec），与
+  // AppFlowyEditor(editorState:) 渲染。内容变化经 transactionStream 通知
+  // （见 [_subscribeEditorTransactions]），选区经 selectionNotifier。
+  late EditorState _editorState;
+  // 正文事务订阅：提交后的事务触发草稿/编辑的自动保存排程（见
+  // EditDiaryController.onCreateDraftInputChanged）。
+  StreamSubscription<EditorTransactionValue>? _editorTransactionSubscription;
   String _metadataJson = '{}';
   // 封面、标签、此时此地、天气、心情、精力与（新建时预设的）胶囊：与发布页
   // 共用同一草稿模型与动作。编辑模式下草稿变化经 [_onMetaChanged] 自动保存；
@@ -209,11 +214,11 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   final ValueNotifier<double> _editPanelExpandProgress = ValueNotifier<double>(
     0,
   );
-  // 缓存 QuillEditor widget 实例：键盘动画期间页面会随 viewInsets 逐帧重建，
+  // 缓存 AppFlowyEditor widget 实例：键盘动画期间页面会随 viewInsets 逐帧重建，
   // LayoutBuilder 也会随 body 高度逐帧重跑；返回同一实例时 Element 直接跳过
-  // 更新，避免 QuillRawEditor 对整篇文档逐行重建子树。输入变化时才重建。
-  Widget? _cachedQuillEditor;
-  Object? _cachedQuillEditorInputs;
+  // 更新，避免编辑器对整篇文档逐行重建子树。输入变化时才重建。
+  Widget? _cachedEditor;
+  Object? _cachedEditorInputs;
   late List<DiaryToolbarItem> _toolbarOrder;
   Set<DiaryToolbarItem> _toolbarHiddenItems = <DiaryToolbarItem>{};
   String? _toolbarCurrentTimeFormatPattern;
@@ -223,7 +228,7 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   VoidCallback? _toolbarSettingsListener;
   bool _recordingPanelOpen = false;
   int _recordingPanelGeneration = 0;
-  TextSelection? _recordingSelection;
+  Selection? _recordingSelection;
 
   // ==================== 生命周期与保存状态 ====================
   bool _initialized = false;
@@ -303,22 +308,22 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
         await recordDiaryTemplateUse(settings, templateId);
       },
     );
-    _contentController = quill.QuillController(
-      document: documentFromPlainText(''),
-      selection: const TextSelection.collapsed(offset: 0),
+    _editorState = EditorState(
+      document: _ensureEditableDocument(
+        decodeDiaryContentToAppFlowyDocument(''),
+      ),
     );
     _caretFollow = DiaryCaretFollowController(
-      editorKey: _quillEditorKey,
       focusNode: _contentFocusNode,
       coveredHeight: _editorBottomCover,
       revealDuration: () =>
           ExpressiveMotion.duration(context, ExpressiveMotion.fast),
-    )..attach(_contentController);
+    )..attach(_editorState);
     _toolbarOrder = List<DiaryToolbarItem>.from(kDefaultDiaryToolbarOrder);
     _controller = EditDiaryController(this);
     _mediaImportController.addListener(_onMediaImportChanged);
     _titleController.addListener(_controller.onCreateDraftInputChanged);
-    _contentController.addListener(_controller.onCreateDraftInputChanged);
+    _subscribeEditorTransactions(_editorState);
     // 新建模式无需等详情查询，直接允许渲染编辑区域。
     _initialized = widget.diaryId == null;
     if (_isCreateEntry) {
@@ -338,7 +343,7 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     _titleController.removeListener(_controller.onCreateDraftInputChanged);
-    _contentController.removeListener(_controller.onCreateDraftInputChanged);
+    _editorTransactionSubscription?.cancel();
     _mediaImportController.removeListener(_onMediaImportChanged);
     _mediaImportController.dispose();
     _dayPhotoSettings?.dayPhotoSuggestionsEnabledNotifier.removeListener(
@@ -354,11 +359,15 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     _titleFocusNode.dispose();
     _contentFocusNode.dispose();
     _toolbarFocusNode.dispose();
-    _contentScrollController.dispose();
-    _editorInnerScrollController.dispose();
     _editPanelExpandProgress.dispose();
     _toolbarPanelExtent.dispose();
-    _contentController.dispose();
+    // EditorState 必须等到 widget 树卸载后才释放：AppFlowy 内部手势
+    // （_IgnoreEditorSelectionGesture）在卸载过程中仍可能访问
+    // selectionNotifier，提前释放会抛 use-after-dispose。
+    final editorState = _editorState;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      editorState.dispose();
+    });
     _recordingController.dispose();
     _unbindToolbarSettingsService();
     super.dispose();
@@ -388,11 +397,18 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
 
   /// 当前正文纯文本（用于搜索、字数统计和空内容判断）。
   String get _currentContentText =>
-      extractPlainTextFromDiaryDocument(_contentController.document);
+      extractPlainTextFromAppFlowyDocument(_editorState.document);
 
-  /// 当前正文 Delta JSON（用于富文本持久化）。
-  String get _currentContentDocJson =>
-      encodeDiaryDocumentToJson(_contentController.document);
+  /// 当前正文块文档 JSON（用于富文本持久化）。
+  ///
+  /// 保存前按当前排版把首行缩进属性写进段落块（见
+  /// [withFirstLineIndentAttribute]）：只改要落盘的 JSON，不动编辑器里的
+  /// 文档（避免触发事务通知与撤销栈）。预览与导出读到属性后缩进首行。
+  String get _currentContentDocJson {
+    final json = _editorState.document.toJson();
+    _stampFirstLineIndent(json, _firstLineIndentWidth);
+    return jsonEncode(json);
+  }
 
   /// 模板变量按哪天展开、推荐按哪天判断：补写时是那一天，否则是今天。
   DateTime get _templateDiaryDate => _createDateOverride ?? _templateClock();
@@ -410,6 +426,24 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
 
   void _onMediaImportChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// 订阅正文事务：提交后的事务（内容已落到文档）触发输入变化处理——
+  /// 新建模式排程草稿自动保存、编辑模式排程编辑自动保存（见
+  /// [EditDiaryController.onCreateDraftInputChanged]）。
+  ///
+  /// 只看 after 事件：before 事件触发时事务还没应用，快照会读到旧内容；
+  /// after 紧随其后，会重新排程一次防抖。选区变化不走事务（走
+  /// selectionNotifier），不会触发这里；纯选区变化本就不产生新快照。
+  void _subscribeEditorTransactions(EditorState editorState) {
+    _editorTransactionSubscription?.cancel();
+    _editorTransactionSubscription = editorState.transactionStream.listen((
+      event,
+    ) {
+      if (event.$1 == TransactionTime.after) {
+        _controller.onCreateDraftInputChanged();
+      }
+    });
   }
 
   /// 监听“补写时推荐当天照片”开关；设置服务异步就绪后才能绑定，绑定后
@@ -671,63 +705,150 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     );
   }
 
-  Widget _buildQuillEditor(
+  /// 主正文编辑器（AppFlowy），自己持有滚动：
+  /// - 标题、模板条、当天照片条经 [AppFlowyEditor.header] 进编辑器的滚动
+  ///   列表，与 Quill 时代“标题与正文在同一滚动容器”一致；底部留白（工具栏
+  ///   面板占位 + 拖拽进度占位）经 [AppFlowyEditor.footer]；
+  /// - 块组件：标准块 + 日记的媒体块（见 [buildDiaryBlockComponentBuilders]），
+  ///   段落带占位提示与段间距；
+  /// - 行内样式：正文排版（字体/字号/行距/字间距）经 [EditorStyle]，日记
+  ///   自定义的行内属性（文字色/背景色/字号档位）经 [textSpanDecorator] 补
+  ///   （见 [_decorateDiaryTextSpan]）；
+  /// - 回车先经日记代码块的接管逻辑（[handleDiaryCodeBlockEnter]），未接管
+  ///   时走编辑器默认链路；
+  /// - 拖拽滚动默认不收起键盘（[Scrollable] 默认即 manual），与原来一致。
+  ///
+  /// 构建结果按输入缓存：键盘动画逐帧挤压布局时返回同一实例，Element 直接
+  /// 跳过更新；header/footer 里的条带各自监听自己的控制器（模板、照片、
+  /// 面板占位），实例复用不影响它们刷新。
+  Widget _buildContentEditor(
     BuildContext context, {
     required DiaryTextAppearance appearance,
+    required bool contentLocked,
+    required bool templatesEnabled,
+    required bool busy,
+    required bool showFloatingToolbar,
+    required bool toolbarStacked,
+    required double Function(double panelProgress) resolveBottomSpacer,
   }) {
     final placeholder = context.l10n.autoT0133;
-    final firstLineIndentWidth = diaryFirstLineIndentWidth(
-      appearance.typography,
-    );
-    // QuillController 未覆写 ==，按实例比较；ThemeData 与正文外观为值比较。
+    final typography = appearance.typography;
+    // EditorState 未覆写 ==，按实例比较；其余为值比较。header/footer 依赖的
+    // 全部输入都在这里：任一变化才重建编辑器，键盘动画的逐帧构建全部命中缓存。
     final inputs = (
-      _contentController,
+      _editorState,
       placeholder,
       Theme.of(context),
       appearance,
-      firstLineIndentWidth,
+      contentLocked,
+      templatesEnabled,
+      busy,
+      showFloatingToolbar,
+      toolbarStacked,
     );
-    final cached = _cachedQuillEditor;
-    if (cached != null && _cachedQuillEditorInputs == inputs) {
+    final cached = _cachedEditor;
+    if (cached != null && _cachedEditorInputs == inputs) {
       return cached;
     }
-    // 样式在编辑器位置（Scaffold 之下）生成，见 [DiaryQuillStylesBuilder]。
-    final editor = DiaryQuillStylesBuilder(
-      appearance: appearance,
-      controller: _contentController,
-      builder: (BuildContext context, DiaryQuillLook look) {
-        return quill.QuillEditor.basic(
-          controller: _contentController,
-          focusNode: _contentFocusNode,
-          scrollController: _editorInnerScrollController,
-          // 新建时不在构建期自动聚焦：键盘会与页面滑入同时弹出并逐帧挤压布局。
-          // 改由 [RouteEntranceWaiter] 在转场结束后聚焦（见 initState）。
-          config: look.configure(
-            quill.QuillEditorConfig(
-              editorKey: _quillEditorKey,
-              autoFocus: false,
-              placeholder: placeholder,
-              scrollable: false,
-              onTapUp: (details, getPosition) => isDiaryPlaybackTap(
-                _contentController,
-                getPosition(details.globalPosition),
-              ),
-              padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
-              embedBuilders: buildDiaryQuillEmbedBuilders(),
+    final editor = AppFlowyEditor(
+      editorState: _editorState,
+      focusNode: _contentFocusNode,
+      // 新建时不在构建期自动聚焦：键盘会与页面滑入同时弹出并逐帧挤压布局。
+      // 改由 [RouteEntranceWaiter] 在转场结束后聚焦（见 initState）。
+      autoFocus: false,
+      header: _buildEditorHeader(
+        context,
+        appearance: appearance,
+        contentLocked: contentLocked,
+        templatesEnabled: templatesEnabled,
+        busy: busy,
+      ),
+      footer: Padding(
+        // 正文与底部留白之间留一段呼吸空间，与原来编辑器下内边距一致。
+        padding: const EdgeInsets.only(top: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 「更多」面板展开时额外让位，自身监听高度，不牵动整列重建。
+            DiaryToolbarPanelReserve(extent: _toolbarPanelExtent),
+            // 底部占位随面板拖拽进度连续变化，仅重建 footer 这一层。
+            ValueListenableBuilder<double>(
+              valueListenable: _editPanelExpandProgress,
+              builder: (BuildContext context, double progress, Widget? child) {
+                return SizedBox(
+                  key: const ValueKey('diary-editor-page-reserve'),
+                  height: resolveBottomSpacer(progress),
+                );
+              },
             ),
-            firstLineIndentWidth: firstLineIndentWidth,
-          ),
-        );
-      },
+          ],
+        ),
+      ),
+      // 拖选到靠近底部浮层时自动滚动：把被盖住的高度也算进边缘距离。
+      autoScrollEdgeOffset: _editorBottomCover(),
+      editorStyle: _diaryEditorStyle(context, appearance),
+      blockComponentBuilders: _diaryBlockComponentBuilders(
+        placeholder: placeholder,
+        paragraphSpacing: typography.paragraphSpacing,
+        baseFontSize: typography.fontSize,
+      ),
+      characterShortcutEvents: [
+        _diaryCodeBlockEnterEvent,
+        ...standardCharacterShortcutEvents,
+      ],
     );
-    _cachedQuillEditor = editor;
-    _cachedQuillEditorInputs = inputs;
+    _cachedEditor = editor;
+    _cachedEditorInputs = inputs;
     return editor;
   }
 
+  /// 编辑器滚动列表的头部：标题 + 新建模式的模板条/当天照片条。
+  /// 编辑器侧已包 [IgnoreEditorSelectionGesture]，点按它们不干扰正文选区；
+  /// 锁定态（面板展开/录音中）的点按屏蔽由外层的 [IgnorePointer] 统一处理。
+  Widget _buildEditorHeader(
+    BuildContext context, {
+    required DiaryTextAppearance appearance,
+    required bool contentLocked,
+    required bool templatesEnabled,
+    required bool busy,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildTitleInput(
+            context,
+            contentLocked: contentLocked,
+            appearance: appearance,
+          ),
+          // 只在新建空白日记里出现（编辑已有日记、续写草稿时没有）。
+          if (_isCreateEntry && templatesEnabled)
+            DiaryTemplateStrip(
+              controller: _templates,
+              diaryDate: _templateDiaryDate,
+              busy: busy,
+              onApply: (template) =>
+                  unawaited(_controller.applyTemplateFromStrip(template)),
+              onOpenAll: () => unawaited(_controller.openTemplatePicker()),
+            ),
+          if (_isCreateEntry)
+            DiaryDayPhotosStrip(
+              controller: _dayPhotos,
+              busy: busy,
+              onInsert: () => unawaited(_controller.insertDayPhotos()),
+              onSetCover: (photo) =>
+                  unawaited(_controller.setDayPhotoCover(photo)),
+              onClearCover: _controller.clearDayPhotoCover,
+            ),
+        ],
+      ),
+    );
+  }
+
   /// 主编辑区域：
-  /// - 标题与正文放在同一个滚动容器内，保证滚动体验连续；
-  /// - 键盘弹起时保持焦点，不因轻微滚动自动收起键盘；
+  /// - 编辑器自己持有滚动（标题/条带在 header、底部留白在 footer），滚动
+  ///   体验连续；
   /// - 标题字体与正文排版跟随“正文字体与排版”设置，修改后即时生效。
   Widget _buildEditor(
     BuildContext context, {
@@ -735,81 +856,21 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     required bool contentLocked,
     required DiaryTextAppearance appearance,
     required bool templatesEnabled,
+    required bool showFloatingToolbar,
+    required bool toolbarStacked,
   }) {
-    final quillEditor = _buildQuillEditor(context, appearance: appearance);
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final minEditorHeight = constraints.maxHeight > 420
-            ? constraints.maxHeight - 140
-            : 280.0;
-        final content = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            _buildTitleInput(
-              context,
-              contentLocked: contentLocked,
-              appearance: appearance,
-            ),
-            if (_isCreateEntry && templatesEnabled)
-              IgnorePointer(
-                ignoring: contentLocked,
-                child: DiaryTemplateStrip(
-                  controller: _templates,
-                  diaryDate: _templateDiaryDate,
-                  busy:
-                      _saving ||
-                      _recordingPanelOpen ||
-                      _mediaImportController.isBusy,
-                  onApply: (template) =>
-                      unawaited(_controller.applyTemplateFromStrip(template)),
-                  onOpenAll: () => unawaited(_controller.openTemplatePicker()),
-                ),
-              ),
-            if (_isCreateEntry)
-              IgnorePointer(
-                ignoring: contentLocked,
-                child: DiaryDayPhotosStrip(
-                  controller: _dayPhotos,
-                  busy:
-                      _saving ||
-                      _recordingPanelOpen ||
-                      _mediaImportController.isBusy,
-                  onInsert: () => unawaited(_controller.insertDayPhotos()),
-                  onSetCover: (photo) =>
-                      unawaited(_controller.setDayPhotoCover(photo)),
-                  onClearCover: _controller.clearDayPhotoCover,
-                ),
-              ),
-            const SizedBox(height: 12),
-            ConstrainedBox(
-              // 标题与正文处在同一可滚动容器，整体滚动体验保持一致。
-              constraints: BoxConstraints(minHeight: minEditorHeight),
-              child: IgnorePointer(ignoring: contentLocked, child: quillEditor),
-            ),
-            // 「更多」面板展开时额外让位，自身监听高度，不牵动整列重建。
-            DiaryToolbarPanelReserve(extent: _toolbarPanelExtent),
-          ],
-        );
-        // 底部占位随面板拖拽进度连续变化，仅重建滚动容器这一层。
-        return ValueListenableBuilder<double>(
-          valueListenable: _editPanelExpandProgress,
-          child: content,
-          builder: (BuildContext context, double progress, Widget? child) {
-            return SingleChildScrollView(
-              controller: _contentScrollController,
-              // 编辑态保持输入焦点，避免轻微滚动时键盘立即收起。
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-              padding: EdgeInsets.fromLTRB(
-                16,
-                4,
-                16,
-                resolveBottomSpacer(progress),
-              ),
-              child: child,
-            );
-          },
-        );
-      },
+    return IgnorePointer(
+      ignoring: contentLocked,
+      child: _buildContentEditor(
+        context,
+        appearance: appearance,
+        contentLocked: contentLocked,
+        templatesEnabled: templatesEnabled,
+        busy: _saving || _recordingPanelOpen || _mediaImportController.isBusy,
+        showFloatingToolbar: showFloatingToolbar,
+        toolbarStacked: toolbarStacked,
+        resolveBottomSpacer: resolveBottomSpacer,
+      ),
     );
   }
 
@@ -833,6 +894,11 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final showEditMetaPanel = _isEditEntry;
+    // 首行缩进落盘宽度按帧缓存：_currentContentDocJson 在 dispose→flush 时
+    // 也会读，那时 ref 已不可用（字段在上面声明）。
+    _firstLineIndentWidth = diaryFirstLineIndentWidth(
+      ref.watch(diaryTextAppearanceProvider).typography,
+    );
     // 日记模板功能关闭时隐藏入口，数据保留：没有建议条，顶栏菜单里没有
     // “选择模板”与“另存为模板”（自动套用见 applyInitialTemplate）。
     final templatesEnabled = ref.watch(
@@ -916,12 +982,17 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
         // 首次拿到详情时回填编辑器与草稿上下文，后续重建不重复执行。
         if (!_initialized && detail != null) {
           _titleController.text = detail.diary.title;
-          _controller.replaceContentController(
-            quill.QuillController(
-              document: decodeDiaryContentToDocument(detail.diary.content),
-              selection: const TextSelection.collapsed(offset: 0),
+          final backfilled = EditorState(
+            document: _ensureEditableDocument(
+              decodeDiaryContentToAppFlowyDocument(detail.diary.content),
             ),
           );
+          if (backfilled.document.root.children.isNotEmpty) {
+            backfilled.selection = Selection.collapsed(
+              Position(path: const [0], offset: 0),
+            );
+          }
+          _controller.replaceEditorState(backfilled);
           try {
             _metadataJson = prettyMetadataJson(detail.diary.metadata);
           } catch (_) {
@@ -1041,6 +1112,8 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
                   contentLocked: _isEditPanelExpanded || _recordingPanelOpen,
                   appearance: ref.watch(diaryTextAppearanceProvider),
                   templatesEnabled: templatesEnabled,
+                  showFloatingToolbar: showFloatingToolbar,
+                  toolbarStacked: toolbarStacked,
                 ),
               ),
               if (showEditMetaPanel &&
@@ -1277,7 +1350,7 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     required double maxPanelExtent,
   }) {
     return DiaryFloatingToolbar(
-      controller: _contentController,
+      editorState: _editorState,
       order: toolbarOrder,
       hiddenItems: _toolbarHiddenItems,
       currentTimeFormatPattern: _toolbarCurrentTimeFormatPattern,
@@ -1295,6 +1368,10 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   /// 「更多」面板展开/收起：正文末尾留白跟着变（见 [DiaryToolbarPanelReserve]）；
   /// 展开时若光标会被面板挡住，在留白生效的下一帧把它滚到面板上方。
   /// 编辑标题时光标不在正文里，不滚动。
+  ///
+  /// 面板展开不改变选区，光标跟随（[DiaryCaretFollowController]）不会自动
+  /// 触发：这里经它手动揭示一次（[DiaryCaretFollowController.revealCurrentCaret]，
+  /// 与选区变化时的揭示同一做法）。
   void _handleToolbarPanelExtentChanged(double extent) {
     if (!mounted) {
       return;
@@ -1305,16 +1382,10 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final selection = _contentController.selection;
-      if (!mounted || !selection.isValid) {
+      if (!mounted) {
         return;
       }
-      revealDiaryCaretAbove(
-        _quillEditorKey,
-        position: selection.extent,
-        // 被遮住的高度 = 工具栏一排、底部留白与光标空隙（与平时的正文避让
-        // 一致）+ 面板。
-        coveredHeight: _editorBottomCover(),
+      _caretFollow.revealCurrentCaret(
         duration: ExpressiveMotion.duration(context, ExpressiveMotion.medium),
       );
     });
@@ -1351,7 +1422,7 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     setState(() {
       _recordingPanelOpen = true;
       _recordingPanelGeneration++;
-      _recordingSelection = _contentController.selection;
+      _recordingSelection = _editorState.selection;
     });
     FocusManager.instance.primaryFocus?.unfocus();
   }
@@ -1379,3 +1450,225 @@ enum _EditorMenuAction {
   saveAsTemplate,
   editorSettings,
 }
+
+/// 保证可编辑的文档：至少有一个空段落。
+///
+/// 空文档（`Document.blank()`）没有子节点，编辑器里没有可落光标的文本块；
+/// 解码失败或内容为空时都回到“一个空段落”，与 Quill 时代
+/// `documentFromPlainText('')` 的形状一致。文档尚未挂到 EditorState，直接
+/// 改节点树是安全的。
+Document _ensureEditableDocument(Document document) {
+  if (document.root.children.isNotEmpty) {
+    return document;
+  }
+  document.root.insert(paragraphNode());
+  return document;
+}
+
+/// 把首行缩进属性写进块文档 JSON 的段落节点（#91）。
+///
+/// 在保存前调用（见 `_EditDiaryPageState._currentContentDocJson`）：只改要
+/// 落盘的 JSON 副本，不动编辑器里的文档。`width <= 0` 时移除标记（见
+/// [withFirstLineIndentAttribute]）。
+void _stampFirstLineIndent(Map<String, dynamic> json, double width) {
+  final document = json[kDiaryBlocksDocumentKey];
+  if (document is! Map<String, dynamic>) {
+    return;
+  }
+  final children = document[kDiaryBlockChildrenKey];
+  if (children is! List) {
+    return;
+  }
+  for (final child in children) {
+    _stampFirstLineIndentNode(child, width);
+  }
+}
+
+void _stampFirstLineIndentNode(Object? node, double width) {
+  if (node is! Map<String, dynamic>) {
+    return;
+  }
+  if (node[kDiaryBlockTypeKey] == kDiaryBlockParagraph) {
+    final data = node[kDiaryBlockDataKey];
+    final attributes = data is Map<String, dynamic>
+        ? Map<String, dynamic>.from(data)
+        : <String, dynamic>{};
+    node[kDiaryBlockDataKey] = withFirstLineIndentAttribute(attributes, width);
+  }
+  final children = node[kDiaryBlockChildrenKey];
+  if (children is List) {
+    for (final child in children) {
+      _stampFirstLineIndentNode(child, width);
+    }
+  }
+}
+
+/// 日记正文的编辑器样式：排版设置（字体、字号、行距、字间距）+ 主题。
+///
+/// 颜色取编辑器位置（Scaffold 之下）的 DefaultTextStyle，与 Quill 时代
+/// `DefaultStyles.getInstance(context)` 的取色位置一致。
+EditorStyle _diaryEditorStyle(
+  BuildContext context,
+  DiaryTextAppearance appearance,
+) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final typography = appearance.typography;
+  final body = TextStyle(
+    // 直接取主题，不经 DefaultTextStyle：页面 State 的 context 在 Scaffold
+    // 之上，那里的 DefaultTextStyle 是 MaterialApp 的红色兜底（见测试）。
+    color: Theme.of(context).textTheme.bodyMedium?.color,
+    fontFamily: appearance.fontFamily,
+    fontSize: typography.fontSize,
+    letterSpacing: typography.letterSpacing,
+  );
+  return EditorStyle.mobile(
+    // 编辑器自己持有滚动时 padding 按块施加（见 PageBlockComponent）：左右
+    // 16 与原来页面边距一致，纵向由 header/footer 与段间距负责。
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    cursorColor: colorScheme.primary,
+    selectionColor: colorScheme.primary.withValues(alpha: 0.2),
+    textStyleConfiguration: TextStyleConfiguration(
+      text: body,
+      lineHeight: typography.lineHeight,
+      href: TextStyle(
+        color: colorScheme.secondary,
+        decoration: TextDecoration.underline,
+      ),
+      // 行内代码：等宽 + 主题表面 tint（预览页同口径见 DiaryCodeBlockLook）。
+      code: TextStyle(
+        fontFamily: _diaryMonospaceFamily(),
+        backgroundColor: colorScheme.surfaceContainerHighest,
+      ),
+    ),
+    textSpanDecorator: (context, node, index, text, before, after) =>
+        _decorateDiaryTextSpan(
+          context,
+          node,
+          index,
+          text,
+          before,
+          after,
+          typography.fontSize,
+        ),
+  );
+}
+
+String _diaryMonospaceFamily() {
+  // 与 DiaryCodeBlockLook.monospaceFamily 同口径：平台系统等宽字族。
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.iOS || TargetPlatform.macOS => 'Menlo',
+    TargetPlatform.windows => 'Consolas',
+    _ => 'monospace',
+  };
+}
+
+/// 日记正文的块组件：标准块 + 日记的媒体块（图片/视频/录音/附件/分隔线）。
+///
+/// 段落覆盖默认配置：空段落的占位提示（新建时“写点什么”一类的文案），以及
+/// 与预览页一致的段间距（段落后）。日记的行内属性（文字色/背景色/字号档位）
+/// 由 [_diaryEditorStyle] 的 textSpanDecorator 渲染。
+Map<String, BlockComponentBuilder> _diaryBlockComponentBuilders({
+  required String placeholder,
+  required double paragraphSpacing,
+  required double baseFontSize,
+}) {
+  return <String, BlockComponentBuilder>{
+    ...standardBlockComponentBuilderMap,
+    ...buildDiaryBlockComponentBuilders(),
+    ParagraphBlockKeys.type: ParagraphBlockComponentBuilder(
+      configuration: const BlockComponentConfiguration().copyWith(
+        placeholderText: (_) => placeholder,
+        // 段间距在段落后（与 DiaryAppFlowyPreview 一致）。
+        padding: (node) => EdgeInsets.only(bottom: paragraphSpacing),
+      ),
+    ),
+  };
+}
+
+/// 日记自定义行内属性的渲染：`font_color` / `bg_color`（`#AARRGGBB`）与
+/// `size`（small/large/huge 三档按正文字号缩放，数字按绝对字号）。
+///
+/// 先走编辑器默认的移动端装饰（链接点按等），再叠加日记的属性；`before`
+/// 里已带了加粗/斜体/下划线/删除线/行内代码等基础样式（见
+/// `AppFlowyRichText.getTextSpan`）。
+InlineSpan _decorateDiaryTextSpan(
+  BuildContext context,
+  Node node,
+  int index,
+  TextInsert text,
+  TextSpan before,
+  TextSpan after,
+  double baseFontSize,
+) {
+  var span = mobileTextSpanDecoratorForAttribute(
+    context,
+    node,
+    index,
+    text,
+    before,
+    after,
+  );
+  final attributes = text.attributes;
+  if (attributes == null) {
+    return span;
+  }
+  var style = const TextStyle();
+  final fontColor = _parseDiaryColor(attributes[kDiaryInlineTextColor]);
+  if (fontColor != null) {
+    style = style.copyWith(color: fontColor);
+  }
+  final backgroundColor = _parseDiaryColor(
+    attributes[kDiaryInlineBackgroundColor],
+  );
+  if (backgroundColor != null) {
+    style = style.copyWith(backgroundColor: backgroundColor);
+  }
+  final fontSize = _diaryInlineFontSize(
+    attributes[kDiaryInlineSize],
+    baseFontSize,
+  );
+  if (fontSize != null) {
+    style = style.copyWith(fontSize: fontSize);
+  }
+  if (style == const TextStyle()) {
+    return span;
+  }
+  return TextSpan(
+    text: span.text,
+    children: span.children,
+    style: (span.style ?? const TextStyle()).merge(style),
+    recognizer: span.recognizer,
+    semanticsLabel: span.semanticsLabel,
+  );
+}
+
+/// `#AARRGGBB` → Color；非法值返回 null（忽略），与预览页同口径。
+Color? _parseDiaryColor(Object? value) {
+  if (value is! String) return null;
+  var hex = value.trim();
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 6) hex = 'FF$hex';
+  if (hex.length != 8) return null;
+  final intValue = int.tryParse(hex, radix: 16);
+  if (intValue == null) return null;
+  return Color(intValue);
+}
+
+/// 行内字号：三档按正文字号缩放，数字按绝对字号（与预览页同口径）。
+double? _diaryInlineFontSize(Object? value, double bodyFontSize) {
+  return switch (value) {
+    'small' => bodyFontSize * 0.85,
+    'large' => bodyFontSize * 1.25,
+    'huge' => bodyFontSize * 1.5,
+    num _ => value.toDouble(),
+    _ => null,
+  };
+}
+
+/// 代码块的回车接管（见 [handleDiaryCodeBlockEnter]）：接管成功返回 true，
+/// 编辑器不再走默认链路；其余情况返回 false，继续走标准的换行事件。
+final CharacterShortcutEvent _diaryCodeBlockEnterEvent = CharacterShortcutEvent(
+  key: 'diaryCodeBlockEnter',
+  character: '\n',
+  handler: (editorState) => handleDiaryCodeBlockEnter(editorState),
+);

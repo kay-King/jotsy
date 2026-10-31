@@ -172,7 +172,7 @@ class _EditDiaryTemplatePort implements DiaryTemplateEditorPort {
   @override
   bool get hasContent =>
       title.trim().isNotEmpty ||
-      diaryDocumentHasVisibleContent(_state._contentController.document);
+      appFlowyDocumentHasVisibleContent(_state._editorState.document);
 
   @override
   DiaryMetaDraftController get meta => _state._meta;
@@ -194,16 +194,46 @@ class _EditDiaryTemplatePort implements DiaryTemplateEditorPort {
     required List<Map<String, Object?>> ops,
     required int caret,
   }) {
-    final document = decodeDiaryContentToDocument(jsonEncode(ops));
+    // 模板拼的是 Quill Delta ops（模板模块尚未迁移）：经块文档中转成
+    // AppFlowy Document；caret 是 Quill 的线性偏移，换算成块选区。
+    final document = _ensureEditableDocument(
+      decodeDiaryContentToAppFlowyDocument(jsonEncode(ops)),
+    );
+    final editorState = EditorState(document: document);
+    editorState.selection = _selectionForQuillOffset(document, caret);
     _state.setState(() {
       _state._titleController.text = title;
-      _state._controller.replaceContentController(
-        quill.QuillController(
-          document: document,
-          selection: TextSelection.collapsed(offset: caret),
-        ),
-      );
+      _state._controller.replaceEditorState(editorState);
     });
     return _state._currentContentDocJson;
   }
+}
+
+/// 把 Quill 的线性偏移（模板套用传来的 caret）映射为 AppFlowy 选区。
+///
+/// Quill 偏移按块顺序累加：每块的文字长度 + 1（块末换行），媒体嵌入占 1。
+/// 模板正文只含文字与分隔线（见 sanitizeDiaryTemplateOps），只走顶层节点；
+/// 越界时落到文档末尾。
+Selection _selectionForQuillOffset(Document document, int caret) {
+  final children = document.root.children;
+  var remaining = caret;
+  for (final node in children) {
+    final textLength = node.delta?.toPlainText().length ?? 1;
+    if (remaining <= textLength) {
+      return Selection.collapsed(
+        Position(
+          path: node.path,
+          offset: remaining.clamp(0, textLength),
+        ),
+      );
+    }
+    // +1 为块末换行在 Quill 偏移里的占位。
+    remaining -= textLength + 1;
+  }
+  if (children.isEmpty) {
+    return Selection.collapsed(Position(path: const [0], offset: 0));
+  }
+  final last = children.last;
+  final lastLength = last.delta?.toPlainText().length ?? 0;
+  return Selection.collapsed(Position(path: last.path, offset: lastLength));
 }

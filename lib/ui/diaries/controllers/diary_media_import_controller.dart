@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show TextSelection;
-import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:flutter_quill/quill_delta.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_appflowy.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/database/file_embed_codec.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/core/services/diary_video_gallery_service.dart';
@@ -18,7 +19,16 @@ typedef DiaryMediaImporter =
 enum DiaryMediaImportOutcome { inserted, cancelled, failed, busy, unsupported }
 
 /// 编排系统选文件 → 私有目录复制 → 正文插入；不构建 UI，不保存数据库。
-/// 页面退出或正文控制器更换会使当前操作失效，并清理尚未提交的文件。
+/// 页面退出或正文编辑器状态更换会使当前操作失效，并清理尚未提交的文件。
+///
+/// AppFlowy 迁移说明：
+/// - 插入经已迁移的 [insertDiaryImages] / [insertDiaryMediaBlocks]（以
+///   EditorState 为入口），媒体块为独立块节点（图片 / 视频 / 附件）。
+/// - 原来在选择器打开期间监听 `document.changes`、用 Delta 把捕获的选区锚点
+///   变换到最新位置；AppFlowy 没有公开的选区变换 API，改为在提交那一刻直接
+///   取编辑器的当前选区——永远不会是过时偏移，也符合“插在光标处”的预期。
+/// - 失败回滚：原来整体换掉 `controller.document`；现在用插入前的块文档
+///   快照删掉全部顶层节点后重建，再恢复选区。
 class DiaryMediaImportController extends ChangeNotifier {
   DiaryMediaImportController({
     DiaryMediaPicker? picker,
@@ -42,7 +52,7 @@ class DiaryMediaImportController extends ChangeNotifier {
   /// [picker] 替换本次的文件来源（如“这天拍的照片”已在页面里选好），
   /// 复制、插入、取消与失败回滚仍走同一条链路。
   Future<DiaryMediaImportOutcome> pickAndInsert({
-    required quill.QuillController controller,
+    required EditorState editorState,
     required DiaryMediaKind kind,
     required bool Function() isCurrent,
     DiaryMediaPicker? picker,
@@ -51,28 +61,17 @@ class DiaryMediaImportController extends ChangeNotifier {
     if (isBusy) return DiaryMediaImportOutcome.busy;
     if (kIsWeb) return DiaryMediaImportOutcome.unsupported;
     final generation = ++_generation;
-    final document = controller.document;
-    var selection = controller.selection;
+    final document = editorState.document;
     bool canCommit() =>
         !_disposed &&
         generation == _generation &&
         isCurrent() &&
-        identical(controller.document, document);
+        identical(editorState.document, document);
 
-    // 选择器打开及复制期间可能发生正文变更，让锚点随 Delta 移动，避免使用
-    // 打开系统选择器之前已经过时的字符偏移。提交自身的变更前取消监听。
-    final subscription = document.changes.listen((change) {
-      if (selection.isValid) {
-        selection = selection.copyWith(
-          baseOffset: change.change.transformPosition(selection.baseOffset),
-          extentOffset: change.change.transformPosition(selection.extentOffset),
-        );
-      }
-    });
     final imported = <DiaryFileAttachment>[];
     List<PlatformFile>? files;
-    Delta? previousContent;
-    TextSelection? previousSelection;
+    String? previousContentJson;
+    Selection? previousSelection;
     _activeKind = kind;
     notifyListeners();
     try {
@@ -86,25 +85,42 @@ class DiaryMediaImportController extends ChangeNotifier {
         imported.add(await _importer(file, kind));
         if (!canCommit()) return DiaryMediaImportOutcome.cancelled;
       }
-      await subscription.cancel();
       if (!canCommit()) return DiaryMediaImportOutcome.cancelled;
-      previousContent = document.toDelta();
-      previousSelection = controller.selection;
+      previousContentJson = diaryDocumentToStoredJson(document);
+      previousSelection = editorState.selection;
+      // 提交时取当前选区：选择器与复制期间用户可能移动过光标，直接用最新的，
+      // 不会拿到已过时的锚点。
+      final selection = editorState.selection;
       if (kind == DiaryMediaKind.image) {
-        insertDiaryImages(
-          controller: controller,
+        await insertDiaryImages(
+          editorState: editorState,
           imagePaths: imported.map((file) => file.path).toList(),
           selection: selection,
         );
       } else {
-        insertDiaryMediaBlocks(
-          controller: controller,
-          selection: selection,
+        await insertDiaryMediaBlocks(
+          editorState: editorState,
+          selection:
+              selection ??
+              Selection.collapsed(
+                Position(path: [document.root.children.length], offset: 0),
+              ),
           embeds: [
             for (final file in imported)
-              kind == DiaryMediaKind.video
-                  ? quill.BlockEmbed.video(file.path)
-                  : quill.BlockEmbed(diaryAttachmentEmbedType, file.encode()),
+              if (kind == DiaryMediaKind.video)
+                Node(
+                  type: kDiaryBlockVideo,
+                  attributes: <String, dynamic>{
+                    kDiaryBlockUrlKey: file.path,
+                  },
+                )
+              else
+                Node(
+                  type: kDiaryBlockAttachment,
+                  attributes: Map<String, dynamic>.from(
+                    jsonDecode(file.encode()) as Map,
+                  ),
+                ),
           ],
         );
       }
@@ -112,11 +128,11 @@ class DiaryMediaImportController extends ChangeNotifier {
       return DiaryMediaImportOutcome.inserted;
     } catch (error, stackTrace) {
       final current = canCommit();
-      if (previousContent != null && current) {
-        controller.document = quill.Document.fromDelta(previousContent);
-        controller.updateSelection(
-          previousSelection!,
-          quill.ChangeSource.local,
+      if (previousContentJson != null && current) {
+        await _restoreDocument(
+          editorState,
+          previousContentJson,
+          previousSelection,
         );
       }
       debugPrint('Diary media import failed: $error\n$stackTrace');
@@ -124,7 +140,6 @@ class DiaryMediaImportController extends ChangeNotifier {
           ? DiaryMediaImportOutcome.failed
           : DiaryMediaImportOutcome.cancelled;
     } finally {
-      await subscription.cancel();
       for (final file in imported) {
         try {
           await DiaryMediaStorageService.deleteManagedDiaryFile(file.path);
@@ -142,6 +157,26 @@ class DiaryMediaImportController extends ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  /// 用 [contentJson] 快照恢复文档：删掉全部顶层节点后按快照重建，再恢复
+  /// [selection]。插入失败后的兜底路径，节点 id 会变化，但内容与选区一致。
+  Future<void> _restoreDocument(
+    EditorState editorState,
+    String contentJson,
+    Selection? selection,
+  ) async {
+    final document = editorState.document;
+    final restored = diaryDocumentFromStoredJson(contentJson);
+    final transaction = editorState.transaction;
+    for (final node in document.root.children.toList()) {
+      transaction.deleteNode(node);
+    }
+    for (final child in restored.root.children) {
+      transaction.insertNode([document.root.children.length], child);
+    }
+    transaction.afterSelection = selection;
+    await editorState.apply(transaction);
   }
 
   static Future<List<PlatformFile>?> _pickFiles(DiaryMediaKind kind) async {

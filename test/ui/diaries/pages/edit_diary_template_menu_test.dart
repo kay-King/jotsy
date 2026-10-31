@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:node_diary/core/database/content_codec.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/services/day_photo_library.dart';
@@ -25,11 +26,13 @@ void main() {
   String titleText(WidgetTester tester) =>
       tester.widget<TextField>(titleField()).controller!.text;
 
-  String bodyText(WidgetTester tester) => tester
-      .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-      .controller
-      .document
-      .toPlainText();
+  String bodyText(WidgetTester tester) =>
+      extractPlainTextFromAppFlowyDocument(
+        tester
+            .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+            .editorState
+            .document,
+      );
 
   const work = DiaryTemplate(
     id: 'user.work',

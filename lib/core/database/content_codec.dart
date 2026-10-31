@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:appflowy_editor/appflowy_editor.dart' as af;
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill/quill_delta.dart';
 
@@ -83,6 +84,75 @@ String encodeDiaryDocumentToJson(quill.Document document) {
   final ops = document.toDelta().toJson();
   final blocks = diaryBlocksFromQuillOps(ops);
   return encodeDiaryBlocks(blocks);
+}
+
+/// 将正文存储内容解码为 AppFlowy Document（编辑器 UI 迁移后使用）。
+///
+/// 存储格式已与 AppFlowy `Document.toJson()` 同构：读取时经
+/// [decodeStoredDiaryBlocks] 收敛三代格式为块文档，直接用
+/// `Document.fromJson` 还原。解析失败时返回空文档。
+af.Document decodeDiaryContentToAppFlowyDocument(String rawContent) {
+  final trimmed = rawContent.trim();
+  if (trimmed.isEmpty) {
+    return af.Document.blank();
+  }
+  try {
+    final blocks = decodeStoredDiaryBlocks(trimmed);
+    return af.Document.fromJson(blocks);
+  } catch (_) {
+    return af.Document.blank();
+  }
+}
+
+/// 将 AppFlowy Document 编码为持久化 JSON（块文档格式）。
+///
+/// 与 `Document.toJson()` 同构，直接序列化即可。
+String encodeAppFlowyDocumentToJson(af.Document document) {
+  return jsonEncode(document.toJson());
+}
+
+/// 从 AppFlowy Document 提取纯文本镜像，用于列表摘要和搜索。
+String extractPlainTextFromAppFlowyDocument(af.Document document) {
+  final buffer = StringBuffer();
+  for (final node in document.root.children) {
+    final delta = node.delta;
+    if (delta != null) {
+      buffer.write(delta.toPlainText());
+    } else {
+      // 媒体与分隔线占一个空行。
+      buffer.write('\n');
+    }
+    for (final child in node.children) {
+      final childDelta = child.delta;
+      if (childDelta != null) {
+        buffer.write(childDelta.toPlainText());
+      }
+    }
+  }
+  return _normalizePlainText(buffer.toString());
+}
+
+/// 判断 AppFlowy Document 是否包含可见内容。
+bool appFlowyDocumentHasVisibleContent(af.Document document) {
+  final text = extractPlainTextFromAppFlowyDocument(document);
+  if (text.trim().isNotEmpty) return true;
+  // 纯文本为空时，检查是否有媒体块。
+  for (final node in document.root.children) {
+    if (!_isTextBlockType(node.type)) return true;
+  }
+  return false;
+}
+
+bool _isTextBlockType(String type) {
+  return <String>{
+    'paragraph',
+    'heading',
+    'bulleted_list',
+    'numbered_list',
+    'todo_list',
+    'quote',
+    'code',
+  }.contains(type);
 }
 
 /// 从正文文档提取纯文本镜像，用于列表摘要和搜索。

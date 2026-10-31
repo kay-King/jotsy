@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
@@ -53,7 +53,6 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
-            quill.FlutterQuillLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
@@ -75,9 +74,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  quill.QuillController contentController(WidgetTester tester) => tester
-      .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-      .controller;
+  EditorState contentEditorState(WidgetTester tester) => tester
+      .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+      .editorState;
+
+  /// 把正文整个换成 [text]（单段落），模拟用户重写正文。
+  Future<void> replaceBodyText(EditorState editorState, String text) async {
+    final node = paragraphNode(text: text);
+    final transaction = editorState.transaction;
+    for (final child in editorState.document.root.children.toList()) {
+      transaction.deleteNode(child);
+    }
+    transaction.insertNode(const [0], node);
+    await editorState.apply(transaction);
+  }
 
   Future<DiaryWithTags> storedDiary(WidgetTester tester) async => (await tester
       .runAsync(() => database.getDiaryWithTagsByDiaryId(diaryId)))!;
@@ -99,21 +109,24 @@ void main() {
           find.widgetWithText(TextField, 'Original title'),
           'Saved automatically',
         );
-        final content = contentController(tester);
-        content.replaceText(
-          0,
-          content.document.length - 1,
-          'New body',
-          const TextSelection.collapsed(offset: 8),
-        );
-        content.formatText(0, 3, quill.Attribute.bold);
+        final editorState = contentEditorState(tester);
+        await replaceBodyText(editorState, 'New body');
+        final firstNode = editorState.document.root.children.first;
+        final boldTransaction = editorState.transaction;
+        boldTransaction.formatText(firstNode, 0, 3, const <String, dynamic>{
+          'bold': true,
+        });
+        await editorState.apply(boldTransaction);
         await tester.pump(const Duration(milliseconds: 600));
 
         final saved = await storedDiary(tester);
         expect(saved.diary.title, 'Saved automatically');
         expect(saved.diary.contentText, 'New body');
-        final document = decodeDiaryContentToDocument(saved.diary.content);
-        expect(document.toDelta().first.attributes?['bold'], isTrue);
+        final document = decodeDiaryContentToAppFlowyDocument(
+          saved.diary.content,
+        );
+        final firstOp = document.root.children.first.delta!.first;
+        expect(firstOp.attributes?['bold'], isTrue);
         expect(find.byType(EditDiaryPage), findsOneWidget);
         expect(find.byType(AlertDialog), findsNothing);
         expect(tester.takeException(), isNull);
@@ -382,13 +395,8 @@ void main() {
       find.widgetWithText(TextField, 'Original title'),
       '',
     );
-    final content = contentController(tester);
-    content.replaceText(
-      0,
-      content.document.length - 1,
-      '',
-      const TextSelection.collapsed(offset: 0),
-    );
+    final editorState = contentEditorState(tester);
+    await replaceBodyText(editorState, '');
     await tester.pump(const Duration(milliseconds: 600));
     final saved = await storedDiary(tester);
     expect(saved.diary.title, isEmpty);

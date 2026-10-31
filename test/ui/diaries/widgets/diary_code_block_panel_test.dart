@@ -1,84 +1,108 @@
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
+import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_code_language_tracker.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_newline.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_style.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_language.dart';
+import 'package:node_diary/ui/diaries/providers/diary_code_block_style_provider.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_code_block/diary_code_block_panel.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_toolbar_more_panel.dart';
 
-import '../../../support/diary_color_panel_harness.dart';
+import '../../../support/expressive_test_theme.dart';
 
-/// 悬浮工具栏的代码块工具与卡片内的代码块面板：转为代码块、开合与高度
-/// 报告、选语言、自动识别标签、退出 / 转为正文 / 复制、从「更多」打开，以及
-/// 选区离开代码块时收起；全程不推路由、正文保持焦点。
-const String _codeTool = '代码块（多行）';
-
-/// 代码块工具排在最前，360dp 下常驻在工具栏一排上。
-final List<DiaryToolbarItem> _codeFirstOrder = <DiaryToolbarItem>[
-  DiaryToolbarItem.codeBlock,
-  for (final item in kDefaultDiaryToolbarOrder)
-    if (item != DiaryToolbarItem.codeBlock) item,
-];
-
-/// 正文：`intro` / 两行代码块 `code1`、`code2` / `after`。
+/// 悬浮工具栏卡片内的代码块面板（AppFlowy 版）：选语言、自动识别标签、
+/// 复制 / 退出代码块 / 转为正文；全程不推路由、不抢正文焦点。
 ///
-/// 偏移：intro 0–5，code1 6–11，code2 12–17，after 18–23（各含行尾换行）。
-quill.QuillController _codeController({
-  Object codeValue = true,
-  int caret = 8,
-  String line1 = 'code1',
-  String line2 = 'code2',
+/// 面板直接挂载测试（不经工具栏）：输入是 EditorState + 块文档，选区用
+/// path 定位到代码块内。
+
+Delta _deltaOf(String text) {
+  final delta = Delta();
+  final lines = text.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    if (i > 0) {
+      delta.insert('\n');
+    }
+    if (lines[i].isNotEmpty) {
+      delta.insert(lines[i]);
+    }
+  }
+  return delta;
+}
+
+Node _paragraph(String text) => Node(
+  type: kDiaryBlockParagraph,
+  attributes: <String, dynamic>{kDiaryBlockDeltaKey: _deltaOf(text).toJson()},
+);
+
+Node _codeBlock(String text, Object? language) => Node(
+  type: kDiaryBlockCode,
+  attributes: <String, dynamic>{
+    kDiaryBlockDeltaKey: _deltaOf(text).toJson(),
+    if (language != null) kDiaryBlockLanguageKey: language,
+  },
+);
+
+/// 正文：intro 段落 / 代码块 / after 段落；光标进代码块。
+({EditorState editorState, Node code}) _editor({
+  Object? language = true,
+  String codeText = 'code1\ncode2',
 }) {
-  final controller = quill.QuillController(
-    document: quill.Document.fromJson(<Map<String, dynamic>>[
-      <String, dynamic>{'insert': 'intro\n$line1'},
-      <String, dynamic>{
-        'insert': '\n',
-        'attributes': <String, dynamic>{'code-block': codeValue},
-      },
-      <String, dynamic>{'insert': line2},
-      <String, dynamic>{
-        'insert': '\n',
-        'attributes': <String, dynamic>{'code-block': codeValue},
-      },
-      <String, dynamic>{'insert': 'after\n'},
-    ]),
-    selection: TextSelection.collapsed(offset: caret),
+  final code = _codeBlock(codeText, language);
+  final editorState = EditorState(
+    document: Document(
+      root: Node(
+        type: kDiaryBlockPage,
+        children: <Node>[_paragraph('intro'), code, _paragraph('after')],
+      ),
+    ),
   );
-  addTearDown(controller.dispose);
-  return controller;
+  addTearDown(editorState.dispose);
+  editorState.selection = Selection.collapsed(Position(path: [1], offset: 2));
+  return (editorState: editorState, code: code);
 }
 
-/// 各行行尾换行上的 `code-block` 值（不是代码块为 null）。
-List<Object?> _lineCodeValues(quill.QuillController controller) => <Object?>[
-  for (final op in controller.document.toDelta().toList())
-    if (op.data case final String text)
-      for (final _ in '\n'.allMatches(text)) op.attributes?['code-block'],
-];
+class _FixedCodeBlockStyle extends DiaryCodeBlockStyleNotifier {
+  _FixedCodeBlockStyle(this.style);
 
-Future<ColorPanelHarness> _pump(
+  final DiaryCodeBlockStyle style;
+
+  @override
+  DiaryCodeBlockStyle build() => style;
+}
+
+Future<void> _pumpPanel(
   WidgetTester tester,
-  quill.QuillController controller, {
-  List<DiaryToolbarItem>? order,
-  DiaryCodeBlockStyle codeBlockStyle = DiaryCodeBlockStyle.defaults,
+  EditorState editorState, {
+  VoidCallback? onClose,
+  DiaryCodeBlockStyle style = DiaryCodeBlockStyle.defaults,
 }) async {
-  final harness = await pumpColorPanel(
-    tester,
-    controller: controller,
-    order: order ?? _codeFirstOrder,
-    codeBlockStyle: codeBlockStyle,
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        diaryCodeBlockStyleProvider.overrideWith(
+          () => _FixedCodeBlockStyle(style),
+        ),
+      ],
+      child: MaterialApp(
+        theme: expressiveTestTheme(Brightness.light),
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: DiaryCodeBlockPanel(
+            editorState: editorState,
+            bodyHeight: kDiaryCodeBlockPanelHeight,
+            onClose: onClose ?? () {},
+          ),
+        ),
+      ),
+    ),
   );
-  harness.editorFocus.requestFocus();
-  await tester.pumpAndSettle();
-  return harness;
-}
-
-Future<void> _tapCodeTool(WidgetTester tester) async {
-  await tester.tap(find.byTooltip(_codeTool));
   await tester.pumpAndSettle();
 }
 
@@ -96,121 +120,43 @@ bool _chipSelected(WidgetTester tester, String label) {
 }
 
 void main() {
-  setUpAll(loadColorPanelFonts);
-
-  testWidgets('outside a code block the tool converts the line, no panel', (
+  testWidgets('a language chip sets the block language and stays open', (
     tester,
   ) async {
-    final controller = _codeController(caret: 2);
-    final harness = await _pump(tester, controller);
-    final pushes = harness.routes.pushes;
-
-    await _tapCodeTool(tester);
-
-    expect(diaryCodeBlockAt(controller.document, 2), isNotNull);
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(harness.extents.where((extent) => extent > 0), isEmpty);
-    expect(harness.routes.pushes, pushes);
-    expect(harness.editorFocus.hasFocus, isTrue);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('inside a code block the tool opens the panel, again closes', (
-    tester,
-  ) async {
-    final harness = await _pump(tester, _codeController());
-    final pushes = harness.routes.pushes;
-
-    await _tapCodeTool(tester);
-
-    expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
-    expect(
-      harness.extents.last,
-      kDiaryToolbarPanelChrome + kDiaryCodeBlockPanelHeight,
-    );
-    expect(
-      tester.getSize(find.byType(DiaryCodeBlockPanel)).height,
-      kDiaryCodeBlockPanelHeight,
-    );
-    expect(find.text('代码块'), findsOneWidget);
-    expect(harness.routes.pushes, pushes);
-    expect(find.byType(Dialog), findsNothing);
-    expect(harness.editorFocus.hasFocus, isTrue);
-    // 未指定语言的块：第一个选项（自动）选中。
-    expect(_chipSelected(tester, '纯文本'), isFalse);
-
-    await _tapCodeTool(tester);
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(harness.extents.last, 0);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('a language chip sets every line of the block and stays open', (
-    tester,
-  ) async {
-    final controller = _codeController();
-    final harness = await _pump(tester, controller);
-    await _tapCodeTool(tester);
+    final env = _editor();
+    await _pumpPanel(tester, env.editorState);
 
     await tester.tap(find.text('Python'));
     await tester.pumpAndSettle();
 
-    expect(_lineCodeValues(controller), <Object?>[
-      null,
-      'python',
-      'python',
-      null,
-    ]);
+    expect(env.code.attributes[kDiaryBlockLanguageKey], 'python');
     expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
     expect(_chipSelected(tester, 'Python'), isTrue);
-
-    // 最后一个语言要先滑过去才能点到。
-    await tester.ensureVisible(find.text('Diff'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Diff'));
-    await tester.pumpAndSettle();
-    expect(_lineCodeValues(controller), <Object?>[null, 'diff', 'diff', null]);
+    // 选区指回改写前：光标仍在代码块里。
+    expect(
+      env.editorState.selection,
+      Selection.collapsed(Position(path: [1], offset: 2)),
+    );
 
     await tester.ensureVisible(find.text('纯文本'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('纯文本'));
     await tester.pumpAndSettle();
-    expect(_lineCodeValues(controller), <Object?>[
-      null,
-      'plain',
-      'plain',
-      null,
-    ]);
-    expect(harness.editorFocus.hasFocus, isTrue);
+    expect(env.code.attributes[kDiaryBlockLanguageKey], 'plain');
+    expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('opening scrolls the selected language into view', (
-    tester,
-  ) async {
-    await _pump(tester, _codeController(codeValue: 'diff'));
-    await _tapCodeTool(tester);
-
-    final panel = tester.getRect(find.byType(DiaryCodeBlockPanel));
-    final chip = tester.getRect(find.text('Diff'));
-    expect(chip.left, greaterThanOrEqualTo(panel.left));
-    expect(chip.right, lessThanOrEqualTo(panel.right));
-    expect(_chipSelected(tester, 'Diff'), isTrue);
-  });
-
   testWidgets('the auto chip names the detected language', (tester) async {
-    final controller = _codeController(
-      line1: 'def greet(name):',
-      line2: '    print(f"hello {name}")',
+    final env = _editor(
+      codeText: 'def greet(name):\n    print(f"hello {name}")',
     );
-    final block = diaryCodeBlockAt(controller.document, 8)!;
     final detected = DiaryCodeLanguageTracker.of(
-      controller,
-    ).languageFor(block, diaryCodeBlockText(block));
+      env.editorState,
+    ).languageFor(env.code, env.code.delta!.toPlainText());
     expect(detected, isNotNull);
 
-    await _pump(tester, controller);
-    await _tapCodeTool(tester);
+    await _pumpPanel(tester, env.editorState);
 
     final name = diaryCodeLanguageById(detected!)!.name;
     expect(find.text('自动 · $name'), findsOneWidget);
@@ -218,63 +164,23 @@ void main() {
   });
 
   testWidgets('without detection the auto chip reads 自动识别', (tester) async {
-    await _pump(tester, _codeController());
-    await _tapCodeTool(tester);
+    await _pumpPanel(tester, _editor().editorState);
     expect(find.text('自动识别'), findsOneWidget);
   });
 
   testWidgets('with auto-detect off the first chip reads 不指定', (tester) async {
-    await _pump(
+    await _pumpPanel(
       tester,
-      _codeController(),
-      codeBlockStyle: DiaryCodeBlockStyle.defaults.copyWith(autoDetect: false),
+      _editor().editorState,
+      style: DiaryCodeBlockStyle.defaults.copyWith(autoDetect: false),
     );
-    await _tapCodeTool(tester);
 
     expect(find.text('不指定'), findsOneWidget);
     expect(find.text('自动识别'), findsNothing);
     expect(_chipSelected(tester, '不指定'), isTrue);
   });
 
-  testWidgets('Exit moves the caret below the block and closes', (
-    tester,
-  ) async {
-    final controller = _codeController();
-    final harness = await _pump(tester, controller);
-    await _tapCodeTool(tester);
-
-    await tester.tap(find.text('退出代码块'));
-    await tester.pumpAndSettle();
-
-    final caret = controller.selection.extentOffset;
-    expect(caret, 18);
-    expect(diaryCodeBlockAt(controller.document, caret), isNull);
-    expect(_lineCodeValues(controller), <Object?>[
-      null,
-      true,
-      true,
-      null,
-      null,
-    ]);
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(harness.extents.last, 0);
-    expect(harness.editorFocus.hasFocus, isTrue);
-  });
-
-  testWidgets('转为正文 removes the code block and closes', (tester) async {
-    final controller = _codeController(codeValue: 'dart');
-    final harness = await _pump(tester, controller);
-    await _tapCodeTool(tester);
-
-    await tester.tap(find.text('转为正文'));
-    await tester.pumpAndSettle();
-
-    expect(_lineCodeValues(controller), <Object?>[null, null, null, null]);
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(harness.extents.last, 0);
-  });
-
-  testWidgets('Copy writes the block to the clipboard and shows a hint', (
+  testWidgets('copy writes the block to the clipboard and keeps the panel', (
     tester,
   ) async {
     final copied = <String>[];
@@ -295,8 +201,9 @@ void main() {
         null,
       ),
     );
-    final harness = await _pump(tester, _codeController());
-    await _tapCodeTool(tester);
+    final env = _editor();
+    var closed = 0;
+    await _pumpPanel(tester, env.editorState, onClose: () => closed++);
 
     await tester.tap(find.text('复制代码'));
     await tester.pump();
@@ -304,97 +211,50 @@ void main() {
 
     expect(copied, <String>['code1\ncode2']);
     expect(find.text('已复制代码'), findsOneWidget);
+    // 复制不收起面板。
     expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
-    expect(harness.editorFocus.hasFocus, isTrue);
+    expect(closed, 0);
+    expect(tester.takeException(), isNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 
-  testWidgets('from More the code panel keeps More expanded', (tester) async {
-    final controller = _codeController();
-    final harness = await _pump(
-      tester,
-      controller,
-      order: kDefaultDiaryToolbarOrder,
-    );
-    await tester.tap(find.byTooltip(colorPanelMoreTooltip));
+  testWidgets('exit moves the caret below the block and closes', (
+    tester,
+  ) async {
+    final env = _editor();
+    var closed = 0;
+    await _pumpPanel(tester, env.editorState, onClose: () => closed++);
+
+    await tester.tap(find.text('退出代码块'));
     await tester.pumpAndSettle();
-    final moreExtent = harness.extents.last;
 
-    await _tapCodeTool(tester);
-
-    expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
-    expect(find.byTooltip('插入图片'), findsNothing);
-    expect(find.byTooltip(colorPanelHideMoreTooltip), findsOneWidget);
-    expect(harness.extents.last, isNot(moreExtent));
-
-    // 选区离开代码块：回到「更多」。
-    controller.updateSelection(
-      const TextSelection.collapsed(offset: 2),
-      quill.ChangeSource.local,
+    expect(closed, 1);
+    // 块后已有 after 段落：光标直接移到它上面，代码块原样保留。
+    expect(
+      env.editorState.selection,
+      Selection.collapsed(Position(path: [2], offset: 0)),
     );
-    await tester.pumpAndSettle();
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(find.byTooltip('插入图片'), findsOneWidget);
-    expect(find.byTooltip(colorPanelHideMoreTooltip), findsOneWidget);
-    expect(harness.extents.last, moreExtent);
+    expect(env.code.type, kDiaryBlockCode);
+    expect(diaryCodeBlockAt(env.editorState.document, const [2]), isNull);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('outside a code block the tool in More leaves More open', (
+  testWidgets('convert to text turns the block into a paragraph and closes', (
     tester,
   ) async {
-    final controller = _codeController(caret: 2);
-    await _pump(tester, controller, order: kDefaultDiaryToolbarOrder);
-    await tester.tap(find.byTooltip(colorPanelMoreTooltip));
+    final env = _editor(language: 'dart');
+    var closed = 0;
+    await _pumpPanel(tester, env.editorState, onClose: () => closed++);
+
+    await tester.tap(find.text('转为正文'));
     await tester.pumpAndSettle();
 
-    await _tapCodeTool(tester);
-
-    expect(diaryCodeBlockAt(controller.document, 2), isNotNull);
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(find.byTooltip('插入图片'), findsOneWidget);
-    expect(find.byTooltip(colorPanelHideMoreTooltip), findsOneWidget);
-  });
-
-  testWidgets('moving the caret out of the block closes the panel', (
-    tester,
-  ) async {
-    final controller = _codeController();
-    final harness = await _pump(tester, controller);
-    await _tapCodeTool(tester);
-
-    // 块内移动不收起。
-    controller.updateSelection(
-      const TextSelection.collapsed(offset: 14),
-      quill.ChangeSource.local,
-    );
-    await tester.pumpAndSettle();
-    expect(find.byType(DiaryCodeBlockPanel), findsOneWidget);
-
-    controller.updateSelection(
-      const TextSelection.collapsed(offset: 20),
-      quill.ChangeSource.local,
-    );
-    await tester.pumpAndSettle();
-    expect(find.byType(DiaryCodeBlockPanel), findsNothing);
-    expect(harness.extents.last, 0);
+    expect(closed, 1);
+    // updateNodeType 会换节点（id 不变）：重新按路径取。
+    final node = env.editorState.document.nodeAtPath([1])!;
+    expect(node.type, kDiaryBlockParagraph);
+    expect(node.delta?.toPlainText(), 'code1\ncode2');
+    expect(diaryCodeBlockAt(env.editorState.document, const [1]), isNull);
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('More lights its dot while the caret is in a language block', (
-    tester,
-  ) async {
-    final controller = _codeController(codeValue: 'python', caret: 2);
-    await _pump(tester, controller, order: kDefaultDiaryToolbarOrder);
-    final dot = find.byKey(const ValueKey<String>('diary-toolbar-more-dot'));
-    double scale() => tester.widget<AnimatedScale>(dot).scale;
-
-    expect(scale(), 0);
-    controller.updateSelection(
-      const TextSelection.collapsed(offset: 8),
-      quill.ChangeSource.local,
-    );
-    await tester.pumpAndSettle();
-    expect(scale(), 1);
   });
 }

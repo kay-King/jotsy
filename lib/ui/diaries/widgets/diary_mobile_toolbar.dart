@@ -1,6 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:appflowy_editor/appflowy_editor.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_attachment_embed_builder.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_audio_embed_builder.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_divider_embed_builder.dart';
@@ -15,31 +14,27 @@ export '../models/diary_toolbar_time_format.dart';
 export 'diary_floating_toolbar.dart';
 export 'diary_toolbar_panel_reserve.dart';
 
-/// 编辑、发布预览和阅读页共用全部 embed；图片点按菜单见 `showDiaryImageOptions`。
+/// 编辑、发布预览和阅读页共用全部块组件（AppFlowy）；图片点按菜单见
+/// `showDiaryImageOptions`。
 /// [onImageOpen]：只读正文里点按图片时调用，第二个参数是从图片画面抓取的
 /// 看图页飞入信息（减少动画或图片未解码时为 null）。
 ///
 /// [foldLongImages]：正文长图折叠（默认）还是完整展开，只有预览页按阅读行为
 /// 设置传入。
-List<quill.EmbedBuilder> buildDiaryQuillEmbedBuilders({
+Map<String, BlockComponentBuilder> buildDiaryBlockComponentBuilders({
   void Function(String imageSource, ImageViewerHero? hero)? onImageOpen,
   bool foldLongImages = true,
 }) {
-  return [
-    if (kIsWeb)
-      ...FlutterQuillEmbeds.defaultEditorBuilders()
-    else ...[
-      // 菜单里删除图片只移出正文，不删文件：撤销或放弃修改后原日记还要用，
-      // 文件由 DiaryMediaCleanupService 按引用回收。
-      DiaryImageEmbedBuilder(
-        onImageOpen: onImageOpen,
-        foldLongImages: foldLongImages,
-      ),
-      const DiaryVideoEmbedBuilder(),
-    ],
-    const DiaryAudioEmbedBuilder(),
-    const DiaryAttachmentEmbedBuilder(),
-    const DiaryAttachmentEmbedBuilder(embedType: 'file'),
-    const DiaryDividerEmbedBuilder(),
-  ];
+  return <String, BlockComponentBuilder>{
+    // 菜单里删除图片只移出正文，不删文件：撤销或放弃修改后原日记还要用，
+    // 文件由 DiaryMediaCleanupService 按引用回收。
+    kDiaryBlockImage: DiaryImageEmbedBuilder(
+      onImageOpen: onImageOpen,
+      foldLongImages: foldLongImages,
+    ),
+    kDiaryBlockVideo: DiaryVideoEmbedBuilder(),
+    kDiaryBlockAudio: DiaryAudioEmbedBuilder(),
+    kDiaryBlockAttachment: DiaryAttachmentEmbedBuilder(),
+    kDiaryBlockDivider: DiaryDividerEmbedBuilder(),
+  };
 }

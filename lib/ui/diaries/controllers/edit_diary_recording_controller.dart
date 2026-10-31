@@ -21,8 +21,15 @@ extension EditDiaryRecordingFlow on EditDiaryController {
 
   Future<void> finishRecording() async {
     final generation = _state._recordingPanelGeneration;
+    final editorState = _state._editorState;
+    // 面板打开时记下的选区；没有时（如从未聚焦）按文档末尾插入，
+    // 与 Quill 时代 selection 无效时取 maxOffset 一致。
     final selection =
-        _state._recordingSelection ?? const TextSelection.collapsed(offset: -1);
+        _state._recordingSelection ??
+        editorState.selection ??
+        Selection.collapsed(
+          Position(path: [editorState.document.root.children.length], offset: 0),
+        );
     final recording = await _state._recordingController.finish();
     if (recording == null) return;
     if (!_state.mounted ||
@@ -34,8 +41,8 @@ extension EditDiaryRecordingFlow on EditDiaryController {
       return;
     }
     try {
-      insertDiaryRecording(
-        controller: _state._contentController,
+      await insertDiaryRecording(
+        editorState: editorState,
         selection: selection,
         recording: recording,
       );

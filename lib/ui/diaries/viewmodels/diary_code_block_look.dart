@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import '../models/diary_code_block/diary_code_block_style.dart';
 import '../models/diary_code_block/diary_code_theme.dart';
 import 'diary_text_appearance.dart';
 
-// 代码块（与行内代码）在某个正文位置的可渲染形态：配色、字体、Quill 的块
-// 样式与行内代码样式。
+// 代码块（与行内代码）在某个正文位置的可渲染形态：配色、字体、块容器的
+// 排布数据与行内代码样式。
 //
 // 输入：代码块样式设置、正文外观、导入字体的字族名，以及正文位置的主题
 // （取明暗与配色）。
@@ -16,6 +15,60 @@ import 'diary_text_appearance.dart';
 //
 // 明暗分两套：代码块跟随设置（可固定深色），行内代码嵌在正文里，始终按
 // 正文所在页面的明暗取色，否则浅色页面上的行内代码会变成一块块深色底。
+//
+// AppFlowy 迁移说明：原来这里直接装出 Quill 的 `DefaultTextBlockStyle` /
+// `InlineCodeStyle` 交给 Quill 渲染；现在只输出纯 Flutter 数据
+// （[DiaryCodeBlockContainerStyle] / [DiaryCodeInlineStyle]），由 AppFlowy
+// 块组件与只读渲染各自取用，不再依赖 flutter_quill。
+
+/// 代码块容器的排布数据：文字样式、上下外边距与装饰（底色、圆角、边框）。
+///
+/// 原来是 `quill.DefaultTextBlockStyle` 携带的信息；AppFlowy 时代块组件
+/// 自己按这份数据排布（标题栏占上外边距，见 [DiaryCodeBlockLook.headerExtent]）。
+@immutable
+class DiaryCodeBlockContainerStyle {
+  const DiaryCodeBlockContainerStyle({
+    required this.textStyle,
+    required this.topMargin,
+    required this.bottomMargin,
+    this.decoration,
+  });
+
+  /// 代码文字样式（字族、字号、行距与正文字色）。
+  final TextStyle textStyle;
+
+  /// 上外边距：块间距 + 标题栏高度（无标题栏时只有块间距）。
+  final double topMargin;
+
+  /// 下外边距：块间距。
+  final double bottomMargin;
+
+  /// 容器装饰：底色、圆角与边框（是否画边框、标题栏是否接上边，见解析逻辑）。
+  final BoxDecoration? decoration;
+}
+
+/// 行内代码的样式：各字阶的文字样式、背景色与圆角。
+///
+/// 原来是 `quill.InlineCodeStyle` 携带的信息；字段名与原来一致，AppFlowy
+/// 只读渲染直接取用。
+@immutable
+class DiaryCodeInlineStyle {
+  const DiaryCodeInlineStyle({
+    this.style,
+    this.header1,
+    this.header2,
+    this.header3,
+    this.backgroundColor,
+    this.radius = DiaryCodeBlockLook.inlineRadius,
+  });
+
+  final TextStyle? style;
+  final TextStyle? header1;
+  final TextStyle? header2;
+  final TextStyle? header3;
+  final Color? backgroundColor;
+  final Radius radius;
+}
 
 /// 代码块在正文位置解析出的外观。
 @immutable
@@ -38,7 +91,7 @@ class DiaryCodeBlockLook {
   /// 行内代码的圆角。
   static const Radius inlineRadius = Radius.circular(4);
 
-  /// Quill 默认行内代码在 h1–h3 中的字号（`DefaultStyles.getInstance`），
+  /// 原来 Quill 默认行内代码在 h1–h3 中的字号（`DefaultStyles.getInstance`），
   /// 再乘代码字号倍数。
   static const List<double> _inlineHeadingSizes = <double>[32, 22, 18];
 
@@ -98,15 +151,14 @@ class DiaryCodeBlockLook {
     final radius = Radius.circular(style.radius);
     final headerExtent = style.header ? headerHeight : 0.0;
     final borderSide = BorderSide(color: palette.border, width: 0.8);
-    final blockStyle = quill.DefaultTextBlockStyle(
-      codeTextStyle,
-      quill.HorizontalSpacing.zero,
-      // 上外边距里留出标题栏的位置（标题栏由代码块装饰层另画），装饰只画
+    final blockStyle = DiaryCodeBlockContainerStyle(
+      textStyle: codeTextStyle,
+      // 上外边距里留出标题栏的位置（标题栏由代码块组件另画），装饰只画
       // 内容区，因此有标题栏时只有下边两个角是圆的，与标题栏拼成一整块；
       // 边框也只画左右下三边，上边由标题栏的边框接上，两者之间不画分隔线。
-      quill.VerticalSpacing(blockGap + headerExtent, blockGap),
-      quill.VerticalSpacing.zero,
-      BoxDecoration(
+      topMargin: blockGap + headerExtent,
+      bottomMargin: blockGap,
+      decoration: BoxDecoration(
         color: palette.background,
         borderRadius: style.header
             ? BorderRadius.vertical(bottom: radius)
@@ -129,13 +181,12 @@ class DiaryCodeBlockLook {
       fontSize: _inlineHeadingSizes[level] * style.fontScale,
       fontWeight: FontWeight.w500,
     );
-    final inlineStyle = quill.InlineCodeStyle(
+    final inlineStyle = DiaryCodeInlineStyle(
       style: inlineText,
       header1: heading(0),
       header2: heading(1),
       header3: heading(2),
       backgroundColor: inlinePalette.inlineBackground,
-      radius: inlineRadius,
     );
 
     return DiaryCodeBlockLook._(
@@ -169,11 +220,11 @@ class DiaryCodeBlockLook {
   /// 代码块文字样式：字族、字号、行距与正文字色。
   final TextStyle codeTextStyle;
 
-  /// Quill 的 `code` 块样式。
-  final quill.DefaultTextBlockStyle blockStyle;
+  /// 代码块容器的排布数据（外边距与装饰）。
+  final DiaryCodeBlockContainerStyle blockStyle;
 
-  /// Quill 的 `inlineCode` 样式。
-  final quill.InlineCodeStyle inlineStyle;
+  /// 行内代码样式。
+  final DiaryCodeInlineStyle inlineStyle;
 
   bool get lineNumbers => style.lineNumbers;
 

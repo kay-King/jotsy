@@ -29,6 +29,12 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   flutter_quill: ^11.6.0
   flutter_quill_extensions: ^11.0.0
+  # AppFlowy 编辑器（UI 迁移中）：git 版；keyboard_height_plugin 用 override
+  # 强制 0.3.0（0.1.5 编译于 android-31，CI 要求 compileSdk 33+）。
+  appflowy_editor:
+    git:
+      url: https://github.com/AppFlowy-IO/appflowy-editor.git
+      ref: 01eccc6ee36bd07698bd80915289fe7070478cd2
   file_picker: ^10.3.10
   smooth_sheets: ^0.17.0
   geolocator: ^14.0.2
@@ -108,3 +114,8 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: assets/app_icon/mingcute_icon.png
+
+dependency_overrides:
+  # appflowy_editor 传递依赖的 keyboard_height_plugin 0.1.5 编译于
+  # android-31，CI 要求 compileSdk 33+；强制 0.3.0（要求 compileSdk 34+）。
+  keyboard_height_plugin: ^0.3.0

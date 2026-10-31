@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -73,10 +72,8 @@ void main() {
               child: MaterialApp(
                 theme: expressiveTestTheme(brightness),
                 locale: Locale(brightness == Brightness.light ? 'en' : 'zh'),
-                localizationsDelegates: const [
-                  ...AppLocalizations.localizationsDelegates,
-                  quill.FlutterQuillLocalizations.delegate,
-                ],
+                localizationsDelegates:
+                    AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: Builder(
                   builder: (context) => Scaffold(

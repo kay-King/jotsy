@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_appflowy.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_appflowy_preview.dart';
 import 'package:node_diary/ui/diaries/widgets/publish_diary_preview.dart';
 
 import '../../../support/expressive_test_theme.dart';
@@ -17,7 +18,6 @@ void main() {
             locale: const Locale('en'),
             localizationsDelegates: const [
               ...AppLocalizations.localizationsDelegates,
-              quill.FlutterQuillLocalizations.delegate,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
@@ -42,7 +42,7 @@ void main() {
     );
     expect(find.text('Untitled diary'), findsOneWidget);
     expect(find.text('No content'), findsOneWidget);
-    expect(find.byType(quill.QuillEditor), findsNothing);
+    expect(find.byType(DiaryAppFlowyPreview), findsNothing);
   });
 
   // 正文不是 Delta JSON（旧数据、导入异常）时页面仍能打开，按纯文本显示。
@@ -58,11 +58,10 @@ void main() {
       ),
     );
     expect(find.text('A walk'), findsOneWidget);
-    expect(find.byType(quill.QuillEditor), findsOneWidget);
-    final controller = tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .controller;
-    expect(controller.document.toPlainText().trim(), 'Plain body');
-    expect(controller.readOnly, isTrue);
+    expect(find.byType(DiaryAppFlowyPreview), findsOneWidget);
+    final document = tester
+        .widget<DiaryAppFlowyPreview>(find.byType(DiaryAppFlowyPreview))
+        .document;
+    expect(diaryDocumentToPlainText(document).trim(), 'Plain body');
   });
 }

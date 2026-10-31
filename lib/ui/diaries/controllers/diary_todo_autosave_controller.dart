@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import '../../../core/database/app_database.dart';
 import '../../../core/database/content_codec.dart';
@@ -20,6 +20,11 @@ import '../../../core/database/content_codec.dart';
 /// 生命周期：[dispose] 时若还有没写的勾选（防抖未到期或正在排队），立即按
 /// 当下的文档写入一次——左右翻页会把刚勾完待办的那页翻走并回收，不能把这次
 /// 勾选丢掉。调用方必须在释放文档之前调用 [dispose]。之后不再回调 [onSaved]。
+///
+/// AppFlowy 迁移说明：原来读 `quill.Document`，经 [encodeDiaryDocumentToJson]
+/// 与 [extractPlainTextFromDiaryDocument] 读写；现在读 AppFlowy [Document]，
+/// 经 [encodeAppFlowyDocumentToJson] 与 [extractPlainTextFromAppFlowyDocument]
+/// 读写，防抖与写入逻辑不变。
 class DiaryTodoAutoSaveController {
   DiaryTodoAutoSaveController({
     required this.readDetail,
@@ -32,7 +37,7 @@ class DiaryTodoAutoSaveController {
   static const Duration debounce = Duration(milliseconds: 260);
 
   final DiaryWithTags? Function() readDetail;
-  final quill.Document? Function() readDocument;
+  final Document? Function() readDocument;
   final AppDatabase Function() readDatabase;
   final VoidCallback onSaved;
 
@@ -56,7 +61,7 @@ class DiaryTodoAutoSaveController {
     if (detail == null || document == null) {
       return null;
     }
-    final contentDocJson = encodeDiaryDocumentToJson(document);
+    final contentDocJson = encodeAppFlowyDocumentToJson(document);
     // 内容未变化直接跳过，减少无效写库。
     if (contentDocJson == detail.diary.content) {
       return null;
@@ -64,7 +69,7 @@ class DiaryTodoAutoSaveController {
     return _TodoSnapshot(
       diaryId: detail.diary.diaryId,
       contentDocJson: contentDocJson,
-      contentText: extractPlainTextFromDiaryDocument(document),
+      contentText: extractPlainTextFromAppFlowyDocument(document),
     );
   }
 
