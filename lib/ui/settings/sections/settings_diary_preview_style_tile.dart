@@ -20,7 +20,7 @@ class SettingsDiaryPreviewStyleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 4);
+    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 2);
     return settingsAsync.when(
       data: (SettingsService settings) => ValueListenableBuilder<String?>(
         valueListenable: settings.diaryPreviewStyleRawNotifier,

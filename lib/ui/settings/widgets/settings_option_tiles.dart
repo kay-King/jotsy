@@ -58,8 +58,8 @@ class SettingsSwitchTile extends StatelessWidget {
       contentPadding: EdgeInsetsDirectional.only(
         start: indentFor(nested: nested, deep: deep),
         end: 16,
-        top: 10,
-        bottom: 10,
+        top: 8,
+        bottom: 8,
       ),
       // 与 listTileTheme 的标题样式合并，只改字号与字重。
       title: Text(title, style: nested ? nestedTitleStyle : null),
@@ -111,7 +111,7 @@ class SettingsSliderTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         nested ? SettingsSwitchTile.nestedIndent : 16,
-        12,
+        10,
         16,
         0,
       ),
@@ -186,9 +186,9 @@ class SettingsChoiceTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         nested ? SettingsSwitchTile.nestedIndent : 16,
+        12,
+        16,
         14,
-        16,
-        16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

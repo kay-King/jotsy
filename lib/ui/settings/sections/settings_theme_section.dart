@@ -303,7 +303,7 @@ class _FontScaleSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       title: Text(l10n.settingsFontScale),
       subtitle: Text(l10n.settingsFontScaleSubtitle),
       trailing: Row(
@@ -362,7 +362,7 @@ class _TabSwitchCurveSelector extends StatelessWidget {
                 dense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 onTap: () => Navigator.of(
                   dialogContext,
@@ -381,7 +381,7 @@ class _TabSwitchCurveSelector extends StatelessWidget {
                 dense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 onTap: () => Navigator.of(
                   dialogContext,
@@ -399,7 +399,7 @@ class _TabSwitchCurveSelector extends StatelessWidget {
                 dense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 onTap: () => Navigator.of(
                   dialogContext,
@@ -428,7 +428,7 @@ class _TabSwitchCurveSelector extends StatelessWidget {
     final l10n = context.l10n;
     final currentLabel = _labelForCurve(l10n, selectedCurveType);
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       title: Text(l10n.settingsTabSwitchCurve),
       subtitle: Text(l10n.settingsTabSwitchCurveSubtitle),
       trailing: Row(

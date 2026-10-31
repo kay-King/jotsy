@@ -120,7 +120,7 @@ class AppearanceLanguagePage extends ConsumerWidget {
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 4,
+                      vertical: 2,
                     ),
                     title: Text(
                       l10n.settingsLanguage,
@@ -140,7 +140,7 @@ class AppearanceLanguagePage extends ConsumerWidget {
                 loading: () => ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 4,
+                    vertical: 2,
                   ),
                   title: Text(l10n.settingsLanguage),
                   subtitle: Text(l10n.settingsLanguageSubtitle),
@@ -148,7 +148,7 @@ class AppearanceLanguagePage extends ConsumerWidget {
                 error: (_, __) => ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 4,
+                    vertical: 2,
                   ),
                   title: Text(l10n.settingsLanguage),
                   subtitle: Text(l10n.settingsLanguageSubtitle),

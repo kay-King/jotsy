@@ -23,7 +23,7 @@ class DiaryPreviewStyleBodyTab extends StatelessWidget {
     final l10n = context.l10n;
     final body = controller.style.body;
     final behavior = controller.behavior;
-    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 4);
+    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 2);
 
     void commit(DiaryPreviewBodyStyle next) =>
         controller.commitWith((style) => style.copyWith(body: next));

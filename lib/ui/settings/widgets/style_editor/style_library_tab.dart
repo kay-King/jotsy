@@ -171,7 +171,7 @@ class StyleLibraryTab<S, L extends StyleLibrary<S, L>, P>
     final l10n = context.l10n;
     final saved = controller.settings.saved;
     final matchingSaved = controller.matchingSaved;
-    const tilePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 4);
+    const tilePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 2);
     return StyleEditorTabList(
       children: <Widget>[
         SettingsCardGroup(

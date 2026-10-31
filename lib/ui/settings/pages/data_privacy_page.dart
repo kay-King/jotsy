@@ -92,7 +92,7 @@ class DataPrivacyPage extends ConsumerWidget {
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 leading: FaIcon(
                   FontAwesomeIcons.database,
@@ -126,7 +126,7 @@ class DataPrivacyPage extends ConsumerWidget {
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 4,
+                              vertical: 2,
                             ),
                             title: Text(l10n.settingsAppLock),
                             subtitle: Text(l10n.settingsAppLockSubtitle),
@@ -150,7 +150,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 loading: () => ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 4,
+                    vertical: 2,
                   ),
                   title: Text(l10n.settingsAppLock),
                   subtitle: Text(l10n.settingsAppLockSubtitle),
@@ -158,7 +158,7 @@ class DataPrivacyPage extends ConsumerWidget {
                 error: (_, __) => ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 4,
+                    vertical: 2,
                   ),
                   title: Text(l10n.settingsAppLock),
                   subtitle: Text(l10n.settingsAppLockSubtitle),
@@ -167,7 +167,7 @@ class DataPrivacyPage extends ConsumerWidget {
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 leading: FaIcon(
                   FontAwesomeIcons.filePen,
@@ -190,7 +190,7 @@ class DataPrivacyPage extends ConsumerWidget {
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 4,
+                  vertical: 2,
                 ),
                 leading: FaIcon(
                   FontAwesomeIcons.trashCan,

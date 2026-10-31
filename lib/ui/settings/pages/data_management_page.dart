@@ -94,7 +94,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 4,
+                        vertical: 2,
                       ),
                       leading: FaIcon(
                         FontAwesomeIcons.fileExport,
@@ -112,7 +112,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 4,
+                        vertical: 2,
                       ),
                       leading: FaIcon(
                         FontAwesomeIcons.bookOpen,
@@ -143,7 +143,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 4,
+                        vertical: 2,
                       ),
                       leading: FaIcon(
                         FontAwesomeIcons.fileImport,
@@ -161,7 +161,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 4,
+                        vertical: 2,
                       ),
                       leading: FaIcon(
                         FontAwesomeIcons.rightToBracket,
@@ -181,7 +181,7 @@ class _DataManagementPageState extends ConsumerState<DataManagementPage>
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 4,
+                        vertical: 2,
                       ),
                       leading: FaIcon(
                         FontAwesomeIcons.cloudArrowUp,

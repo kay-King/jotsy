@@ -226,7 +226,9 @@ class _SettingsDestination extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      // 图标槽与标题的间距略收紧（默认 16），行更紧凑。
+      horizontalTitleGap: 12,
       // 照 IdeaMemo 设置页：图标裸置、无底块，正文色单色线条感，
       // 固定 40 宽槽位保持各行标题对齐。
       leading: SizedBox(
