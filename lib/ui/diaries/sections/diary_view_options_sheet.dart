@@ -10,6 +10,54 @@ import '../../notebooks/viewmodels/notebook_labels.dart';
 import '../../widgets/expressive_choice_tile.dart';
 import 'diary_head_section.dart';
 
+/// 横排分段控件：白底圆角轨道 + 轻微阴影，选中段 Salt 蓝底白字。
+/// 与设置页主题模式的横排三段式同式。
+class _SaltSegmented<T> extends StatelessWidget {
+  const _SaltSegmented({
+    required this.segments,
+    required this.selected,
+    required this.onSelectionChanged,
+    this.minSegmentWidth = 72,
+  });
+
+  final List<ButtonSegment<T>> segments;
+  final Set<T> selected;
+  final ValueChanged<Set<T>> onSelectionChanged;
+  final double minSegmentWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+            // 轨道白底；选中片 Salt 蓝、选中字白。只影响这一棵子树。
+            surfaceContainerHigh: Colors.white,
+            surfaceContainerLowest: const Color(0xFF0470E6),
+            onSurface: Colors.white,
+          ),
+        ),
+        child: ExpressiveButtonGroup<T>(
+          minSegmentWidth: minSegmentWidth,
+          segments: segments,
+          selected: selected,
+          onSelectionChanged: onSelectionChanged,
+        ),
+      ),
+    );
+  }
+}
+
 /// 打开日记列表的视图选项面板：排序依据、正/倒序与布局，以及（传入
 /// [onOpenCardStyle] 时）进入卡片样式页的入口、（传入 [onOpenNotebookShelf]
 /// 时）打开书架的入口。
@@ -171,15 +219,21 @@ class _DiaryViewOptionsSheetState extends State<DiaryViewOptionsSheet> {
                 label: l10n.autoT0141,
               ),
               const SizedBox(height: AppSpacing.xs),
-              for (final field in DiarySortField.values)
-                ExpressiveChoiceTile(
-                  label: _sortFieldLabel(l10n, field),
-                  selected: _sortMode.field == field,
-                  // 换排序依据时保留当前正/倒序。
-                  onTap: () => _selectSortMode(_sortMode.withField(field)),
-                ),
+              _SaltSegmented<DiarySortField>(
+                segments: <ButtonSegment<DiarySortField>>[
+                  for (final field in DiarySortField.values)
+                    ButtonSegment<DiarySortField>(
+                      value: field,
+                      label: Text(_sortFieldLabel(l10n, field)),
+                    ),
+                ],
+                selected: <DiarySortField>{_sortMode.field},
+                // 换排序依据时保留当前正/倒序。
+                onSelectionChanged: (Set<DiarySortField> selection) =>
+                    _selectSortMode(_sortMode.withField(selection.single)),
+              ),
               const SizedBox(height: AppSpacing.s),
-              ExpressiveButtonGroup<DiarySortDirection>(
+              _SaltSegmented<DiarySortDirection>(
                 segments: <ButtonSegment<DiarySortDirection>>[
                   ButtonSegment<DiarySortDirection>(
                     value: DiarySortDirection.descending,
@@ -205,24 +259,29 @@ class _DiaryViewOptionsSheetState extends State<DiaryViewOptionsSheet> {
               const SizedBox(height: AppSpacing.s),
               _SortEffectHint(text: _sortEffectHint(l10n, _sortMode)),
             ],
-            const SizedBox(height: AppSpacing.l),
+            const SizedBox(height: AppSpacing.m),
             _SectionHeader(
               icon: FontAwesomeIcons.tableCellsLarge,
               label: l10n.autoT0145,
             ),
             const SizedBox(height: AppSpacing.xs),
-            ExpressiveChoiceTile(
-              label: l10n.autoT0146,
-              selected: _layoutMode == DiaryLayoutMode.list,
-              onTap: () => _selectLayoutMode(DiaryLayoutMode.list),
-            ),
-            ExpressiveChoiceTile(
-              label: l10n.autoT0147,
-              selected: _layoutMode == DiaryLayoutMode.waterfall,
-              onTap: () => _selectLayoutMode(DiaryLayoutMode.waterfall),
+            _SaltSegmented<DiaryLayoutMode>(
+              segments: <ButtonSegment<DiaryLayoutMode>>[
+                ButtonSegment<DiaryLayoutMode>(
+                  value: DiaryLayoutMode.list,
+                  label: Text(l10n.autoT0146),
+                ),
+                ButtonSegment<DiaryLayoutMode>(
+                  value: DiaryLayoutMode.waterfall,
+                  label: Text(l10n.autoT0147),
+                ),
+              ],
+              selected: <DiaryLayoutMode>{_layoutMode},
+              onSelectionChanged: (Set<DiaryLayoutMode> selection) =>
+                  _selectLayoutMode(selection.single),
             ),
             if (widget.onOpenNotebookShelf case final openShelf?) ...<Widget>[
-              const SizedBox(height: AppSpacing.l),
+              const SizedBox(height: AppSpacing.m),
               _SectionHeader(
                 icon: FontAwesomeIcons.book,
                 label: l10n.notebookTitle,
@@ -244,7 +303,7 @@ class _DiaryViewOptionsSheetState extends State<DiaryViewOptionsSheet> {
               ),
             ],
             if (widget.onOpenCardStyle case final openCardStyle?) ...<Widget>[
-              const SizedBox(height: AppSpacing.l),
+              const SizedBox(height: AppSpacing.m),
               _SectionHeader(
                 icon: FontAwesomeIcons.palette,
                 label: l10n.diaryCardStyleSheetSection,

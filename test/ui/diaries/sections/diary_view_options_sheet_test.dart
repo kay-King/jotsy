@@ -53,12 +53,6 @@ Future<_Calls> _openSheet(
   return calls;
 }
 
-Color? _tileColor(WidgetTester tester, String label) => tester
-    .widget<ListTile>(
-      find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
-    )
-    .tileColor;
-
 void main() {
   testWidgets('options apply on tap while the sheet stays open', (
     tester,
@@ -94,24 +88,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(calls.layouts, <DiaryLayoutMode>[DiaryLayoutMode.waterfall]);
     expect(find.byType(DiaryViewOptionsSheet), findsOneWidget);
-  });
-
-  testWidgets('the selected tile blends its color instead of switching', (
-    tester,
-  ) async {
-    await _openSheet(tester);
-    expect(_tileColor(tester, '发表时间')!.a, 0);
-
-    await tester.tap(find.text('发表时间'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 90));
-    final midAlpha = _tileColor(tester, '发表时间')!.a;
-    expect(midAlpha, greaterThan(0));
-    expect(midAlpha, lessThan(1));
-
-    await tester.pumpAndSettle();
-    expect(_tileColor(tester, '发表时间')!.a, 1);
-    expect(_tileColor(tester, '更新时间')!.a, 0);
   });
 
   testWidgets('a short screen with large text scrolls instead of overflowing', (
