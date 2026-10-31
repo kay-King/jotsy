@@ -20,12 +20,7 @@ subprojects {
 // 否则 keyboard_height_plugin（compileSdk 31）会因 AndroidX 依赖要求 33/34 而构建失败
 subprojects {
     plugins.withId("com.android.library") {
-        extensions.configure<com.android.build.gradle.LibraryExtension> {
-            compileSdk = 34
-        }
-    }
-    plugins.withId("com.android.application") {
-        extensions.configure<com.android.build.gradle.AppExtension> {
+        extensions.configure<com.android.build.api.dsl.LibraryExtension> {
             compileSdk = 34
         }
     }
