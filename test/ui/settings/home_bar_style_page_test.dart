@@ -280,10 +280,7 @@ void main() {
     await openHomeBarStyleTab(tester, l10n.homeBarStyleTabBehavior);
     expect(inHomeBarOptions(l10n.homeBarStyleHideOnScroll), findsNothing);
     expect(
-      find.descendant(
-        of: find.byType(BottomSheet),
-        matching: find.textContaining(l10n.homeBarStyleHideOnScrollSolidHint),
-      ),
+      find.textContaining(l10n.homeBarStyleHideOnScrollSolidHint),
       findsOneWidget,
     );
 

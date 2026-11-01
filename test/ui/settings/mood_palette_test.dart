@@ -72,22 +72,10 @@ void main() {
     });
 
     test('colorForWeight clamps to the ten slots', () {
-      expect(
-        MoodPalette.defaults.colorForWeight(1),
-        const Color(0xFF5C6BC0),
-      );
-      expect(
-        MoodPalette.defaults.colorForWeight(10),
-        const Color(0xFFEC407A),
-      );
-      expect(
-        MoodPalette.defaults.colorForWeight(0),
-        const Color(0xFF5C6BC0),
-      );
-      expect(
-        MoodPalette.defaults.colorForWeight(99),
-        const Color(0xFFEC407A),
-      );
+      expect(MoodPalette.defaults.colorForWeight(1), const Color(0xFF5C6BC0));
+      expect(MoodPalette.defaults.colorForWeight(10), const Color(0xFFEC407A));
+      expect(MoodPalette.defaults.colorForWeight(0), const Color(0xFF5C6BC0));
+      expect(MoodPalette.defaults.colorForWeight(99), const Color(0xFFEC407A));
     });
   });
 
@@ -101,10 +89,7 @@ void main() {
       expect(settings.moodPalette, MoodPalette.defaults);
       expect(settings.moodPaletteRaw, isNull);
 
-      final custom = MoodPalette.defaults.withColor(
-        0,
-        const Color(0xFFFF0000),
-      );
+      final custom = MoodPalette.defaults.withColor(0, const Color(0xFFFF0000));
       await settings.setMoodPalette(custom);
       expect(settings.moodPalette, custom);
       expect(settings.moodPaletteRaw, isNotNull);
@@ -182,7 +167,7 @@ void main() {
       final l10n = AppLocalizations.of(
         tester.element(find.byType(MoodOptionsPage)),
       );
-      return (l10n: l10n,);
+      return (l10n: l10n);
     }
 
     testWidgets('picks a color from the sheet and saves it', (

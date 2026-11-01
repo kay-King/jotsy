@@ -66,10 +66,7 @@ void main() {
       expect(find.text('v0.8.1'), findsOneWidget);
       // 版本要点直接可见，完整内容默认收起。
       expect(find.textContaining('心情色板'), findsWidgets);
-      expect(
-        find.textContaining('十种心情各有自己的颜色，从靛紫'),
-        findsNothing,
-      );
+      expect(find.textContaining('十种心情各有自己的颜色，从靛紫'), findsNothing);
       // 末尾的卡片在首屏之外，滚到可见再断言。
       await tester.scrollUntilVisible(find.text('v0.8.0'), 300);
       expect(find.text('v0.8.0'), findsOneWidget);
@@ -83,10 +80,7 @@ void main() {
       await tester.tap(find.text('展开全部').first);
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('十种心情各有自己的颜色，从靛紫'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('十种心情各有自己的颜色，从靛紫'), findsOneWidget);
 
       // 展开后按钮被顶到首屏之外，先滚回来再点收起。
       await tester.ensureVisible(find.text('收起').first);
@@ -94,10 +88,7 @@ void main() {
       await tester.tap(find.text('收起').first);
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('十种心情各有自己的颜色，从靛紫'),
-        findsNothing,
-      );
+      expect(find.textContaining('十种心情各有自己的颜色，从靛紫'), findsNothing);
     });
   });
 }

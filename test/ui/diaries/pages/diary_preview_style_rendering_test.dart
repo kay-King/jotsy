@@ -14,9 +14,9 @@ import 'package:node_diary/ui/diaries/models/diary_preview_style/diary_preview_b
 import 'package:node_diary/ui/diaries/models/diary_preview_style/diary_preview_settings.dart';
 import 'package:node_diary/ui/diaries/models/diary_preview_style/diary_preview_style.dart';
 import 'package:node_diary/ui/diaries/pages/diary_preview_page.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_appflowy_preview.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_preview_overlays.dart';
 import 'package:node_diary/ui/diaries/widgets/publish_diary_cover_sliver.dart';
-import 'package:node_diary/ui/diaries/widgets/diary_image_embed_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../support/expressive_test_theme.dart';
@@ -152,7 +152,7 @@ void main() {
     );
     expect(
       _top(tester, find.text('西湖')),
-      greaterThan(_top(tester, find.byType(quill.QuillEditor))),
+      greaterThan(_top(tester, find.byType(DiaryAppFlowyPreview))),
     );
     expect(
       _top(tester, find.text('西湖')),
@@ -322,23 +322,22 @@ void main() {
         textSelection: false,
       ),
     );
-    final config = tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .config;
-    expect(config.checkBoxReadOnly, isTrue);
-    expect(config.enableInteractiveSelection, isFalse);
+    final preview = tester.widget<DiaryAppFlowyPreview>(
+      find.byType(DiaryAppFlowyPreview),
+    );
+    // todoToggle: false → onToggleTodo 为 null，复选框只读。
+    expect(preview.onToggleTodo, isNull);
+    expect(preview.textSelection, isFalse);
   });
 
   testWidgets('the long image behavior reaches the body image builder', (
     tester,
   ) async {
-    bool foldsLongImages() => tester
-        .widget<quill.QuillEditor>(find.byType(quill.QuillEditor))
-        .config
-        .embedBuilders!
-        .whereType<DiaryImageEmbedBuilder>()
-        .single
-        .foldLongImages;
+    bool foldsLongImages() =>
+        tester
+            .widget<DiaryAppFlowyPreview>(find.byType(DiaryAppFlowyPreview))
+            .longImageMode ==
+        DiaryPreviewLongImageMode.fold;
 
     await _pump(tester);
     expect(foldsLongImages(), isTrue);
@@ -364,7 +363,7 @@ void main() {
         page: DiaryPreviewPageStyle(limitWidth: true, contentWidth: 600),
       ),
     );
-    final editor = tester.getRect(find.byType(quill.QuillEditor));
+    final editor = tester.getRect(find.byType(DiaryAppFlowyPreview));
     expect(editor.width, closeTo(600 - 32, 0.5));
     expect(editor.center.dx, closeTo(500, 0.5));
   });
@@ -434,7 +433,7 @@ void main() {
       before,
     );
     expect(
-      Theme.of(tester.element(find.byType(quill.QuillEditor))).brightness,
+      Theme.of(tester.element(find.byType(DiaryAppFlowyPreview))).brightness,
       Brightness.dark,
     );
   });

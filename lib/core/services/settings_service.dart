@@ -451,6 +451,7 @@ class SettingsService {
     }
     return MoodPalette.defaults;
   }
+
   String? get calendarDisplayOptionsRaw =>
       calendarDisplayOptionsRawNotifier.value;
   String? get diaryCardStyleRaw => diaryCardStyleRawNotifier.value;
@@ -469,6 +470,7 @@ class SettingsService {
   String? get profileAvatarPath => profileAvatarPathNotifier.value;
   String get profileBio => profileBioNotifier.value;
   String? get profileCoverPath => profileCoverPathNotifier.value;
+
   /// 当前 10 个心情符号；唯一来源是心情色板（旧符号键在首次读取时迁移）。
   List<String> get moodOptions => moodPalette.symbols;
   int get diaryCardTagLimit => diaryCardTagLimitNotifier.value;

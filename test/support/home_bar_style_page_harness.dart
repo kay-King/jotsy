@@ -65,21 +65,42 @@ Future<(SettingsService, AppLocalizations)> pumpHomeBarStylePage(
 HomeBarSettings storedHomeBarSettings(SettingsService settings) =>
     HomeBarSettings.decode(settings.homeBarStyleRaw);
 
-/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
-Future<void> openHomeBarStyleTab(WidgetTester tester, String label) async {
-  final button = find.text(label);
+/// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
+/// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
+Future<void> openHomeBarStyleTab(
+  WidgetTester tester,
+  String label, {
+  AppLocalizations? l10n,
+}) async {
+  final resolvedL10n =
+      l10n ?? AppLocalizations.of(tester.element(find.byType(Scaffold).first));
+  final button = find.byTooltip(resolvedL10n.styleEditorSettingsTitle);
   await tester.ensureVisible(button);
   await tester.pumpAndSettle();
   await tester.tap(button);
   await tester.pumpAndSettle();
+  final sectionHeader = find.text(label);
+  if (sectionHeader.evaluate().isEmpty) {
+    await tester.dragUntilVisible(
+      sectionHeader,
+      find.byType(Scaffold).last,
+      const Offset(0, -200),
+    );
+    await tester.pumpAndSettle();
+  } else {
+    await tester.ensureVisible(sectionHeader);
+    await tester.pumpAndSettle();
+  }
 }
 
-/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+/// 关掉选项整页：直接 Navigator.pop 回到全屏预览。
+/// AppTopBar 用自定义返回键（FontAwesome angleLeft），不用标准 BackButton。
 Future<void> closeHomeBarStyleSheet(
   WidgetTester tester,
   AppLocalizations l10n,
 ) async {
-  await tester.tap(find.byTooltip(l10n.commonClose));
+  final context = tester.element(find.byType(Scaffold).first);
+  Navigator.of(context).pop();
   await tester.pumpAndSettle();
 }
 
@@ -93,24 +114,19 @@ Future<Finder> openHomeBarStyleMenu(
   return find.widgetWithText(MenuItemButton, l10n.commonReset);
 }
 
-/// BottomSheet 里的纵向滚动列表。
-Finder homeBarSheetScrollable() => find
-    .descendant(
-      of: find.byType(BottomSheet),
-      matching: find.byWidgetPredicate(
-        (widget) =>
-            widget is Scrollable && widget.axisDirection == AxisDirection.down,
-      ),
-    )
-    .first;
+/// 选项整页里的纵向滚动列表。
+Finder homeBarSheetScrollable() => find.byWidgetPredicate(
+  (widget) =>
+      widget is Scrollable && widget.axisDirection == AxisDirection.down,
+);
 
-/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
+/// 选项列表是懒构建的：目标还没进树时先在选项整页里向下滚动。
 Future<void> scrollToHomeBarOption(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
+    await tester.dragUntilVisible(
       finder,
-      120,
-      scrollable: homeBarSheetScrollable(),
+      find.byType(Scaffold).last,
+      const Offset(0, -200),
     );
   }
   await tester.ensureVisible(finder);
@@ -123,6 +139,6 @@ Future<void> tapHomeBarOption(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
-/// 选项 BottomSheet 里的某个文字（不含下方预览）。
+/// 选项整页里的某个文字（不含下方预览）。
 Finder inHomeBarOptions(String text) =>
-    find.descendant(of: find.byType(BottomSheet), matching: find.text(text));
+    find.descendant(of: find.byType(Scaffold), matching: find.text(text));

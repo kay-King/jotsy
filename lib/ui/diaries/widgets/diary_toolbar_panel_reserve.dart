@@ -94,8 +94,5 @@ void revealDiaryCaretAbove(
   if (scrollService == null) {
     return;
   }
-  scrollService.scrollTo(
-    scrollService.dy + coveredHeight,
-    duration: duration,
-  );
+  scrollService.scrollTo(scrollService.dy + coveredHeight, duration: duration);
 }

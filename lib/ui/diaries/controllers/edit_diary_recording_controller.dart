@@ -28,7 +28,10 @@ extension EditDiaryRecordingFlow on EditDiaryController {
         _state._recordingSelection ??
         editorState.selection ??
         Selection.collapsed(
-          Position(path: [editorState.document.root.children.length], offset: 0),
+          Position(
+            path: [editorState.document.root.children.length],
+            offset: 0,
+          ),
         );
     final recording = await _state._recordingController.finish();
     if (recording == null) return;

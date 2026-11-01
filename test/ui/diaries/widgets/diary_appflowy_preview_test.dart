@@ -77,28 +77,27 @@ void main() {
     WidgetTester tester, {
     required Document doc,
     void Function(Node node, bool checked)? onToggleTodo,
-  }) =>
-      tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: expressiveTestTheme(Brightness.light),
-            locale: const Locale('en'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: DiaryAppFlowyPreview(
-                  document: doc,
-                  appearance: const DiaryTextAppearance(
-                    typography: DiaryTypography(),
-                  ),
-                  onToggleTodo: onToggleTodo,
-                ),
+  }) => tester.pumpWidget(
+    ProviderScope(
+      child: MaterialApp(
+        theme: expressiveTestTheme(Brightness.light),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: DiaryAppFlowyPreview(
+              document: doc,
+              appearance: const DiaryTextAppearance(
+                typography: DiaryTypography(),
               ),
+              onToggleTodo: onToggleTodo,
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 
   testWidgets('renders text blocks, lists and code', (tester) async {
     await pumpPreview(tester, doc: document());
@@ -166,9 +165,6 @@ void main() {
       isTrue,
     );
     // 普通文字：有可见内容。
-    expect(
-      diaryAppFlowyDocumentHasVisibleContent(document()),
-      isTrue,
-    );
+    expect(diaryAppFlowyDocumentHasVisibleContent(document()), isTrue);
   });
 }

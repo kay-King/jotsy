@@ -120,8 +120,9 @@ class _SamplePage extends ConsumerStatefulWidget {
 
 class _SamplePageState extends ConsumerState<_SamplePage> {
   // 示例的待办只在本地勾选（不写库）：EditorState 持有文档，勾选经事务写回。
-  late final EditorState _editorState =
-      diaryEditorStateFromStoredJson(widget.detail.diary.content);
+  late final EditorState _editorState = diaryEditorStateFromStoredJson(
+    widget.detail.diary.content,
+  );
   final ScrollController _scroll = ScrollController();
   late final DiaryPreviewViewData _viewData = DiaryPreviewViewData.resolve(
     widget.detail.diary,
@@ -150,8 +151,7 @@ class _SamplePageState extends ConsumerState<_SamplePage> {
       appSeed: widget.appSeed,
       screenSize: MediaQuery.sizeOf(context),
       reduceMotion: MediaQuery.disableAnimationsOf(context),
-      moodPalette:
-          ref.watch(moodPaletteProvider).value ?? MoodPalette.defaults,
+      moodPalette: ref.watch(moodPaletteProvider).value ?? MoodPalette.defaults,
       moodEmoji: _viewData.moodEmoji,
       firstTagColor: detail.tags.isEmpty ? null : detail.tags.first.color,
     );

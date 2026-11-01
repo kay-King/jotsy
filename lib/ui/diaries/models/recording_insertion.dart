@@ -18,10 +18,9 @@ Future<void> insertDiaryRecording({
   final transaction = editorState.transaction;
   final normalized = selection.normalized;
   final anchor = editorState.getNodeAtPath(normalized.end.path);
-  final insertPath =
-      anchor == null
-          ? [editorState.document.root.children.length]
-          : anchor.path.next;
+  final insertPath = anchor == null
+      ? [editorState.document.root.children.length]
+      : anchor.path.next;
   transaction.insertNode(
     insertPath,
     Node(type: kDiaryBlockAudio, attributes: _audioAttributes(recording)),

@@ -92,10 +92,7 @@ class DiaryColorValue {
   }
 
   /// 从选区样式（行内属性表）里读取。
-  factory DiaryColorValue.of(
-    Attributes attributes,
-    DiaryColorTarget target,
-  ) {
+  factory DiaryColorValue.of(Attributes attributes, DiaryColorTarget target) {
     final value = attributes[target.attributeKey];
     return DiaryColorValue.parse(value is String ? value : null);
   }

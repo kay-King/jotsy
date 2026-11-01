@@ -18,10 +18,9 @@ Future<void> insertDiaryMediaBlocks({
   final normalized = selection.normalized;
   // 保留选中的正文：锚定在选区末端所在节点之后插入，不删除选区内容。
   final anchor = editorState.getNodeAtPath(normalized.end.path);
-  var insertPath =
-      anchor == null
-          ? [editorState.document.root.children.length]
-          : anchor.path.next;
+  var insertPath = anchor == null
+      ? [editorState.document.root.children.length]
+      : anchor.path.next;
   for (final embed in embeds) {
     transaction.insertNode(insertPath, embed);
     insertPath = insertPath.next;

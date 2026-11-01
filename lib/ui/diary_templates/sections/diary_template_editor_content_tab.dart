@@ -184,7 +184,9 @@ class _DiaryTemplateEditorContentTabState
             ),
           ),
         ),
-        DiaryTemplateVariableBar(onInsert: (token) => unawaited(_insert(token))),
+        DiaryTemplateVariableBar(
+          onInsert: (token) => unawaited(_insert(token)),
+        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l),
@@ -194,8 +196,7 @@ class _DiaryTemplateEditorContentTabState
               autoFocus: false,
               editorStyle: _editorStyle(context, appearance),
               blockComponentBuilders: _blockBuilders(
-                paragraphSpacing:
-                    appearance.typography.paragraphSpacing,
+                paragraphSpacing: appearance.typography.paragraphSpacing,
                 hint: l10n.diaryTemplateEditorBodyHint,
               ),
               // 旧 Quill 编辑器没有 Markdown 快捷输入（如 `---` 变分隔线）：
@@ -279,10 +280,7 @@ Node? _lastTextNode(EditorState editorState) {
 
 /// 模板正文的编辑器样式：字体、字号、行距、字间距跟随正文排版设置
 ///（[DiaryTextAppearance]），与 Quill 时代的模板编辑器同口径。
-EditorStyle _editorStyle(
-  BuildContext context,
-  DiaryTextAppearance appearance,
-) {
+EditorStyle _editorStyle(BuildContext context, DiaryTextAppearance appearance) {
   final theme = Theme.of(context);
   final typography = appearance.typography;
   return EditorStyle.mobile(

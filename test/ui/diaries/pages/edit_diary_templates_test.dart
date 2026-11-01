@@ -27,13 +27,12 @@ void main() {
       tester.widget<TextField>(titleField()).controller!.text;
 
   /// 正文由编辑器以块绘制，不是 Text：直接读文档。
-  String bodyText(WidgetTester tester) =>
-      extractPlainTextFromAppFlowyDocument(
-        tester
-            .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
-            .editorState
-            .document,
-      );
+  String bodyText(WidgetTester tester) => extractPlainTextFromAppFlowyDocument(
+    tester
+        .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+        .editorState
+        .document,
+  );
 
   String todayDaily(DateTime day) =>
       '${DateFormat.yMMMMd('zh').format(day)} '

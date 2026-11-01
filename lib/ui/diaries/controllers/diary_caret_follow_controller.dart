@@ -94,10 +94,7 @@ class DiaryCaretFollowController {
 
   /// 选区在动的那一端：AppFlowy 的 Selection 已按文档顺序归一化
   /// （start 在前、end 在后），对应原来 TextSelection 的 base / extent。
-  static Position? _revealTarget(
-    Selection? previous,
-    Selection selection,
-  ) {
+  static Position? _revealTarget(Selection? previous, Selection selection) {
     if (selection.isCollapsed) {
       return selection.end;
     }

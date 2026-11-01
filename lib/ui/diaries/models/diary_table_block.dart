@@ -36,9 +36,7 @@ Future<void> insertDiaryTableBlock(EditorState editorState) async {
   } else {
     final anchor = editorState.getNodeAtPath(selection.end.path);
     Node? enclosingTable;
-    for (var current = anchor;
-        current != null;
-        current = current.parent) {
+    for (var current = anchor; current != null; current = current.parent) {
       if (current.type == TableBlockKeys.type) {
         enclosingTable = current;
         break;
@@ -63,10 +61,7 @@ Future<void> insertDiaryTableBlock(EditorState editorState) async {
 /// 新表格节点：[rows]×[cols] 个空格子，每格一个空段落。
 Node _tableNode({required int rows, required int cols}) => Node(
   type: TableBlockKeys.type,
-  attributes: {
-    TableBlockKeys.rowsLen: rows,
-    TableBlockKeys.colsLen: cols,
-  },
+  attributes: {TableBlockKeys.rowsLen: rows, TableBlockKeys.colsLen: cols},
   children: [
     for (var row = 0; row < rows; row++)
       for (var col = 0; col < cols; col++)
@@ -153,8 +148,8 @@ class _TableGrid {
 
   static int? _index(Object? value) =>
       value is num && value.isFinite && value >= 0 && value == value.truncate()
-          ? value.toInt()
-          : null;
+      ? value.toInt()
+      : null;
 
   static _TableGrid? of(Node node) {
     if (node.type != TableBlockKeys.type) return null;

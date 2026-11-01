@@ -74,9 +74,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  EditorState contentEditorState(WidgetTester tester) => tester
-      .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
-      .editorState;
+  EditorState contentEditorState(WidgetTester tester) =>
+      tester.widget<AppFlowyEditor>(find.byType(AppFlowyEditor)).editorState;
 
   /// 把正文整个换成 [text]（单段落），模拟用户重写正文。
   Future<void> replaceBodyText(EditorState editorState, String text) async {

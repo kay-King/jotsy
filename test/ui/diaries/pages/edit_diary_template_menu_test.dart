@@ -26,13 +26,12 @@ void main() {
   String titleText(WidgetTester tester) =>
       tester.widget<TextField>(titleField()).controller!.text;
 
-  String bodyText(WidgetTester tester) =>
-      extractPlainTextFromAppFlowyDocument(
-        tester
-            .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
-            .editorState
-            .document,
-      );
+  String bodyText(WidgetTester tester) => extractPlainTextFromAppFlowyDocument(
+    tester
+        .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
+        .editorState
+        .document,
+  );
 
   const work = DiaryTemplate(
     id: 'user.work',

@@ -7,8 +7,9 @@ void main() {
   group('JournalHtmlConverter 富格式导入', () {
     test('识别 sup/sub 上下标', () {
       final writer = JournalDeltaWriter();
-      JournalHtmlConverter(writer)
-          .appendHtml('<p>H<sub>2</sub>O 和 E=mc<sup>2</sup></p>');
+      JournalHtmlConverter(
+        writer,
+      ).appendHtml('<p>H<sub>2</sub>O 和 E=mc<sup>2</sup></p>');
       final result = writer.build();
       expect(result.contentJson, contains('"script":"sub"'));
       expect(result.contentJson, contains('"script":"super"'));
@@ -18,9 +19,9 @@ void main() {
 
     test('识别 CSS vertical-align 上下标', () {
       final writer = JournalDeltaWriter();
-      JournalHtmlConverter(writer).appendHtml(
-        '<p><span style="vertical-align: super;">上标</span>文本</p>',
-      );
+      JournalHtmlConverter(
+        writer,
+      ).appendHtml('<p><span style="vertical-align: super;">上标</span>文本</p>');
       final result = writer.build();
       expect(result.contentJson, contains('"script":"super"'));
     });
@@ -37,8 +38,7 @@ void main() {
 
     test('h4-h6 标题保留级别不再压到3级', () {
       final writer = JournalDeltaWriter();
-      JournalHtmlConverter(writer)
-          .appendHtml('<h4>四级标题</h4><h6>六级标题</h6>');
+      JournalHtmlConverter(writer).appendHtml('<h4>四级标题</h4><h6>六级标题</h6>');
       final result = writer.build();
       expect(result.contentJson, contains('"header":4'));
       expect(result.contentJson, contains('"header":6'));
@@ -46,9 +46,9 @@ void main() {
 
     test('details/summary 折叠块展开不丢数据', () {
       final writer = JournalDeltaWriter();
-      JournalHtmlConverter(writer).appendHtml(
-        '<details><summary>点击展开</summary><p>隐藏的内容</p></details>',
-      );
+      JournalHtmlConverter(
+        writer,
+      ).appendHtml('<details><summary>点击展开</summary><p>隐藏的内容</p></details>');
       final result = writer.build();
       expect(result.contentText, contains('点击展开'));
       expect(result.contentText, contains('隐藏的内容'));
@@ -92,9 +92,9 @@ void main() {
 
     test('GFM 表格以文本行保留不丢数据', () {
       final writer = JournalDeltaWriter();
-      JournalMarkdownConverter(writer).append(
-        '| 姓名 | 年龄 |\n|------|------|\n| 张三 | 20 |',
-      );
+      JournalMarkdownConverter(
+        writer,
+      ).append('| 姓名 | 年龄 |\n|------|------|\n| 张三 | 20 |');
       final result = writer.build();
       expect(result.contentText, contains('姓名'));
       expect(result.contentText, contains('张三'));

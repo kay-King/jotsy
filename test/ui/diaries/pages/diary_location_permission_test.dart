@@ -72,8 +72,7 @@ void main() {
               child: MaterialApp(
                 theme: expressiveTestTheme(brightness),
                 locale: Locale(brightness == Brightness.light ? 'en' : 'zh'),
-                localizationsDelegates:
-                    AppLocalizations.localizationsDelegates,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: Builder(
                   builder: (context) => Scaffold(

@@ -146,12 +146,7 @@ class DiaryPreviewPageStyle {
     const d = DiaryPreviewPageStyle();
     final json = <String, Object>{};
     StyleJson.putEnum(json, 'colorSeed', colorSeed, d.colorSeed);
-    StyleJson.putEnum(
-      json,
-      'colorIntensity',
-      colorIntensity,
-      d.colorIntensity,
-    );
+    StyleJson.putEnum(json, 'colorIntensity', colorIntensity, d.colorIntensity);
     StyleJson.put(json, 'tintPaper', tintPaper, d.tintPaper);
     StyleJson.putEnum(json, 'paper', paper, d.paper);
     StyleJson.put(

@@ -64,9 +64,8 @@ void main() {
     await tester.pump(Duration.zero);
   }
 
-  EditorState bodyEditorState(WidgetTester tester) => tester
-      .widget<AppFlowyEditor>(find.byType(AppFlowyEditor))
-      .editorState;
+  EditorState bodyEditorState(WidgetTester tester) =>
+      tester.widget<AppFlowyEditor>(find.byType(AppFlowyEditor)).editorState;
 
   ScrollPosition bodyScroll(WidgetTester tester) => tester
       .state<ScrollableState>(
@@ -136,10 +135,7 @@ void main() {
     transaction.insertText(node, selection.end.offset, text);
     await editorState.apply(transaction);
     editorState.selection = Selection.collapsed(
-      Position(
-        path: node.path,
-        offset: selection.end.offset + text.length,
-      ),
+      Position(path: node.path, offset: selection.end.offset + text.length),
     );
     await tester.pumpAndSettle();
   }

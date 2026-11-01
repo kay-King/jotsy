@@ -286,7 +286,7 @@ void main() {
     );
     final l10n = _l10n(tester);
     Finder checkboxPoint() => find.byWidgetPredicate(
-      (Widget widget) => widget.runtimeType.toString() == 'QuillCheckboxPoint',
+      (Widget widget) => widget.runtimeType.toString() == '_TodoCheckbox',
     );
     // 直接调用点按回调：真实点按的水波纹会让页面在动画期间保活
     // （InkWell 的 AutomaticKeepAlive），测试里就等不到回收。
@@ -326,7 +326,9 @@ void main() {
     await _swipe(tester, forward: false);
     await _swipe(tester, forward: false);
     expect(find.text('甲'), findsOneWidget);
-    expect((tester.widget(checkboxPoint()) as dynamic).value, isTrue);
+    final checkbox = tester.widget(checkboxPoint());
+    final node = (checkbox as dynamic).node as dynamic;
+    expect(node.attributes['checked'], isTrue);
     await _unmount(tester);
   });
 

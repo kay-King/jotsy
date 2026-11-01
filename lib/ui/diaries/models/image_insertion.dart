@@ -41,10 +41,9 @@ Future<void> insertDiaryImages({
       }
     }
     final anchor = editorState.getNodeAtPath(normalized.end.path);
-    insertPath =
-        anchor == null
-            ? [editorState.document.root.children.length]
-            : anchor.path.next;
+    insertPath = anchor == null
+        ? [editorState.document.root.children.length]
+        : anchor.path.next;
   }
 
   var path = insertPath;

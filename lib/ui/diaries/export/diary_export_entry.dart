@@ -97,9 +97,7 @@ class DiaryExportEntry {
   /// 从 Quill Delta ops 经块文档转出 AppFlowy Document（测试兼容用）。
   static af.Document _documentFromDeltaOps(List<dynamic> deltaOps) {
     try {
-      final blocks = diaryBlocksFromQuillOps(
-        deltaOps.cast<Object?>(),
-      );
+      final blocks = diaryBlocksFromQuillOps(deltaOps.cast<Object?>());
       return af.Document.fromJson(blocks);
     } catch (_) {
       return af.Document.blank();

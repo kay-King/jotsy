@@ -296,39 +296,41 @@ void main() {
       },
     );
 
-    test('pdf body renders code blocks without crashing on language values',
-        () async {
-      final entry = codeEntry(<dynamic>[
-        codeLine('x = 1', 'python'),
-        codeLine('raw', 'plain'),
-        codeLine('auto', true),
-        <String, dynamic>{
-          'insert': 'off\n',
-          'attributes': <String, dynamic>{'code-block': false},
-        },
-      ]);
-      final body = await DiaryPdfWriter.prepareBody(
-        entry,
-        includeImages: false,
-        labels: testExportLabels,
-        media: DiaryExportMediaLibrary(),
-        images: <Uint8List>[],
-      );
-      // AppFlowy 渲染器直接处理代码块节点，不再需要改写语言值。
-      expect(body, isNotNull);
-      expect(body!.document.root.children.isNotEmpty, isTrue);
+    test(
+      'pdf body renders code blocks without crashing on language values',
+      () async {
+        final entry = codeEntry(<dynamic>[
+          codeLine('x = 1', 'python'),
+          codeLine('raw', 'plain'),
+          codeLine('auto', true),
+          <String, dynamic>{
+            'insert': 'off\n',
+            'attributes': <String, dynamic>{'code-block': false},
+          },
+        ]);
+        final body = await DiaryPdfWriter.prepareBody(
+          entry,
+          includeImages: false,
+          labels: testExportLabels,
+          media: DiaryExportMediaLibrary(),
+          images: <Uint8List>[],
+        );
+        // AppFlowy 渲染器直接处理代码块节点，不再需要改写语言值。
+        expect(body, isNotNull);
+        expect(body!.document.root.children.isNotEmpty, isTrue);
 
-      final fonts = await DiaryPdfFonts.load();
-      final output = await DiaryPdfWriter.write(
-        <DiaryExportEntry>[entry],
-        options: DiaryExportOptions.defaults,
-        labels: testExportLabels,
-        media: DiaryExportMediaLibrary(),
-        fonts: fonts,
-        documentTitle: 'Jotsy',
-      );
-      expect(ascii.decode(output.bytes!.sublist(0, 5)), '%PDF-');
-    });
+        final fonts = await DiaryPdfFonts.load();
+        final output = await DiaryPdfWriter.write(
+          <DiaryExportEntry>[entry],
+          options: DiaryExportOptions.defaults,
+          labels: testExportLabels,
+          media: DiaryExportMediaLibrary(),
+          fonts: fonts,
+          documentTitle: 'Jotsy',
+        );
+        expect(ascii.decode(output.bytes!.sublist(0, 5)), '%PDF-');
+      },
+    );
 
     test('docx and plain text still treat language blocks as code', () async {
       final entry = codeEntry(<dynamic>[codeLine('x = 1', 'python')]);

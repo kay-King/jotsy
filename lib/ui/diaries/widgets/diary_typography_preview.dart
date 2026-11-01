@@ -62,9 +62,7 @@ class DiaryTypographyPreview extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.s),
             DiaryAppFlowyPreview(
-              document: _sampleDocument(
-                context.l10n.diaryTypographySampleBody,
-              ),
+              document: _sampleDocument(context.l10n.diaryTypographySampleBody),
               appearance: appearance,
               textSelection: false,
             ),

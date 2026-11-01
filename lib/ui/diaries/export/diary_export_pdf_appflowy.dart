@@ -258,11 +258,7 @@ class DiaryPdfAppFlowyRenderer {
       _ => context.theme.defaultTextStyle.copyWith(fontSize: 15),
     };
     return pw.Padding(
-      padding: pw.EdgeInsets.only(
-        left: indent * 12.0,
-        top: 8,
-        bottom: 4,
-      ),
+      padding: pw.EdgeInsets.only(left: indent * 12.0, top: 8, bottom: 4),
       child: _richText(node, context, style: base),
     );
   }
@@ -385,7 +381,7 @@ class DiaryPdfAppFlowyRenderer {
     final delta = node.delta;
     final code = delta?.toPlainText() ?? '';
     if (code.trim().isEmpty) return pw.SizedBox();
-    
+
     final palette = context.code?.paper;
     final background = palette != null
         ? PdfColor.fromInt(palette.background.toARGB32())
@@ -393,7 +389,7 @@ class DiaryPdfAppFlowyRenderer {
     final foreground = palette != null
         ? PdfColor.fromInt(palette.foreground.toARGB32())
         : PdfColors.black;
-    
+
     // 代码块按行拆分，每行一个 Text，避免长代码的换行问题。
     final lines = code.split('\n');
     return pw.Padding(
@@ -427,14 +423,14 @@ class DiaryPdfAppFlowyRenderer {
     if (!context.includeImages) return null;
     final url = node.attributes['url']?.toString();
     if (url == null || url.isEmpty) return null;
-    
+
     final index = context.imageIndex[url];
     if (index == null || index >= context.images.length) return null;
-    
+
     final bytes = context.images[index];
     final info = ExportImageInfo.read(bytes);
     if (info == null) return null;
-    
+
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 4, bottom: 4),
       child: pw.Center(
@@ -485,7 +481,7 @@ class DiaryPdfAppFlowyRenderer {
       // 结构不完整时降级为纯文字，避免丢字。
       return _fallback(node, context, indent: 0);
     }
-    
+
     // 按行列位置组织单元格。
     final cells = List.generate(
       rowsLen,
@@ -498,7 +494,7 @@ class DiaryPdfAppFlowyRenderer {
         cells[row][col] = child;
       }
     }
-    
+
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 4, bottom: 4),
       child: pw.Table(
@@ -597,7 +593,7 @@ class DiaryPdfAppFlowyRenderer {
   }) {
     final text = node.delta?.toPlainText().trim() ?? '';
     if (text.isEmpty && node.children.isEmpty) return null;
-    
+
     final widgets = <pw.Widget>[];
     if (text.isNotEmpty) {
       widgets.add(

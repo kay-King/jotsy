@@ -50,8 +50,7 @@ class _MoodColorPickerSheet extends StatelessWidget {
       Colors.orange,
       Colors.deepOrange,
     ])
-      for (final shade in <int>[400, 700])
-        family[shade]!,
+      for (final shade in <int>[400, 700]) family[shade]!,
   ].where((color) => !_recommended.contains(color)).toList();
 
   @override
@@ -70,9 +69,7 @@ class _MoodColorPickerSheet extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outlineVariant,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

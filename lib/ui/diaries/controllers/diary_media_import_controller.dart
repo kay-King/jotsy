@@ -110,9 +110,7 @@ class DiaryMediaImportController extends ChangeNotifier {
               if (kind == DiaryMediaKind.video)
                 Node(
                   type: kDiaryBlockVideo,
-                  attributes: <String, dynamic>{
-                    kDiaryBlockUrlKey: file.path,
-                  },
+                  attributes: <String, dynamic>{kDiaryBlockUrlKey: file.path},
                 )
               else
                 Node(

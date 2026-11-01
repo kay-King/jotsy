@@ -222,5 +222,6 @@ class MoodPalette {
   }
 
   @override
-  int get hashCode => Object.hash(Object.hashAll(symbols), Object.hashAll(colors));
+  int get hashCode =>
+      Object.hash(Object.hashAll(symbols), Object.hashAll(colors));
 }

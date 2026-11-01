@@ -221,10 +221,7 @@ Selection _selectionForQuillOffset(Document document, int caret) {
     final textLength = node.delta?.toPlainText().length ?? 1;
     if (remaining <= textLength) {
       return Selection.collapsed(
-        Position(
-          path: node.path,
-          offset: remaining.clamp(0, textLength),
-        ),
+        Position(path: node.path, offset: remaining.clamp(0, textLength)),
       );
     }
     // +1 为块末换行在 Quill 偏移里的占位。

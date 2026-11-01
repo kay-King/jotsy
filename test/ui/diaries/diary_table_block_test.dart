@@ -43,18 +43,17 @@ Node _tableNode(List<List<String>> rows) {
   );
 }
 
-Future<void> _pumpPreview(WidgetTester tester, Node table) =>
-    tester.pumpWidget(
-      MaterialApp(
-        theme: expressiveTestTheme(Brightness.light),
-        home: Scaffold(
-          body: DiaryTableBlockPreview(
-            node: table,
-            textStyle: const TextStyle(fontSize: 16),
-          ),
-        ),
+Future<void> _pumpPreview(WidgetTester tester, Node table) => tester.pumpWidget(
+  MaterialApp(
+    theme: expressiveTestTheme(Brightness.light),
+    home: Scaffold(
+      body: DiaryTableBlockPreview(
+        node: table,
+        textStyle: const TextStyle(fontSize: 16),
       ),
-    );
+    ),
+  ),
+);
 
 void main() {
   group('insertDiaryTableBlock', () {
@@ -99,8 +98,7 @@ void main() {
       final table = _tableNode([
         ['a'],
       ]);
-      final transaction = editorState.transaction
-        ..insertNode([1], table);
+      final transaction = editorState.transaction..insertNode([1], table);
       await editorState.apply(transaction);
       editorState.selection = Selection.collapsed(
         Position(path: const [1, 0, 0], offset: 1),
@@ -148,10 +146,7 @@ void main() {
     });
 
     testWidgets('空表格节点不占位、不抛异常', (tester) async {
-      await _pumpPreview(
-        tester,
-        Node(type: TableBlockKeys.type),
-      );
+      await _pumpPreview(tester, Node(type: TableBlockKeys.type));
 
       expect(find.byType(Table), findsNothing);
       expect(tester.takeException(), isNull);
@@ -161,10 +156,7 @@ void main() {
       // 位置重复：同一位置两格。
       final broken = Node(
         type: TableBlockKeys.type,
-        attributes: {
-          TableBlockKeys.rowsLen: 1,
-          TableBlockKeys.colsLen: 1,
-        },
+        attributes: {TableBlockKeys.rowsLen: 1, TableBlockKeys.colsLen: 1},
         children: [
           Node(
             type: TableCellBlockKeys.type,

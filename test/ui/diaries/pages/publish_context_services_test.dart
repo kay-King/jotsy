@@ -10,6 +10,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
 import 'package:node_diary/ui/diaries/pages/edit_diary_page.dart';
 import 'package:node_diary/ui/diaries/pages/publish_diary_page.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_appflowy_preview.dart';
 import 'package:node_diary/ui/diaries/widgets/publish_location_precision_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -167,7 +168,7 @@ void main() {
   testWidgets('panel input does not rebuild the body preview', (tester) async {
     await openPublisher(tester);
     final panel = PublishPanelDriver(tester);
-    final previewBefore = tester.widget(find.byType(quill.QuillEditor));
+    final previewBefore = tester.widget(find.byType(DiaryAppFlowyPreview));
 
     panel.setEnergy(3);
     panel.setMood('🙂');
@@ -175,7 +176,10 @@ void main() {
     await tester.pump();
 
     expect(
-      identical(tester.widget(find.byType(quill.QuillEditor)), previewBefore),
+      identical(
+        tester.widget(find.byType(DiaryAppFlowyPreview)),
+        previewBefore,
+      ),
       isTrue,
     );
     await unmount(tester);

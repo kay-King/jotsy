@@ -594,17 +594,17 @@ class DiaryPdfWriter {
   }) async {
     final document = entry.document;
     final imageIndex = <String, int>{};
-    
+
     // 收集图片：遍历所有图片节点，读取字节并建立 URL 到下标的映射。
     if (includeImages) {
       await _collectImages(document.root, media, images, imageIndex);
     }
-    
+
     // 检查可见内容。
     if (!appFlowyDocumentHasVisibleContent(document) && imageIndex.isEmpty) {
       return null;
     }
-    
+
     return (document: document, imageIndex: imageIndex);
   }
 

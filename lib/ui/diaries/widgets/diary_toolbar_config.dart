@@ -249,8 +249,7 @@ Widget buildDiaryToolbarItemButton(
         tooltip: item.label(l10n),
         icon: (context, foreground) =>
             FaIcon(item.iconData, size: 14, color: foreground),
-        isActive: () =>
-            editorState.selection == null
+        isActive: () => editorState.selection == null
             ? false
             : editorState
                       .getNodeAtPath(editorState.selection!.start.path)
@@ -341,22 +340,16 @@ Widget buildDiaryToolbarItemButton(
       children: <Widget>[
         _DiaryToolbarButton(
           tooltip: item.label(l10n),
-          icon: (context, foreground) => FaIcon(
-            FontAwesomeIcons.indent,
-            size: 14,
-            color: foreground,
-          ),
+          icon: (context, foreground) =>
+              FaIcon(FontAwesomeIcons.indent, size: 14, color: foreground),
           onPressed: () =>
               unawaited(_shiftDiaryBlockIndent(editorState, increase: true)),
         ),
         const SizedBox(width: kDiaryToolbarIndentGap),
         _DiaryToolbarButton(
           tooltip: item.label(l10n),
-          icon: (context, foreground) => FaIcon(
-            FontAwesomeIcons.outdent,
-            size: 14,
-            color: foreground,
-          ),
+          icon: (context, foreground) =>
+              FaIcon(FontAwesomeIcons.outdent, size: 14, color: foreground),
           onPressed: () =>
               unawaited(_shiftDiaryBlockIndent(editorState, increase: false)),
         ),
@@ -436,23 +429,20 @@ Future<void> _toggleDiaryBlockType(
   final node = editorState.getNodeAtPath(selection.start.path);
   if (node == null || node.delta == null) return;
   final isActive = node.type == blockType;
-  await editorState.formatNode(
-    selection,
-    (n) {
-      final attributes = Map<String, dynamic>.from(n.attributes);
-      attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
-      if (isActive) {
-        attributes.remove(kDiaryBlockLevelKey);
-        attributes.remove(kDiaryBlockCheckedKey);
-      } else if (blockType == kDiaryBlockTodoList) {
-        attributes[kDiaryBlockCheckedKey] = false;
-      }
-      return n.copyWith(
-        type: isActive ? kDiaryBlockParagraph : blockType,
-        attributes: attributes,
-      );
-    },
-  );
+  await editorState.formatNode(selection, (n) {
+    final attributes = Map<String, dynamic>.from(n.attributes);
+    attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
+    if (isActive) {
+      attributes.remove(kDiaryBlockLevelKey);
+      attributes.remove(kDiaryBlockCheckedKey);
+    } else if (blockType == kDiaryBlockTodoList) {
+      attributes[kDiaryBlockCheckedKey] = false;
+    }
+    return n.copyWith(
+      type: isActive ? kDiaryBlockParagraph : blockType,
+      attributes: attributes,
+    );
+  });
 }
 
 /// 标题级别循环：正文 → 一级 → 二级 → 三级 → 正文（与原来一致）。
@@ -470,22 +460,16 @@ Future<void> _cycleDiaryHeaderStyle(EditorState editorState) async {
     (true, _) => 0,
     (false, _) => 1,
   };
-  await editorState.formatNode(
-    selection,
-    (n) {
-      final attributes = Map<String, dynamic>.from(n.attributes);
-      attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
-      if (nextLevel == 0) {
-        attributes.remove(kDiaryBlockLevelKey);
-        return n.copyWith(
-          type: kDiaryBlockParagraph,
-          attributes: attributes,
-        );
-      }
-      attributes[kDiaryBlockLevelKey] = nextLevel;
-      return n.copyWith(type: kDiaryBlockHeading, attributes: attributes);
-    },
-  );
+  await editorState.formatNode(selection, (n) {
+    final attributes = Map<String, dynamic>.from(n.attributes);
+    attributes[kDiaryBlockDeltaKey] = (n.delta ?? Delta()).toJson();
+    if (nextLevel == 0) {
+      attributes.remove(kDiaryBlockLevelKey);
+      return n.copyWith(type: kDiaryBlockParagraph, attributes: attributes);
+    }
+    attributes[kDiaryBlockLevelKey] = nextLevel;
+    return n.copyWith(type: kDiaryBlockHeading, attributes: attributes);
+  });
 }
 
 /// 缩进：块文档里缩进即嵌套（见 diary_blocks_from_delta）。
@@ -608,8 +592,7 @@ Future<void> _editDiaryLink(
         autofocus: true,
         keyboardType: TextInputType.url,
         decoration: const InputDecoration(hintText: 'https://'),
-        onSubmitted: (String value) =>
-            Navigator.of(context).pop(value.trim()),
+        onSubmitted: (String value) => Navigator.of(context).pop(value.trim()),
       ),
       actions: <Widget>[
         TextButton(

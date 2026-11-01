@@ -132,8 +132,7 @@ void main() {
             // FaIconData 只是 IconData 的包装类，直接 == 比不到，按码点认。
             (widget) =>
                 widget is FaIcon &&
-                widget.icon?.codePoint ==
-                    FontAwesomeIcons.bold.codePoint,
+                widget.icon?.codePoint == FontAwesomeIcons.bold.codePoint,
           ),
         ),
       );

@@ -39,9 +39,7 @@ class _MoodOptionsPageState extends State<MoodOptionsPage> {
       MoodPalette.slotCount,
       (index) => TextEditingController(text: palette.symbols[index]),
     );
-    _colors = <Color>[
-      for (final value in palette.colors) Color(value),
-    ];
+    _colors = <Color>[for (final value in palette.colors) Color(value)];
   }
 
   @override
@@ -57,9 +55,7 @@ class _MoodOptionsPageState extends State<MoodOptionsPage> {
       return;
     }
     final palette = MoodPalette(
-      symbols: <String>[
-        for (final controller in _controllers) controller.text,
-      ],
+      symbols: <String>[for (final controller in _controllers) controller.text],
       colors: <int>[for (final color in _colors) color.toARGB32()],
     );
     setState(() => _saving = true);
@@ -98,10 +94,7 @@ class _MoodOptionsPageState extends State<MoodOptionsPage> {
     if (_saving) {
       return;
     }
-    final picked = await showMoodColorPicker(
-      context,
-      initial: _colors[index],
-    );
+    final picked = await showMoodColorPicker(context, initial: _colors[index]);
     if (picked == null || !mounted) {
       return;
     }

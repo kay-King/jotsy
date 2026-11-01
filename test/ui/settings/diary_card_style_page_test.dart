@@ -74,18 +74,37 @@ Future<(SettingsService, AppLocalizations)> _pumpPage(
 DiaryCardStyleSettings _stored(SettingsService settings) =>
     DiaryCardStyleSettings.decode(settings.diaryCardStyleRaw);
 
-/// 点底部悬浮分类按钮：弹 BottomSheet 显示该分类的选项。
-Future<void> _openTab(WidgetTester tester, String label) async {
-  final button = find.text(label);
+/// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
+/// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
+Future<void> _openTab(
+  WidgetTester tester,
+  String label,
+  AppLocalizations l10n,
+) async {
+  final button = find.byTooltip(l10n.styleEditorSettingsTitle);
   await tester.ensureVisible(button);
   await tester.pumpAndSettle();
   await tester.tap(button);
   await tester.pumpAndSettle();
+  final sectionHeader = find.text(label);
+  if (sectionHeader.evaluate().isEmpty) {
+    await tester.dragUntilVisible(
+      sectionHeader,
+      find.byType(Scaffold).last,
+      const Offset(0, -200),
+    );
+    await tester.pumpAndSettle();
+  } else {
+    await tester.ensureVisible(sectionHeader);
+    await tester.pumpAndSettle();
+  }
 }
 
-/// 关掉选项 BottomSheet：点右上角的关闭按钮。
+/// 关掉选项整页：直接 Navigator.pop 回到全屏预览。
+/// AppTopBar 用自定义返回键（FontAwesome angleLeft），不用标准 BackButton。
 Future<void> _closeSheet(WidgetTester tester, AppLocalizations l10n) async {
-  await tester.tap(find.byTooltip(l10n.commonClose));
+  final context = tester.element(find.byType(Scaffold).first);
+  Navigator.of(context).pop();
   await tester.pumpAndSettle();
 }
 
@@ -96,22 +115,13 @@ Future<Finder> _openMenu(WidgetTester tester, AppLocalizations l10n) async {
   return find.widgetWithText(MenuItemButton, l10n.commonReset);
 }
 
-/// 选项列表是懒构建的：目标还没进树时先在 BottomSheet 里向下滚动。
+/// 选项列表是懒构建的：目标还没进树时先在选项整页里向下滚动。
 Future<void> _tapVisible(WidgetTester tester, Finder finder) async {
   if (finder.evaluate().isEmpty) {
-    await tester.scrollUntilVisible(
+    await tester.dragUntilVisible(
       finder,
-      120,
-      scrollable: find
-          .descendant(
-            of: find.byType(BottomSheet),
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Scrollable &&
-                  widget.axisDirection == AxisDirection.down,
-            ),
-          )
-          .first,
+      find.byType(Scaffold).last,
+      const Offset(0, -200),
     );
   }
   await tester.ensureVisible(finder);
@@ -161,7 +171,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabContent);
+    await _openTab(tester, l10n.diaryCardStyleTabContent, l10n);
     await _tapVisible(
       tester,
       find.widgetWithText(SettingsSwitchTile, l10n.diaryCardStyleShowPreview),
@@ -187,7 +197,7 @@ void main() {
     );
     expect(find.text(l10n.autoT0033), findsOneWidget);
 
-    await _openTab(tester, l10n.diaryCardStyleTabContent);
+    await _openTab(tester, l10n.diaryCardStyleTabContent, l10n);
     final untitledSwitch = find.widgetWithText(
       SettingsSwitchTile,
       l10n.diaryCardStyleShowUntitled,
@@ -210,7 +220,7 @@ void main() {
     tester,
   ) async {
     final (_, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabDate);
+    await _openTab(tester, l10n.diaryCardStyleTabDate, l10n);
     for (final label in <String>[
       l10n.diaryCardStyleDateFull,
       l10n.diaryCardStyleFooterRelative,
@@ -231,7 +241,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabOrder);
+    await _openTab(tester, l10n.diaryCardStyleTabOrder, l10n);
     // 拖动“标题”行（第二行）的手柄（拿起即拖动，不经过长按）到“标签”下方。
     final handle = find.byType(TripleBarDragHandle).at(1);
     final gesture = await tester.startGesture(tester.getCenter(handle));
@@ -249,7 +259,7 @@ void main() {
       DiaryCardBlock.preview,
       DiaryCardBlock.footer,
     ]);
-    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byType(DiaryCardStylePreviewToolbar), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -257,11 +267,13 @@ void main() {
     tester,
   ) async {
     final (_, l10n) = await _pumpPage(tester, size: const Size(900, 700));
-    expect(find.byType(DiaryCardStylePreviewToolbar), findsOneWidget);
+    expect(find.byType(DiaryCardStylePreviewToolbar), findsNothing);
     expect(find.byType(TabBarView), findsNothing);
-    expect(find.text(l10n.diaryCardStyleTabPresets), findsOneWidget);
-    await _openTab(tester, l10n.diaryCardStyleTabLayout);
-    expect(find.byType(BottomSheet), findsOneWidget);
+    // 分类收进「样式设置」整页：主页面上不再直接显示分类名。
+    expect(find.text(l10n.diaryCardStyleTabPresets), findsNothing);
+    await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
+    // 选项整页是 Navigator 推入的整页，不再是 BottomSheet。
+    expect(find.byType(Scaffold), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -269,7 +281,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabLayout);
+    await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
     final tile = tester.widget<SettingsSliderTile>(
       find.widgetWithText(SettingsSliderTile, l10n.diaryCardStyleCornerRadius),
     );
@@ -287,7 +299,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabPresets);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets, l10n);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetMagazine));
     await _dismissSnackBars(tester);
     final magazine = DiaryCardPresets.styleOf(DiaryCardPresetId.magazine);
@@ -306,7 +318,7 @@ void main() {
 
   testWidgets('applying a preset can be undone', (tester) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabPresets);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets, l10n);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetMinimal));
     expect(
       _stored(settings).current,
@@ -325,7 +337,7 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabPresets);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets, l10n);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetCompact));
     await _dismissSnackBars(tester);
 
@@ -368,7 +380,7 @@ void main() {
   ) async {
     _mockClipboard(tester);
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabPresets);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets, l10n);
     await _tapVisible(tester, find.text(l10n.diaryCardStylePresetJournal));
     await _dismissSnackBars(tester);
 
@@ -384,7 +396,7 @@ void main() {
     expect(settings.diaryCardStyleRaw, isNull);
 
     _clipboard = 'Try this one: $code';
-    await _openTab(tester, l10n.diaryCardStyleTabPresets);
+    await _openTab(tester, l10n.diaryCardStyleTabPresets, l10n);
     await _tapVisible(tester, find.text(l10n.styleEditorImportCode));
     expect(
       _stored(settings).current,
@@ -420,7 +432,7 @@ void main() {
           .layoutMode,
       DiaryLayoutMode.waterfall,
     );
-    await _openTab(tester, l10n.diaryCardStyleTabLayout);
+    await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
     expect(find.text(l10n.diaryCardStyleWaterfallGroup), findsOneWidget);
     await _tapVisible(tester, find.text(l10n.diaryCardStyleColumnsValue(3)));
     expect(_stored(settings).current.waterfall.columns, 3);
@@ -460,14 +472,9 @@ void main() {
         l10n.diaryCardStyleTabColor,
         l10n.diaryCardStyleTabTexture,
       ]) {
-        await _openTab(tester, label);
+        await _openTab(tester, label, l10n);
         await tester.drag(
-          find
-              .descendant(
-                of: find.byType(BottomSheet),
-                matching: find.byType(Scrollable),
-              )
-              .first,
+          find.byType(Scrollable).first,
           const Offset(0, -2000),
         );
         await tester.pumpAndSettle();

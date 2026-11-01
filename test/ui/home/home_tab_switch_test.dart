@@ -254,17 +254,21 @@ void main() {
     testWidgets('desktop off leaves only diaries and settings', (tester) async {
       await _pumpHome(
         tester,
-        // 桌面是唯一可关的 Tab，关掉后只留日记与设置。
+        // 桌面是唯一可关的 Tab，关掉后只留日记、时间线与设置。
         appFeaturesRaw: '{"desktop":false}',
       );
       final l10n = tester.element(find.byType(HomePage)).l10n;
 
-      expect(_navLabels(tester), <String>[l10n.navDiaries, l10n.navSettings]);
+      expect(_navLabels(tester), <String>[
+        l10n.navDiaries,
+        l10n.navTimeline,
+        l10n.navSettings,
+      ]);
       expect(_navItem(l10n.navDesktop), findsNothing);
 
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 1);
+      expect(_homePage(tester), 2);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       expect(find.byType(SettingsPage), findsOneWidget);
       await _unmount(tester);
@@ -278,19 +282,23 @@ void main() {
 
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 2);
+      expect(_homePage(tester), 3);
       final settingsElement = tester.element(find.byType(SettingsPage));
 
       unawaited(settings.setAppFeaturesRaw('{"desktop":false}'));
       await tester.pump();
       // 本帧就落在新下标上：设置页仍在屏幕上，没有闪到别的页。
-      expect(_homePage(tester), 1);
+      expect(_homePage(tester), 2);
       expect(find.byType(SettingsPage), findsOneWidget);
       await tester.pumpAndSettle();
 
-      expect(_navLabels(tester), <String>[l10n.navDiaries, l10n.navSettings]);
+      expect(_navLabels(tester), <String>[
+        l10n.navDiaries,
+        l10n.navTimeline,
+        l10n.navSettings,
+      ]);
       expect(_selectedNavLabel(tester), l10n.navSettings);
-      expect(_homePage(tester), 1);
+      expect(_homePage(tester), 2);
       expect(find.byType(SettingsPage), findsOneWidget);
       // 下标前移不重建设置页。
       expect(tester.element(find.byType(SettingsPage)), same(settingsElement));
@@ -315,18 +323,19 @@ void main() {
       final l10n = tester.element(find.byType(HomePage)).l10n;
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 1);
+      expect(_homePage(tester), 2);
       final settingsElement = tester.element(find.byType(SettingsPage));
 
       unawaited(settings.setAppFeaturesRaw(null));
       await tester.pump();
-      expect(_homePage(tester), 2);
+      expect(_homePage(tester), 3);
       expect(find.byType(SettingsPage), findsOneWidget);
       await tester.pumpAndSettle();
 
       expect(_navLabels(tester), <String>[
         l10n.navDesktop,
         l10n.navDiaries,
+        l10n.navTimeline,
         l10n.navSettings,
       ]);
       expect(_selectedNavLabel(tester), l10n.navSettings);
@@ -365,7 +374,7 @@ void main() {
 
       await tester.tap(_navItem(l10n.navDiaries));
       await tester.pumpAndSettle();
-      // 桌面隐藏后只剩 [日记, 设置]，日记是第 0 页。
+      // 桌面隐藏后只剩 [日记, 时间线, 设置]，日记是第 0 页。
       expect(_homePage(tester), 0);
       expect(
         tester.state(find.byType(DiariesPage, skipOffstage: false)),
@@ -401,7 +410,7 @@ void main() {
       // 底栏点击与左右滑动仍按新的下标工作。
       await tester.tap(_navItem(l10n.navSettings));
       await tester.pumpAndSettle();
-      expect(_homePage(tester), 1);
+      expect(_homePage(tester), 2);
       expect(_selectedNavLabel(tester), l10n.navSettings);
       await _unmount(tester);
     });

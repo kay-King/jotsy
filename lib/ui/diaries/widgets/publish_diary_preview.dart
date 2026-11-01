@@ -61,10 +61,7 @@ class _PublishDiaryPreviewState extends ConsumerState<PublishDiaryPreview> {
           if (!_hasVisibleContent)
             Text(context.l10n.autoT0139, style: theme.textTheme.bodyMedium)
           else
-            DiaryAppFlowyPreview(
-              document: _document,
-              appearance: appearance,
-            ),
+            DiaryAppFlowyPreview(document: _document, appearance: appearance),
         ],
       ),
     );
