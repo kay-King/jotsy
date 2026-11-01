@@ -1,0 +1,33 @@
+name: tmp-upload-apk-to-release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download jotsy-apk artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jotsy-apk
+          run-id: 41302279199
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Unzip and rename APK
+        run: |
+          unzip -o jotsy-apk.zip -d apk-out
+          echo "--- extracted files ---"
+          ls -la apk-out
+          APK="$(find apk-out -name '*.apk' | head -n 1)"
+          if [ -z "$APK" ]; then echo "No APK found" >&2; exit 1; fi
+          echo "Found APK: $APK"
+          mv "$APK" jotsy-0.10.0-arm64.apk
+          ls -lh jotsy-0.10.0-arm64.apk
+
+      - name: Upload to release (overwrite)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload theme-v0.10.0-v1 jotsy-0.10.0-arm64.apk --clobber
