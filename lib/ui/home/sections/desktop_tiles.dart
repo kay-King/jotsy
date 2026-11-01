@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/calendar/pages/calendar_page.dart';
 import 'package:node_diary/ui/diaries/pages/timeline_page.dart';
 import 'package:node_diary/ui/explore/pages/explore_media_gallery_page.dart';
-import 'package:node_diary/ui/explore/widgets/explore_shared_widgets.dart';
 import 'package:node_diary/ui/settings/pages/tag_management_page.dart';
 
 import '../widgets/desktop_card.dart';

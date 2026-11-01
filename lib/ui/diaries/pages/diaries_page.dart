@@ -20,10 +20,8 @@ import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
 import 'package:node_diary/ui/diaries/widgets/diaries_fast_scroller.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_notebook_drawer.dart';
 import 'package:node_diary/ui/home/widgets/home_bar/home_chrome_scope.dart';
-import 'package:node_diary/ui/home/widgets/home_bar/home_top_bar_surface.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 
-import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
 import '../../../core/services/settings_service.dart';
 import '../../../core/services/tag_order_codec.dart';
@@ -52,7 +50,6 @@ import '../viewmodels/diary_view_preferences.dart';
 import '../sections/diaries_list_section.dart';
 import '../sections/diary_view_options_sheet.dart';
 import '../widgets/diaries_header_sliver.dart';
-import '../widgets/diary_filter_sheet.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
 import 'package:node_diary/ui/widgets/launch_reveal.dart';
 
@@ -96,15 +93,11 @@ class _DiariesPage extends ConsumerState<DiariesPage>
   static const int _diaryPageSize = diaryFirstPageSize;
   static const double _loadMoreTriggerExtent = 420;
   static const double _listBottomExtraSpace = 12;
-  static const double _tagSectionTopGap = 2;
-  static const double _tagSectionBottomGap = 4;
 
   /// 与 `DiaryHeadSection` 自身高度（顶部 4dp + 52dp 内容行）一致：多留的
   /// 空白会垫在搜索条与标签栏之间，让两者显得脱节。
   static const double _headerCollapsibleHeight = 56;
   static const Duration _tagFilterSnapDuration = ExpressiveMotion.medium;
-  static const double _tagFilterFlingVelocity = 600;
-  static const double _tagFilterDragCommitDistance = 24;
 
   // ==================== 列表选择与过渡状态 ====================
   final Set<String> _selectedDiaryIds = <String>{};
@@ -137,10 +130,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
   List<DiaryWithTags>? _cachedVisibleSourceItemsRef;
   String _cachedHiddenDiaryIdsSignature = '';
   List<DiaryWithTags>? _lastSyncedVisibleItemsRef;
-  List<Tag>? _cachedTagFilterSourceTagsRef;
-  List<DiaryWithTags>? _cachedTagFilterVisibleItemsRef;
-  String _cachedTagFilterKeyword = '';
-  List<Tag> _cachedTagFilters = const <Tag>[];
   bool _fabVisibleByScroll = true;
   double _fabScrollDeltaAccumulator = 0;
   int _visibleDiaryLimit = _diaryPageSize;
@@ -153,7 +142,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
   DiaryLayoutMode _layoutMode = DiaryLayoutMode.list;
   bool _viewPreferencesLoaded = false;
   late final AnimationController _tagFilterExpansionController;
-  double _tagFilterDragDelta = 0;
 
   /// 标签栏是否（部分）展开：决定系统返回是否先收起标签栏，变化时重建页面
   /// 以更新 PopScope。
@@ -266,7 +254,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     final notebooksEnabled = ref.watch(
       appFeaturesProvider.select((features) => features.notebooks),
     );
-    final hasNotebooks = notebooksEnabled && ref.watch(hasNotebooksProvider);
     // 功能管理里关闭侧滑归档时卡片不再左滑，仍可多选或在预览页归档。
     final swipeArchiveEnabled = ref.watch(
       appFeaturesProvider.select((features) => features.swipeArchive),
@@ -284,9 +271,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
       (_, String? next) => _scopeController.handleScopeIdChanged(next),
     );
     // 日记本里只列本子里用到的标签（已选的保留，好让用户取消）。
-    final scopeTagIds = scopeResolution.isAll
-        ? null
-        : ref.watch(scopeTagIdsProvider(scopeResolution.scope)).value;
 
     return settingsAsync.when(
       loading: () => const Scaffold(body: DelayedLoadingIndicator()),
@@ -761,45 +745,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     }
   }
 
-  /// 标签栏的候选标签：全部日记时为全部标签；日记本里只留本子里用到的与
-  /// 已选的（[scopeTagIds] 还没查出来时先显示全部）。
-  List<Tag> _scopeTags(
-    List<Tag> tags,
-    Set<int>? scopeTagIds,
-    Set<int> selectedTagIds,
-  ) {
-    if (scopeTagIds == null) {
-      return tags;
-    }
-    final filtered = <Tag>[
-      for (final tag in tags)
-        if (scopeTagIds.contains(tag.id) || selectedTagIds.contains(tag.id))
-          tag,
-    ];
-    // 内容没变时沿用上次的列表实例，下游的标签缓存按引用复用。
-    final previous = _cachedScopeTags;
-    if (previous != null &&
-        previous.length == filtered.length &&
-        identical(_cachedScopeTagsSource, tags) &&
-        _sameTagIds(previous, filtered)) {
-      return previous;
-    }
-    _cachedScopeTagsSource = tags;
-    return _cachedScopeTags = filtered;
-  }
-
-  List<Tag>? _cachedScopeTags;
-  List<Tag>? _cachedScopeTagsSource;
-
-  static bool _sameTagIds(List<Tag> a, List<Tag> b) {
-    for (var index = 0; index < a.length; index++) {
-      if (a[index].id != b[index].id) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   Future<void> _openCreateFromHomeFab() async {
     await _controller.openCreateEditorWithDraftPrompt();
   }
@@ -846,42 +791,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     return false;
   }
 
-  void _handleTagFilterDragStart() {
-    _tagFilterExpansionController.stop();
-    _tagFilterDragDelta = 0;
-  }
-
-  void _handleTagFilterDragUpdate(double delta, double expansionExtent) {
-    // The sliver extent and the bar's clipping viewport share this normalized
-    // progress, so the content follows the finger without a second animation.
-    _tagFilterDragDelta += delta;
-    if (expansionExtent <= 0) {
-      return;
-    }
-    final nextProgress =
-        (_tagFilterExpansionController.value + delta / expansionExtent).clamp(
-          0.0,
-          1.0,
-        );
-    _tagFilterExpansionController.value = nextProgress;
-  }
-
-  void _handleTagFilterDragEnd(double velocity) {
-    // A deliberate short pull should not require traversing half of the
-    // visible panel. Use net displacement for slow gestures so moving back
-    // towards the start cancels the intent; tiny movements retain the nearest
-    // state, while a fling can still override the final position.
-    final bool shouldExpand;
-    if (velocity.abs() >= _tagFilterFlingVelocity) {
-      shouldExpand = velocity > 0;
-    } else if (_tagFilterDragDelta.abs() >= _tagFilterDragCommitDistance) {
-      shouldExpand = _tagFilterDragDelta > 0;
-    } else {
-      shouldExpand = _tagFilterExpansionController.value >= 0.5;
-    }
-    _animateTagFiltersTo(shouldExpand);
-  }
-
   void _animateTagFiltersTo(bool expanded) {
     final target = expanded ? 1.0 : 0.0;
     final duration = ExpressiveMotion.duration(context, _tagFilterSnapDuration);
@@ -916,33 +825,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     _cachedVisibleSourceItemsRef = sourceItems;
     _cachedHiddenDiaryIdsSignature = hiddenSignature;
     _cachedVisibleItems = resolved;
-    return resolved;
-  }
-
-  /// 解析顶部标签筛选列表，并在可复用时直接返回缓存。
-  List<Tag> _resolveTagFiltersForDisplay({
-    required List<Tag> allTags,
-    required List<DiaryWithTags> visibleItems,
-    required String keyword,
-  }) {
-    final normalizedKeyword = keyword.trim();
-    final canReuseCache =
-        identical(allTags, _cachedTagFilterSourceTagsRef) &&
-        identical(visibleItems, _cachedTagFilterVisibleItemsRef) &&
-        _cachedTagFilterKeyword == normalizedKeyword;
-    if (canReuseCache) {
-      return _cachedTagFilters;
-    }
-
-    final resolved = _controller.buildTagFiltersForDisplay(
-      allTags: allTags,
-      visibleItems: visibleItems,
-      keyword: normalizedKeyword,
-    );
-    _cachedTagFilterSourceTagsRef = allTags;
-    _cachedTagFilterVisibleItemsRef = visibleItems;
-    _cachedTagFilterKeyword = normalizedKeyword;
-    _cachedTagFilters = resolved;
     return resolved;
   }
 
@@ -982,35 +864,6 @@ class _DiariesPage extends ConsumerState<DiariesPage>
     _isPagingCooldown = false;
     _pagingCooldownTimer?.cancel();
     _pagingCooldownTimer = null;
-  }
-
-  /// 打开筛选 BottomSheet：日记本切换 + 标签多选 + 清除筛选。
-  ///
-  /// 原来顶栏的 DiaryTagFilterBar 已拿掉，筛选入口搬到顶栏筛选图标。
-  /// 筛选逻辑（filterState、scope）一点不动，只是换入口。
-  Future<void> _openFilterSheet(BuildContext context) async {
-    final scopeResolution = ref.read(homeNotebookScopeResolutionProvider);
-    final currentNotebook = scopeResolution.notebook;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => DiaryFilterSheet(
-        currentNotebookName: currentNotebook?.name,
-        isAllScope: scopeResolution.isAll,
-        onOpenNotebookShelf: () => unawaited(_scopeController.openShelf()),
-        onToggleTag: (tagId, selected) =>
-            _controller.toggleTagFilter(tagId, selected),
-        onClearFilters: () {
-          _controller.clearTagFilters();
-          // 范围回到全部日记。
-          _scopeController.showAll();
-        },
-      ),
-    );
   }
 
   /// 请求加载下一批日记（每次 +20）。
