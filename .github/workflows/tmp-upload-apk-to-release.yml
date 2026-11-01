@@ -16,12 +16,11 @@ jobs:
           run-id: 41302279199
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Unzip and rename APK
+      - name: Rename APK
         run: |
-          unzip -o jotsy-apk.zip -d apk-out
-          echo "--- extracted files ---"
-          ls -la apk-out
-          APK="$(find apk-out -name '*.apk' | head -n 1)"
+          echo "--- downloaded files ---"
+          ls -la
+          APK="$(find . -maxdepth 2 -name '*.apk' | head -n 1)"
           if [ -z "$APK" ]; then echo "No APK found" >&2; exit 1; fi
           echo "Found APK: $APK"
           mv "$APK" jotsy-0.10.0-arm64.apk
