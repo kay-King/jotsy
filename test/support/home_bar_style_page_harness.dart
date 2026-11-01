@@ -74,21 +74,35 @@ Future<void> openHomeBarStyleTab(
 }) async {
   final resolvedL10n =
       l10n ?? AppLocalizations.of(tester.element(find.byType(Scaffold).first));
-  final button = find.byTooltip(resolvedL10n.styleEditorSettingsTitle);
-  await tester.ensureVisible(button);
-  await tester.pumpAndSettle();
+  // 注意：find.byTooltip 是懒求值的，ensureVisible 会重新求值；
+  // 实测中两次求值结果不一致（1 个变 2 个），故直接取 .first 固化，
+  // 顶栏按钮恒可见，无需 ensureVisible。
+  final button = find
+      .byTooltip(resolvedL10n.styleEditorSettingsTitle)
+      .first;
   await tester.tap(button);
   await tester.pumpAndSettle();
-  final sectionHeader = find.text(label);
-  if (sectionHeader.evaluate().isEmpty) {
-    await tester.dragUntilVisible(
-      sectionHeader,
-      find.byType(Scaffold).last,
-      const Offset(0, -200),
+  // 注意：分类标题文本可能在区块内容里重复出现（如分组标题），
+  // 但区块头在树中排在内容之前，操作时取 .first 固化。
+  if (find.text(label).evaluate().isEmpty) {
+    // 懒构建还没进树：向下滚动触发构建。不直接用 dragUntilVisible(find.text(label))，
+    // 因为滚动过程中文本可能出现多次导致其内部 element() 报 Too many elements。
+    final scrollable = find.descendant(
+      of: find.byType(Scaffold).last,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable &&
+            widget.axisDirection == AxisDirection.down &&
+            widget.physics is AlwaysScrollableScrollPhysics,
+      ),
     );
-    await tester.pumpAndSettle();
+    // 最多滚 10 次，每次 500px，直到文本出现。
+    for (int i = 0; i < 10 && find.text(label).evaluate().isEmpty; i++) {
+      await tester.drag(scrollable.first, const Offset(0, -500));
+      await tester.pumpAndSettle();
+    }
   } else {
-    await tester.ensureVisible(sectionHeader);
+    await tester.ensureVisible(find.text(label).first);
     await tester.pumpAndSettle();
   }
 }
@@ -114,10 +128,16 @@ Future<Finder> openHomeBarStyleMenu(
   return find.widgetWithText(MenuItemButton, l10n.commonReset);
 }
 
-/// 选项整页里的纵向滚动列表。
-Finder homeBarSheetScrollable() => find.byWidgetPredicate(
-  (widget) =>
-      widget is Scrollable && widget.axisDirection == AxisDirection.down,
+/// 选项整页里的纵向滚动列表（取最后一个 Scaffold 里的主 ListView，
+/// 排除内嵌的 NeverScrollableScrollPhysics 滚动区）。
+Finder homeBarSheetScrollable() => find.descendant(
+  of: find.byType(Scaffold).last,
+  matching: find.byWidgetPredicate(
+    (widget) =>
+        widget is Scrollable &&
+        widget.axisDirection == AxisDirection.down &&
+        widget.physics is AlwaysScrollableScrollPhysics,
+  ),
 );
 
 /// 选项列表是懒构建的：目标还没进树时先在选项整页里向下滚动。
@@ -129,16 +149,19 @@ Future<void> scrollToHomeBarOption(WidgetTester tester, Finder finder) async {
       const Offset(0, -200),
     );
   }
-  await tester.ensureVisible(finder);
+  // 取 .first 固化，避免文本在页内重复时 ensureVisible 重求值报 Too many elements。
+  await tester.ensureVisible(finder.first);
   await tester.pumpAndSettle();
 }
 
 Future<void> tapHomeBarOption(WidgetTester tester, Finder finder) async {
   await scrollToHomeBarOption(tester, finder);
-  await tester.tap(finder);
+  await tester.tap(finder.first);
   await tester.pumpAndSettle();
 }
 
-/// 选项整页里的某个文字（不含下方预览）。
-Finder inHomeBarOptions(String text) =>
-    find.descendant(of: find.byType(Scaffold), matching: find.text(text));
+/// 选项整页里的某个文字（取最后一个 Scaffold，避免命中底下主预览页）。
+Finder inHomeBarOptions(String text) => find.descendant(
+  of: find.byType(Scaffold).last,
+  matching: find.text(text),
+);

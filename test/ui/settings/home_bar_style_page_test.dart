@@ -41,6 +41,8 @@ void main() {
     tester,
   ) async {
     final (_, l10n) = await pumpHomeBarStylePage(tester);
+    // 新 UI：五个分类在「样式设置」整页里按区块上下排列（懒构建，逐个滚动验证）。
+    await openHomeBarStyleTab(tester, l10n.homeBarStyleTabPresets);
     for (final label in <String>[
       l10n.homeBarStyleTabPresets,
       l10n.homeBarStyleTabMaterial,
@@ -48,8 +50,16 @@ void main() {
       l10n.homeBarStyleTabItems,
       l10n.homeBarStyleTabBehavior,
     ]) {
-      expect(find.text(label), findsOneWidget, reason: label);
+      // 滚动到该分类区块（懒构建）。
+      await tester.dragUntilVisible(
+        find.text(label).first,
+        find.byType(Scaffold).last,
+        const Offset(0, -200),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsWidgets, reason: label);
     }
+    await closeHomeBarStyleSheet(tester, l10n);
     // 默认是实色：预览里是贴底的实色底栏。
     expect(find.byType(BottomNav), findsOneWidget);
     expect(find.byType(HomeFloatingBar), findsNothing);
@@ -84,8 +94,12 @@ void main() {
     );
     expect(inHomeBarOptions(l10n.homeBarStyleGlassTopBars), findsOneWidget);
     expect(inHomeBarOptions(l10n.homeBarStyleGlassFooter), findsOneWidget);
+    // 回到主预览页验证：玻璃材质显示悬浮栏。
+    await closeHomeBarStyleSheet(tester, l10n);
     expect(find.byType(HomeFloatingBar), findsOneWidget);
 
+    // 回到选项页切回实色。
+    await openHomeBarStyleTab(tester, l10n.homeBarStyleTabMaterial);
     await tapHomeBarOption(
       tester,
       _materialOption(l10n.homeBarStyleMaterialSolid),
@@ -97,6 +111,7 @@ void main() {
     // fork 的间距默认值已与玻璃一致（同为 2），切材质不再改间距。
     expect(storedHomeBarSettings(settings).current.labelGap, 2);
     expect(inHomeBarOptions(l10n.homeBarStyleGlassTopBars), findsNothing);
+    await closeHomeBarStyleSheet(tester, l10n);
     expect(find.byType(BottomNav), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -258,6 +273,11 @@ void main() {
       HomeBarStyle.glassLabelGap,
     );
     expect(inHomeBarOptions(l10n.homeBarStyleFloatingSolidHint), findsNothing);
+    // 滚动到“尺寸”分组（切换材质后新出现，可能在懒构建区外）。
+    await scrollToHomeBarOption(
+      tester,
+      inHomeBarOptions(l10n.homeBarStyleSizeGroup),
+    );
     expect(inHomeBarOptions(l10n.homeBarStyleSizeGroup), findsOneWidget);
 
     await tapHomeBarOption(
@@ -268,6 +288,8 @@ void main() {
       storedHomeBarSettings(settings).current.fabPlacement,
       HomeBarFabPlacement.inline,
     );
+    // 回到主预览页验证：内联按钮显示，悬浮按钮隐藏。
+    await closeHomeBarStyleSheet(tester, l10n);
     expect(find.byType(HomeInlineCreateButton), findsOneWidget);
     expect(find.byType(HomeCreateFab), findsNothing);
     expect(tester.takeException(), isNull);
@@ -323,6 +345,8 @@ void main() {
       inHomeBarOptions(l10n.homeBarStylePresetGlass),
     );
     expect(storedHomeBarSettings(settings).current, HomeBarPreset.glass.style);
+    // 回到主预览页：验证悬浮栏显示，且撤销 SnackBar 可见。
+    await closeHomeBarStyleSheet(tester, l10n);
     expect(find.byType(HomeFloatingBar), findsOneWidget);
     expect(
       find.text(l10n.styleEditorApplied(l10n.homeBarStylePresetGlass)),

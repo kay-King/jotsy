@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' show QuillEditor;
+import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_appflowy_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
@@ -79,9 +79,9 @@ void main() {
       DiaryPreviewPage(diaryId: 'seeded-1', initialDetail: seeded),
     );
 
-    // 首帧即是完整内容（标题 + 正文编辑器），不是空壳，也没有首屏等待。
+    // 首帧即是完整内容（标题 + 正文预览），不是空壳，也没有首屏等待。
     expect(find.text('海边日落'), findsOneWidget);
-    expect(find.byType(QuillEditor), findsOneWidget);
+    expect(find.byType(DiaryAppFlowyPreview), findsOneWidget);
     expect(find.byType(DelayedLoadingIndicator), findsNothing);
 
     database.pending.complete(seeded);
