@@ -1,8 +1,11 @@
 import 'dart:convert';
 
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/core/database/app_database.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_appflowy.dart';
+import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/ui/diaries/controllers/simple_composer_controller.dart';
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
 
@@ -23,8 +26,12 @@ void main() {
   Future<Diary> stored(String id) async =>
       (await database.getDiaryWithTagsByDiaryId(id))!.diary;
 
-  List<Map<String, dynamic>> deltaOf(Diary diary) =>
-      (jsonDecode(diary.content) as List).cast<Map<String, dynamic>>();
+  /// AppFlowy 迁移后正文存的是块文档（Map），不再是 Delta List。
+  /// 返回顶层块节点列表供断言。
+  List<Node> blocksOf(Diary diary) =>
+      diaryDocumentFromStoredJson(diary.content).root.children;
+
+  String blockText(Node node) => node.delta?.toPlainText() ?? '';
 
   test('text-only diary is stored with first-line title', () async {
     final controller = SimpleComposerController(database);
@@ -37,9 +44,10 @@ void main() {
     expect(diary.title, '周末和朋友去山里露营');
     expect(diary.contentText, '周末和朋友去山里露营\n帐篷搭在溪边，晚上能听见水声。');
     expect(diary.cover, isNull);
-    final ops = deltaOf(diary);
-    expect(ops.length, 1);
-    expect(ops.first['insert'], contains('周末和朋友去山里露营'));
+    final blocks = blocksOf(diary);
+    expect(blocks.length, 1);
+    expect(blocks.first.type, kDiaryBlockParagraph);
+    expect(blockText(blocks.first), contains('周末和朋友去山里露营'));
   });
 
   test('empty text produces empty title and empty delta', () async {
@@ -51,7 +59,7 @@ void main() {
     final diary = await stored(id);
     expect(diary.title, '');
     expect(diary.contentText, '');
-    expect(deltaOf(diary), isEmpty);
+    expect(blocksOf(diary), isEmpty);
   });
 
   test('title falls back to first non-empty line', () async {
@@ -86,14 +94,15 @@ void main() {
 
     final diary = await stored(id);
     expect(diary.cover, '/private/img-a.jpg');
-    // 正文 1 条 + 每张图 2 条（图片块 + 换行）= 5 条。
-    final ops = deltaOf(diary);
-    expect(ops.length, 5);
-    expect(ops[0]['insert'], '露营\n');
-    expect((ops[1]['insert'] as Map)['image'], '/private/img-a.jpg');
-    expect(ops[2]['insert'], '\n');
-    expect((ops[3]['insert'] as Map)['image'], '/private/img-b.jpg');
-    expect(ops[4]['insert'], '\n');
+    // 正文 1 个段落块 + 2 个图片块 = 3 个块（AppFlowy 迁移后不再是 Delta ops）。
+    final blocks = blocksOf(diary);
+    expect(blocks.length, 3);
+    expect(blocks[0].type, kDiaryBlockParagraph);
+    expect(blockText(blocks[0]), '露营');
+    expect(blocks[1].type, kDiaryBlockImage);
+    expect(blocks[1].attributes[kDiaryBlockUrlKey], '/private/img-a.jpg');
+    expect(blocks[2].type, kDiaryBlockImage);
+    expect(blocks[2].attributes[kDiaryBlockUrlKey], '/private/img-b.jpg');
   });
 
   test('draft snapshot carries the simpleComposer marker', () async {
@@ -241,10 +250,11 @@ void main() {
       ),
       isNull,
     );
-    // 非法 JSON。
+    // 非法 JSON：按纯文本处理（decodeStoredDiaryBlocks 的设计），
+    // 纯文本能用简洁编辑器打开，所以返回文本而不是 null。
     expect(
-      SimpleComposerController.tryExtractSimpleContent('not-json'),
-      isNull,
+      SimpleComposerController.tryExtractSimpleContent('not-json')?.text,
+      'not-json',
     );
   });
 

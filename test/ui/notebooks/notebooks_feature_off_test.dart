@@ -19,9 +19,7 @@ import 'package:node_diary/ui/diaries/pages/edit_diary_page.dart';
 import 'package:node_diary/ui/diaries/providers/diary_filters.dart';
 import 'package:node_diary/ui/diaries/widgets/publish_panel/publish_notebook_tiles.dart';
 import 'package:node_diary/ui/notebooks/providers/home_notebook_scope_provider.dart';
-import 'package:node_diary/ui/notebooks/sections/notebook_shelf_sheet.dart';
 import 'package:node_diary/ui/notebooks/widgets/notebook_lock_layer.dart';
-import 'package:node_diary/ui/notebooks/widgets/notebook_switcher_chip.dart';
 import 'package:node_diary/ui/notebooks/viewmodels/notebook_view.dart';
 
 import '../../support/calendar_test_harness.dart';
@@ -40,14 +38,12 @@ void main() {
       h.settings.setAppFeaturesRaw(notebooksOff);
 
   Future<void> openShelfAndPick(DiaryDraftsHarness h, String name) async {
-    await h.tester.tap(find.byType(NotebookSwitcherChip));
-    await h.settleAll();
-    await h.tester.tap(
-      find.descendant(
-        of: find.byType(NotebookShelf),
-        matching: find.text(name),
-      ),
-    );
+    // 顶栏的 NotebookSwitcherChip 已在 fab901ea 移除，改走侧边栏选本。
+    // Drawer 动画用 pump 而不用 settleAll（动画可能不收敛）。
+    await h.tester.tap(find.byIcon(Icons.menu_outlined));
+    await h.tester.pump();
+    await h.tester.pump(const Duration(milliseconds: 300));
+    await h.tester.tap(find.text(name).first);
     await h.settleAll();
   }
 
