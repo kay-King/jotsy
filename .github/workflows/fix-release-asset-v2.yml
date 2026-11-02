@@ -1,0 +1,45 @@
+name: fix-release-asset-v2 (temporary)
+
+# 临时工作流：把 Release theme-v0.10.0-v1 里的错包（52MB）换成已核验的正确构建产物。
+# 正确产物：run 41283167674 / artifact jotsy-apk，35106442 字节，
+# SHA256=64ad197d33587d9b1c740327a2ad0216ee92f1e68044ba96ee2ee52d2c995452。
+# 用完即删。
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-release-asset-v2.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jotsy-apk
+          run-id: 41283167674
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify size and SHA256 (must match expected)
+        run: |
+          set -e
+          ls -l app-release.apk
+          SIZE=$(stat -c%s app-release.apk)
+          echo "size=$SIZE"
+          if [ "$SIZE" != "35106442" ]; then echo "SIZE MISMATCH: $SIZE"; exit 1; fi
+          echo "64ad197d33587d9b1c740327a2ad0216ee92f1e68044ba96ee2ee52d2c995452  app-release.apk" | sha256sum -c -
+          echo "VERIFIED OK"
+
+      - name: Upload to release (overwrite wrong asset)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          cp app-release.apk jotsy-0.10.0-arm64.apk
+          gh release upload theme-v0.10.0-v1 jotsy-0.10.0-arm64.apk --clobber
+          echo "UPLOADED"
