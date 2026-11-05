@@ -1985,6 +1985,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryToolbarCallout => 'Callout';
 
   @override
+  String get diaryToolbarDivider => 'Divider';
+
+  @override
   String get backupBusyInspect => 'Reading file...';
 
   @override
@@ -4470,6 +4473,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryPreviewStyleAlignCenter => 'Center';
 
   @override
+  String get diaryPreviewStyleTitleDivider => 'Line below title';
+
+  @override
+  String get diaryPreviewStyleTitleDividerSubtitle =>
+      'A light, thin line between the title and the text';
+
+  @override
+  String get diaryPreviewStyleTitleBodyGap => 'Space before text';
+
+  @override
+  String get diaryPreviewStyleTitleBodyGapSubtitle =>
+      'With the line on, this space is kept above and below it';
+
+  @override
   String get diaryPreviewStyleMetaPosition => 'Position';
 
   @override
@@ -5688,6 +5705,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryExportSelected => 'Export';
 
   @override
+  String get diaryTagBatchAction => 'Set tags';
+
+  @override
+  String diaryTagBatchTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tags for $count entries',
+      one: 'Tags for 1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diaryTagBatchDone => 'Done';
+
+  @override
+  String diaryTagBatchUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Updated tags of $count entries',
+      one: 'Updated tags of 1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get diaryTagBatchFailed => 'Couldn\'t update tags. Please try again.';
+
+  @override
   String get dataMgmtExportDiaries => 'Export diaries';
 
   @override
@@ -6541,6 +6589,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryTemplateVarTimeLabel => 'Time';
 
   @override
+  String get diaryTemplateVarTime12hLabel => 'Time (12-hour)';
+
+  @override
+  String get diaryTemplateVarTime12hFormat => 'h:mm a';
+
+  @override
   String get diaryTemplateVarYearToken => 'year';
 
   @override
@@ -6960,6 +7014,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get diaryTemplateEditorVariablesHint =>
       'Variables are filled in from the entry\'s date when the template is applied. Lunar dates and solar terms use Chinese names.';
+
+  @override
+  String diaryTemplateEditorTimeFormatHint(String example) {
+    return 'Time takes a format after a colon, such as $example: H for the hour (h for 12-hour), mm for minutes, ss for seconds and a for AM/PM; put any other letters in single quotes. A format that can\'t be read is left as written.';
+  }
 
   @override
   String diaryTemplateEditorVariableExample(String example) {

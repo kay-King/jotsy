@@ -20,6 +20,7 @@ export 'notebook_rules.dart';
 part 'app_database.g.dart';
 part 'app_database_schema.dart';
 part 'app_database_tag_ops.dart';
+part 'app_database_diary_batch_writes.dart';
 part 'app_database_diary_writes.dart';
 part 'app_database_diary_scope_sql.dart';
 part 'app_database_diary_queries.dart';
@@ -57,6 +58,7 @@ part 'app_database_day_mood_ops.dart';
 class AppDatabase extends _$AppDatabase
     with
         _AppDatabaseTagOps,
+        _AppDatabaseDiaryBatchWrites,
         _AppDatabaseDiaryScopeSql,
         _AppDatabaseDiaryQueries,
         _AppDatabaseDiaryListQueries,

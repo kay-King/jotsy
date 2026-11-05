@@ -1,6 +1,7 @@
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../core/database/diary_blocks/diary_blocks_schema.dart';
 import '../../../core/services/diary_typography.dart';
 
 /// 首行缩进的 AppFlowy 属性键。
@@ -30,8 +31,10 @@ double diaryFirstLineIndentWidth(DiaryTypography typography) =>
 /// 判断一个 AppFlowy 段落节点是否应该应用首行缩进。
 ///
 /// [node] 为段落节点；[typography] 为当前排版设置（首行缩进开关与字号）。
+///
+/// 全局开关开时所有普通段落都缩；开关关时，只有带工具栏写入的首行缩进
+/// 标记（`kDiaryParagraphIndentKey`，v0.11.0 #122）的段落缩进。
 bool shouldApplyFirstLineIndent(Node node, DiaryTypography typography) {
-  if (typography.firstLineIndent <= 0) return false;
   // 只有普通段落参与；标题、列表、引用、代码块等不缩。
   if (node.type != ParagraphBlockKeys.type) return false;
   // 块属性里显式关掉的不缩（预留）。
@@ -44,7 +47,24 @@ bool shouldApplyFirstLineIndent(Node node, DiaryTypography typography) {
   if (delta == null || delta.isEmpty) return false;
   final text = delta.toPlainText();
   if (text.isEmpty || text.trimLeft().length != text.length) return false;
-  return true;
+  // 全局开关，或段落带工具栏写入的首行缩进标记。
+  return typography.firstLineIndent > 0 ||
+      node.attributes[kDiaryParagraphIndentKey] == true;
+}
+
+/// 本段生效的首行缩进宽度（逻辑像素）：带工具栏首行缩进标记时取两字与
+/// 全局较大者，否则为全局宽度。调用方只在 [shouldApplyFirstLineIndent]
+/// 为真时使用。
+double diaryParagraphFirstLineIndentWidth(
+  Node node,
+  DiaryTypography typography,
+  double fontSize,
+) {
+  final global = diaryFirstLineIndentWidth(typography);
+  if (node.attributes[kDiaryParagraphIndentKey] == true) {
+    return global > 2 * fontSize ? global : 2 * fontSize;
+  }
+  return global;
 }
 
 /// 为首行缩进构建前导占位 span。

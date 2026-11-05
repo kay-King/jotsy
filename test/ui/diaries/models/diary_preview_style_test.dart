@@ -246,4 +246,43 @@ void main() {
       StyleCodeStatus.invalid,
     );
   });
+
+  test('title divider and body gap default to off and 14', () {
+    const title = DiaryPreviewTitleStyle();
+    expect(title.divider, isFalse);
+    expect(title.bodyGap, DiaryPreviewTitleStyle.defaultBodyGap);
+    expect(DiaryPreviewTitleStyle.defaultBodyGap, 14);
+    // 默认值不写键：默认样式仍编成空对象。
+    expect(const DiaryPreviewStyle().toJson(), isEmpty);
+  });
+
+  test('title divider and body gap survive a round trip', () {
+    const style = DiaryPreviewStyle(
+      title: DiaryPreviewTitleStyle(divider: true, bodyGap: 30),
+    );
+    final json = style.toJson();
+    expect(json, <String, Object>{
+      'title': <String, Object>{'divider': true, 'bodyGap': 30.0},
+    });
+    expect(DiaryPreviewStyle.fromJson(jsonDecode(jsonEncode(json))), style);
+  });
+
+  test('title body gap clamps to its limits and bad values fall back', () {
+    final tooSmall = DiaryPreviewStyle.fromJson(<String, Object?>{
+      'title': <String, Object?>{'bodyGap': 1},
+    });
+    expect(
+      tooSmall.title.bodyGap,
+      DiaryPreviewStyleLimits.titleBodyGap.min,
+    );
+    final tooBig = DiaryPreviewStyle.fromJson(<String, Object?>{
+      'title': <String, Object?>{'bodyGap': 100},
+    });
+    expect(tooBig.title.bodyGap, DiaryPreviewStyleLimits.titleBodyGap.max);
+    final broken = DiaryPreviewStyle.fromJson(<String, Object?>{
+      'title': <String, Object?>{'divider': 'yes', 'bodyGap': 'wide'},
+    });
+    expect(broken.title.divider, isFalse);
+    expect(broken.title.bodyGap, DiaryPreviewTitleStyle.defaultBodyGap);
+  });
 }

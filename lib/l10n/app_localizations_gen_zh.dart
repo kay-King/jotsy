@@ -1907,6 +1907,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryToolbarCallout => '提示块';
 
   @override
+  String get diaryToolbarDivider => '分隔线';
+
+  @override
   String get backupBusyInspect => '正在读取文件...';
 
   @override
@@ -4029,6 +4032,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryPreviewStyleAlignCenter => '居中';
 
   @override
+  String get diaryPreviewStyleTitleDivider => '标题下分隔线';
+
+  @override
+  String get diaryPreviewStyleTitleDividerSubtitle => '在标题与正文之间画一条浅色细线';
+
+  @override
+  String get diaryPreviewStyleTitleBodyGap => '标题与正文间距';
+
+  @override
+  String get diaryPreviewStyleTitleBodyGapSubtitle => '开启分隔线时，线的上下各留这段距离';
+
+  @override
   String get diaryPreviewStyleMetaPosition => '位置';
 
   @override
@@ -5176,6 +5191,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryExportSelected => '导出';
 
   @override
+  String get diaryTagBatchAction => '设置标签';
+
+  @override
+  String diaryTagBatchTitle(int count) {
+    return '给 $count 篇日记设置标签';
+  }
+
+  @override
+  String get diaryTagBatchDone => '完成';
+
+  @override
+  String diaryTagBatchUpdated(int count) {
+    return '已更新 $count 篇日记的标签';
+  }
+
+  @override
+  String get diaryTagBatchFailed => '标签更新失败，请重试';
+
+  @override
   String get dataMgmtExportDiaries => '导出日记';
 
   @override
@@ -5917,6 +5951,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryTemplateVarTimeLabel => '时间';
 
   @override
+  String get diaryTemplateVarTime12hLabel => '时间（12 小时制）';
+
+  @override
+  String get diaryTemplateVarTime12hFormat => 'ah:mm';
+
+  @override
   String get diaryTemplateVarYearToken => '年';
 
   @override
@@ -6308,6 +6348,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get diaryTemplateEditorVariablesHint =>
       '套用模板时按日记的日期替换成具体内容。农历与节气为中文名称。';
+
+  @override
+  String diaryTemplateEditorTimeFormatHint(String example) {
+    return '时间可以在冒号后写格式，如 $example：H 为时（h 为 12 小时制）、mm 为分、ss 为秒、a 为上午 / 下午，其他字母要加单引号。格式认不出时原样保留。';
+  }
 
   @override
   String diaryTemplateEditorVariableExample(String example) {

@@ -7,6 +7,7 @@ import 'package:node_diary/ui/diaries/widgets/diary_divider_embed_builder.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_image_embed_builder.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_link_card/diary_link_card.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_link_card/diary_link_card_builder.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_quote_bar.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_toggle_block/diary_toggle_block.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_video_embed_builder.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
@@ -33,7 +34,22 @@ Map<String, BlockComponentBuilder> buildDiaryBlockComponentBuilders({
   bool foldLongImages = true,
   void Function(String diaryId)? onOpenDiary,
 }) {
+  // 标准引用块的配置（占位文案与留白）：只换竖条，其他沿用。
+  final quoteConfiguration =
+      (standardBlockComponentBuilderMap[QuoteBlockKeys.type]
+              as QuoteBlockComponentBuilder)
+          .configuration;
   return <String, BlockComponentBuilder>{
+    // 引用：竖条与相邻的引用相接时画进本块的上下留白（padding + margin），
+    // 连续几行引用连成一条，见 DiaryQuoteBar（v0.11.0 #134）。
+    QuoteBlockKeys.type: QuoteBlockComponentBuilder(
+      configuration: quoteConfiguration,
+      iconBuilder: (context, node) => DiaryQuoteBar(
+        node: node,
+        blockInsets:
+            quoteConfiguration.padding(node) + quoteConfiguration.margin(node),
+      ),
+    ),
     // 菜单里删除图片只移出正文，不删文件：撤销或放弃修改后原日记还要用，
     // 文件由 DiaryMediaCleanupService 按引用回收。
     kDiaryBlockImage: DiaryImageEmbedBuilder(

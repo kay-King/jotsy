@@ -22,6 +22,11 @@ const int _kDiaryTableDefaultCols = 3;
 ///
 /// 光标已在某个表格里时插到该表格后面（不把原表格拆开）；没有选区时插到
 /// 文档末尾。一次事务完成，单步可撤销。
+///
+/// 表格后面总留一个能打字的块（v0.11.0 #125）：表格是一整块，光标出不了
+/// 格子就写不了表格下面的内容。所以后面没有块、或紧跟的是媒体 / 分隔线
+/// 这类没有文字的块时，在表格后面补一个空段落；手机上没有方向键，表格在
+/// 文末时否则无法继续写。
 Future<void> insertDiaryTableBlock(EditorState editorState) async {
   final table = _tableNode(
     rows: _kDiaryTableDefaultRows,
@@ -31,6 +36,7 @@ Future<void> insertDiaryTableBlock(EditorState editorState) async {
   final selection = editorState.selection?.normalized;
 
   final Path insertPath;
+  Node? afterTable;
   if (selection == null) {
     insertPath = [editorState.document.root.children.length];
   } else {
@@ -42,11 +48,12 @@ Future<void> insertDiaryTableBlock(EditorState editorState) async {
         break;
       }
     }
-    insertPath =
-        enclosingTable?.path.next ??
-        (anchor == null
-            ? [editorState.document.root.children.length]
-            : anchor.path.next);
+    final anchorNode = enclosingTable ?? anchor;
+    insertPath = anchorNode == null
+        ? [editorState.document.root.children.length]
+        : anchorNode.path.next;
+    // 插入位置之后的块：表格插进去后它就是表格的下一块。
+    afterTable = anchorNode?.next;
   }
 
   transaction
@@ -55,7 +62,74 @@ Future<void> insertDiaryTableBlock(EditorState editorState) async {
     ..afterSelection = Selection.collapsed(
       Position(path: [...insertPath, 0, 0]),
     );
+  // 表格后面没有能直接打字的块时补一个空段落（与表格同一次事务）。
+  if (!_isDiaryTextBlock(afterTable)) {
+    transaction.insertNode(insertPath.next, paragraphNode());
+  }
   await editorState.apply(transaction);
+}
+
+/// [node] 是能直接打字的块（带 delta 的文字块）。
+bool _isDiaryTextBlock(Node? node) => node != null && node.delta != null;
+
+/// 光标离开 [table] 到它后面的块开头：后面没有能打字的块时先补一个空
+/// 段落（老数据里文末的表格）。[removing] 给出时在同一事务里删掉它
+/// （格子最后一段的空行回车退出时，那个空行不留在格子里）。一步撤销。
+Future<void> leaveDiaryTableBelow(
+  EditorState editorState,
+  Node table, {
+  Node? removing,
+}) async {
+  final next = table.next;
+  final transaction = editorState.transaction;
+  if (_isDiaryTextBlock(next)) {
+    if (removing == null) {
+      await editorState.updateSelectionWithReason(
+        Selection.collapsed(Position(path: next!.path)),
+      );
+      return;
+    }
+  } else {
+    transaction.insertNode(table.path.next, paragraphNode());
+  }
+  if (removing != null) transaction.deleteNode(removing);
+  // 删掉的是表格里的段落，表格自身的路径不变，紧跟它的块仍在 path.next。
+  transaction.afterSelection = Selection.collapsed(
+    Position(path: table.path.next),
+  );
+  await editorState.apply(transaction);
+}
+
+/// 表格最后一行格子末尾的空段落上回车：离开表格（v0.11.0 #125）。
+///
+/// 接管条件：折叠选区落在某格的段落上，该段是格子的最后一段、不是第一段、
+/// 为空且没有子块，且格子在表格的最后一行。满足时删掉这个空段落，光标到
+/// 表格后面的块（没有能打字的块时补一个空段落），与代码块“块尾空行回车
+/// 退出”同理。接管成功返回 true，编辑器不再走默认换行；其余情况返回
+/// false，继续走标准的格内换行。
+Future<bool> handleDiaryTableExitEnter(EditorState editorState) async {
+  final selection = editorState.selection?.normalized;
+  if (selection == null || !selection.isCollapsed) return false;
+  final node = editorState.getNodeAtPath(selection.start.path);
+  if (node == null || node.type != ParagraphBlockKeys.type) return false;
+  // 空段落：光标在段首段尾无所谓，空段的 offset 只能是 0。
+  if (!(node.delta?.isEmpty ?? false) || node.children.isNotEmpty) {
+    return false;
+  }
+  final cell = node.parent;
+  if (cell == null || cell.type != TableCellBlockKeys.type) return false;
+  // 不是格子的第一段、且是最后一段。
+  if (identical(cell.children.first, node)) return false;
+  if (!identical(cell.children.last, node)) return false;
+  final table = cell.parent;
+  if (table == null || table.type != TableBlockKeys.type) return false;
+  final rows = table.attributes[TableBlockKeys.rowsLen];
+  final row = cell.attributes[TableCellBlockKeys.rowPosition];
+  if (rows is! num || row is! num) return false;
+  // 只在最后一行的格子上退出。
+  if (row.toInt() != rows.toInt() - 1) return false;
+  await leaveDiaryTableBelow(editorState, table, removing: node);
+  return true;
 }
 
 /// 新表格节点：[rows]×[cols] 个空格子，每格一个空段落。

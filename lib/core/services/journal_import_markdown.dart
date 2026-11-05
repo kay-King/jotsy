@@ -73,11 +73,12 @@ class JournalMarkdownConverter {
   static final RegExp _ordered = RegExp(r'^(\s*)\d{1,9}[.)]\s+(.*)$');
 
   void append(String markdown) {
-    final lines = markdown
-        .replaceAll('\r\n', '\n')
-        .replaceAll('\r', '\n')
-        .replaceAll('\u200b', '')
-        .split('\n');
+    final lines = joinSpacedMarkdownLinks(
+      markdown
+          .replaceAll('\r\n', '\n')
+          .replaceAll('\r', '\n')
+          .replaceAll('\u200b', ''),
+    ).split('\n');
     final definitions = collectJournalMarkdownReferences(lines, _inlineParser);
     String? fence;
     // 当前围栏的 `code-block` 值：认得的语言 id、`plain` 或 true（未指定 /
@@ -340,6 +341,54 @@ class JournalMarkdownConverter {
 
   static bool _isWebLink(String href) =>
       RegExp(r'^(https?|mailto):', caseSensitive: false).hasMatch(href);
+}
+
+/// 行内代码，或 `]` 与 `(` 之间隔着空白的网址链接（组 2 为 `[文字]`，组 3
+/// 为 `(地址)`）。
+final RegExp _codeSpanOrSpacedLink = RegExp(
+  r'(`+)[^\n]*?\1|(\[[^\]\n]+\])[ \t]+(\((?:https?|mailto):[^)\s]+\))',
+  caseSensitive: false,
+);
+
+/// 待办的勾选框 `[ ]` / `[x]`：`- [ ] (https://…)` 是一条以括号网址开头的
+/// 待办，不是链接，不能接上。
+final RegExp _taskBox = RegExp(r'^\[[ xX]\]$');
+
+/// 把 `[文字] (https://…)` 中间的空白去掉，让它按链接转换。
+///
+/// CommonMark 要求 `]` 与 `(` 紧挨，带空格时整段按文字显示，地址只剩一个
+/// 裸网址；手打或经其他应用转手的 Markdown 常带这个空格，本意都是链接。
+/// 只认 http(s) / mailto 地址（相对路径本来就只留文字，接上也没用），代码
+/// 围栏里的行与行内代码是原文，不动。
+String joinSpacedMarkdownLinks(String text) =>
+    _mapLinesOutsideFences(text, (line) {
+      if (!line.contains(']')) return line;
+      return line.replaceAllMapped(_codeSpanOrSpacedLink, (match) {
+        final label = match.group(2);
+        if (label == null || _taskBox.hasMatch(label)) return match.group(0)!;
+        return '$label${match.group(3)!}';
+      });
+    });
+
+/// 对代码围栏之外的每一行做 [map]（围栏行与围栏里的行原样保留），围栏的
+/// 识别与 [JournalMarkdownConverter.append] 用同一套规则。
+String _mapLinesOutsideFences(String text, String Function(String line) map) {
+  final lines = text.split('\n');
+  String? fence;
+  for (var i = 0; i < lines.length; i++) {
+    final line = lines[i];
+    if (fence != null) {
+      if (line.trimLeft().startsWith(fence)) fence = null;
+      continue;
+    }
+    final fenceMatch = JournalMarkdownConverter._fence.firstMatch(line);
+    if (fenceMatch != null) {
+      fence = fenceMatch.group(1)!.substring(0, 3);
+      continue;
+    }
+    lines[i] = map(line);
+  }
+  return lines.join('\n');
 }
 
 /// 把一个 HTML 标签或注释解析为占位元素（tag 为 [tag]），原文放在 `raw`

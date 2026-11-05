@@ -2676,6 +2676,10 @@
   "@diaryToolbarCallout": {
     "description": "Toolbar action for inserting a callout block."
   },
+  "diaryToolbarDivider": "分隔线",
+  "@diaryToolbarDivider": {
+    "description": "Toolbar action for inserting a divider line into diary content."
+  },
   "backupBusyInspect": "正在读取文件...",
   "@backupBusyInspect": {
     "description": "导入前读取并检查所选备份或日记文件时的等待文案。"
@@ -5726,6 +5730,22 @@
   "@diaryPreviewStyleAlignCenter": {
     "description": "预览页样式设置：对齐选项。"
   },
+  "diaryPreviewStyleTitleDivider": "标题下分隔线",
+  "@diaryPreviewStyleTitleDivider": {
+    "description": "预览页样式设置：开关标题：在标题与正文之间画一条细线。"
+  },
+  "diaryPreviewStyleTitleDividerSubtitle": "在标题与正文之间画一条浅色细线",
+  "@diaryPreviewStyleTitleDividerSubtitle": {
+    "description": "预览页样式设置：开关说明。"
+  },
+  "diaryPreviewStyleTitleBodyGap": "标题与正文间距",
+  "@diaryPreviewStyleTitleBodyGap": {
+    "description": "预览页样式设置：滑块标题：标题区与正文之间的距离。"
+  },
+  "diaryPreviewStyleTitleBodyGapSubtitle": "开启分隔线时，线的上下各留这段距离",
+  "@diaryPreviewStyleTitleBodyGapSubtitle": {
+    "description": "预览页样式设置：滑块说明。"
+  },
   "diaryPreviewStyleMetaPosition": "位置",
   "@diaryPreviewStyleMetaPosition": {
     "description": "预览页样式设置：设置项标题。"
@@ -7124,6 +7144,36 @@
   "@diaryExportSelected": {
     "description": "日记列表多选栏：导出选中日记的按钮提示。"
   },
+  "diaryTagBatchAction": "设置标签",
+  "@diaryTagBatchAction": {
+    "description": "日记列表多选栏“更多”菜单：给选中的日记批量加上或去掉标签的菜单项。"
+  },
+  "diaryTagBatchTitle": "给 {count} 篇日记设置标签",
+  "@diaryTagBatchTitle": {
+    "description": "多选日记的标签面板标题；count 为选中的篇数。",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryTagBatchDone": "完成",
+  "@diaryTagBatchDone": {
+    "description": "多选日记的标签面板底部的提交按钮。"
+  },
+  "diaryTagBatchUpdated": "已更新 {count} 篇日记的标签",
+  "@diaryTagBatchUpdated": {
+    "description": "多选日记批量改标签后的撤销提示；count 为标签有变化的篇数。",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "diaryTagBatchFailed": "标签更新失败，请重试",
+  "@diaryTagBatchFailed": {
+    "description": "多选日记批量改标签写入失败的提示。"
+  },
   "dataMgmtExportDiaries": "导出日记",
   "@dataMgmtExportDiaries": {
     "description": "数据管理页：按范围导出日记的入口。"
@@ -8196,6 +8246,14 @@
   "@diaryTemplateVarTimeLabel": {
     "description": "模板变量的名称。"
   },
+  "diaryTemplateVarTime12hLabel": "时间（12 小时制）",
+  "@diaryTemplateVarTime12hLabel": {
+    "description": "“全部变量”面板里，时间变量下方那一行常用格式（12 小时制）的名称。"
+  },
+  "diaryTemplateVarTime12hFormat": "ah:mm",
+  "@diaryTemplateVarTime12hFormat": {
+    "description": "12 小时制时间写在变量名冒号后的 intl DateFormat 图案，按这种语言的习惯排列上午 / 下午与时分；必须是应用认得的图案（字母只用 DateFormat 的字段字母，其他字母放进单引号）。"
+  },
   "diaryTemplateVarYearToken": "年",
   "@diaryTemplateVarYearToken": {
     "description": "插入到双花括号里的模板变量名，必须是应用认得的写法之一。"
@@ -8779,6 +8837,15 @@
   "diaryTemplateEditorVariablesHint": "套用模板时按日记的日期替换成具体内容。农历与节气为中文名称。",
   "@diaryTemplateEditorVariablesHint": {
     "description": "模板变量面板的说明。"
+  },
+  "diaryTemplateEditorTimeFormatHint": "时间可以在冒号后写格式，如 {example}：H 为时（h 为 12 小时制）、mm 为分、ss 为秒、a 为上午 / 下午，其他字母要加单引号。格式认不出时原样保留。",
+  "@diaryTemplateEditorTimeFormatHint": {
+    "description": "“全部变量”面板里时间几行下方的说明：时间变量可以在冒号后写自己的格式。",
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
   },
   "diaryTemplateEditorVariableExample": "今天：{example}",
   "@diaryTemplateEditorVariableExample": {

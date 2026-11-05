@@ -19,9 +19,12 @@ Widget _host({
       isSelectionMode: selection,
       selectedCount: count,
       onCancelSelection: () {},
+      allSelected: false,
+      onToggleSelectAll: () {},
       isPinActionUnpin: false,
       onPinSelected: () {},
       onArchiveSelected: () {},
+      onSetTagsSelected: () {},
       onExportSelected: () {},
       onDeleteSelected: () {},
       onAddToNotebookSelected: onAddToNotebook ?? () {},
@@ -113,11 +116,36 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    // 数量放不下时缩小而不是省略，仍能读出完整数字。
-    expect(find.text('已选择 1234 项'), findsOneWidget);
+    // 勾选框占去一截宽度后“已选择 N 项”读不清：只显示完整数字（不省略），
+    // 读屏仍是完整的“已选择 N 项”。
+    expect(find.text('1234'), findsOneWidget);
+    expect(find.text('已选择 1234 项'), findsNothing);
+    expect(
+      tester.getSemantics(
+        find.byKey(const ValueKey<String>('head_select_all')),
+      ),
+      matchesSemantics(
+        isButton: true,
+        hasTapAction: true,
+        label: '全选',
+        value: '已选择 1234 项',
+      ),
+    );
     expect(find.byTooltip('收进日记本'), findsOneWidget);
     expect(find.byTooltip('归档'), findsOneWidget);
     expect(find.byTooltip('删除'), findsOneWidget);
+  });
+
+  testWidgets('a wide selection bar keeps the full count beside the box', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_host(selection: true, count: 1234));
+    await tester.pumpAndSettle();
+    expect(find.text('已选择 1234 项'), findsOneWidget);
+    expect(find.byTooltip('全选'), findsOneWidget);
   });
 
   testWidgets('add to notebook calls back from the selection bar', (
@@ -139,6 +167,7 @@ void main() {
     await tester.tap(find.byTooltip('更多操作'));
     await tester.pumpAndSettle();
     expect(find.text('置顶'), findsOneWidget);
+    expect(find.text('设置标签'), findsOneWidget);
     expect(find.text('导出'), findsOneWidget);
     expect(find.text('从本日记本移出'), findsNothing);
     expect(find.text('移动到…'), findsNothing);
@@ -150,6 +179,15 @@ void main() {
     await tester.tap(find.byTooltip('更多操作'));
     await tester.pumpAndSettle();
     expect(find.text('从本日记本移出'), findsOneWidget);
+    expect(find.text('移动到…'), findsOneWidget);
+
+    // “更多”菜单里的顺序：置顶、设置标签、导出、移出、移动到。
+    await tester.pumpAndSettle();
+    final pin = tester.getTopLeft(find.text('置顶')).dy;
+    final tags = tester.getTopLeft(find.text('设置标签')).dy;
+    final export = tester.getTopLeft(find.text('导出')).dy;
+    expect(pin < tags && tags < export, isTrue);
+    // 普通日记本里菜单为 5 项，仍放得下。
     expect(find.text('移动到…'), findsOneWidget);
   });
 }

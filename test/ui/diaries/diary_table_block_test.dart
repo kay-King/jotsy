@@ -57,12 +57,13 @@ Future<void> _pumpPreview(WidgetTester tester, Node table) => tester.pumpWidget(
 
 void main() {
   group('insertDiaryTableBlock', () {
-    test('插入后文档里有 3x3 的 table 节点', () async {
+    test('插入后文档里有 3x3 的 table 节点，表格后补一个空段落', () async {
       final editorState = await _editorState(text: 'hello');
       await insertDiaryTableBlock(editorState);
 
       final children = editorState.document.root.children;
-      expect(children.length, 2);
+      // 正文段落 + 表格 + 表格后补的空段落（v0.11.0 #125：表格后总留可写段落）。
+      expect(children.length, 3);
       final table = children[1];
       expect(table.type, TableBlockKeys.type);
       expect(table.attributes[TableBlockKeys.rowsLen], 3);
@@ -80,6 +81,9 @@ void main() {
           expect(cell.children.single.delta?.isEmpty, isTrue);
         }
       }
+      // 补的空段落是普通段落、在表格后面。
+      expect(children[2].type, ParagraphBlockKeys.type);
+      expect(children[2].delta?.isEmpty, isTrue);
     });
 
     test('插入后光标进第一个 cell 的段落开头', () async {
@@ -107,23 +111,190 @@ void main() {
       await insertDiaryTableBlock(editorState);
 
       final children = editorState.document.root.children;
-      expect(children.length, 3);
+      // 空段落 + 旧表格 + 新表格 + 新表格后补的空段落。
+      expect(children.length, 4);
       expect(children[1].type, TableBlockKeys.type);
       expect(children[1].attributes[TableBlockKeys.rowsLen], 1);
       expect(children[2].type, TableBlockKeys.type);
       expect(children[2].attributes[TableBlockKeys.rowsLen], 3);
+      expect(children[3].type, ParagraphBlockKeys.type);
+      expect(children[3].delta?.isEmpty, isTrue);
       expect(editorState.selection?.end.path, [2, 0, 0]);
     });
 
-    test('没有选区时插到文档末尾', () async {
+    test('没有选区时插到文档末尾，表格后补一个空段落', () async {
       // 空文档（没有子块）：表格落在 [0]，光标进第一格。
       final editorState = EditorState(document: Document.blank());
       await insertDiaryTableBlock(editorState);
 
       final children = editorState.document.root.children;
-      expect(children.length, 1);
-      expect(children.last.type, TableBlockKeys.type);
+      expect(children.length, 2);
+      expect(children.first.type, TableBlockKeys.type);
+      expect(children.last.type, ParagraphBlockKeys.type);
+      expect(children.last.delta?.isEmpty, isTrue);
       expect(editorState.selection?.end.path, [0, 0, 0]);
+    });
+
+    test('表格后面已有正文段落时不补空段落', () async {
+      final editorState = await _editorState(text: 'hello');
+      // 在文末再加一个正文段落：表格插在第一段后面、第二段前面。
+      final transaction = editorState.transaction
+        ..insertNode([1], paragraphNode(text: 'after'));
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: [0], offset: 5),
+      );
+
+      await insertDiaryTableBlock(editorState);
+
+      final children = editorState.document.root.children;
+      expect(children.length, 3);
+      expect(children[0].type, ParagraphBlockKeys.type);
+      expect(children[1].type, TableBlockKeys.type);
+      // 紧跟的是原有正文段落，不补。
+      expect(children[2].type, ParagraphBlockKeys.type);
+      expect(children[2].delta?.toPlainText(), 'after');
+    });
+  });
+
+  group('handleDiaryTableExitEnter', () {
+    Future<EditorState> editorWithTable({
+      required List<List<String>> rows,
+      required List<int> caretPath,
+      int caretOffset = 0,
+    }) async {
+      final editorState = await _editorState();
+      final table = _tableNode(rows);
+      final transaction = editorState.transaction..insertNode([1], table);
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: caretPath, offset: caretOffset),
+      );
+      return editorState;
+    }
+
+    test('最后一行格子末尾的空段落上回车：删掉空行、光标到表格后', () async {
+      // 2 行 1 列：第二行格子追加一个空段落，光标落在它上面。
+      final editorState = await editorWithTable(
+        rows: [
+          ['a'],
+          ['b'],
+        ],
+        caretPath: const [1, 1, 0],
+      );
+      final table = editorState.document.root.children[1];
+      final lastCell = table.children[1];
+      final transaction = editorState.transaction
+        ..insertNode([1, 1, 1], paragraphNode());
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: [1, 1, 1], offset: 0),
+      );
+      expect(lastCell.children.length, 2);
+
+      final handled = await handleDiaryTableExitEnter(editorState);
+
+      expect(handled, isTrue);
+      final children = editorState.document.root.children;
+      // 空段落 + 表格 + 表格后补的空段落（回车退出时没有则补）。
+      expect(children.length, 3);
+      expect(children[1], same(table));
+      expect(children[2].type, ParagraphBlockKeys.type);
+      expect(children[2].delta?.isEmpty, isTrue);
+      // 格子里那个空段落已被删掉。
+      expect(lastCell.children.length, 1);
+      expect(editorState.selection?.end.path, [2]);
+      expect(editorState.selection?.end.offset, 0);
+    });
+
+    test('最后一行格子末尾的空段落上回车：表格后已有段落时直接过去', () async {
+      final editorState = await editorWithTable(
+        rows: [
+          ['a'],
+          ['b'],
+        ],
+        caretPath: const [1, 1, 0],
+      );
+      final transaction = editorState.transaction
+        ..insertNode([1, 1, 1], paragraphNode())
+        ..insertNode([2], paragraphNode(text: 'after'));
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: [1, 1, 1], offset: 0),
+      );
+
+      final handled = await handleDiaryTableExitEnter(editorState);
+
+      expect(handled, isTrue);
+      final children = editorState.document.root.children;
+      expect(children.length, 3);
+      expect(children[2].delta?.toPlainText(), 'after');
+      expect(editorState.selection?.end.path, [2]);
+    });
+
+    test('非最后一行格子的空段落上回车不接管', () async {
+      final editorState = await editorWithTable(
+        rows: [
+          ['a'],
+          ['b'],
+        ],
+        caretPath: const [1, 0, 0],
+      );
+      final table = editorState.document.root.children[1];
+      final firstCell = table.children[0];
+      final transaction = editorState.transaction
+        ..insertNode([1, 0, 1], paragraphNode());
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: [1, 0, 1], offset: 0),
+      );
+
+      final handled = await handleDiaryTableExitEnter(editorState);
+
+      expect(handled, isFalse);
+      expect(firstCell.children.length, 2);
+    });
+
+    test('格子第一段上回车不接管', () async {
+      final editorState = await editorWithTable(
+        rows: [
+          ['a'],
+          ['b'],
+        ],
+        caretPath: const [1, 1, 0],
+      );
+
+      // 光标在最后一行格子的第一段（有文字）：不接管。
+      editorState.selection = Selection.collapsed(
+        Position(path: [1, 1, 0], offset: 1),
+      );
+
+      final handled = await handleDiaryTableExitEnter(editorState);
+
+      expect(handled, isFalse);
+    });
+
+    test('格子末尾段落非空时回车不接管', () async {
+      final editorState = await editorWithTable(
+        rows: [
+          ['a'],
+          ['b'],
+        ],
+        caretPath: const [1, 1, 0],
+      );
+      final table = editorState.document.root.children[1];
+      final lastCell = table.children[1];
+      final transaction = editorState.transaction
+        ..insertNode([1, 1, 1], paragraphNode(text: 'x'));
+      await editorState.apply(transaction);
+      editorState.selection = Selection.collapsed(
+        Position(path: [1, 1, 1], offset: 1),
+      );
+
+      final handled = await handleDiaryTableExitEnter(editorState);
+
+      expect(handled, isFalse);
+      expect(lastCell.children.length, 2);
     });
   });
 

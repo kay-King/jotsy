@@ -3590,6 +3590,12 @@ abstract class AppLocalizations {
   /// **'Callout'**
   String get diaryToolbarCallout;
 
+  /// Toolbar action for inserting a divider line into diary content.
+  ///
+  /// In en, this message translates to:
+  /// **'Divider'**
+  String get diaryToolbarDivider;
+
   /// Busy label while the selected backup or diary file is read and checked before choosing how to import it.
   ///
   /// In en, this message translates to:
@@ -7454,6 +7460,30 @@ abstract class AppLocalizations {
   /// **'Center'**
   String get diaryPreviewStyleAlignCenter;
 
+  /// Diary preview style settings: switch title for a thin line between the title and the text.
+  ///
+  /// In en, this message translates to:
+  /// **'Line below title'**
+  String get diaryPreviewStyleTitleDivider;
+
+  /// Diary preview style settings: switch subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A light, thin line between the title and the text'**
+  String get diaryPreviewStyleTitleDividerSubtitle;
+
+  /// Diary preview style settings: slider title for the space between the title area and the text.
+  ///
+  /// In en, this message translates to:
+  /// **'Space before text'**
+  String get diaryPreviewStyleTitleBodyGap;
+
+  /// Diary preview style settings: slider subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'With the line on, this space is kept above and below it'**
+  String get diaryPreviewStyleTitleBodyGapSubtitle;
+
   /// Diary preview style settings: setting title.
   ///
   /// In en, this message translates to:
@@ -9578,6 +9608,36 @@ abstract class AppLocalizations {
   /// **'Export'**
   String get diaryExportSelected;
 
+  /// Diary list selection bar, More menu: item that adds or removes tags on the selected entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Set tags'**
+  String get diaryTagBatchAction;
+
+  /// Title of the tag sheet for selected entries; count is the number of selected entries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Tags for 1 entry} other{Tags for {count} entries}}'**
+  String diaryTagBatchTitle(int count);
+
+  /// Submit button at the bottom of the tag sheet for selected entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get diaryTagBatchDone;
+
+  /// Undo hint after changing tags of selected entries; count is the number of entries whose tags changed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Updated tags of 1 entry} other{Updated tags of {count} entries}}'**
+  String diaryTagBatchUpdated(int count);
+
+  /// Hint when writing tags for selected entries fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update tags. Please try again.'**
+  String get diaryTagBatchFailed;
+
   /// Data management entry that opens diary export.
   ///
   /// In en, this message translates to:
@@ -10916,6 +10976,18 @@ abstract class AppLocalizations {
   /// **'Time'**
   String get diaryTemplateVarTimeLabel;
 
+  /// Name of the common 12-hour time format listed under the time variable in the All variables sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Time (12-hour)'**
+  String get diaryTemplateVarTime12hLabel;
+
+  /// intl DateFormat pattern written after the colon of the time variable for a 12-hour clock, ordered the way this language writes AM/PM and the time. Must be a pattern the app accepts (only DateFormat field letters; any other letters go in single quotes).
+  ///
+  /// In en, this message translates to:
+  /// **'h:mm a'**
+  String get diaryTemplateVarTime12hFormat;
+
   /// Template variable name inserted between double braces for the year of the diary's date. Must be one of the aliases the app recognises.
   ///
   /// In en, this message translates to:
@@ -11611,6 +11683,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Variables are filled in from the entry\'s date when the template is applied. Lunar dates and solar terms use Chinese names.'**
   String get diaryTemplateEditorVariablesHint;
+
+  /// Note below the time rows in the All variables sheet: the time variable accepts a custom format after a colon.
+  ///
+  /// In en, this message translates to:
+  /// **'Time takes a format after a colon, such as {example}: H for the hour (h for 12-hour), mm for minutes, ss for seconds and a for AM/PM; put any other letters in single quotes. A format that can\'t be read is left as written.'**
+  String diaryTemplateEditorTimeFormatHint(String example);
 
   /// Example value of a template variable, computed for today.
   ///

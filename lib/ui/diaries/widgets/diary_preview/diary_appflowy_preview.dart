@@ -315,7 +315,16 @@ Widget _buildBlock(
         firstInRun: firstInRun,
       );
     case kDiaryBlockQuote:
-      return _QuoteBlock(node: node, ctx: ctx, depth: depth);
+      // 相邻的引用竖条连成一条（v0.11.0 #134）：与上一行引用相接时去掉
+      // 这侧的间距，竖线在块分界处对接；下侧由下一行的相接处理。
+      final joinsAbove =
+          index > 0 && siblings[index - 1].type == kDiaryBlockQuote;
+      return _QuoteBlock(
+        node: node,
+        ctx: ctx,
+        depth: depth,
+        joinsAbove: joinsAbove,
+      );
     case kDiaryBlockCode:
       return _CodeBlock(node: node, ctx: ctx, depth: depth);
     case kDiaryBlockDivider:
@@ -421,9 +430,16 @@ class _ParagraphBlock extends StatelessWidget {
     final typography = styles.body;
     final diaryTypography = ctx.appearance.typography;
     // 首行缩进只在这里垫出来：段落首个文字 span 前插定宽占位，原文
-    // Delta 不动（与 Quill 时代一致）。
-    final indentWidth = diaryFirstLineIndentWidth(diaryTypography);
+    // Delta 不动（与 Quill 时代一致）。带工具栏标记的段落取两字与全局
+    // 较大者（见 diaryParagraphFirstLineIndentWidth）。
     final indent = shouldApplyFirstLineIndent(node, diaryTypography);
+    final indentWidth = indent
+        ? diaryParagraphFirstLineIndentWidth(
+            node,
+            diaryTypography,
+            typography.fontSize ?? 16,
+          )
+        : 0.0;
     final span = _buildDeltaSpan(
       context,
       node.delta,
@@ -715,23 +731,32 @@ class _TodoCheckboxState extends State<_TodoCheckbox> {
 }
 
 /// 引用：左侧 4dp 灰线、文字 60% 透明度（与 Quill 默认一致）。
+///
+/// 与上一行引用相接（[joinsAbove]）时去掉这侧的间距，竖线在块分界处对接、
+/// 连成一条（v0.11.0 #134）；单独的引用与改版前一致。
 class _QuoteBlock extends StatelessWidget {
   const _QuoteBlock({
     required this.node,
     required this.ctx,
     required this.depth,
+    this.joinsAbove = false,
   });
 
   final Node node;
   final _BlockBuildContext ctx;
   final int depth;
+  final bool joinsAbove;
 
   @override
   Widget build(BuildContext context) {
     final styles = ctx.styles;
     final span = _buildDeltaSpan(context, node.delta, styles.quote, ctx);
     return Padding(
-      padding: EdgeInsets.only(left: depth * styles.fontSize, top: 6),
+      // 与上一行引用相接时不要这侧的间距，否则竖线断开。
+      padding: EdgeInsets.only(
+        left: depth * styles.fontSize,
+        top: joinsAbove ? 0 : 6,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

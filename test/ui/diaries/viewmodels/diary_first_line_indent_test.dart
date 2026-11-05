@@ -142,6 +142,109 @@ void main() {
         isFalse,
       );
     });
+
+    test('工具栏标记的段落：全局关闭时也缩进（v0.11.0 #122）', () {
+      expect(
+        shouldApplyFirstLineIndent(
+          _node(
+            ParagraphBlockKeys.type,
+            '第一段文字',
+            attributes: {kDiaryParagraphIndentKey: true},
+          ),
+          const DiaryTypography(),
+        ),
+        isTrue,
+      );
+    });
+
+    test('工具栏标记的段落：居中/空段落仍不缩', () {
+      expect(
+        shouldApplyFirstLineIndent(
+          _node(
+            ParagraphBlockKeys.type,
+            '居中段',
+            attributes: {kDiaryParagraphIndentKey: true, 'align': 'center'},
+          ),
+          const DiaryTypography(),
+        ),
+        isFalse,
+      );
+      expect(
+        shouldApplyFirstLineIndent(
+          _node(
+            ParagraphBlockKeys.type,
+            '',
+            attributes: {kDiaryParagraphIndentKey: true},
+          ),
+          const DiaryTypography(),
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('diaryParagraphFirstLineIndentWidth', () {
+    test('带标记的段落取两字与全局较大者', () {
+      const fontSize = 16.0;
+      // 全局 2 字 = 32px，标记两字 = 32px，取 32。
+      expect(
+        diaryParagraphFirstLineIndentWidth(
+          _node(
+            ParagraphBlockKeys.type,
+            '文字',
+            attributes: {kDiaryParagraphIndentKey: true},
+          ),
+          typography,
+          fontSize,
+        ),
+        32,
+      );
+      // 全局 0 字时标记仍给两字 32px。
+      expect(
+        diaryParagraphFirstLineIndentWidth(
+          _node(
+            ParagraphBlockKeys.type,
+            '文字',
+            attributes: {kDiaryParagraphIndentKey: true},
+          ),
+          const DiaryTypography(),
+          fontSize,
+        ),
+        32,
+      );
+      // 全局 3 字 = 48px 时标记段落取全局 48px。
+      expect(
+        diaryParagraphFirstLineIndentWidth(
+          _node(
+            ParagraphBlockKeys.type,
+            '文字',
+            attributes: {kDiaryParagraphIndentKey: true},
+          ),
+          const DiaryTypography(firstLineIndent: 3, fontSize: 16),
+          fontSize,
+        ),
+        48,
+      );
+    });
+
+    test('无标记的段落只取全局宽度', () {
+      expect(
+        diaryParagraphFirstLineIndentWidth(
+          _node(ParagraphBlockKeys.type, '文字'),
+          typography,
+          16,
+        ),
+        32,
+      );
+      expect(
+        diaryParagraphFirstLineIndentWidth(
+          _node(ParagraphBlockKeys.type, '文字'),
+          const DiaryTypography(),
+          16,
+        ),
+        0,
+      );
+    });
   });
 
   group('withFirstLineIndentAttribute', () {

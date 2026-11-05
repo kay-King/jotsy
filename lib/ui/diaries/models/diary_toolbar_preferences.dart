@@ -32,6 +32,7 @@ enum DiaryToolbarItem {
   currentTime,
   recording,
   table,
+  divider,
   toggleList,
   callout,
 }
@@ -64,6 +65,9 @@ const List<DiaryToolbarItem> kDefaultDiaryToolbarOrder = <DiaryToolbarItem>[
   DiaryToolbarItem.codeBlock,
   // v0.10.0 新工具：排在后半段。
   DiaryToolbarItem.table,
+  // 分隔线紧跟表格（同为整块的插入），在后半段，不挤进常驻的前几格；
+  // 已保存过顺序的用户由 [decodeDiaryToolbarOrder] 补到末尾。
+  DiaryToolbarItem.divider,
   DiaryToolbarItem.toggleList,
   DiaryToolbarItem.callout,
 ];
@@ -96,6 +100,7 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.currentTime => 'current_time',
       DiaryToolbarItem.recording => 'recording',
       DiaryToolbarItem.table => 'table',
+      DiaryToolbarItem.divider => 'divider',
       DiaryToolbarItem.toggleList => 'toggle_list',
       DiaryToolbarItem.callout => 'callout',
     };
@@ -128,6 +133,8 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.currentTime => FontAwesomeIcons.clock,
       DiaryToolbarItem.recording => FontAwesomeIcons.microphone,
       DiaryToolbarItem.table => FontAwesomeIcons.table,
+      // 与编辑器里分隔线块同一根线（工具栏只负责插入，不画它）。
+      DiaryToolbarItem.divider => FontAwesomeIcons.minus,
       DiaryToolbarItem.toggleList => FontAwesomeIcons.squareCaretDown,
       DiaryToolbarItem.callout => FontAwesomeIcons.circleInfo,
     };
@@ -159,6 +166,7 @@ extension DiaryToolbarItemX on DiaryToolbarItem {
       DiaryToolbarItem.currentTime => l10n.diaryToolbarInsertCurrentTime,
       DiaryToolbarItem.recording => l10n.diaryToolbarRecording,
       DiaryToolbarItem.table => l10n.diaryToolbarInsertTable,
+      DiaryToolbarItem.divider => l10n.diaryToolbarDivider,
       DiaryToolbarItem.toggleList => l10n.diaryToolbarToggleList,
       DiaryToolbarItem.callout => l10n.diaryToolbarCallout,
     };

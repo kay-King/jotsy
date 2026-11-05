@@ -7,7 +7,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/diaries/controllers/diary_paragraph_indent_editing.dart';
 import 'package:node_diary/ui/diaries/models/diary_code_block/diary_code_block_newline.dart';
+import 'package:node_diary/ui/diaries/models/diary_divider_block.dart';
 import 'package:node_diary/ui/diaries/models/diary_table_block.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_layout.dart';
 import 'package:node_diary/ui/diaries/models/diary_toolbar_preferences.dart';
@@ -93,6 +95,7 @@ bool isDiaryToolbarItemActive(DiaryToolbarItem item, EditorState editorState) {
     DiaryToolbarItem.currentTime ||
     DiaryToolbarItem.recording ||
     DiaryToolbarItem.table ||
+    DiaryToolbarItem.divider ||
     DiaryToolbarItem.toggleList ||
     DiaryToolbarItem.callout => false,
   };
@@ -120,11 +123,12 @@ bool _isDiaryInlineActive(EditorState editorState, String key) {
   );
 }
 
-/// 选区起始块是否嵌在别的块下（块文档里缩进即嵌套）。
+/// 选区起始块是否缩进：带首行缩进标记，或嵌在别的块下（块文档里缩进即嵌套）。
 bool _isDiarySelectionIndented(EditorState editorState) {
   final selection = editorState.selection;
   if (selection == null) return false;
   final node = editorState.getNodeAtPath(selection.start.path);
+  if (node != null && diaryParagraphHasFirstLineIndent(node)) return true;
   final parent = node?.parent;
   return parent != null && parent != editorState.document.root;
 }
@@ -393,6 +397,13 @@ Widget buildDiaryToolbarItemButton(
           FaIcon(item.iconData, size: 14, color: foreground),
       onPressed: () => unawaited(insertDiaryTableBlock(editorState)),
     ),
+    // v0.11.0 新增：分隔线（实现见 diary_divider_block.dart）。
+    DiaryToolbarItem.divider => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) =>
+          FaIcon(item.iconData, size: 14, color: foreground),
+      onPressed: () => unawaited(insertDiaryDividerBlock(editorState)),
+    ),
     DiaryToolbarItem.toggleList => _DiaryToolbarButton(
       tooltip: item.label(l10n),
       icon: (context, foreground) =>
@@ -483,6 +494,18 @@ Future<void> _shiftDiaryBlockIndent(
   EditorState editorState, {
   required bool increase,
 }) async {
+  // 正文段落：只缩进首行，多行段落折行后的各行仍顶格（v0.11.0 #122，见
+  // diary_paragraph_indent_editing.dart）；列表、待办、折叠块等仍是真实的
+  // 嵌套层级。格子里只能放段落，不缩进（缩进即成为上一段的子块）。
+  final paragraphs = diaryFirstLineIndentTargets(editorState);
+  if (paragraphs != null) {
+    if (increase) {
+      await indentDiaryFirstLine(editorState, paragraphs);
+    } else {
+      await outdentDiaryFirstLine(editorState, paragraphs);
+    }
+    return;
+  }
   final selection = editorState.selection?.normalized;
   if (selection == null) return;
   final document = editorState.document;

@@ -121,7 +121,7 @@ class DiariesNotebookMembershipController {
     required Future<NotebookMembershipUndo> Function() write,
     required String message,
   }) async {
-    _state.setState(_state._selectedDiaryIds.clear);
+    _state.setState(_state._resetSelection);
     if (animateOut) {
       transitionCoordinator.startHideAnimations(targetIds);
     }

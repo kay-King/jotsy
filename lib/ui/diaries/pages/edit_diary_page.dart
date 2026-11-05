@@ -35,6 +35,9 @@ import 'package:node_diary/ui/diaries/controllers/debounced_auto_save_controller
 import 'package:node_diary/ui/diaries/controllers/diary_media_import_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_caret_follow_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_code_block_editing.dart';
+import 'package:node_diary/ui/diaries/controllers/diary_embed_editing.dart';
+import 'package:node_diary/ui/diaries/controllers/diary_embed_keys.dart';
+import 'package:node_diary/ui/diaries/models/diary_table_block.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_video_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_audio_player_controller.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_day_photos_controller.dart';
@@ -46,9 +49,11 @@ import 'package:node_diary/ui/diaries/providers/diary_saved_colors_provider.dart
 import 'package:node_diary/ui/diaries/providers/diary_typography_provider.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_first_line_indent.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_text_appearance.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_armed_embed_frame.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_floating_toolbar_surface.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mention/diary_mention_popup.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_trailing_line_tap.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_recording_panel.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_media_import_overlay.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_day_photos/diary_day_photos_sheet.dart';
@@ -224,6 +229,12 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
   // 更新，避免编辑器对整篇文档逐行重建子树。输入变化时才重建。
   Widget? _cachedEditor;
   Object? _cachedEditorInputs;
+  // 软键盘在嵌入块旁的退格（见 [DiaryEmbedKeyboardInterceptor]）：编辑器挂载
+  // 后登记到它的键盘服务上；换 EditorState 时随之迁移（见
+  // [_syncEmbedKeyboardInterceptor]）。
+  final DiaryEmbedKeyboardInterceptor _embedKeyboardInterceptor =
+      DiaryEmbedKeyboardInterceptor();
+  EditorState? _embedInterceptorState;
   late List<DiaryToolbarItem> _toolbarOrder;
   Set<DiaryToolbarItem> _toolbarHiddenItems = <DiaryToolbarItem>{};
   String? _toolbarCurrentTimeFormatPattern;
@@ -366,6 +377,15 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     _toolbarFocusNode.dispose();
     _editPanelExpandProgress.dispose();
     _toolbarPanelExtent.dispose();
+    // 软键盘拦截器随编辑器走：页面卸载时从当前键盘服务上摘掉（EditorState
+    // 本身推迟到下一帧才释放，见下）。
+    final embedInterceptorState = _embedInterceptorState;
+    if (embedInterceptorState != null && !embedInterceptorState.isDisposed) {
+      embedInterceptorState.service.keyboardService?.unregisterInterceptor(
+        _embedKeyboardInterceptor,
+      );
+    }
+    _embedInterceptorState = null;
     // EditorState 必须等到 widget 树卸载后才释放：AppFlowy 内部手势
     // （_IgnoreEditorSelectionGesture）在卸载过程中仍可能访问
     // selectionNotifier，提前释放会抛 use-after-dispose。
@@ -449,6 +469,29 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
         _controller.onCreateDraftInputChanged();
       }
     });
+  }
+
+  /// 把软键盘的嵌入块删除拦截器登记到当前编辑器的键盘服务上（只登记一次）。
+  ///
+  /// 键盘服务随 AppFlowyEditor 挂载才出现，在编辑器重建后的下一帧同步（见
+  /// [_buildContentEditor]）；换 EditorState 时从旧服务上摘掉、登记到新
+  /// 的上。`registerInterceptor` 只往列表里追加、不去重，靠
+  /// [_embedInterceptorState] 挡住重复登记。
+  void _syncEmbedKeyboardInterceptor() {
+    if (!mounted) return;
+    final state = _editorState;
+    if (state.isDisposed) return;
+    final service = state.service.keyboardService;
+    if (service == null) return;
+    if (identical(_embedInterceptorState, state)) return;
+    final old = _embedInterceptorState;
+    if (old != null && !old.isDisposed) {
+      old.service.keyboardService?.unregisterInterceptor(
+        _embedKeyboardInterceptor,
+      );
+    }
+    service.registerInterceptor(_embedKeyboardInterceptor);
+    _embedInterceptorState = state;
   }
 
   /// 监听“补写时推荐当天照片”开关；设置服务异步就绪后才能绑定，绑定后
@@ -755,58 +798,79 @@ class _EditDiaryPageState extends ConsumerState<EditDiaryPage>
     if (cached != null && _cachedEditorInputs == inputs) {
       return cached;
     }
-    final editor = AppFlowyEditor(
+    final editor = DiaryTrailingLineTap(
       editorState: _editorState,
-      focusNode: _contentFocusNode,
-      // 新建时不在构建期自动聚焦：键盘会与页面滑入同时弹出并逐帧挤压布局。
-      // 改由 [RouteEntranceWaiter] 在转场结束后聚焦（见 initState）。
-      autoFocus: false,
-      header: _buildEditorHeader(
-        context,
-        appearance: appearance,
-        contentLocked: contentLocked,
-        templatesEnabled: templatesEnabled,
-        busy: busy,
-      ),
-      footer: Padding(
-        // 正文与底部留白之间留一段呼吸空间，与原来编辑器下内边距一致。
-        padding: const EdgeInsets.only(top: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 「更多」面板展开时额外让位，自身监听高度，不牵动整列重建。
-            DiaryToolbarPanelReserve(extent: _toolbarPanelExtent),
-            // 底部占位随面板拖拽进度连续变化，仅重建 footer 这一层。
-            ValueListenableBuilder<double>(
-              valueListenable: _editPanelExpandProgress,
-              builder: (BuildContext context, double progress, Widget? child) {
-                return SizedBox(
-                  key: const ValueKey('diary-editor-page-reserve'),
-                  height: resolveBottomSpacer(progress),
-                );
-              },
-            ),
-          ],
+      child: AppFlowyEditor(
+        editorState: _editorState,
+        focusNode: _contentFocusNode,
+        // 新建时不在构建期自动聚焦：键盘会与页面滑入同时弹出并逐帧挤压布局。
+        // 改由 [RouteEntranceWaiter] 在转场结束后聚焦（见 initState）。
+        autoFocus: false,
+        header: _buildEditorHeader(
+          context,
+          appearance: appearance,
+          contentLocked: contentLocked,
+          templatesEnabled: templatesEnabled,
+          busy: busy,
         ),
+        footer: Padding(
+          // 正文与底部留白之间留一段呼吸空间，与原来编辑器下内边距一致。
+          padding: const EdgeInsets.only(top: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 「更多」面板展开时额外让位，自身监听高度，不牵动整列重建。
+              DiaryToolbarPanelReserve(extent: _toolbarPanelExtent),
+              // 底部占位随面板拖拽进度连续变化，仅重建 footer 这一层。
+              ValueListenableBuilder<double>(
+                valueListenable: _editPanelExpandProgress,
+                builder:
+                    (BuildContext context, double progress, Widget? child) {
+                      return SizedBox(
+                        key: const ValueKey('diary-editor-page-reserve'),
+                        height: resolveBottomSpacer(progress),
+                      );
+                    },
+              ),
+            ],
+          ),
+        ),
+        // 拖选到靠近底部浮层时自动滚动：把被盖住的高度也算进边缘距离。
+        autoScrollEdgeOffset: _editorBottomCover(),
+        editorStyle: _diaryEditorStyle(context, appearance),
+        blockComponentBuilders: _diaryBlockComponentBuilders(
+          editorState: _editorState,
+          placeholder: placeholder,
+          paragraphSpacing: typography.paragraphSpacing,
+          baseFontSize: typography.fontSize,
+          // 日记卡片块点“打开日记”：按 id 再开一篇预览页。
+          onOpenDiary: (String diaryId) =>
+              unawaited(openDiaryPreviewById(context, diaryId)),
+        ),
+        // 嵌入块旁的退格 / Delete 紧排在上游同键命令之前：上游会越过嵌入块
+        // 合并文字（见 diary_embed_editing.dart）。“段首转正文”排在上游退格
+        // 之前，仍先于这里。
+        commandShortcutEvents: [
+          for (final event in standardCommandShortcutEvents) ...[
+            if (identical(event, backspaceCommand)) diaryEmbedBackspaceCommand,
+            if (identical(event, deleteCommand)) diaryEmbedDeleteCommand,
+            event,
+          ],
+        ],
+        characterShortcutEvents: [
+          _diaryCodeBlockEnterEvent,
+          _diaryTableExitEnterEvent,
+          ...standardCharacterShortcutEvents,
+        ],
       ),
-      // 拖选到靠近底部浮层时自动滚动：把被盖住的高度也算进边缘距离。
-      autoScrollEdgeOffset: _editorBottomCover(),
-      editorStyle: _diaryEditorStyle(context, appearance),
-      blockComponentBuilders: _diaryBlockComponentBuilders(
-        placeholder: placeholder,
-        paragraphSpacing: typography.paragraphSpacing,
-        baseFontSize: typography.fontSize,
-        // 日记卡片块点“打开日记”：按 id 再开一篇预览页。
-        onOpenDiary: (String diaryId) =>
-            unawaited(openDiaryPreviewById(context, diaryId)),
-      ),
-      characterShortcutEvents: [
-        _diaryCodeBlockEnterEvent,
-        ...standardCharacterShortcutEvents,
-      ],
     );
     _cachedEditor = editor;
     _cachedEditorInputs = inputs;
+    // 键盘服务随编辑器挂载才出现，下一帧再登记软键盘拦截器（只登记一次，
+    // 见 [_syncEmbedKeyboardInterceptor]）。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncEmbedKeyboardInterceptor();
+    });
     return editor;
   }
 
@@ -1590,12 +1654,13 @@ String _diaryMonospaceFamily() {
 /// 与预览页一致的段间距（段落后）。日记的行内属性（文字色/背景色/字号档位）
 /// 由 [_diaryEditorStyle] 的 textSpanDecorator 渲染。
 Map<String, BlockComponentBuilder> _diaryBlockComponentBuilders({
+  required EditorState editorState,
   required String placeholder,
   required double paragraphSpacing,
   required double baseFontSize,
   ValueChanged<String>? onOpenDiary,
 }) {
-  return <String, BlockComponentBuilder>{
+  final builders = <String, BlockComponentBuilder>{
     ...standardBlockComponentBuilderMap,
     ...buildDiaryBlockComponentBuilders(onOpenDiary: onOpenDiary),
     ParagraphBlockKeys.type: ParagraphBlockComponentBuilder(
@@ -1606,6 +1671,16 @@ Map<String, BlockComponentBuilder> _diaryBlockComponentBuilders({
       ),
     ),
   };
+  // 退格 / Delete 先选中嵌入块、再按一次才删（见 diary_embed_editing.dart）：
+  // 只在编辑页包（这里是编辑页专用的函数，编辑/预览共用的
+  // buildDiaryBlockComponentBuilders 不动）。
+  for (final type in kDiaryEmbedDeletableBlockTypes) {
+    final builder = builders[type];
+    if (builder != null) {
+      builders[type] = DiaryArmedEmbedBuilder(builder, editorState);
+    }
+  }
+  return builders;
 }
 
 /// 日记自定义行内属性的渲染：`font_color` / `bg_color`（`#AARRGGBB`）与
@@ -1694,4 +1769,12 @@ final CharacterShortcutEvent _diaryCodeBlockEnterEvent = CharacterShortcutEvent(
   key: 'diaryCodeBlockEnter',
   character: '\n',
   handler: (editorState) => handleDiaryCodeBlockEnter(editorState),
+);
+
+/// 表格最后一行格子末尾空段落的回车接管（见 [handleDiaryTableExitEnter]）：
+/// 接管成功返回 true，离开表格；其余情况返回 false，继续走标准的格内换行。
+final CharacterShortcutEvent _diaryTableExitEnterEvent = CharacterShortcutEvent(
+  key: 'diaryTableExitEnter',
+  character: '\n',
+  handler: (editorState) => handleDiaryTableExitEnter(editorState),
 );

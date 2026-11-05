@@ -45,6 +45,10 @@ class DiaryPreviewResolvedStyle {
         DiaryPreviewPaper.ink: (0xFF1E2126, 0xFF121417),
       };
 
+  /// 标题下分隔线的不透明度（浅色页 / 深色页），见 [titleDividerColor]。
+  static const double titleDividerOpacityLight = 0.16;
+  static const double titleDividerOpacityDark = 0.2;
+
   factory DiaryPreviewResolvedStyle.resolve({
     required DiaryPreviewStyle style,
     required ThemeData appTheme,
@@ -145,6 +149,23 @@ class DiaryPreviewResolvedStyle {
   /// 头图框高度（最高为屏高的
   /// [DiaryPreviewStyleLimits.coverMaxScreenFraction]）。
   final double coverHeight;
+
+  /// 标题下分隔线的颜色：正文色按 [titleDividerOpacityLight] /
+  /// [titleDividerOpacityDark] 降低不透明度。
+  ///
+  /// 为什么不直接用 `outlineVariant`：它是主题里的固定色调，落在自定义纸色
+  /// （尤其是中间调的纸）上可能和纸几乎同色；正文色已经保证了与纸的对比度，
+  /// 按比例淡化后在任何纸色、染过的纸、背景遮罩与玻璃上都“浅而可见”，色相
+  /// 也跟着正文色走。半透明而不预先叠到 [background] 上：页面让位给
+  /// 背景图时线下面并不是纸色。
+  Color get titleDividerColor {
+    final ink = bodyColor ?? theme.colorScheme.onSurface;
+    return ink.withValues(
+      alpha: theme.brightness == Brightness.light
+          ? titleDividerOpacityLight
+          : titleDividerOpacityDark,
+    );
+  }
 
   static Color? _paperColor(DiaryPreviewPageStyle page, Brightness brightness) {
     final light = brightness == Brightness.light;

@@ -396,6 +396,86 @@ void main() {
       ]);
     });
 
+    group('joinSpacedMarkdownLinks', () {
+      test('joins web links with a gap between ] and (', () {
+        expect(
+          joinSpacedMarkdownLinks(
+            '[English] (https://example.com/a.md) | 简体中文\n'
+            '[信] \t(mailto:a@b.c)',
+          ),
+          '[English](https://example.com/a.md) | 简体中文\n'
+          '[信](mailto:a@b.c)',
+        );
+      });
+
+      test('leaves code, relative paths and task boxes alone', () {
+        const text =
+            '`[a] (https://x.com)` [b] (./b.md)\n'
+            '- [ ] (https://x.com) 待办\n'
+            '- [x] (https://x.com) 完成\n'
+            '```\n[c] (https://x.com)\n```';
+        expect(joinSpacedMarkdownLinks(text), text);
+      });
+
+      test('spaced http, https and mailto links convert to links', () {
+        expect(_markdown('[English] (https://example.com/en.md) | 简体中文'), [
+          {
+            'insert': 'English',
+            'attributes': {'link': 'https://example.com/en.md'},
+          },
+          {'insert': ' | 简体中文\n'},
+        ]);
+        expect(_markdown('[站点] (http://x.y) 与 [信] (mailto:a@b.c)'), [
+          {
+            'insert': '站点',
+            'attributes': {'link': 'http://x.y'},
+          },
+          {'insert': ' 与 '},
+          {
+            'insert': '信',
+            'attributes': {'link': 'mailto:a@b.c'},
+          },
+          {'insert': '\n'},
+        ]);
+      });
+
+      test('mixed lines keep fences, code spans, tasks and relative links', () {
+        final ops = _markdown(
+          '[English] (https://example.com/en.md)\n'
+          '`[a] (https://x.com)`\n'
+          '[b] (./b.md)\n'
+          '- [ ] (https://x.com) 待办\n'
+          '```\n[c] (https://x.com)\n```',
+        );
+        expect(ops, [
+          {
+            'insert': 'English',
+            'attributes': {'link': 'https://example.com/en.md'},
+          },
+          {'insert': '\n'},
+          {
+            'insert': '[a] (https://x.com)',
+            'attributes': {'code': true},
+          },
+          {'insert': '\n[b] (./b.md)\n('},
+          {
+            'insert': 'https://x.com',
+            'attributes': {'link': 'https://x.com'},
+          },
+          {'insert': ') 待办'},
+          {
+            'insert': '\n',
+            'attributes': {'list': 'unchecked'},
+          },
+          {'insert': '[c] (https://x.com)'},
+          {
+            'insert': '\n',
+            'attributes': {'code-block': true},
+          },
+        ]);
+      });
+    });
+
     test('inline HTML colours, highlights and rules in Markdown notes', () {
       final writer = JournalDeltaWriter();
       JournalMarkdownConverter(writer, inlineHtml: true).append(

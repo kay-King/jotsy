@@ -14,8 +14,9 @@ import 'package:node_diary/ui/diaries/models/diary_location.dart';
 import 'package:node_diary/ui/diaries/models/location_resolve_hint.dart';
 import 'package:node_diary/ui/diaries/models/weather_resolve_hint.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_meta_draft_controller.dart';
-import 'package:node_diary/ui/diaries/widgets/create_tag_dialog.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
+
+import 'tag_create_flow.dart';
 
 /// 元数据面板的异步动作：选封面、新建标签、改地址层级、自动定位、取天气。
 ///
@@ -119,20 +120,13 @@ class DiaryMetaActions {
 
   /// 内联新建标签，成功后自动选中；[initialName] 预填弹窗里的名称。
   Future<void> createTag(BuildContext context, {String? initialName}) async {
-    final tag = await showCreateTagDialog(context, initialName: initialName);
-    if (tag == null || !context.mounted) return;
-    try {
-      final tagId = await _ref
-          .read(appDatabaseProvider)
-          .createTag(name: tag.name, color: tag.color);
-      if (!context.mounted) return;
-      draft.setTagSelected(tagId, true);
-    } catch (error) {
-      debugPrint('Tag creation failed: $error');
-      if (context.mounted) {
-        _hint(context, context.l10n.publishTagCreateFailed);
-      }
-    }
+    final tagId = await runCreateTagFlow(
+      context,
+      _ref.read(appDatabaseProvider),
+      initialName: initialName,
+    );
+    if (tagId == null || !context.mounted) return;
+    draft.setTagSelected(tagId, true);
   }
 
   /// 改地址层级，同时记为新建日记的默认层级（必须在同步阶段读 ref）。

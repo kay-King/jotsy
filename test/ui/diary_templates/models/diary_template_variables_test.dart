@@ -2,12 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/ui/diary_templates/models/diary_template_variables.dart';
 
 void main() {
-  String? valueOf(DiaryTemplateVariable variable) => switch (variable) {
-    DiaryTemplateVariable.date => '10月18日',
-    DiaryTemplateVariable.weekday => '星期日',
-    DiaryTemplateVariable.question => '第一行\n第二行',
-    _ => null,
-  };
+  String? valueOf(DiaryTemplateVariable variable, [String? format]) {
+    if (format != null) {
+      return switch (variable) {
+        DiaryTemplateVariable.time => '8:05',
+        _ => null,
+      };
+    }
+    return switch (variable) {
+      DiaryTemplateVariable.date => '10月18日',
+      DiaryTemplateVariable.weekday => '星期日',
+      DiaryTemplateVariable.question => '第一行\n第二行',
+      _ => null,
+    };
+  }
 
   test('Chinese and English names resolve to the same value', () {
     expect(resolveDiaryTemplateText('{{日期}}', valueOf), '10月18日');
@@ -62,5 +70,37 @@ void main() {
       DiaryTemplateVariable.date,
     });
     expect(diaryTemplateVariablesIn('没有变量'), isEmpty);
+  });
+
+  test('time accepts a format after a colon', () {
+    expect(resolveDiaryTemplateText('{{时间:HH:mm}}', valueOf), '8:05');
+    expect(resolveDiaryTemplateText('{{time:HH:mm}}', valueOf), '8:05');
+    // 全角冒号同样认。
+    expect(resolveDiaryTemplateText('{{时间：HH:mm}}', valueOf), '8:05');
+    // 格式里的冒号不动：只按第一个冒号拆。
+    expect(resolveDiaryTemplateText('{{时间:HH:mm:ss}}', valueOf), '8:05');
+    // 两侧空白不计。
+    expect(resolveDiaryTemplateText('{{ 时间 : HH:mm }}', valueOf), '8:05');
+  });
+
+  test('formats on other variables and empty formats stay as written', () {
+    expect(resolveDiaryTemplateText('{{日期:yyyy}}', valueOf), '{{日期:yyyy}}');
+    expect(resolveDiaryTemplateText('{{date:yyyy}}', valueOf), '{{date:yyyy}}');
+    expect(resolveDiaryTemplateText('{{时间:}}', valueOf), '{{时间:}}');
+    expect(resolveDiaryTemplateText('{{时间: }}', valueOf), '{{时间: }}');
+    expect(resolveDiaryTemplateText('{{未知:HH:mm}}', valueOf), '{{未知:HH:mm}}');
+  });
+
+  test('formatted uses count as uses of the variable', () {
+    expect(diaryTemplateVariablesIn('{{时间:HH:mm}} 与 {{日期}}'), {
+      DiaryTemplateVariable.time,
+      DiaryTemplateVariable.date,
+    });
+    expect(diaryTemplateVariablesIn('{{日期:yyyy}}'), isEmpty);
+  });
+
+  test('diaryTemplateToken writes a format after the name', () {
+    expect(diaryTemplateToken('时间'), '{{时间}}');
+    expect(diaryTemplateToken('时间', 'HH:mm'), '{{时间:HH:mm}}');
   });
 }

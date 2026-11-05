@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
@@ -188,46 +189,83 @@ class _DiaryTemplateEditorContentTabState
           onInsert: (token) => unawaited(_insert(token)),
         ),
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.l),
-            child: AppFlowyEditor(
-              editorState: widget.controller.body,
-              focusNode: _bodyFocus,
-              autoFocus: false,
-              editorStyle: _editorStyle(context, appearance),
-              blockComponentBuilders: _blockBuilders(
-                paragraphSpacing: appearance.typography.paragraphSpacing,
-                hint: l10n.diaryTemplateEditorBodyHint,
-              ),
-              // 旧 Quill 编辑器没有 Markdown 快捷输入（如 `---` 变分隔线）：
-              // 模板里只留工具栏显式排版，输入时不意外变形。
-              characterShortcutEvents: const [],
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // 键盘、标题和变量条都已扣除；按这里的剩余高度限制面板，给正文
+              // 留出至少一行与触控空间，避免展开后把编辑器压到零高度。
+              final editorMinHeight = math.max(
+                kMinInteractiveDimension,
+                appearance.typography.fontSize *
+                    appearance.typography.lineHeight,
+              );
+              final maxPanelExtent = math.min(
+                MediaQuery.sizeOf(context).height / 3,
+                math.max(
+                  0.0,
+                  constraints.maxHeight -
+                      kDiaryToolbarBarHeight -
+                      AppSpacing.s -
+                      editorMinHeight,
+                ),
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.l,
+                      ),
+                      child: AppFlowyEditor(
+                        editorState: widget.controller.body,
+                        focusNode: _bodyFocus,
+                        autoFocus: false,
+                        editorStyle: _editorStyle(context, appearance),
+                        blockComponentBuilders: _blockBuilders(
+                          paragraphSpacing:
+                              appearance.typography.paragraphSpacing,
+                          hint: l10n.diaryTemplateEditorBodyHint,
+                        ),
+                        // 旧 Quill 编辑器没有 Markdown 快捷输入（如 `---` 变分隔线）：
+                        // 模板里只留工具栏显式排版，输入时不意外变形。
+                        characterShortcutEvents: const [],
+                        // 工具栏在正文下方，不遮挡正文。移动端自动滚动沿用
+                        // 80dp 边缘区（本包默认 appFlowyEditorAutoScrollEdgeOffset
+                        // 更大）时，矮视口放不下目标矩形，零时长滚动就会在微任务
+                        // 里反复换向，阻塞整个 UI 直至卡死；边缘区置 0 即关掉
+                        // 这层自动滚动，正文自带滚动已够用。
+                        autoScrollEdgeOffset: 0,
+                      ),
+                    ),
+                  ),
+                  if (showToolbar)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        kDiaryFloatingToolbarInset,
+                        0,
+                        kDiaryFloatingToolbarInset,
+                        AppSpacing.s,
+                      ),
+                      child: DiaryFloatingToolbarSurface(
+                        child: Focus(
+                          focusNode: _toolbarFocus,
+                          child: DiaryFloatingToolbar(
+                            editorState: widget.controller.body,
+                            order: order,
+                            maxPanelExtent: maxPanelExtent,
+                            savedColors: ref.watch(diarySavedColorsProvider),
+                            onEditSavedColors: ref
+                                .read(diarySavedColorsProvider.notifier)
+                                .edit,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
-        if (showToolbar)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              kDiaryFloatingToolbarInset,
-              0,
-              kDiaryFloatingToolbarInset,
-              AppSpacing.s,
-            ),
-            child: DiaryFloatingToolbarSurface(
-              child: Focus(
-                focusNode: _toolbarFocus,
-                child: DiaryFloatingToolbar(
-                  editorState: widget.controller.body,
-                  order: order,
-                  maxPanelExtent: MediaQuery.sizeOf(context).height / 3,
-                  savedColors: ref.watch(diarySavedColorsProvider),
-                  onEditSavedColors: ref
-                      .read(diarySavedColorsProvider.notifier)
-                      .edit,
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }
