@@ -46,10 +46,7 @@ void main() {
       expect(children[1].type, kDiaryBlockDivider);
       expect(children[2].type, kDiaryBlockParagraph);
       expect(children[2].delta!.toPlainText(), isEmpty);
-      expect(
-        editorState.selection,
-        Selection.collapsed(Position(path: [2])),
-      );
+      expect(editorState.selection, Selection.collapsed(Position(path: [2])));
     });
 
     test('无选区时插到文档末尾', () async {
@@ -62,10 +59,7 @@ void main() {
       expect(children, hasLength(3));
       expect(children[1].type, kDiaryBlockDivider);
       expect(children[2].type, kDiaryBlockParagraph);
-      expect(
-        editorState.selection,
-        Selection.collapsed(Position(path: [2])),
-      );
+      expect(editorState.selection, Selection.collapsed(Position(path: [2])));
     });
 
     test('一次事务：一步撤销回到插入前', () async {

@@ -136,10 +136,7 @@ void main() {
     // 只有原文、没有字段也不行。
     expect(formatDiaryTemplateMoment(moment, '点', 'zh'), isNull);
     // 引号里的字母原文可以。
-    expect(
-      formatDiaryTemplateMoment(moment, "HH'点'mm", 'zh'),
-      '08点05',
-    );
+    expect(formatDiaryTemplateMoment(moment, "HH'点'mm", 'zh'), '08点05');
     // intl 仍抛错时也原样保留（6 个以上的 E）。
     expect(formatDiaryTemplateMoment(moment, 'EEEEEE', 'zh'), isNull);
   });

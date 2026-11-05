@@ -114,6 +114,13 @@ class DiaryPreviewTitleStyle {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(visible, showUntitled, scale, weight, align, divider, bodyGap);
+  int get hashCode => Object.hash(
+    visible,
+    showUntitled,
+    scale,
+    weight,
+    align,
+    divider,
+    bodyGap,
+  );
 }

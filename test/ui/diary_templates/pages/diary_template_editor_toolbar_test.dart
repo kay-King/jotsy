@@ -34,61 +34,58 @@ void main() {
   }
 
   for (final brightness in Brightness.values) {
-    testWidgets(
-      'expanding More lets auto scrolling stop in a short viewport '
-      '(${brightness.name})',
-      (tester) async {
-        final h = await openEditor(
-          tester,
-          brightness,
-          template: buildBuiltInDiaryTemplates(
-            lookupAppLocalizations(const Locale('zh')),
-          ).first,
-        );
-        tester.view.physicalSize = const Size(400, 760);
-        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
-        final body = find.byType(AppFlowyEditor);
-        await tester.tap(body);
-        await tester.pumpAndSettle();
-        await tester.tap(find.byTooltip(h.l10n.diaryToolbarMoreTools));
-        await tester.pumpAndSettle(const Duration(milliseconds: 16));
+    testWidgets('expanding More lets auto scrolling stop in a short viewport '
+        '(${brightness.name})', (tester) async {
+      final h = await openEditor(
+        tester,
+        brightness,
+        template: buildBuiltInDiaryTemplates(
+          lookupAppLocalizations(const Locale('zh')),
+        ).first,
+      );
+      tester.view.physicalSize = const Size(400, 760);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      final body = find.byType(AppFlowyEditor);
+      await tester.tap(body);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip(h.l10n.diaryToolbarMoreTools));
+      await tester.pumpAndSettle(const Duration(milliseconds: 16));
 
-        final editor = tester.widget<AppFlowyEditor>(body);
-        expect(editor.autoScrollEdgeOffset, 0);
-        final state = editor.editorState;
-        final position = state.scrollableState!.position;
-        position.jumpTo(
-          (position.minScrollExtent + position.maxScrollExtent) / 2,
-        );
-        await tester.pump();
+      final editor = tester.widget<AppFlowyEditor>(body);
+      expect(editor.autoScrollEdgeOffset, 0);
+      final state = editor.editorState;
+      final position = state.scrollableState!.position;
+      position.jumpTo(
+        (position.minScrollExtent + position.maxScrollExtent) / 2,
+      );
+      await tester.pump();
 
-        // 上游按宿主操作系统选择滚动服务，Linux widget 测试不会进入移动端。
-        // 直接重放手机选区通知使用的零时长滚动；计步到上限主动停止，旧代码的
-        // 微任务换向循环才会正常报断言失败，而不是卡住整个测试进程。
-        final scroller = state.autoScroller!;
-        const maxScrollSteps = 100;
-        var scrollSteps = 0;
-        void countScroll() {
-          if (++scrollSteps >= maxScrollSteps) scroller.stopAutoScroll();
-        }
+      // 上游按宿主操作系统选择滚动服务，Linux widget 测试不会进入移动端。
+      // 直接重放手机选区通知使用的零时长滚动；计步到上限主动停止，旧代码的
+      // 微任务换向循环才会正常报断言失败，而不是卡住整个测试进程。
+      final scroller = state.autoScroller!;
+      const maxScrollSteps = 100;
+      var scrollSteps = 0;
+      void countScroll() {
+        if (++scrollSteps >= maxScrollSteps) scroller.stopAutoScroll();
+      }
 
-        state.addScrollViewScrolledListener(countScroll);
-        addTearDown(() {
-          scroller.stopAutoScroll();
-          state.removeScrollViewScrolledListener(countScroll);
-        });
-        scroller.startAutoScroll(
-          tester.getCenter(body),
-          edgeOffset: editor.autoScrollEdgeOffset,
-          duration: Duration.zero,
-        );
-        await tester.pump();
+      state.addScrollViewScrolledListener(countScroll);
+      addTearDown(() {
+        scroller.stopAutoScroll();
+        state.removeScrollViewScrolledListener(countScroll);
+      });
+      scroller.startAutoScroll(
+        tester.getCenter(body),
+        edgeOffset: editor.autoScrollEdgeOffset,
+        duration: Duration.zero,
+      );
+      await tester.pump();
 
-        expect(scrollSteps, lessThan(maxScrollSteps));
-        expect(scroller.scrolling, isFalse);
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(scrollSteps, lessThan(maxScrollSteps));
+      expect(scroller.scrolling, isFalse);
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets(
       'More preserves room to edit with a tall keyboard (${brightness.name})',

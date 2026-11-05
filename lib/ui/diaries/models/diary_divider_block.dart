@@ -31,8 +31,6 @@ Future<void> insertDiaryDividerBlock(EditorState editorState) async {
       Node(type: kDiaryBlockDivider),
       paragraphNode(),
     ])
-    ..afterSelection = Selection.collapsed(
-      Position(path: insertPath.next),
-    );
+    ..afterSelection = Selection.collapsed(Position(path: insertPath.next));
   await editorState.apply(transaction);
 }

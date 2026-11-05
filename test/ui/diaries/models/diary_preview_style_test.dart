@@ -271,10 +271,7 @@ void main() {
     final tooSmall = DiaryPreviewStyle.fromJson(<String, Object?>{
       'title': <String, Object?>{'bodyGap': 1},
     });
-    expect(
-      tooSmall.title.bodyGap,
-      DiaryPreviewStyleLimits.titleBodyGap.min,
-    );
+    expect(tooSmall.title.bodyGap, DiaryPreviewStyleLimits.titleBodyGap.min);
     final tooBig = DiaryPreviewStyle.fromJson(<String, Object?>{
       'title': <String, Object?>{'bodyGap': 100},
     });

@@ -77,9 +77,7 @@ Future<void> openHomeBarStyleTab(
   // 注意：find.byTooltip 是懒求值的，ensureVisible 会重新求值；
   // 实测中两次求值结果不一致（1 个变 2 个），故直接取 .first 固化，
   // 顶栏按钮恒可见，无需 ensureVisible。
-  final button = find
-      .byTooltip(resolvedL10n.styleEditorSettingsTitle)
-      .first;
+  final button = find.byTooltip(resolvedL10n.styleEditorSettingsTitle).first;
   await tester.tap(button);
   await tester.pumpAndSettle();
   // 注意：分类标题文本可能在区块内容里重复出现（如分组标题），
@@ -161,7 +159,5 @@ Future<void> tapHomeBarOption(WidgetTester tester, Finder finder) async {
 }
 
 /// 选项整页里的某个文字（取最后一个 Scaffold，避免命中底下主预览页）。
-Finder inHomeBarOptions(String text) => find.descendant(
-  of: find.byType(Scaffold).last,
-  matching: find.text(text),
-);
+Finder inHomeBarOptions(String text) =>
+    find.descendant(of: find.byType(Scaffold).last, matching: find.text(text));
