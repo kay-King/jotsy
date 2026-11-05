@@ -3,7 +3,7 @@ part of 'app_database.dart';
 /// 日记查询的范围（[DiaryListScope]）与私密排除：所有日记读取共用的 SQL 片段。
 ///
 /// 私密规则（唯一权威口径）：一篇日记只要在至少一本“手动 + 非 normal 可见性”
-/// 的日记本里就是私密日记。私密日记：
+/// 的日记本里、或是这类本子的子孙本里，就是私密日记。私密日记：
 /// - 不出现在任何全局查询里（全部日记、搜索、探索、日历、归档、导出候选等）；
 /// - 只在它所在的那本私密日记本的范围里出现；
 /// - 普通日记本与智能日记本的范围同样排除它（私密优先于其他归属）。
@@ -151,18 +151,40 @@ mixin _AppDatabaseDiaryScopeSql on _$AppDatabase {
   }
 }
 
-/// 全部私密日记的本地 id：在至少一本手动、可见性不是 normal 的日记本里。
+/// 私密日记本的本地 id（递归 CTE，可直接放进 `IN (…)`）：可见性不是 normal
+/// 的手动本，加上它们沿 `parent_id` 往下的全部子孙。
 ///
 /// - 可见性按“不等于 normal”判断而不是列举 hidden / locked：更新版本写入的
 ///   未知可见性一律当作私密，宁可多藏也不意外露出；
-/// - 未知类型的本子不算（只有手动本能私密，写入时非手动本一律存 normal）；
+/// - 起点只取手动本（只有手动本能私密，写入时非手动本一律存 normal）；往下
+///   只经手动本传递：智能本自己会被收进来（它在私密本里，打开同样要验证），
+///   但智能本不能当上级，挂在它下面的本子是坏数据，不随它变私密——与界面上
+///   把这种本子当顶层显示的口径一致；
+/// - UNION 而不是 UNION ALL：成环的坏数据（备份合并后修复前）也会停下；
+/// - 不相关子查询，SQLite 只执行一次，不随日记数逐行重跑。日记本只有几十行，
+///   递归的代价可以忽略。
+final String _privateNotebookIdsSql =
+    'WITH RECURSIVE private_nb(id, notebook_id, kind) AS ('
+    'SELECT id, notebook_id, kind FROM notebooks '
+    "WHERE kind = '${NotebookKind.manual.name}' "
+    "AND visibility <> '${NotebookVisibility.normal.name}' "
+    'UNION '
+    'SELECT c.id, c.notebook_id, c.kind FROM notebooks c '
+    'JOIN private_nb p ON c.parent_id = p.notebook_id '
+    "WHERE p.kind = '${NotebookKind.manual.name}'"
+    ') SELECT id FROM private_nb';
+
+/// 全部私密日记的本地 id：在至少一本私密的手动日记本里
+/// （[_privateNotebookIdsSql]）。
+///
+/// - 未知类型的本子不算（只有手动本有成员行）；
 /// - `diary_notebooks.diary_id` 非空，NOT IN 不会因子查询含 NULL 而整体为空；
 /// - 不相关子查询，SQLite 只执行一次并建临时索引，不随日记数逐行重跑。
 final String _privateDiaryIdsSql =
     'SELECT pdn.diary_id FROM diary_notebooks pdn '
     'JOIN notebooks pn ON pn.id = pdn.notebook_id '
     "WHERE pn.kind = '${NotebookKind.manual.name}' "
-    "AND pn.visibility <> '${NotebookVisibility.normal.name}'";
+    'AND pn.id IN ($_privateNotebookIdsSql)';
 
 /// 排除私密日记的条件，[idColumn] 是外层日记表的本地 id 列（如 `d.id`）。
 /// 所有全局日记查询都经它过滤，见 [_AppDatabaseDiaryScopeSql] 的私密规则。

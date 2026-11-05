@@ -1145,7 +1145,7 @@ abstract class AppLocalizations {
   /// Body message for privacy description dialog.
   ///
   /// In en, this message translates to:
-  /// **'Your diaries, tags, and media files are stored locally on this device and are not uploaded to cloud services by default.'**
+  /// **'Your diaries, tags, and media files are stored locally on this device and are not uploaded to cloud services by default. The AI assistant is off by default; when on, it sends only what an AI feature needs, directly to the AI service you configure, and your key stays on this device.'**
   String get aboutPrivacyDialogMessage;
 
   /// Action title to open Flutter license page.
@@ -10025,7 +10025,7 @@ abstract class AppLocalizations {
   /// Backfill photo strip: explanation for requesting photo access.
   ///
   /// In en, this message translates to:
-  /// **'Allow photo access to see the photos you took on this day and add some to this entry.'**
+  /// **'Allow photo access to see the photos and videos you took on this day and add some to this entry.'**
   String get diaryDayPhotosAccessBody;
 
   /// Backfill photo strip: explanation after photo access was denied.
@@ -10085,7 +10085,7 @@ abstract class AppLocalizations {
   /// Photos from this day: note shown when photo access is limited.
   ///
   /// In en, this message translates to:
-  /// **'Showing only photos you allowed'**
+  /// **'Showing only photos and videos you allowed'**
   String get diaryDayPhotosLimited;
 
   /// Photos from this day: button that lets the user allow more photos under limited access.
@@ -10115,7 +10115,7 @@ abstract class AppLocalizations {
   /// Hint when some photos from that day couldn't be read while inserting.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 photo couldn\'t be read and was skipped} other{{count} photos couldn\'t be read and were skipped}}'**
+  /// **'{count, plural, =1{1 item couldn\'t be read and was skipped} other{{count} items couldn\'t be read and were skipped}}'**
   String diaryDayPhotosMissing(int count);
 
   /// Editor settings: title of the switch that automatically shows that day's photos under the title when backfilling.
@@ -10187,7 +10187,7 @@ abstract class AppLocalizations {
   /// Photos from this day panel: shown when the gallery has no photos from that day.
   ///
   /// In en, this message translates to:
-  /// **'No photos taken this day'**
+  /// **'No photos or videos taken this day'**
   String get diaryDayPhotosEmpty;
 
   /// Badge in the corner of a folded long image (much taller than wide) in the diary body.
@@ -14833,6 +14833,3900 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage notebooks'**
   String get diaryDrawerManageNotebooks;
+
+  /// Last button of the text selection menu: shows the remaining actions (share, translate and so on).
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get textSelectionMenuMore;
+
+  /// Last button of the expanded text selection menu: hides the remaining actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get textSelectionMenuLess;
+
+  /// Button creating a writing command.
+  ///
+  /// In en, this message translates to:
+  /// **'New command'**
+  String get aiActionAdd;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullet points'**
+  String get aiActionBulletPoints;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the text below into a clear bullet list (a Markdown unordered list) with short items.'**
+  String get aiActionBulletPointsPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get aiActionContinue;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Continue the diary below in the same voice and tone with one natural paragraph of about 80 to 150 words. Write only the new text and do not repeat what is already there.'**
+  String get aiActionContinuePrompt;
+
+  /// Badge for a built-in command with an edited prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get aiActionCustomized;
+
+  /// Title of the command editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit command'**
+  String get aiActionEditTitle;
+
+  /// Title of the command editor when creating.
+  ///
+  /// In en, this message translates to:
+  /// **'New command'**
+  String get aiActionEditTitleNew;
+
+  /// Command emoji field.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get aiActionEmoji;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get aiActionExpand;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the text below with more details, feelings and imagery so it becomes richer, roughly doubling its length. Keep the original tone and point of view.'**
+  String get aiActionExpandPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract to-dos'**
+  String get aiActionExtractTodos;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Find the tasks, plans and follow-ups mentioned in the text below and list them as a Markdown task list, one per line starting with \"- [ ] \". If there are none, reply with one line saying so.'**
+  String get aiActionExtractTodosPrompt;
+
+  /// Shown when the command limit is reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} commands'**
+  String aiActionLimit(int count);
+
+  /// Command name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get aiActionName;
+
+  /// Choice of how a command's result is used.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get aiActionOutput;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'As a poem'**
+  String get aiActionPoem;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the content below into a short modern poem of 4 to 12 lines that keeps its mood and imagery.'**
+  String get aiActionPoemPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get aiActionPolish;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Polish the text below so it reads more smoothly and naturally. Fix awkward phrasing, keep the meaning, tone and first-person voice, and do not make it longer.'**
+  String get aiActionPolishPrompt;
+
+  /// Command prompt field.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get aiActionPrompt;
+
+  /// Hint of the command prompt field.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell AI what to do with the text'**
+  String get aiActionPromptHint;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix errors'**
+  String get aiActionProofread;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Fix spelling, punctuation and grammar mistakes in the text below. Leave everything else exactly as it is and do not rewrite it.'**
+  String get aiActionProofreadPrompt;
+
+  /// Title of the restore-prompt dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the default prompt?'**
+  String get aiActionResetPromptTitle;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Shorten'**
+  String get aiActionShorten;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Shorten the text below to about half its length. Keep the key information and feelings and remove repetition and filler.'**
+  String get aiActionShortenPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize'**
+  String get aiActionSummarize;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize the main points of the text below in two or three sentences.'**
+  String get aiActionSummarizePrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'More casual'**
+  String get aiActionToneCasual;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the text below in a more relaxed, conversational tone, as if chatting with a friend, while keeping its meaning.'**
+  String get aiActionToneCasualPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'More formal'**
+  String get aiActionToneFormal;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the text below in a more formal, polished tone while keeping its meaning.'**
+  String get aiActionToneFormalPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Funnier'**
+  String get aiActionToneHumor;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the text below to be funnier, with a playful metaphor or a bit of self-deprecation, while keeping its meaning.'**
+  String get aiActionToneHumorPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'More literary'**
+  String get aiActionToneLiterary;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the text below in a more literary style, with finer description and fitting figures of speech, without piling on ornate words. Keep its meaning.'**
+  String get aiActionToneLiteraryPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmer'**
+  String get aiActionToneWarm;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Rewrite the text below to sound warmer and gentler, with more kindness and care, while keeping its meaning.'**
+  String get aiActionToneWarmPrompt;
+
+  /// Built-in AI writing action label.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get aiActionTranslate;
+
+  /// Instruction of a built-in AI writing action (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'Translate the text below. If it is mainly Chinese, translate it into English; otherwise translate it into Simplified Chinese. Output only the translation.'**
+  String get aiActionTranslatePrompt;
+
+  /// Label above the variable chips.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert a variable'**
+  String get aiActionVariables;
+
+  /// Help under the variable chips.
+  ///
+  /// In en, this message translates to:
+  /// **'If the prompt has no “text” variable, the text is added after the prompt automatically.'**
+  String get aiActionVariablesHelp;
+
+  /// Footer of the writing commands list.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder. The order here is the order in the editor.'**
+  String get aiActionsFooter;
+
+  /// Subtitle of the writing commands entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder, hide, rewrite prompts or add your own'**
+  String get aiActionsSubtitle;
+
+  /// Title of the writing commands page.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing commands'**
+  String get aiActionsTitle;
+
+  /// Title of a chat about one entry.
+  ///
+  /// In en, this message translates to:
+  /// **'About “{title}”'**
+  String aiChatAboutEntry(String title);
+
+  /// Shown for a missing cited entry.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry no longer exists'**
+  String get aiChatCitationMissing;
+
+  /// Number of entries an answer used.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Used 1 entry} other{Used {count} entries}}'**
+  String aiChatCitations(int count);
+
+  /// Body of the delete chat dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Its messages are deleted too. Your entries aren\'t affected.'**
+  String get aiChatDeleteBody;
+
+  /// Deletes a chat message.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete message'**
+  String get aiChatDeleteMessage;
+
+  /// Title of the delete message dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this message?'**
+  String get aiChatDeleteMessageTitle;
+
+  /// Title of the delete chat dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this chat?'**
+  String get aiChatDeleteTitle;
+
+  /// Snackbar after deleting a chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat deleted'**
+  String get aiChatDeleted;
+
+  /// Edits and resends the last question.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit and resend'**
+  String get aiChatEditResend;
+
+  /// Empty chat hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about your mood over a period, how something unfolded, or let AI help you remember.'**
+  String get aiChatEmptyHint;
+
+  /// Hint of the chat input.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask something…'**
+  String get aiChatInputHint;
+
+  /// Chat model chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get aiChatModel;
+
+  /// Default model option.
+  ///
+  /// In en, this message translates to:
+  /// **'Default ({name})'**
+  String aiChatModelDefault(String name);
+
+  /// Tooltip of the chat page menu.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get aiChatMore;
+
+  /// Shown when an answer used no entries.
+  ///
+  /// In en, this message translates to:
+  /// **'No related entries found'**
+  String get aiChatNoCitations;
+
+  /// Chat persona chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Persona'**
+  String get aiChatPersona;
+
+  /// Pins a chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get aiChatPin;
+
+  /// Shown while a search plan is made.
+  ///
+  /// In en, this message translates to:
+  /// **'Understanding the question…'**
+  String get aiChatPlanning;
+
+  /// Title of the chat date range picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose dates'**
+  String get aiChatRangeTitle;
+
+  /// Renames a chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get aiChatRename;
+
+  /// Title of the rename dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename chat'**
+  String get aiChatRenameTitle;
+
+  /// Chat scope chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get aiChatScope;
+
+  /// Chat scope option.
+  ///
+  /// In en, this message translates to:
+  /// **'All entries'**
+  String get aiChatScopeAll;
+
+  /// Chat scope option.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get aiChatScopeAuto;
+
+  /// Subtitle of the auto scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the search method in AI settings'**
+  String get aiChatScopeAutoSubtitle;
+
+  /// Chat scope pinned to one entry.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry'**
+  String get aiChatScopeEntry;
+
+  /// Chat scope option.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range…'**
+  String get aiChatScopeRange;
+
+  /// Chat scope option.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {days} days'**
+  String aiChatScopeRecent(int days);
+
+  /// Title of the chat scope sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Search in'**
+  String get aiChatScopeTitle;
+
+  /// Shown while entries are searched.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for related entries…'**
+  String get aiChatSearching;
+
+  /// Label under a stopped answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get aiChatStoppedLabel;
+
+  /// Token counts under an answer.
+  ///
+  /// In en, this message translates to:
+  /// **'{input} in · {output} out'**
+  String aiChatTokens(String input, String output);
+
+  /// Unpins a chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get aiChatUnpin;
+
+  /// Title of an unnamed chat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get aiChatUntitled;
+
+  /// Snackbar after deleting an AI item.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted “{name}”'**
+  String aiCommonDeleted(String name);
+
+  /// Badge for a hidden AI item.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get aiCommonHidden;
+
+  /// Menu item hiding an AI item.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get aiCommonHide;
+
+  /// Menu item restoring a built-in prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default'**
+  String get aiCommonRestoreDefault;
+
+  /// Menu item showing a hidden AI item.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get aiCommonShow;
+
+  /// Confirmation mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get aiConfirmAlways;
+
+  /// Confirmation mode.
+  ///
+  /// In en, this message translates to:
+  /// **'First time'**
+  String get aiConfirmFirstTime;
+
+  /// Confirmation mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple entries'**
+  String get aiConfirmMultiDiary;
+
+  /// Button confirming the send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get aiConfirmSendAction;
+
+  /// Line describing how many entries are sent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}}, about {words} words'**
+  String aiConfirmSendEntries(int count, int words);
+
+  /// Line describing attached photos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Plus 1 photo} other{Plus {count} photos}}'**
+  String aiConfirmSendImages(int count);
+
+  /// Line naming the model.
+  ///
+  /// In en, this message translates to:
+  /// **'Handled by “{name}”'**
+  String aiConfirmSendModel(String name);
+
+  /// Privacy note on the send confirmation sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes straight from this device; the developer never sees it. The provider handles it under its own privacy policy.'**
+  String get aiConfirmSendNote;
+
+  /// Checkbox remembering the provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t ask again for this provider'**
+  String get aiConfirmSendRemember;
+
+  /// Line describing how much text is sent.
+  ///
+  /// In en, this message translates to:
+  /// **'About {words} words of text'**
+  String aiConfirmSendText(int words);
+
+  /// Title of the send confirmation sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to {host}?'**
+  String aiConfirmSendTitle(String host);
+
+  /// Choice of AI creativity.
+  ///
+  /// In en, this message translates to:
+  /// **'Creativity'**
+  String get aiCreativity;
+
+  /// Creativity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get aiCreativityBalanced;
+
+  /// Creativity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative'**
+  String get aiCreativityCreative;
+
+  /// Creativity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise'**
+  String get aiCreativityPrecise;
+
+  /// Explanation of the creativity option.
+  ///
+  /// In en, this message translates to:
+  /// **'Only applies to providers that accept a temperature'**
+  String get aiCreativitySubtitle;
+
+  /// A number of days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String aiDays(int count);
+
+  /// A number of diary entries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}}'**
+  String aiEntries(int count);
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI service rejected the request. Check the provider\'s advanced settings.'**
+  String get aiErrorBadRequest;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t understand the response. The address may point to a web page instead of the API.'**
+  String get aiErrorBadResponse;
+
+  /// Shown when the user stopped an AI generation.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get aiErrorCancelled;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI service declined this request because of its content policy.'**
+  String get aiErrorContentFiltered;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'Too much content for this model. Lower the word limit in AI privacy settings or pick a model with a longer context.'**
+  String get aiErrorContextTooLong;
+
+  /// Button that shows the raw error details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get aiErrorDetails;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'This key has no access to the model, or the service isn\'t available in your region.'**
+  String get aiErrorForbidden;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The model or address wasn\'t found. Check the model name and API address.'**
+  String get aiErrorModelNotFound;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the AI service. Check the network, the address or the proxy.'**
+  String get aiErrorNetwork;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI model is set up yet. Add a provider in Settings → AI assistant.'**
+  String get aiErrorNotConfigured;
+
+  /// Button that opens AI settings from an error.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get aiErrorOpenSettings;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The account has run out of balance or quota.'**
+  String get aiErrorQuota;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again in a moment.'**
+  String get aiErrorRateLimited;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI service is having trouble or is overloaded. Please try again later.'**
+  String get aiErrorServer;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI service took too long to respond.'**
+  String get aiErrorTimeout;
+
+  /// AI error message.
+  ///
+  /// In en, this message translates to:
+  /// **'The API key is invalid or missing.'**
+  String get aiErrorUnauthorized;
+
+  /// Explore AI card button.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask my diary'**
+  String get aiExploreAsk;
+
+  /// Explore AI card without recaps.
+  ///
+  /// In en, this message translates to:
+  /// **'No recap yet. How about one for this week?'**
+  String get aiExploreNoRecap;
+
+  /// Explore AI card when not configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up an AI service to use this'**
+  String get aiExploreNotConfigured;
+
+  /// Explore AI card button.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s recap'**
+  String get aiExploreWeekly;
+
+  /// AI settings group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get aiGroupFeatures;
+
+  /// Footer of the AI features group.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning a feature off only hides it. Existing AI records are kept.'**
+  String get aiGroupFeaturesFooter;
+
+  /// AI settings group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal touch'**
+  String get aiGroupPersonal;
+
+  /// AI settings group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & usage'**
+  String get aiGroupPrivacy;
+
+  /// AI settings group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get aiGroupService;
+
+  /// Hint of the hub question field.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your diary…'**
+  String get aiHubAskHint;
+
+  /// Hub chats group.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get aiHubChatsGroup;
+
+  /// Shown when there are no chats.
+  ///
+  /// In en, this message translates to:
+  /// **'No chats yet. Ask a question above to start.'**
+  String get aiHubNoChats;
+
+  /// Shown when there are no recaps.
+  ///
+  /// In en, this message translates to:
+  /// **'No recaps yet'**
+  String get aiHubNoRecaps;
+
+  /// Tooltip of the settings button on the AI hub.
+  ///
+  /// In en, this message translates to:
+  /// **'AI settings'**
+  String get aiHubOpenSettings;
+
+  /// Quick question.
+  ///
+  /// In en, this message translates to:
+  /// **'How have I changed over the past half year?'**
+  String get aiHubQuickGrowth;
+
+  /// Quick question.
+  ///
+  /// In en, this message translates to:
+  /// **'What small things made me happy recently?'**
+  String get aiHubQuickHappy;
+
+  /// Quick question.
+  ///
+  /// In en, this message translates to:
+  /// **'What was I doing this time last year?'**
+  String get aiHubQuickLastYear;
+
+  /// Quick question.
+  ///
+  /// In en, this message translates to:
+  /// **'How has this month been for me?'**
+  String get aiHubQuickMonth;
+
+  /// Quick question.
+  ///
+  /// In en, this message translates to:
+  /// **'What have I been worrying about lately?'**
+  String get aiHubQuickWorry;
+
+  /// Opens the recap page.
+  ///
+  /// In en, this message translates to:
+  /// **'More options…'**
+  String get aiHubRecapMore;
+
+  /// Hub recaps group.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps'**
+  String get aiHubRecapsGroup;
+
+  /// Hint of the chat search field.
+  ///
+  /// In en, this message translates to:
+  /// **'Search chats'**
+  String get aiHubSearchChats;
+
+  /// Tooltip of the hub ask button.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get aiHubSend;
+
+  /// Title of the AI hub page.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get aiHubTitle;
+
+  /// Tooltip of the AI entry on the home top bar.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get aiHubTooltip;
+
+  /// Image menu item asking AI to caption the image.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe with AI'**
+  String get aiImageDescribe;
+
+  /// Shown while AI describes an image.
+  ///
+  /// In en, this message translates to:
+  /// **'Describing the photo…'**
+  String get aiImageDescribing;
+
+  /// Shown when the model has no vision.
+  ///
+  /// In en, this message translates to:
+  /// **'The current model can\'t see images. Pick a vision model for “Describe images” in Model assignment.'**
+  String get aiImageNoVision;
+
+  /// Answer language option.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get aiLanguageCustom;
+
+  /// Hint of the custom answer language field.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 日本語, Français'**
+  String get aiLanguageCustomHint;
+
+  /// Answer language option.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get aiLanguageFollowApp;
+
+  /// Answer language option.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get aiLanguageFollowDiary;
+
+  /// Answer length option.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed'**
+  String get aiLengthLong;
+
+  /// Answer length option.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get aiLengthMedium;
+
+  /// Answer length option.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get aiLengthShort;
+
+  /// Hint for numeric fields left empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get aiModelAuto;
+
+  /// Model context length field.
+  ///
+  /// In en, this message translates to:
+  /// **'Context length (tokens)'**
+  String get aiModelContext;
+
+  /// Model display name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name (optional)'**
+  String get aiModelDisplayName;
+
+  /// Title of the model settings sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Model settings'**
+  String get aiModelEditTitle;
+
+  /// Model max output field.
+  ///
+  /// In en, this message translates to:
+  /// **'Max output tokens'**
+  String get aiModelMaxOutput;
+
+  /// Button adding the selected models.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Add} other{Add {count}}}'**
+  String aiModelPickerAdd(int count);
+
+  /// Shown when the fetched model list is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider returned no models. Add a model name manually.'**
+  String get aiModelPickerEmpty;
+
+  /// Search field of the model picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Search models'**
+  String get aiModelPickerSearch;
+
+  /// Title of the fetched model picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose models'**
+  String get aiModelPickerTitle;
+
+  /// Badge for a model with reasoning output enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get aiModelReasoning;
+
+  /// Explanation of the reasoning toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the model for its thinking; retried without it if the model doesn\'t support it'**
+  String get aiModelReasoningSubtitle;
+
+  /// Model reasoning toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request reasoning'**
+  String get aiModelReasoningToggle;
+
+  /// Button that removes a model.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove model'**
+  String get aiModelRemove;
+
+  /// Badge for a model that accepts images.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get aiModelVision;
+
+  /// Model vision toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepts images'**
+  String get aiModelVisionToggle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with your diary'**
+  String get aiModuleChat;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your diary; answers cite the entries they use'**
+  String get aiModuleChatSubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing prompts'**
+  String get aiModulePrompts;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'A few questions when you don\'t know what to write'**
+  String get aiModulePromptsSubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps & insights'**
+  String get aiModuleRecap;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Summaries by week, month, year or notebook'**
+  String get aiModuleRecapSubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get aiModuleReply;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Let AI read an entry and respond to you on the reading page'**
+  String get aiModuleReplySubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart fill'**
+  String get aiModuleSuggest;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate titles and suggest tags and moods'**
+  String get aiModuleSuggestSubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Image understanding'**
+  String get aiModuleVision;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the photos in an entry along with the text; text only if the model can\'t take images'**
+  String get aiModuleVisionSubtitle;
+
+  /// AI module name.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing assistant'**
+  String get aiModuleWriting;
+
+  /// AI module description.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue, polish, change tone, translate and your own commands in the editor'**
+  String get aiModuleWritingSubtitle;
+
+  /// AI option under reflections.
+  ///
+  /// In en, this message translates to:
+  /// **'Respond after publishing'**
+  String get aiOptionAutoReply;
+
+  /// Explanation of the auto-reply option.
+  ///
+  /// In en, this message translates to:
+  /// **'Each new entry is sent once for a reflection'**
+  String get aiOptionAutoReplySubtitle;
+
+  /// AI option under smart fill.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest on the publish page'**
+  String get aiOptionAutoSuggest;
+
+  /// Explanation of the auto-suggest option.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends the entry once to suggest a title, tags and mood; nothing is filled in until you tap it'**
+  String get aiOptionAutoSuggestSubtitle;
+
+  /// Option to auto-title conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Name chats automatically'**
+  String get aiOptionAutoTitle;
+
+  /// Choice of how many entries chat may read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read at most'**
+  String get aiOptionMaxCitations;
+
+  /// Choice of how a prompt question is inserted.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert as'**
+  String get aiOptionPromptStyle;
+
+  /// AI option under writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Use recent entries'**
+  String get aiOptionPromptsRecent;
+
+  /// Explanation of using recent entries for prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends excerpts of your latest entries for more personal prompts'**
+  String get aiOptionPromptsRecentSubtitle;
+
+  /// AI option under writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show prompts on new entries'**
+  String get aiOptionPromptsStrip;
+
+  /// Explanation of the prompts strip option.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is sent until you tap it'**
+  String get aiOptionPromptsStripSubtitle;
+
+  /// Choice of default recap sections.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps include'**
+  String get aiOptionRecapSections;
+
+  /// Choice of how many recent days chat reads.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent range'**
+  String get aiOptionRecentDays;
+
+  /// Choice of chat retrieval mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding entries'**
+  String get aiOptionRetrieval;
+
+  /// Explanation of retrieval modes.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart understands the question first; keywords only match words; recent only reads the latest days'**
+  String get aiOptionRetrievalSubtitle;
+
+  /// Option to show model reasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Show reasoning'**
+  String get aiOptionShowReasoning;
+
+  /// Option to show token counts under answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show token usage'**
+  String get aiOptionShowTokens;
+
+  /// AI option under smart fill.
+  ///
+  /// In en, this message translates to:
+  /// **'Show “Generate title” next to the title'**
+  String get aiOptionTitleButton;
+
+  /// Choice of how many photos to send.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos per request'**
+  String get aiOptionVisionImages;
+
+  /// Choice of the photo size sent to the model.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo size'**
+  String get aiOptionVisionSize;
+
+  /// Command output option.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert below'**
+  String get aiOutputInsertBelow;
+
+  /// Choice of the AI answer language.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer language'**
+  String get aiOutputLanguage;
+
+  /// Command output option.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview only'**
+  String get aiOutputPreview;
+
+  /// Command output option.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get aiOutputReplace;
+
+  /// Snackbar after copying an AI result.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get aiPanelCopied;
+
+  /// Button copying the AI result.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get aiPanelCopy;
+
+  /// Shown when the AI target is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to work on yet. Write something or select some text first.'**
+  String get aiPanelEmptyTarget;
+
+  /// Button inserting the AI result below.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert below'**
+  String get aiPanelInsertBelow;
+
+  /// Hint of the free-form instruction field.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell AI what to do, e.g. “make it more casual”'**
+  String get aiPanelInstructionHint;
+
+  /// Shown when AI is blocked for a private entry.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry is in a private notebook. You can allow AI for private entries in AI privacy settings.'**
+  String get aiPanelPrivateBlocked;
+
+  /// Label of the collapsible reasoning section.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get aiPanelReasoning;
+
+  /// Button replacing the text with the AI result.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get aiPanelReplace;
+
+  /// Button sending a free-form instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get aiPanelSend;
+
+  /// Button stopping an AI generation.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get aiPanelStop;
+
+  /// Shown before the first output arrives.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking…'**
+  String get aiPanelThinking;
+
+  /// Title of the AI writing panel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI writing'**
+  String get aiPanelTitle;
+
+  /// Button that creates a persona.
+  ///
+  /// In en, this message translates to:
+  /// **'New persona'**
+  String get aiPersonaAdd;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Calmly untangles what happened and why'**
+  String get aiPersonaAnalystDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Thoughtful analyst'**
+  String get aiPersonaAnalystName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a calm, rational analyst. Help the user untangle what happened in the diary, the reasons behind it and the options they have. Separate facts from feelings and point out angles they may have missed. Be concise and structured.'**
+  String get aiPersonaAnalystPrompt;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear and objective, good for questions and summaries'**
+  String get aiPersonaAssistantDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary assistant'**
+  String get aiPersonaAssistantName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are the user\'s diary assistant. You can read the diary entries the user shares with you. Base your answers on those entries, and keep them clear, objective and well organised. Say so when you are unsure, and never invent things that are not in the diary.'**
+  String get aiPersonaAssistantPrompt;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Spots your progress and the next small step'**
+  String get aiPersonaCoachDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth coach'**
+  String get aiPersonaCoachName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a positive, practical growth coach. Find the effort, progress and things worth praising in the diary, point out patterns that could improve, and suggest one to three concrete, doable small actions. Be encouraging without being vague.'**
+  String get aiPersonaCoachPrompt;
+
+  /// Name of a copied persona.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (copy)'**
+  String aiPersonaCopySuffix(String name);
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Asks questions that help you see your feelings'**
+  String get aiPersonaCounselorDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Counselor style'**
+  String get aiPersonaCounselorName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You respond the way a counselor often does: listen, reflect back and clarify, and use open questions to help the user notice their emotions and needs, without rushing to conclusions or advice. You are not professional therapy. If the diary mentions thoughts of hurting themselves or others, gently encourage the user to reach out to people around them or to professional help.'**
+  String get aiPersonaCounselorPrompt;
+
+  /// Menu item copying a built-in persona.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as mine'**
+  String get aiPersonaDuplicate;
+
+  /// Title of the persona editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit persona'**
+  String get aiPersonaEditTitle;
+
+  /// Title of the persona editor when creating.
+  ///
+  /// In en, this message translates to:
+  /// **'New persona'**
+  String get aiPersonaEditTitleNew;
+
+  /// Persona emoji field.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get aiPersonaEmoji;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats casually like an old friend'**
+  String get aiPersonaFriendDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Close friend'**
+  String get aiPersonaFriendName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a friend the user has known for years. You talk naturally, casually and sincerely, you can joke and you can be serious. Respond the way a friend would after reading their diary: mention details you noticed, share how you feel, and give practical advice only when it helps.'**
+  String get aiPersonaFriendPrompt;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'A reply from you, ten years later'**
+  String get aiPersonaFutureSelfDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Future self'**
+  String get aiPersonaFutureSelfName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are the user ten years from now, rereading this diary entry. Write a short letter to your past self in the first person: gentle, knowing how things unfolded, with the calm and wisdom that time brings, but do not invent specific future events.'**
+  String get aiPersonaFutureSelfPrompt;
+
+  /// Shown when the persona limit is reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} personas'**
+  String aiPersonaLimit(int count);
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Understands first, then answers gently'**
+  String get aiPersonaListenerDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm listener'**
+  String get aiPersonaListenerName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a warm, patient listener. After reading the user\'s diary, first show that you understand and acknowledge the feelings in it, then respond gently. Do not judge or lecture, give little advice, and offer empathy and affirmation instead. You may end with one gentle question that invites the user to reflect a little more.'**
+  String get aiPersonaListenerPrompt;
+
+  /// Persona name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get aiPersonaName;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinks about it from a wider view'**
+  String get aiPersonaPhilosopherDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Philosopher'**
+  String get aiPersonaPhilosopherName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a friendly philosopher. Start from the small, concrete things in the diary and connect them to bigger questions such as meaning, choice, time and relationships. Use fitting ideas or metaphors, stay approachable, and come back to the user\'s own life at the end.'**
+  String get aiPersonaPhilosopherPrompt;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers your day in poetic language'**
+  String get aiPersonaPoetDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Poet'**
+  String get aiPersonaPoetName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a gentle poet. Respond to the user\'s diary in vivid, poetic but not obscure language. You may write a short prose poem or a few lines of verse that capture the mood and images of the day.'**
+  String get aiPersonaPoetPrompt;
+
+  /// Persona prompt field.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get aiPersonaPrompt;
+
+  /// Hint of the persona prompt field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe who they are, how they talk and how they respond to your diary'**
+  String get aiPersonaPromptHint;
+
+  /// Built-in AI persona description.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharp tongue, soft heart'**
+  String get aiPersonaRoastDesc;
+
+  /// Built-in AI persona name.
+  ///
+  /// In en, this message translates to:
+  /// **'Roasting buddy'**
+  String get aiPersonaRoastName;
+
+  /// System prompt of a built-in AI persona (sent to the model).
+  ///
+  /// In en, this message translates to:
+  /// **'You are a buddy with a sharp tongue and a soft heart. Tease what happened in the diary with humour and exaggeration, but never mock the user\'s real pain or touch sensitive topics such as appearance or identity. Let your care show at the end.'**
+  String get aiPersonaRoastPrompt;
+
+  /// Persona use.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get aiPersonaUseChat;
+
+  /// Persona use.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps'**
+  String get aiPersonaUseRecap;
+
+  /// Persona use.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get aiPersonaUseReply;
+
+  /// Group of built-in personas.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get aiPersonasBuiltInGroup;
+
+  /// Group of default personas per use.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults'**
+  String get aiPersonasDefaultsGroup;
+
+  /// Shown when there are no custom personas.
+  ///
+  /// In en, this message translates to:
+  /// **'No personas of your own yet. Create one, or copy a built-in persona and change it.'**
+  String get aiPersonasMineEmpty;
+
+  /// Group of custom personas.
+  ///
+  /// In en, this message translates to:
+  /// **'My personas'**
+  String get aiPersonasMineGroup;
+
+  /// Subtitle of the personas entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Whose voice reflections, chats and recaps use'**
+  String get aiPersonasSubtitle;
+
+  /// Title of the personas page.
+  ///
+  /// In en, this message translates to:
+  /// **'Personas'**
+  String get aiPersonasTitle;
+
+  /// A number of photos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo} other{{count} photos}}'**
+  String aiPhotos(int count);
+
+  /// Preset group title.
+  ///
+  /// In en, this message translates to:
+  /// **'China'**
+  String get aiPresetGroupChina;
+
+  /// Preset group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom API'**
+  String get aiPresetGroupCustom;
+
+  /// Preset group title.
+  ///
+  /// In en, this message translates to:
+  /// **'International'**
+  String get aiPresetGroupInternational;
+
+  /// Preset group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Run locally'**
+  String get aiPresetGroupLocal;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic-compatible API'**
+  String get aiPresetNameCustomAnthropic;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemini API'**
+  String get aiPresetNameCustomGemini;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible API'**
+  String get aiPresetNameCustomOpenAi;
+
+  /// Custom preset using the OpenAI Responses API.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI Responses API'**
+  String get aiPresetNameCustomOpenAiResponses;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Qwen (Alibaba Cloud)'**
+  String get aiPresetNameDashscope;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Tencent Hunyuan'**
+  String get aiPresetNameHunyuan;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Kimi (Moonshot)'**
+  String get aiPresetNameMoonshot;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'SiliconFlow'**
+  String get aiPresetNameSiliconflow;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Doubao (Volcengine Ark)'**
+  String get aiPresetNameVolcengine;
+
+  /// AI provider preset name.
+  ///
+  /// In en, this message translates to:
+  /// **'Zhipu GLM'**
+  String get aiPresetNameZhipu;
+
+  /// Title of the preset picker sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a provider'**
+  String get aiPresetSheetTitle;
+
+  /// Option allowing single-entry AI on private entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow AI on private entries'**
+  String get aiPrivacyAllowPrivate;
+
+  /// Explanation of the private entries option.
+  ///
+  /// In en, this message translates to:
+  /// **'The writing assistant and reflections become available in private notebooks. Chats and recaps still never read them.'**
+  String get aiPrivacyAllowPrivateSubtitle;
+
+  /// Choice of the context word budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Send at most'**
+  String get aiPrivacyBudget;
+
+  /// Explains “Send at most”: no per-entry limit, only the total of one request is capped.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries are sent in full; text is cut only when one request would go over this.'**
+  String get aiPrivacyBudgetSubtitle;
+
+  /// Row that clears all AI records.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all AI records'**
+  String get aiPrivacyClearRecords;
+
+  /// Body of the clear-records dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Every chat, reflection and recap is deleted from this device. This can\'t be undone. Your diary entries are not affected.'**
+  String get aiPrivacyClearRecordsBody;
+
+  /// Snackbar after clearing AI records.
+  ///
+  /// In en, this message translates to:
+  /// **'AI records cleared'**
+  String get aiPrivacyClearRecordsDone;
+
+  /// Number of stored AI records.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing saved yet} =1{1 chat or result} other{{count} chats and results}}'**
+  String aiPrivacyClearRecordsSubtitle(int count);
+
+  /// Title of the clear-records dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all AI records?'**
+  String get aiPrivacyClearRecordsTitle;
+
+  /// Group of confirmation options.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm before sending'**
+  String get aiPrivacyConfirmGroup;
+
+  /// Explanation of confirmation modes.
+  ///
+  /// In en, this message translates to:
+  /// **'First time: once per provider. Multiple entries: chats and recaps always show what will be sent. Always: confirm every request.'**
+  String get aiPrivacyConfirmSubtitle;
+
+  /// Metadata toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get aiPrivacyDate;
+
+  /// Number of excluded items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String aiPrivacyExcludedCount(int count);
+
+  /// Shown when nothing is excluded.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get aiPrivacyExcludedNone;
+
+  /// Row for excluded notebooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded notebooks'**
+  String get aiPrivacyExcludedNotebooks;
+
+  /// Row for excluded tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded tags'**
+  String get aiPrivacyExcludedTags;
+
+  /// Option to include archived entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Include archived entries'**
+  String get aiPrivacyIncludeArchived;
+
+  /// Metadata toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get aiPrivacyLocation;
+
+  /// Metadata toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood'**
+  String get aiPrivacyMood;
+
+  /// Shown when an exclusion sheet has no items.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to choose from'**
+  String get aiPrivacyPickEmpty;
+
+  /// Title of the notebook exclusion sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebooks to leave out'**
+  String get aiPrivacyPickNotebooks;
+
+  /// Title of the tag exclusion sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags to leave out'**
+  String get aiPrivacyPickTags;
+
+  /// Footer explaining where AI records are kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats, reflections and recaps are saved on this device and in full backups. They are never synced over the local network.'**
+  String get aiPrivacyRecordsFooter;
+
+  /// Group title for stored AI records.
+  ///
+  /// In en, this message translates to:
+  /// **'AI records'**
+  String get aiPrivacyRecordsGroup;
+
+  /// Button resetting acknowledged hosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask again for every provider'**
+  String get aiPrivacyResetHosts;
+
+  /// Snackbar after resetting acknowledged hosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Done. You\'ll be asked again next time.'**
+  String get aiPrivacyResetHostsDone;
+
+  /// Explanation of resetting acknowledged hosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the first-time confirmation again'**
+  String get aiPrivacyResetHostsSubtitle;
+
+  /// Group of multi-entry context options.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats and recaps'**
+  String get aiPrivacyScopeGroup;
+
+  /// Footer of the metadata toggles.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles and text are always sent. Private notebooks, the recycle bin and sealed time capsules are never sent.'**
+  String get aiPrivacySendFooter;
+
+  /// Group of metadata toggles.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent with entries'**
+  String get aiPrivacySendGroup;
+
+  /// Subtitle of the AI privacy entry.
+  ///
+  /// In en, this message translates to:
+  /// **'What is sent and which entries are left out'**
+  String get aiPrivacySubtitle;
+
+  /// Metadata toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get aiPrivacyTags;
+
+  /// Title of the AI privacy page.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get aiPrivacyTitle;
+
+  /// Metadata toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather'**
+  String get aiPrivacyWeather;
+
+  /// About-me field.
+  ///
+  /// In en, this message translates to:
+  /// **'About me'**
+  String get aiProfileAboutMe;
+
+  /// Hint of the about-me field.
+  ///
+  /// In en, this message translates to:
+  /// **'What you do, your life right now, what matters to you. AI will keep it in mind.'**
+  String get aiProfileAboutMeHint;
+
+  /// Footer of the profile page.
+  ///
+  /// In en, this message translates to:
+  /// **'These are sent along with every request. Leave them empty to send nothing.'**
+  String get aiProfileFooter;
+
+  /// Writing style field.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing style'**
+  String get aiProfileStyle;
+
+  /// Hint of the writing style field.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. plain and simple, few adjectives, short sentences'**
+  String get aiProfileStyleHint;
+
+  /// Subtitle of the profile entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Help AI know you better (optional)'**
+  String get aiProfileSubtitle;
+
+  /// Title of the profile page.
+  ///
+  /// In en, this message translates to:
+  /// **'About me & style'**
+  String get aiProfileTitle;
+
+  /// Prompt line carrying the user's about-me text.
+  ///
+  /// In en, this message translates to:
+  /// **'About the user: {text}'**
+  String aiPromptAboutUser(String text);
+
+  /// Header of the diary context in chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Relevant diary entries:'**
+  String get aiPromptChatContextHeader;
+
+  /// Shown to the model when no entries matched.
+  ///
+  /// In en, this message translates to:
+  /// **'(No diary entries matched this question.)'**
+  String get aiPromptChatNoDiaries;
+
+  /// System prompt of chat with diaries.
+  ///
+  /// In en, this message translates to:
+  /// **'You can read some of the user\'s diary entries, each marked [Dn]. Answer based on these entries. When you use an entry, cite its marker at the end of the sentence, like [D3]. Do not invent anything that is not in the entries; if you can\'t find it, say so.'**
+  String get aiPromptChatSystem;
+
+  /// Instruction for naming a conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarise the topic of this conversation in at most 8 words. Output only the title.'**
+  String get aiPromptChatTitle;
+
+  /// Prompt line with today's date for chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is {date}.'**
+  String aiPromptChatToday(String date);
+
+  /// Prompt line wrapping a free-form instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow this instruction for the text below: {text}'**
+  String aiPromptCustomInstruction(String text);
+
+  /// Instruction for describing an image.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what is in this photo and its mood in one or two sentences, as a caption for a diary. Output only the description.'**
+  String get aiPromptDescribeImage;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get aiPromptFieldBody;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get aiPromptFieldDate;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Place'**
+  String get aiPromptFieldLocation;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood'**
+  String get aiPromptFieldMood;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get aiPromptFieldTags;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get aiPromptFieldTitle;
+
+  /// Field label inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather'**
+  String get aiPromptFieldWeather;
+
+  /// Prompt line saying photos are attached.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One photo from the entry is attached.} other{{count} photos from the entry are attached.}}'**
+  String aiPromptImagesAttached(int count);
+
+  /// Language name used inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get aiPromptLanguageChinese;
+
+  /// Language name used inside prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get aiPromptLanguageEnglish;
+
+  /// Prompt line for detailed answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel free to answer in detail.'**
+  String get aiPromptLengthLong;
+
+  /// Prompt line for medium answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the answer to a moderate length.'**
+  String get aiPromptLengthMedium;
+
+  /// Prompt line for short answers.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the answer short, within a few sentences.'**
+  String get aiPromptLengthShort;
+
+  /// Prompt line carrying the persona prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role: {text}'**
+  String aiPromptPersona(String text);
+
+  /// Instruction for writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Write 3 concrete, gentle questions that make it easy for the user to start today\'s diary. One question per line, no numbering, nothing else.'**
+  String get aiPromptPromptsInstruction;
+
+  /// Prompt line introducing recent entries.
+  ///
+  /// In en, this message translates to:
+  /// **'Excerpts of the user\'s recent entries, for a more personal touch:'**
+  String get aiPromptPromptsRecent;
+
+  /// Prompt line with today's date.
+  ///
+  /// In en, this message translates to:
+  /// **'Today: {date}'**
+  String aiPromptPromptsToday(String date);
+
+  /// Instruction for partial summaries of long recaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Below are entries from part of a period. Summarise in bullet points what happened, the feelings and the thoughts, keeping concrete dates and details, so they can be merged into a recap later.'**
+  String get aiPromptRecapChunk;
+
+  /// Prompt line introducing partial summaries.
+  ///
+  /// In en, this message translates to:
+  /// **'These are summaries of consecutive parts of the period, oldest first:'**
+  String get aiPromptRecapFromSummaries;
+
+  /// Instruction for recaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Below are the entries the user wrote during {period}. Write a recap organised with Markdown subheadings, covering:'**
+  String aiPromptRecapInstruction(String period);
+
+  /// Prompt line with mood counts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood counts: {moods}'**
+  String aiPromptRecapMoods(String moods);
+
+  /// Rules appended to the recap instruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Only use what is in the entries. Mention dates when you refer to specific days. If an entry is marked [Dn], you may cite it as [Dn].'**
+  String get aiPromptRecapRules;
+
+  /// Prompt line with recap statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics: {count} entries, {words} words.'**
+  String aiPromptRecapStats(int count, int words);
+
+  /// Prompt line with top tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Most used tags: {tags}'**
+  String aiPromptRecapTopTags(String tags);
+
+  /// Instruction for AI reflections.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is an entry the user wrote. Read it as yourself and respond to the user directly. Do not retell the entry and do not use headings.'**
+  String get aiPromptReplyInstruction;
+
+  /// Prompt line forcing the answer language.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply in {language}.'**
+  String aiPromptRespondIn(String language);
+
+  /// Prompt line asking to follow the diary language.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply in the same language the diary is written in.'**
+  String get aiPromptRespondLikeDiary;
+
+  /// Instruction for building a retrieval plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the user\'s question into a diary search plan. Today is {date}. Give up to 8 short keywords likely to appear in the entries (include synonyms), and a date range only if the question implies one. Reply with one JSON object only, exactly in this shape:'**
+  String aiPromptRetrievalPlan(String date);
+
+  /// Prompt insert style.
+  ///
+  /// In en, this message translates to:
+  /// **'Callout'**
+  String get aiPromptStyleCallout;
+
+  /// Prompt insert style.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get aiPromptStyleHeading;
+
+  /// Prompt insert style.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get aiPromptStyleQuote;
+
+  /// Instruction for smart-fill suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on the entry below, suggest: a short fitting title of at most 20 characters without quotes; 0 to 3 of the user\'s existing tags; at most 2 new tags of at most 6 characters each, only if really useful; and the single best mood from the given options, or leave it empty if unsure. Reply with one JSON object only, exactly in this shape:'**
+  String get aiPromptSuggestInstruction;
+
+  /// Prompt line listing mood options.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood options: {moods}'**
+  String aiPromptSuggestMoodList(String moods);
+
+  /// Prompt line listing existing tags.
+  ///
+  /// In en, this message translates to:
+  /// **'The user\'s existing tags: {tags}'**
+  String aiPromptSuggestTagsList(String tags);
+
+  /// Base system prompt sent to the model.
+  ///
+  /// In en, this message translates to:
+  /// **'You are the AI assistant inside Jotsy, a personal diary app. The person you talk to is the author of the diary. Be sincere and specific, and never invent facts that are not in the diary.'**
+  String get aiPromptSystemBase;
+
+  /// Marker appended to truncated diary text in prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'(the rest is omitted)'**
+  String get aiPromptTruncated;
+
+  /// Prompt line introducing the whole entry as context.
+  ///
+  /// In en, this message translates to:
+  /// **'For context, this is the whole entry (do not repeat it):'**
+  String get aiPromptWritingContext;
+
+  /// Prompt line carrying the preferred writing style.
+  ///
+  /// In en, this message translates to:
+  /// **'The user\'s preferred writing style: {text}'**
+  String aiPromptWritingStyle(String text);
+
+  /// System prompt of the writing assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'You are a writing assistant helping the user edit their own diary. Output only the resulting text: no explanations, no quotes, no preface. Keep the first-person point of view. You may use Markdown lists, bold and task lists, but no headings.'**
+  String get aiPromptWritingSystem;
+
+  /// Button hiding the prompts strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide prompts'**
+  String get aiPromptsClose;
+
+  /// Shown when no prompts were produced.
+  ///
+  /// In en, this message translates to:
+  /// **'No questions this time. Try again?'**
+  String get aiPromptsEmpty;
+
+  /// Hint under writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a question to add it to your entry'**
+  String get aiPromptsHint;
+
+  /// Shown while prompts are generated.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking of questions…'**
+  String get aiPromptsLoading;
+
+  /// Button generating new prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'New set'**
+  String get aiPromptsRefresh;
+
+  /// Chip that asks AI for writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Need a writing prompt?'**
+  String get aiPromptsStripLabel;
+
+  /// Title of the prompts sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing prompts'**
+  String get aiPromptsTitle;
+
+  /// API protocol name.
+  ///
+  /// In en, this message translates to:
+  /// **'Anthropic (Claude)'**
+  String get aiProtocolAnthropic;
+
+  /// API protocol name.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Gemini'**
+  String get aiProtocolGemini;
+
+  /// API protocol name.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI compatible'**
+  String get aiProtocolOpenAi;
+
+  /// Name of the OpenAI Responses API protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI Responses'**
+  String get aiProtocolOpenAiResponses;
+
+  /// Button that adds a model by name.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get aiProviderAddModel;
+
+  /// Advanced provider settings group.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get aiProviderAdvanced;
+
+  /// Provider API key field.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get aiProviderApiKey;
+
+  /// API key field label for local presets.
+  ///
+  /// In en, this message translates to:
+  /// **'API key (optional for local services)'**
+  String get aiProviderApiKeyOptional;
+
+  /// Provider base URL field.
+  ///
+  /// In en, this message translates to:
+  /// **'API address'**
+  String get aiProviderBaseUrl;
+
+  /// Hint of the API address field.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. https://api.example.com/v1'**
+  String get aiProviderBaseUrlHint;
+
+  /// Button that deletes a provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete provider'**
+  String get aiProviderDelete;
+
+  /// Body of the delete-provider dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Its key and model settings are removed, and features assigned to it go back to the default model.'**
+  String get aiProviderDeleteBody;
+
+  /// Title of the delete-provider dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String aiProviderDeleteTitle(String name);
+
+  /// Badge for a disabled provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get aiProviderDisabled;
+
+  /// Button that discards unsaved changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get aiProviderDiscard;
+
+  /// Title of the discard-changes dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get aiProviderDiscardTitle;
+
+  /// Title of the provider edit page.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit provider'**
+  String get aiProviderEditTitle;
+
+  /// Title of the provider edit page when creating.
+  ///
+  /// In en, this message translates to:
+  /// **'Add provider'**
+  String get aiProviderEditTitleNew;
+
+  /// Provider enabled toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get aiProviderEnabled;
+
+  /// Provider extra body field.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra request fields (JSON)'**
+  String get aiProviderExtraBody;
+
+  /// Hint of the extra body field.
+  ///
+  /// In en, this message translates to:
+  /// **'A JSON object merged into every request, for provider-specific options'**
+  String get aiProviderExtraBodyHint;
+
+  /// Validation error of the extra body field.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a valid JSON object'**
+  String get aiProviderExtraBodyInvalid;
+
+  /// Button that loads the provider's model list.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch model list'**
+  String get aiProviderFetchModels;
+
+  /// Button that opens the provider's key page.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a key'**
+  String get aiProviderGetKey;
+
+  /// Provider custom headers field.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom headers'**
+  String get aiProviderHeaders;
+
+  /// Hint of the custom headers field.
+  ///
+  /// In en, this message translates to:
+  /// **'One per line, as Name: value'**
+  String get aiProviderHeadersHint;
+
+  /// Provider include-usage toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request usage'**
+  String get aiProviderIncludeUsage;
+
+  /// Explanation of the include-usage toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for token usage while streaming; turn off if requests fail'**
+  String get aiProviderIncludeUsageSubtitle;
+
+  /// Hint for local providers.
+  ///
+  /// In en, this message translates to:
+  /// **'To reach Ollama or LM Studio on a computer from your phone, replace localhost with the computer\'s LAN address and let the server listen on 0.0.0.0.'**
+  String get aiProviderLocalHint;
+
+  /// Hint for the manual model name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Model name, e.g. deepseek-chat'**
+  String get aiProviderModelIdHint;
+
+  /// Provider models group title.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get aiProviderModels;
+
+  /// Number of models of a provider.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No models} =1{1 model} other{{count} models}}'**
+  String aiProviderModelsCount(int count);
+
+  /// Shown when a provider has no models.
+  ///
+  /// In en, this message translates to:
+  /// **'No models yet. Fetch the list from the provider or add a model name manually.'**
+  String get aiProviderModelsEmpty;
+
+  /// Provider name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get aiProviderName;
+
+  /// Validation error for an empty provider name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name'**
+  String get aiProviderNameRequired;
+
+  /// Shown when testing a provider without models.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one model first'**
+  String get aiProviderNeedModel;
+
+  /// Badge for a provider without an API key.
+  ///
+  /// In en, this message translates to:
+  /// **'No key'**
+  String get aiProviderNoKey;
+
+  /// Provider protocol choice.
+  ///
+  /// In en, this message translates to:
+  /// **'API format'**
+  String get aiProviderProtocol;
+
+  /// Provider proxy field.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP proxy'**
+  String get aiProviderProxy;
+
+  /// Hint of the proxy field.
+  ///
+  /// In en, this message translates to:
+  /// **'host:port, e.g. 127.0.0.1:7890; empty for direct'**
+  String get aiProviderProxyHint;
+
+  /// Provider retry count.
+  ///
+  /// In en, this message translates to:
+  /// **'Retries'**
+  String get aiProviderRetries;
+
+  /// Provider send-temperature toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send temperature'**
+  String get aiProviderSendTemperature;
+
+  /// Explanation of the send-temperature toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Newer Claude models reject it, so it\'s off for Anthropic'**
+  String get aiProviderSendTemperatureSubtitle;
+
+  /// Provider streaming toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Streaming'**
+  String get aiProviderStream;
+
+  /// Explanation of the streaming toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show answers as they are written; turn off if a relay doesn\'t support it'**
+  String get aiProviderStreamSubtitle;
+
+  /// Provider first-token timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for first token'**
+  String get aiProviderTimeout;
+
+  /// Validation error for an invalid API address.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an address starting with http:// or https://'**
+  String get aiProviderUrlInvalid;
+
+  /// Number of configured AI providers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 provider} other{{count} providers}}'**
+  String aiProvidersCount(int count);
+
+  /// Shown when no AI provider exists.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet'**
+  String get aiProvidersEmpty;
+
+  /// Footer of the AI providers list.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a default model, the first usable provider is used; change it in Model assignment.'**
+  String get aiProvidersFooter;
+
+  /// Title of the AI providers list.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get aiProvidersTitle;
+
+  /// Recap over all entries.
+  ///
+  /// In en, this message translates to:
+  /// **'All entries'**
+  String get aiRecapAllNotebooks;
+
+  /// Custom recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom…'**
+  String get aiRecapCustom;
+
+  /// Title of the custom recap date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose dates'**
+  String get aiRecapCustomRange;
+
+  /// Title of the delete recap dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this recap?'**
+  String get aiRecapDeleteTitle;
+
+  /// Snackbar after deleting a recap.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap deleted'**
+  String get aiRecapDeleted;
+
+  /// Title of a recap saved as an entry.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} recap'**
+  String aiRecapDiaryTitle(String period);
+
+  /// Button generating a recap.
+  ///
+  /// In en, this message translates to:
+  /// **'Write recap'**
+  String get aiRecapGenerate;
+
+  /// Heading of saved recaps on the recap page.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier recaps'**
+  String get aiRecapHistory;
+
+  /// Recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get aiRecapLastMonth;
+
+  /// Recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week'**
+  String get aiRecapLastWeek;
+
+  /// Model credit under a recap.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by {model}'**
+  String aiRecapModel(String model);
+
+  /// Shown when the period has no entries.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries to recap in this period.'**
+  String get aiRecapNoEntries;
+
+  /// Recap notebook choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook'**
+  String get aiRecapNotebook;
+
+  /// Title of the recap notebook sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a notebook'**
+  String get aiRecapNotebookPick;
+
+  /// A date range.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String aiRecapPeriodRange(String start, String end);
+
+  /// Recap persona choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get aiRecapPersona;
+
+  /// Recap period choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get aiRecapRange;
+
+  /// Progress of a long recap.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading part {index} of {total}…'**
+  String aiRecapReading(int index, int total);
+
+  /// Saves AI text as a new diary draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as entry'**
+  String get aiRecapSaveAsDiary;
+
+  /// Shown after a recap is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your recaps'**
+  String get aiRecapSaved;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Key moments'**
+  String get aiRecapSectionEvents;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Gratitude'**
+  String get aiRecapSectionGratitude;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth & change'**
+  String get aiRecapSectionGrowth;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood trends'**
+  String get aiRecapSectionMood;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'People around me'**
+  String get aiRecapSectionPeople;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorable lines'**
+  String get aiRecapSectionQuotes;
+
+  /// Recap section.
+  ///
+  /// In en, this message translates to:
+  /// **'Next steps'**
+  String get aiRecapSectionSuggestions;
+
+  /// Recap section choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Include'**
+  String get aiRecapSections;
+
+  /// Shares the recap text.
+  ///
+  /// In en, this message translates to:
+  /// **'Share text'**
+  String get aiRecapShare;
+
+  /// Shown when system share is unavailable and the text was copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied. Paste it wherever you\'d like to share.'**
+  String get aiRecapShareUnavailable;
+
+  /// Recap statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry} other{{count} entries}} · {words} words'**
+  String aiRecapStats(int count, int words);
+
+  /// Shown when a recap is stopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped. The partial recap isn\'t saved.'**
+  String get aiRecapStopped;
+
+  /// Recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get aiRecapThisMonth;
+
+  /// Recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get aiRecapThisWeek;
+
+  /// Recap period.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get aiRecapThisYear;
+
+  /// Title of the AI recap page.
+  ///
+  /// In en, this message translates to:
+  /// **'AI recap'**
+  String get aiRecapTitle;
+
+  /// Shown while the final recap streams.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the recap…'**
+  String get aiRecapWriting;
+
+  /// Heading of the AI reflections section with a count.
+  ///
+  /// In en, this message translates to:
+  /// **'AI reflections · {count}'**
+  String aiRepliesHeading(int count);
+
+  /// Row that asks AI for a reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI to respond…'**
+  String get aiReplyAsk;
+
+  /// Shown when auto reflection needs a first-time confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto reflection skipped: confirm this provider once by asking for a reflection manually.'**
+  String get aiReplyAutoSkipped;
+
+  /// Collapses a long reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get aiReplyCollapse;
+
+  /// Button opening a chat about this entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk more'**
+  String get aiReplyContinueChat;
+
+  /// Snackbar after deleting a reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection deleted'**
+  String get aiReplyDeleted;
+
+  /// Dismisses a failed or stopped reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get aiReplyDismiss;
+
+  /// Expands a long reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get aiReplyExpand;
+
+  /// Item in the reading page More sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'AI reflection'**
+  String get aiReplyMoreItem;
+
+  /// Title of the persona picker for reflections.
+  ///
+  /// In en, this message translates to:
+  /// **'Who should respond?'**
+  String get aiReplyPickPersona;
+
+  /// Menu item regenerating a reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get aiReplyRegenerate;
+
+  /// Menu item saving a reflection as a comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as comment'**
+  String get aiReplySaveAsComment;
+
+  /// Snackbar after saving a reflection as a comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as a comment'**
+  String get aiReplySavedAsComment;
+
+  /// Shown after a reflection was stopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped. Try again?'**
+  String get aiReplyStopped;
+
+  /// Shown while a reflection is being written.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your entry…'**
+  String get aiReplyWriting;
+
+  /// Choice of AI answer length.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer length'**
+  String get aiResponseLength;
+
+  /// Retrieval mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Keywords'**
+  String get aiRetrievalKeyword;
+
+  /// Retrieval mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get aiRetrievalRecent;
+
+  /// Retrieval mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart'**
+  String get aiRetrievalSmart;
+
+  /// Default model row.
+  ///
+  /// In en, this message translates to:
+  /// **'Default model'**
+  String get aiRoutingDefault;
+
+  /// Explanation of the default model.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by every feature that has no model of its own'**
+  String get aiRoutingDefaultSubtitle;
+
+  /// Fast model row.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast model'**
+  String get aiRoutingFast;
+
+  /// Explanation of the fast model.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred for short tasks such as smart fill and prompts; pick something cheap and quick'**
+  String get aiRoutingFastSubtitle;
+
+  /// Default model when none is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'First usable ({name})'**
+  String aiRoutingFirstUsable(String name);
+
+  /// Option to use the default model.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as default'**
+  String get aiRoutingFollowDefault;
+
+  /// Option to use the fast model.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as fast model'**
+  String get aiRoutingFollowFast;
+
+  /// Shown when no model is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get aiRoutingNone;
+
+  /// Title of the model picker sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model'**
+  String get aiRoutingPickTitle;
+
+  /// Subtitle of the model assignment entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Use different models for different features'**
+  String get aiRoutingSubtitle;
+
+  /// Group of per-task model rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Per feature'**
+  String get aiRoutingTasksGroup;
+
+  /// Title of the per-task model assignment page.
+  ///
+  /// In en, this message translates to:
+  /// **'Model assignment'**
+  String get aiRoutingTitle;
+
+  /// AI writing scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Text before the cursor'**
+  String get aiScopeBeforeCaret;
+
+  /// AI writing scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole entry'**
+  String get aiScopeDocument;
+
+  /// AI writing scope.
+  ///
+  /// In en, this message translates to:
+  /// **'This paragraph'**
+  String get aiScopeParagraph;
+
+  /// AI writing scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection'**
+  String get aiScopeSelection;
+
+  /// Summary of what the AI command works on.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} · {words} words'**
+  String aiScopeSummary(String scope, int words);
+
+  /// A number of seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
+  String aiSeconds(int count);
+
+  /// Selection menu item opening AI writing for the selected text.
+  ///
+  /// In en, this message translates to:
+  /// **'AI…'**
+  String get aiSelectionMenu;
+
+  /// Subtitle of the AI entry on the settings home.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers, models, personas and privacy'**
+  String get aiSettingsEntrySubtitle;
+
+  /// Footer explaining AI privacy on the AI settings page.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing goes through the developer: requests go straight from this device to the provider you set up. API keys stay on this device and never enter backups or sync.'**
+  String get aiSettingsFooter;
+
+  /// Tile on the AI settings page opening the hub.
+  ///
+  /// In en, this message translates to:
+  /// **'Open AI assistant'**
+  String get aiSettingsOpenHub;
+
+  /// Subtitle of the open hub tile.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your diary and write recaps'**
+  String get aiSettingsOpenHubSubtitle;
+
+  /// Title of the AI settings page and its settings entry.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get aiSettingsTitle;
+
+  /// Slash command continuing the entry with AI.
+  ///
+  /// In en, this message translates to:
+  /// **'AI continue'**
+  String get aiSlashContinue;
+
+  /// Slash menu group title for AI commands.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get aiSlashGroup;
+
+  /// Slash command showing AI writing prompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing prompts'**
+  String get aiSlashPrompts;
+
+  /// Slash command opening the AI writing panel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI writing…'**
+  String get aiSlashWrite;
+
+  /// Button to add an AI provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Add provider'**
+  String get aiStatusAddProvider;
+
+  /// Label of the default model on the status card.
+  ///
+  /// In en, this message translates to:
+  /// **'Default model'**
+  String get aiStatusDefaultModel;
+
+  /// Status card body when no provider is set up.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a provider and its API key, and AI features will appear in the editor, the reading page and the home screen. Content is only sent to the service you set up.'**
+  String get aiStatusNotConfiguredBody;
+
+  /// Status card title when no provider is set up.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI service yet'**
+  String get aiStatusNotConfiguredTitle;
+
+  /// Button that sends a tiny test request.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get aiStatusTest;
+
+  /// Result of a successful connection test.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected · {ms} ms'**
+  String aiStatusTestOk(int ms);
+
+  /// Shown while the test request runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get aiStatusTesting;
+
+  /// Snackbar after applying suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied AI suggestions'**
+  String get aiSuggestApplied;
+
+  /// Menu item suggesting tags and mood.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest tags & mood with AI'**
+  String get aiSuggestMeta;
+
+  /// Button letting AI pick a mood.
+  ///
+  /// In en, this message translates to:
+  /// **'AI pick'**
+  String get aiSuggestMoodButton;
+
+  /// Shown when there is no content for suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a little first so AI has something to go on.'**
+  String get aiSuggestNeedContent;
+
+  /// Chip creating a suggested new tag.
+  ///
+  /// In en, this message translates to:
+  /// **'New “{name}”'**
+  String aiSuggestNewTag(String name);
+
+  /// Shown when AI returns no usable suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions this time'**
+  String get aiSuggestNothing;
+
+  /// Header of AI tag suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'AI suggests'**
+  String get aiSuggestTagsHeader;
+
+  /// Menu item / button generating a title.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate title with AI'**
+  String get aiSuggestTitle;
+
+  /// Snackbar after AI fills the title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title filled in by AI'**
+  String get aiSuggestTitleApplied;
+
+  /// Shown while smart fill runs.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is thinking…'**
+  String get aiSuggesting;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get aiTaskChat;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing prompts'**
+  String get aiTaskPrompts;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps'**
+  String get aiTaskRecap;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get aiTaskReply;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart fill'**
+  String get aiTaskSuggest;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Small background tasks'**
+  String get aiTaskUtility;
+
+  /// Explanation of the utility task.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat titles, search plans and partial summaries of long recaps'**
+  String get aiTaskUtilitySubtitle;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe images'**
+  String get aiTaskVision;
+
+  /// AI task name.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing assistant'**
+  String get aiTaskWriting;
+
+  /// A number of times.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Off} =1{Once} other{{count} times}}'**
+  String aiTimes(int count);
+
+  /// Editor toolbar tool that opens the AI writing panel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI writing'**
+  String get aiToolbarLabel;
+
+  /// Button clearing usage records.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear usage'**
+  String get aiUsageClear;
+
+  /// Body of the clear-usage dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this device\'s statistics are cleared; the provider\'s billing isn\'t affected.'**
+  String get aiUsageClearBody;
+
+  /// Title of the clear-usage dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear usage records?'**
+  String get aiUsageClearTitle;
+
+  /// Shown when there is no usage.
+  ///
+  /// In en, this message translates to:
+  /// **'No usage recorded yet'**
+  String get aiUsageEmpty;
+
+  /// Number of failed requests.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} failed'**
+  String aiUsageFailures(int count);
+
+  /// Footer of the usage page.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts only requests sent from this device. Check the provider\'s billing for actual costs.'**
+  String get aiUsageFooter;
+
+  /// Total tokens in a month.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} tokens'**
+  String aiUsageMonthTotal(String tokens);
+
+  /// Number of requests.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request} other{{count} requests}}'**
+  String aiUsageRequests(int count);
+
+  /// Subtitle of the AI usage entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests and tokens sent from this device'**
+  String get aiUsageSubtitle;
+
+  /// Title of the AI usage page.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get aiUsageTitle;
+
+  /// Input and output tokens.
+  ///
+  /// In en, this message translates to:
+  /// **'In {input} · Out {output}'**
+  String aiUsageTokens(String input, String output);
+
+  /// Prompt variable: the entry date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get aiVariableDate;
+
+  /// Prompt variable: the whole entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole entry'**
+  String get aiVariableDiary;
+
+  /// Prompt variable: the mood.
+  ///
+  /// In en, this message translates to:
+  /// **'Mood'**
+  String get aiVariableMood;
+
+  /// Prompt variable: the selected text.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get aiVariableText;
+
+  /// Prompt variable: the title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get aiVariableTitle;
+
+  /// Photo size choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get aiVisionSizeLarge;
+
+  /// Photo size choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get aiVisionSizeMedium;
+
+  /// Photo size choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get aiVisionSizeSmall;
+
+  /// A number of words (characters for CJK), large numbers abbreviated (100K).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String aiWords(int count);
+
+  /// 背景与材质设置：开关：图片跟随所选来源，source 为来源页面名。
+  ///
+  /// In en, this message translates to:
+  /// **'Use the image from {source}'**
+  String appSurfaceFollowImage(String source);
+
+  /// 背景与材质设置：图片跟随的来源没有显示背景图片时的说明，source 为来源页面名。
+  ///
+  /// In en, this message translates to:
+  /// **'{source} has no background image right now'**
+  String appSurfaceFollowImageNone(String source);
+
+  /// 背景与材质设置：图片跟随来源时缩略图旁的说明，source 为来源页面名。
+  ///
+  /// In en, this message translates to:
+  /// **'Using the image from {source}'**
+  String appSurfaceFollowImageNote(String source);
+
+  /// 背景与材质设置：开关：参数整块跟随所选来源，source 为来源页面名。
+  ///
+  /// In en, this message translates to:
+  /// **'Use the parameters from {source}'**
+  String appSurfaceFollowParams(String source);
+
+  /// 背景与材质设置：参数跟随开关的说明。
+  ///
+  /// In en, this message translates to:
+  /// **'Focus, blur and veils follow together'**
+  String get appSurfaceFollowParamsHint;
+
+  /// 背景与材质设置：区域单独设置的图片背景里，图片与参数跟随哪个页面的设置行标题与面板标题。
+  ///
+  /// In en, this message translates to:
+  /// **'Follow from'**
+  String get appSurfaceFollowSource;
+
+  /// 背景与材质设置：跟随来源面板顶部的说明。
+  ///
+  /// In en, this message translates to:
+  /// **'When Image or Parameters below follow, they use what the chosen page currently shows and update when it changes.'**
+  String get appSurfaceFollowSourceHint;
+
+  /// 背景与材质设置：图片背景编辑器里“图片”分组的标题。
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get appSurfaceImageGroup;
+
+  /// 背景与材质设置：图片背景编辑器里“参数”（焦点、模糊、遮罩）分组的标题。
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get appSurfaceParamsGroup;
+
+  /// 背景与材质设置：跟随来源面板里会形成循环跟随而停用的选项的说明。
+  ///
+  /// In en, this message translates to:
+  /// **'Its own source leads back here'**
+  String get appSurfaceSourceLoop;
+
+  /// 背景与材质设置：跟随来源面板里每个选项的说明，kind 为该页面当前显示的背景类型名。
+  ///
+  /// In en, this message translates to:
+  /// **'Currently: {kind}'**
+  String appSurfaceSourceShows(String kind);
+
+  /// Automatic backup frequency: daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get cloudAutoBackupDaily;
+
+  /// Automatic backup frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get cloudAutoBackupIntervalTitle;
+
+  /// Automatic backup status: failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup failed at {time}: {reason}'**
+  String cloudAutoBackupLastFailed(String time, String reason);
+
+  /// Automatic backup status: too much new content.
+  ///
+  /// In en, this message translates to:
+  /// **'{time}: {size} is new. Please back up manually'**
+  String cloudAutoBackupLastNeedsManual(String time, String size);
+
+  /// Automatic backup status: unchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Last automatic backup: {time}, nothing changed'**
+  String cloudAutoBackupLastUnchanged(String time);
+
+  /// Automatic backup status: uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Last automatic backup: {time}, uploaded {size}'**
+  String cloudAutoBackupLastUploaded(String time, String size);
+
+  /// Automatic backup subtitle before the first incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up manually once before turning this on'**
+  String get cloudAutoBackupNeedsChain;
+
+  /// Automatic backup switch subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backs up quietly when you open or leave the app once it is due. If more than 50 MB is new, it waits for you to back up manually'**
+  String get cloudAutoBackupSubtitle;
+
+  /// Location list: auto backup failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto backup failed'**
+  String get cloudAutoBackupTileFailed;
+
+  /// Location list: auto backup waiting for a manual backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up manually'**
+  String get cloudAutoBackupTileNeedsManual;
+
+  /// Auto backup status on the location list.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto backup · {time}'**
+  String cloudAutoBackupTileOk(String time);
+
+  /// Automatic backup switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup'**
+  String get cloudAutoBackupTitle;
+
+  /// Automatic backup frequency: weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get cloudAutoBackupWeekly;
+
+  /// Primary button on a backup location: incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up'**
+  String get cloudBackupBackupNow;
+
+  /// Incremental backup: reading existing backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading backups on the drive…'**
+  String get cloudIncrementalBusyCheck;
+
+  /// Incremental backup: pruning old backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning up old backups…'**
+  String get cloudIncrementalBusyPrune;
+
+  /// Incremental backup: scanning local data.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for changes…'**
+  String get cloudIncrementalBusyScan;
+
+  /// Confirm button when continuing an existing incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get cloudIncrementalContinue;
+
+  /// Continue the existing incremental backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get cloudIncrementalContinueExisting;
+
+  /// Content of the delete-incremental-backup confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'The incremental backup from {time} will be deleted. Photos and media used only by it are removed from the drive too; other backups are not affected. This cannot be undone.'**
+  String cloudIncrementalDeleteContent(String time);
+
+  /// Title of the delete-incremental-backup confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this incremental backup?'**
+  String get cloudIncrementalDeleteTitle;
+
+  /// The snapshot file of an incremental backup is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot file missing; cannot be restored'**
+  String get cloudIncrementalEntryMissing;
+
+  /// Title of an incremental backup in the remote list.
+  ///
+  /// In en, this message translates to:
+  /// **'Incremental backup'**
+  String get cloudIncrementalEntryTitle;
+
+  /// A media file changed during the incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo or attachment changed during the backup. Please try again'**
+  String get cloudIncrementalErrorMediaChanged;
+
+  /// Incremental backup password is wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'The password does not open this incremental backup'**
+  String get cloudIncrementalErrorPassword;
+
+  /// Explanation when continuing an existing encrypted incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'There are encrypted incremental backups on this drive. Enter their password to continue them without re-uploading photos and media.'**
+  String get cloudIncrementalExistingEncryptedMessage;
+
+  /// Explanation when unencrypted incremental backups already exist.
+  ///
+  /// In en, this message translates to:
+  /// **'There are unencrypted incremental backups on this drive. Continuing uploads only what is new. To encrypt, start a new series instead (all photos and media will be uploaded again).'**
+  String get cloudIncrementalExistingPlainContent;
+
+  /// Title when unencrypted incremental backups already exist.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue the existing backups?'**
+  String get cloudIncrementalExistingPlainTitle;
+
+  /// Forget the remembered incremental backup password.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get cloudIncrementalForgetChain;
+
+  /// Content of the reset-password confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This device forgets the current incremental backup password and automatic backup pauses. Next time you back up, enter the original password to continue, or set a new one to start over (all photos and media will be uploaded again).'**
+  String get cloudIncrementalForgetContent;
+
+  /// Title of the reset-password confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the incremental backup password?'**
+  String get cloudIncrementalForgetTitle;
+
+  /// Shown after forgetting the incremental password.
+  ///
+  /// In en, this message translates to:
+  /// **'Incremental backup password forgotten'**
+  String get cloudIncrementalForgotten;
+
+  /// Keep all incremental backups.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get cloudIncrementalKeepAll;
+
+  /// Keep option for incremental backups.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String cloudIncrementalKeepCount(int count);
+
+  /// Explanation of the keep setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Older incremental backups are deleted automatically, along with photos and media used only by them'**
+  String get cloudIncrementalKeepSubtitle;
+
+  /// How many incremental backups to keep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get cloudIncrementalKeepTitle;
+
+  /// Explanation in the password dialog for the first incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'This password is remembered on this device and used for later and automatic backups. You will need it to restore on another device. Leave empty for no encryption.'**
+  String get cloudIncrementalNewPasswordMessage;
+
+  /// Explanation when the remembered incremental password no longer works.
+  ///
+  /// In en, this message translates to:
+  /// **'The password remembered on this device no longer opens the incremental backups on the drive; it may have been changed on another device. Reset it to enter the original password or start a new series.'**
+  String get cloudIncrementalRememberedMismatchContent;
+
+  /// Explanation in the password dialog when restoring an encrypted incremental backup.
+  ///
+  /// In en, this message translates to:
+  /// **'This incremental backup is encrypted. Enter the password set when it was made.'**
+  String get cloudIncrementalRestorePasswordMessage;
+
+  /// Wrong incremental password: try again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get cloudIncrementalRetry;
+
+  /// Explanation of the incremental backup group.
+  ///
+  /// In en, this message translates to:
+  /// **'“Back up” uploads only new photos and changed data; anything already on the drive is never uploaded again. Restoring on this device downloads only what is missing, saving your drive’s traffic quota.'**
+  String get cloudIncrementalSectionHint;
+
+  /// Title of the incremental backup group on a backup location.
+  ///
+  /// In en, this message translates to:
+  /// **'Incremental backup'**
+  String get cloudIncrementalSectionTitle;
+
+  /// Start a new series of incremental backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new series'**
+  String get cloudIncrementalStartNew;
+
+  /// Incremental backup: nothing changed, nothing uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing changed. The backup on the drive is up to date'**
+  String get cloudIncrementalUnchanged;
+
+  /// Incremental backup succeeded, with the uploaded size.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed up. Uploaded {size} this time'**
+  String cloudIncrementalUploaded(String size);
+
+  /// Explanation when the incremental backup password is wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'This password does not open the incremental backups on the drive. Try again, or start a new series of incremental backups (all photos and media will be uploaded again).'**
+  String get cloudIncrementalWrongPasswordContent;
+
+  /// Title when the password does not open the incremental backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get cloudIncrementalWrongPasswordTitle;
+
+  /// Photos from this day preview: tooltip of the selection circle when the item is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect'**
+  String get diaryDayPhotosDeselect;
+
+  /// Photos from this day: insert button with the number of selected items when the selection includes videos.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert {count}'**
+  String diaryDayPhotosInsertCountItems(int count);
+
+  /// Photos from this day: label and tooltip of the selection circle of an item already inserted.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get diaryDayPhotosInserted;
+
+  /// Photos from this day: screen reader hint for tapping a thumbnail to open the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get diaryDayPhotosPreview;
+
+  /// Photos from this day preview: shown when the large image cannot be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo can\'t be shown'**
+  String get diaryDayPhotosPreviewFailed;
+
+  /// Photos from this day: label and tooltip of the selection circle on a thumbnail and in the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get diaryDayPhotosSelect;
+
+  /// Photos from this day: number of selected items when the selection includes videos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String diaryDayPhotosSelectedItems(int count);
+
+  /// Photos from this day sheet title when that day has videos; date is the day.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos and videos from {date}'**
+  String diaryDayPhotosSheetTitleMedia(String date);
+
+  /// Backfill photo strip title when that day has both photos and videos.
+  ///
+  /// In en, this message translates to:
+  /// **'{photos, plural, =1{1 photo} other{{photos} photos}} and {videos, plural, =1{1 video} other{{videos} videos}} from this day'**
+  String diaryDayPhotosTitleMixed(int photos, int videos);
+
+  /// Backfill photo strip title when that day only has videos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 video} other{{count} videos}} from this day'**
+  String diaryDayPhotosTitleVideos(int count);
+
+  /// Photos from this day: note shown when only image access was granted (followed by an Allow access button).
+  ///
+  /// In en, this message translates to:
+  /// **'Videos from this day aren\'t available yet'**
+  String get diaryDayPhotosVideoAccess;
+
+  /// Photos from this day: screen reader label of a video already inserted.
+  ///
+  /// In en, this message translates to:
+  /// **'Video taken at {time}, {duration} long, added'**
+  String diaryDayPhotosVideoInsertedLabel(String time, String duration);
+
+  /// Photos from this day: screen reader label of a video; duration is m:ss.
+  ///
+  /// In en, this message translates to:
+  /// **'Video taken at {time}, {duration} long'**
+  String diaryDayPhotosVideoLabel(String time, String duration);
+
+  /// Shown when taking a photo or video fails because camera permission was denied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is off. Allow Jotsy to use the camera in system settings.'**
+  String get diaryMediaCameraPermissionDenied;
+
+  /// Shown when taking a photo or video fails because the device has no camera or camera app.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera is available on this device.'**
+  String get diaryMediaCameraUnavailable;
+
+  /// Editor toolbar image/video menu item: pick existing photos or videos with the system picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get diaryMediaFromLibrary;
+
+  /// Editor toolbar video menu item and slash command: record a video with the system camera and insert it.
+  ///
+  /// In en, this message translates to:
+  /// **'Record video'**
+  String get diaryMediaRecordVideo;
+
+  /// Editor toolbar image menu item and slash command: take a photo with the system camera and insert it.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get diaryMediaTakePhoto;
+
+  /// Diary preview style settings: switch: with a background image, the veil takes this diary's basis color.
+  ///
+  /// In en, this message translates to:
+  /// **'Tint the background veil'**
+  String get diaryPreviewStyleTintScrim;
+
+  /// Diary preview style settings: subtitle of Tint the background veil.
+  ///
+  /// In en, this message translates to:
+  /// **'With a background image, the veil takes each diary\'s basis color (such as its mood color); its strength still follows Background & Material'**
+  String get diaryPreviewStyleTintScrimHint;
+
+  /// Explore card name.
+  ///
+  /// In en, this message translates to:
+  /// **'AI insights'**
+  String get exploreModuleAi;
+
+  /// Explore card description.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest recap, and ask your diary'**
+  String get exploreModuleAiDesc;
+
+  /// Placeholder title in the diary body on desktop when an embedded image is a HEIC/HEIF/AVIF photo that the desktop decoder cannot read.
+  ///
+  /// In en, this message translates to:
+  /// **'HEIC photos can\'t be shown on this computer'**
+  String get imageHeifUnsupported;
+
+  /// Explains under imageHeifUnsupported how the photo gets fixed: the Android app converts it to JPEG on startup, then a sync brings it to the desktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Jotsy on your phone and it converts this photo to JPEG automatically. Sync again and it will show up here.'**
+  String get imageHeifUnsupportedHint;
+
+  /// Button on the desktop HEIC placeholder that opens the image file with the system's default app.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in another app'**
+  String get imageOpenInOtherApp;
+
+  /// Feature toggle title for the AI assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get settingsFeaturesAi;
+
+  /// Feature toggle subtitle for the AI assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Write, reflect, recap and chat with your own AI API'**
+  String get settingsFeaturesAiSubtitle;
 }
 
 class _AppLocalizationsDelegate

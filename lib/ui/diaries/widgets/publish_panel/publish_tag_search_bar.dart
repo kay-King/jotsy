@@ -4,6 +4,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/widgets/expressive_icon_swap.dart';
 import 'package:node_diary/ui/widgets/expressive_menu/expressive_menu.dart';
 import 'package:node_diary/ui/widgets/expressive_state_blend.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../models/tag_picker_sort.dart';
 import 'publish_panel_tile.dart';
@@ -105,6 +106,7 @@ class _SearchField extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
+                  contextMenuBuilder: appTextContextMenuBuilder,
                   controller: controller,
                   focusNode: focusNode,
                   maxLines: 1,

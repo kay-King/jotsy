@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/expressive_icon_swap.dart';
@@ -39,6 +40,7 @@ class _CloudBackupConfigFieldState extends State<CloudBackupConfigField> {
     final l10n = context.l10n;
     final obscured = widget.secret && _obscured;
     return TextField(
+      contextMenuBuilder: appTextContextMenuBuilder,
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: obscured,

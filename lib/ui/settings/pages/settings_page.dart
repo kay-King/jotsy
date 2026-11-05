@@ -9,6 +9,8 @@ import 'package:node_diary/ui/settings/pages/editor_settings_page.dart';
 import 'package:node_diary/ui/settings/pages/profile_page.dart';
 import 'package:node_diary/ui/settings/pages/tag_management_page.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../ai/pages/settings/ai_settings_page.dart';
+import '../../ai/providers/ai_providers.dart';
 import '../../home/widgets/home_bar/home_chrome_scope.dart';
 import '../../notebooks/pages/notebooks_page.dart';
 import '../../widgets/page_header.dart';
@@ -146,6 +148,28 @@ class SettingsPage extends StatelessWidget {
                               MaterialPageRoute<void>(
                                 builder: (BuildContext context) {
                                   return const NotebooksPage();
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                ),
+                // AI 助手：功能管理里打开后才出现（关闭时界面与改版前一致）。
+                Consumer(
+                  builder:
+                      (BuildContext context, WidgetRef ref, Widget? child) {
+                        final enabled = ref.watch(aiFeatureEnabledProvider);
+                        if (!enabled) return const SizedBox.shrink();
+                        return _SettingsDestination(
+                          icon: Icons.auto_awesome_outlined,
+                          title: l10n.aiSettingsTitle,
+                          subtitle: l10n.aiSettingsEntrySubtitle,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return const AiSettingsPage();
                                 },
                               ),
                             );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/widgets/color_palette_families.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 import '../../../app/theme/expressive_motion.dart';
 import '../../widgets/color_palette_picker.dart';
 
@@ -152,6 +153,7 @@ class _CreateTagDialogState extends State<_CreateTagDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: _nameController,
               autofocus: true,
               textInputAction: TextInputAction.done,

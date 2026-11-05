@@ -12,6 +12,7 @@ import 'package:node_diary/ui/diaries/controllers/simple_composer_controller.dar
 import 'package:node_diary/ui/diaries/models/new_diary_draft.dart';
 import 'package:node_diary/ui/diaries/widgets/simple_composer_image_grid.dart';
 import 'package:node_diary/ui/widgets/image_viewer_page.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 /// 简洁编辑器（fakeWechat 写日记样式）：纯文本 + 图片九宫格。
 ///
@@ -290,6 +291,7 @@ class _SimpleComposerPageState extends ConsumerState<SimpleComposerPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
+                contextMenuBuilder: appTextContextMenuBuilder,
                 controller: _textController,
                 maxLines: null,
                 minLines: 5,

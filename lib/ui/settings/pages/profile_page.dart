@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../l10n/app_localizations.dart';
@@ -177,6 +178,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.m),
                 child: TextField(
+                  contextMenuBuilder: appTextContextMenuBuilder,
                   controller: _nicknameController,
                   focusNode: _nicknameFocusNode,
                   maxLength: DiaryProfile.nicknameMaxLength,
@@ -199,6 +201,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.m),
                 child: TextField(
+                  contextMenuBuilder: appTextContextMenuBuilder,
                   controller: _bioController,
                   focusNode: _bioFocusNode,
                   maxLength: DiaryProfile.bioMaxLength,

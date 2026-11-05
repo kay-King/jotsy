@@ -18,6 +18,7 @@ import 'package:node_diary/ui/diaries/widgets/diary_code_block/diary_toolbar_cod
 import 'package:node_diary/ui/diaries/widgets/diary_color_panel/diary_color_panel.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_color_panel/diary_toolbar_color_button.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_toolbar_config.dart';
+import 'package:node_diary/ui/diaries/widgets/diary_toolbar_media_button.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_toolbar_more_button.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_toolbar_more_panel.dart';
 
@@ -65,8 +66,12 @@ class DiaryFloatingToolbar extends StatefulWidget {
     this.currentTimeFormatPattern,
     this.onRecordingPressed,
     this.recordingOpen = false,
+    // AI 写作面板：给出时工具栏出现 AI 按钮（见 DiaryToolbarItem.ai）。
+    this.onAiPressed,
+    this.aiOpen = false,
     this.mediaImportController,
     this.onMediaPressed,
+    this.onCameraPressed,
     this.onPanelExtentChanged,
     this.maxPanelExtent = double.infinity,
     this.savedColors = DiarySavedColors.empty,
@@ -79,11 +84,18 @@ class DiaryFloatingToolbar extends StatefulWidget {
   final String? currentTimeFormatPattern;
   final VoidCallback? onRecordingPressed;
   final bool recordingOpen;
+  final VoidCallback? onAiPressed;
+  final bool aiOpen;
 
   /// 媒体控制器由编辑页持有：系统选择器收起键盘时工具栏会卸载，导入不能跟着
   /// 取消。这里只读取它的进行中状态。
   final DiaryMediaImportController? mediaImportController;
   final void Function(DiaryMediaKind)? onMediaPressed;
+
+  /// 拍照（图片）/ 录像（视频）。给出时图片与视频按钮点按先弹出来源菜单
+  /// （[DiaryToolbarMediaSourceButton]）；null（不支持拍摄的平台）时按钮
+  /// 仍直接打开选择器。
+  final void Function(DiaryMediaKind)? onCameraPressed;
 
   /// 面板目标高度（含分隔线）变化时回调：展开为面板高度，收起或卸载后为 0。
   final ValueChanged<double>? onPanelExtentChanged;
@@ -162,6 +174,11 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
     if (widget.recordingOpen &&
         !oldWidget.recordingOpen &&
         _panel != _ToolbarPanel.none) {
+      _panel = _ToolbarPanel.none;
+      _panelController.value = 0;
+    }
+    // AI 面板打开时同样收起内层面板（与录音面板同一处理）。
+    if (widget.aiOpen && !oldWidget.aiOpen && _panel != _ToolbarPanel.none) {
       _panel = _ToolbarPanel.none;
       _panelController.value = 0;
     }
@@ -319,10 +336,12 @@ class _DiaryFloatingToolbarState extends State<DiaryFloatingToolbar>
   }
 
   Widget _buildContent(BuildContext context, double width) {
-    final items = filterEnabledDiaryToolbarOrder(
-      widget.order,
-      widget.hiddenItems,
-    );
+    // 没给 onAiPressed（AI 不可用 / 模板正文）时 AI 工具不显示：并入隐藏集
+    // （不新增 diaryToolbarUnavailableItems 机制）。
+    final hiddenItems = widget.onAiPressed == null
+        ? {...widget.hiddenItems, DiaryToolbarItem.ai}
+        : widget.hiddenItems;
+    final items = filterEnabledDiaryToolbarOrder(widget.order, hiddenItems);
     if (items.isEmpty) {
       _reportExtent(0, deferred: true);
       return const SizedBox.shrink();

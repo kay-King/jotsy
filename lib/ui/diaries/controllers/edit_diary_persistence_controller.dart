@@ -64,6 +64,11 @@ extension EditDiaryPersistenceFlow on EditDiaryController {
       _state._closeRecordingPanel();
       return;
     }
+    // AI 写作面板开着时返回先收起它（与录音面板同一顺序）。
+    if (_state._aiPanelOpen) {
+      closeAiPanel();
+      return;
+    }
     // 返回先退出面板子页或收起面板，再补存尚处于防抖窗口中的输入。
     if (_state._editPanelController.canPopInnerPage) {
       await _state._editPanelController.popInnerPage();

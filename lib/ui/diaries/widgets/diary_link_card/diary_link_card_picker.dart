@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../../core/services/app_service.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -113,6 +114,7 @@ class _DiaryLinkCardPickerState extends ConsumerState<_DiaryLinkCardPicker> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: TextField(
+                contextMenuBuilder: appTextContextMenuBuilder,
                 controller: _search,
                 autofocus: true,
                 decoration: InputDecoration(

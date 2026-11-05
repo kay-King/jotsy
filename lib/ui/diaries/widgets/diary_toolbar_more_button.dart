@@ -25,6 +25,7 @@ class DiaryToolbarMoreButton extends StatelessWidget {
     required this.expanded,
     required this.onPressed,
     this.recordingOpen = false,
+    this.aiOpen = false,
   });
 
   final EditorState editorState;
@@ -33,6 +34,7 @@ class DiaryToolbarMoreButton extends StatelessWidget {
   final List<DiaryToolbarItem> overflow;
   final bool expanded;
   final bool recordingOpen;
+  final bool aiOpen;
   final VoidCallback onPressed;
 
   bool _hasActiveOverflow() {
@@ -40,7 +42,8 @@ class DiaryToolbarMoreButton extends StatelessWidget {
     return overflow.any(
       (DiaryToolbarItem item) =>
           isDiaryToolbarItemActive(item, editorState) ||
-          (item == DiaryToolbarItem.recording && recordingOpen),
+          (item == DiaryToolbarItem.recording && recordingOpen) ||
+          (item == DiaryToolbarItem.ai && aiOpen),
     );
   }
 

@@ -28,19 +28,27 @@ import 'package:node_diary/ui/widgets/image_viewer_page.dart';
 ///
 /// [readOnly]（发布页预览等只读正文）时只有查看、复制、保存。图片块在点按时
 /// 传入 [node]，菜单期间正文不会被改动。
+///
+/// [onDescribeImage] 给出时多一项「AI 描述图片」：回调返回的描述以一次事务
+/// 插在图片块后面（一步撤销）。回调由调用方接 AI 流程；图片点按菜单本身在
+/// fork 里尚未接线（见 diary_image_embed_builder.dart），此项随菜单一起
+/// 待接线。
 Future<void> showDiaryImageOptions(
   BuildContext context, {
   required EditorState editorState,
   required Node node,
   required String source,
   required bool readOnly,
+  Future<String?> Function(String source)? onDescribeImage,
 }) async {
   final l10n = context.l10n;
   final style = diaryImageStyleOf(node);
   final action = await showDialog<_ImageAction>(
     context: context,
-    builder: (BuildContext dialogContext) =>
-        _DiaryImageOptionsDialog(readOnly: readOnly),
+    builder: (BuildContext dialogContext) => _DiaryImageOptionsDialog(
+      readOnly: readOnly,
+      describeAvailable: onDescribeImage != null,
+    ),
   );
   if (action == null || !context.mounted) {
     return;
@@ -70,6 +78,21 @@ Future<void> showDiaryImageOptions(
           ),
         );
       }
+    case _ImageAction.describe:
+      final describe = onDescribeImage;
+      if (describe == null) return;
+      final description = await describe(source);
+      if (description == null || description.trim().isEmpty) return;
+      final transaction = editorState.transaction
+        ..insertNodes(node.path.next, [paragraphNode(text: description.trim())])
+        ..afterSelection = Selection.collapsed(
+          Position(path: node.path.next, offset: description.trim().length),
+        );
+      await editorState.apply(
+        transaction,
+        skipHistoryDebounce: true,
+        withUpdateSelection: true,
+      );
     case _ImageAction.delete:
       await DiaryImageEmbedActions.remove(editorState, node: node);
   }
@@ -113,12 +136,16 @@ void _showResizer(
   );
 }
 
-enum _ImageAction { view, resize, copy, save, delete }
+enum _ImageAction { view, resize, copy, save, describe, delete }
 
 class _DiaryImageOptionsDialog extends StatelessWidget {
-  const _DiaryImageOptionsDialog({required this.readOnly});
+  const _DiaryImageOptionsDialog({
+    required this.readOnly,
+    this.describeAvailable = false,
+  });
 
   final bool readOnly;
+  final bool describeAvailable;
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +190,12 @@ class _DiaryImageOptionsDialog extends StatelessWidget {
           FontAwesomeIcons.download,
           l10n.imageViewerSaveToGallery,
         ),
+        if (!readOnly && describeAvailable)
+          item(
+            _ImageAction.describe,
+            FontAwesomeIcons.wandMagicSparkles,
+            l10n.aiImageDescribe,
+          ),
         if (!readOnly)
           item(
             _ImageAction.delete,

@@ -5,6 +5,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/widgets/app_top_bar.dart';
 import 'package:node_diary/ui/widgets/color_swatch_button.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 import '../models/mood_palette.dart';
 import '../widgets/mood_color_picker.dart';
 import '../widgets/settings_card_group.dart';
@@ -207,6 +208,7 @@ class _MoodOptionField extends StatelessWidget {
           SizedBox(
             width: 72,
             child: TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: controller,
               enabled: enabled,
               textAlign: TextAlign.center,

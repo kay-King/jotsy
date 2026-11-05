@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/app_service.dart';
+import '../../../../core/services/diary_media_storage_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../notebooks/providers/notebook_providers.dart';
 import '../../../notebooks/viewmodels/notebook_view.dart';
@@ -32,6 +33,7 @@ class DiaryMentionPopup extends ConsumerStatefulWidget {
     required this.editorState,
     this.excludeDiaryId,
     this.editorFocusNode,
+    this.onCameraPressed,
   });
 
   final EditorState editorState;
@@ -41,6 +43,11 @@ class DiaryMentionPopup extends ConsumerStatefulWidget {
 
   /// 选中后把焦点还给正文。
   final FocusNode? editorFocusNode;
+
+  /// `/` 菜单里的“拍照 / 录像”（图片 / 视频）；null 时不出现（不支持拍摄
+  /// 的平台、只读正文）。编辑页按平台门控给回调，走编辑页的拍摄插入链路，
+  /// 这里不直接建控制器。
+  final void Function(DiaryMediaKind)? onCameraPressed;
 
   @override
   ConsumerState<DiaryMentionPopup> createState() => DiaryMentionPopupState();
@@ -231,6 +238,34 @@ class DiaryMentionPopupState extends ConsumerState<DiaryMentionPopup> {
     widget.editorFocusNode?.requestFocus();
   }
 
+  /// `/` 菜单里的“拍照 / 录像”：先删掉 `/query`（与 [_pickLinkCard] 同样
+  /// 的做法，免得斜杠留在正文里），再走编辑页给的拍摄回调；焦点还给正文，
+  /// 拍摄链路在光标处插入。
+  Future<void> _pickCamera(DiaryMediaKind kind) async {
+    final trigger = _trigger;
+    final editorState = widget.editorState;
+    final selection = editorState.selection;
+    final onCameraPressed = widget.onCameraPressed;
+    _closeMenu();
+    if (trigger == null ||
+        selection == null ||
+        !selection.isCollapsed ||
+        onCameraPressed == null) {
+      return;
+    }
+    final node = editorState.getNodeAtPath(selection.start.path);
+    if (node?.delta == null) return;
+    final deleteLength = trigger.query.length + 1;
+    final length = node!.delta!.length;
+    if (trigger.triggerOffset + deleteLength <= length) {
+      final transaction = editorState.transaction;
+      transaction.deleteText(node, trigger.triggerOffset, deleteLength);
+      await editorState.apply(transaction);
+    }
+    onCameraPressed(kind);
+    widget.editorFocusNode?.requestFocus();
+  }
+
   List<Widget> _menuChildren(AppLocalizations l10n) {
     final trigger = _trigger;
     if (trigger == null) return const [];
@@ -241,6 +276,18 @@ class DiaryMentionPopupState extends ConsumerState<DiaryMentionPopup> {
           onPressed: () => unawaited(_pickLinkCard()),
           child: Text(l10n.linkCardSlashItem),
         ),
+        if (widget.onCameraPressed != null) ...[
+          ExpressiveMenuItem(
+            leadingIcon: const FaIcon(FontAwesomeIcons.camera),
+            onPressed: () => unawaited(_pickCamera(DiaryMediaKind.image)),
+            child: Text(l10n.diaryMediaTakePhoto),
+          ),
+          ExpressiveMenuItem(
+            leadingIcon: const FaIcon(FontAwesomeIcons.video),
+            onPressed: () => unawaited(_pickCamera(DiaryMediaKind.video)),
+            child: Text(l10n.diaryMediaRecordVideo),
+          ),
+        ],
       ];
     }
     if (_candidates.isEmpty) {

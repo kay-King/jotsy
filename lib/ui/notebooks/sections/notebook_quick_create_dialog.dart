@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
@@ -97,6 +98,7 @@ class _QuickCreateNotebookDialogState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: _name,
               autofocus: true,
               maxLength: NotebookEditorController.maxNameLength,

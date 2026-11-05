@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
@@ -173,6 +174,7 @@ class _AppUpdateSourceSheetState extends State<AppUpdateSourceSheet> {
                             0,
                           ),
                           child: TextField(
+                            contextMenuBuilder: appTextContextMenuBuilder,
                             controller: _customController,
                             autofocus: _customController.text.isEmpty,
                             keyboardType: TextInputType.url,

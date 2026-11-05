@@ -1,7 +1,8 @@
 // 功能管理开关（设置 → 功能管理）。
 //
 // 职责：描述用户可整体关闭的功能——桌面 Tab、时间线 Tab、日记本、纪念日、
-// 日记模板、时间胶囊、侧滑归档——是否开启；默认全部开启。关闭只是在各处隐藏入口与
+// 日记模板、时间胶囊、侧滑归档、AI 助手——是否开启；AI 助手默认关闭（让
+// 初始界面简洁，AI 还需要用户自己的接口），其余默认开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
 //
 // 探索与日历已经并进桌面页（首页），不再占底栏 Tab，这里也不再有
@@ -23,9 +24,10 @@ class AppFeatures {
     this.templates = true,
     this.timeCapsules = true,
     this.swipeArchive = true,
+    this.ai = false,
   });
 
-  /// 全部开启：从未设置、读不出或恢复默认时都是它。
+  /// 默认开关（AI 助手关闭，其余开启）：从未设置、读不出或恢复默认时都是它。
   static const AppFeatures defaults = AppFeatures();
 
   /// 桌面 Tab。
@@ -50,6 +52,12 @@ class AppFeatures {
   /// 手势，桌面用右键菜单）。关闭后仍可长按多选或在预览页里归档。
   final bool swipeArchive;
 
+  /// AI 助手：用用户自己配置的 AI 服务接口（OpenAI 兼容 / Claude / Gemini）
+  /// 写作、回应、回顾与对话。默认关闭；开启后还要在设置 → AI 助手里配好
+  /// 服务商，各处入口才会出现（见 `aiAvailableProvider`）。关闭只隐藏入口，
+  /// AI 记录与服务商配置都保留。
+  final bool ai;
+
   /// 纪念日是否可用：只看自己的开关（以前依附日历，日历并进首页后
   /// 不再有日历开关）。界面一律读这个 getter，不直接读 [anniversaries]。
   bool get anniversariesEnabled => anniversaries;
@@ -61,6 +69,7 @@ class AppFeatures {
   static const _keyTemplates = 'templates';
   static const _keyTimeCapsules = 'timeCapsules';
   static const _keySwipeArchive = 'swipeArchive';
+  static const _keyAi = 'ai';
 
   /// 解析设置原文。空值、坏 JSON 或不是对象时回到 [defaults]；每个字段
   /// 单独读取，类型不对只让这一项回到默认，认不出的键忽略——这样新旧版本
@@ -88,6 +97,7 @@ class AppFeatures {
       templates: read(_keyTemplates, defaults.templates),
       timeCapsules: read(_keyTimeCapsules, defaults.timeCapsules),
       swipeArchive: read(_keySwipeArchive, defaults.swipeArchive),
+      ai: read(_keyAi, defaults.ai),
     );
   }
 
@@ -103,6 +113,7 @@ class AppFeatures {
       _keyTemplates: templates,
       _keyTimeCapsules: timeCapsules,
       _keySwipeArchive: swipeArchive,
+      _keyAi: ai,
     });
   }
 
@@ -114,6 +125,7 @@ class AppFeatures {
     bool? templates,
     bool? timeCapsules,
     bool? swipeArchive,
+    bool? ai,
   }) {
     return AppFeatures(
       desktop: desktop ?? this.desktop,
@@ -123,6 +135,7 @@ class AppFeatures {
       templates: templates ?? this.templates,
       timeCapsules: timeCapsules ?? this.timeCapsules,
       swipeArchive: swipeArchive ?? this.swipeArchive,
+      ai: ai ?? this.ai,
     );
   }
 
@@ -135,7 +148,8 @@ class AppFeatures {
       other.anniversaries == anniversaries &&
       other.templates == templates &&
       other.timeCapsules == timeCapsules &&
-      other.swipeArchive == swipeArchive;
+      other.swipeArchive == swipeArchive &&
+      other.ai == ai;
 
   @override
   int get hashCode => Object.hash(
@@ -146,6 +160,7 @@ class AppFeatures {
     templates,
     timeCapsules,
     swipeArchive,
+    ai,
   );
 
   @override
@@ -153,5 +168,5 @@ class AppFeatures {
       'AppFeatures(desktop: $desktop, timeline: $timeline, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
       'templates: $templates, timeCapsules: $timeCapsules, '
-      'swipeArchive: $swipeArchive)';
+      'swipeArchive: $swipeArchive, ai: $ai)';
 }

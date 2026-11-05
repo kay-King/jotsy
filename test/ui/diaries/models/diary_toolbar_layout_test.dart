@@ -103,7 +103,10 @@ void main() {
     });
 
     test('counts hidden tools above the line without giving them a cell', () {
-      final order = kDefaultDiaryToolbarOrder;
+      // AI 写作只在 AI 可用时排进工具栏，这里按没有它的默认顺序排布。
+      final order = kDefaultDiaryToolbarOrder
+          .where((item) => item != DiaryToolbarItem.ai)
+          .toList();
       // 隐藏第 2 个：线上方仍是 6 个启用工具，分界下标多算上被隐藏的那一项。
       final hidden = <DiaryToolbarItem>{order[1]};
 

@@ -8,6 +8,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
 import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import 'package:node_diary/ui/widgets/app_top_bar.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 import '../../widgets/expressive_reorder_proxy.dart';
 import '../../widgets/triple_bar_drag_handle.dart';
 import '../../widgets/unsaved_changes_dialog.dart';
@@ -23,9 +24,18 @@ import 'diary_code_block_style_page.dart';
 /// 工具常驻在工具栏上，线下方的收进「更多」面板。分界线是列表中的一行（不可
 /// 拖动），拖放下标按含分界线的可见列表计算。
 class DiaryToolbarOrderPage extends StatefulWidget {
-  const DiaryToolbarOrderPage({super.key, required this.settingsService});
+  const DiaryToolbarOrderPage({
+    super.key,
+    required this.settingsService,
+    this.aiAvailable = false,
+  });
 
   final SettingsService settingsService;
+
+  /// AI 写作可用（AI 助手可用且写作模块开启）：为 false 时“AI 写作”工具
+  /// 不列出（与编辑页工具栏一致）；仍保存在 [_order] 里，恢复可用时按原
+  /// 位置出现。
+  final bool aiAvailable;
 
   @override
   State<DiaryToolbarOrderPage> createState() => _DiaryToolbarOrderPageState();
@@ -65,6 +75,13 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
       encodeDiaryToolbarHiddenItems(_hiddenItems) != _savedHiddenItemsRaw ||
       _currentTimeFormatPattern != _savedTimeFormatPattern;
 
+  /// 列表里显示的顺序：AI 不可用时去掉 AI 写作项（仍保存在 [_order] 里）。
+  List<DiaryToolbarItem> get _shownOrder => widget.aiAvailable
+      ? _order
+      : _order
+            .where((item) => item != DiaryToolbarItem.ai)
+            .toList(growable: false);
+
   /// 返回键与标题栏返回统一入口：有未保存修改时先确认，避免拖拽排序、
   /// 启用开关与时间格式的调整被静默丢弃。
   Future<void> _attemptExit() async {
@@ -99,8 +116,10 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
     required int? boundary,
     required double toolbarWidth,
   }) {
+    // 拖拽在显示顺序上操作；AI 不可用时藏起的 ai 项按原下标拼回 [_order]。
+    final aiIndex = _order.indexOf(DiaryToolbarItem.ai);
     // null 占位代表分界线。
-    final rows = <DiaryToolbarItem?>[..._order];
+    final rows = <DiaryToolbarItem?>[..._shownOrder];
     if (boundary != null) {
       rows.insert(boundary, null);
     }
@@ -111,17 +130,19 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
     rows.insert(newIndex, moved);
     final reordered = rows.whereType<DiaryToolbarItem>().toList();
     final dividerIndex = rows.indexOf(null);
-    setState(() {
-      _order = dividerIndex < 0
-          ? reordered
-          : keepDiaryToolbarItemOnSide(
-              reordered,
-              moved: moved,
-              pinned: rows.indexOf(moved) < dividerIndex,
-              hiddenItems: _hiddenItems,
-              width: toolbarWidth,
-            );
-    });
+    final next = dividerIndex < 0
+        ? reordered
+        : keepDiaryToolbarItemOnSide(
+            reordered,
+            moved: moved,
+            pinned: rows.indexOf(moved) < dividerIndex,
+            hiddenItems: _hiddenItems,
+            width: toolbarWidth,
+          );
+    if (aiIndex >= 0 && !next.contains(DiaryToolbarItem.ai)) {
+      next.insert(aiIndex.clamp(0, next.length), DiaryToolbarItem.ai);
+    }
+    setState(() => _order = next);
   }
 
   void _handleToggleEnabled(DiaryToolbarItem item, bool? enabled) {
@@ -256,7 +277,7 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
     final toolbarWidth =
         MediaQuery.sizeOf(context).width - 2 * kDiaryFloatingToolbarInset;
     final boundary = diaryToolbarOverflowBoundary(
-      _order,
+      _shownOrder,
       _hiddenItems,
       width: toolbarWidth,
     );
@@ -307,7 +328,7 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   buildDefaultDragHandles: false,
                   proxyDecorator: expressiveReorderProxyDecorator,
-                  itemCount: _order.length + (boundary == null ? 0 : 1),
+                  itemCount: _shownOrder.length + (boundary == null ? 0 : 1),
                   // 拖拽手柄立即拖动、不经过长按，系统不会反馈；拿起时补一次触觉。
                   onReorderStart: (_) =>
                       unawaited(HapticFeedback.mediumImpact()),
@@ -324,7 +345,7 @@ class _DiaryToolbarOrderPageState extends State<DiaryToolbarOrderPage> {
                       );
                     }
                     final item =
-                        _order[boundary != null && index > boundary
+                        _shownOrder[boundary != null && index > boundary
                             ? index - 1
                             : index];
                     final enabled = !_hiddenItems.contains(item);
@@ -460,6 +481,7 @@ class _CurrentTimeFormatDialogState extends State<_CurrentTimeFormatDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           TextField(
+            contextMenuBuilder: appTextContextMenuBuilder,
             controller: _controller,
             autofocus: true,
             decoration: InputDecoration(

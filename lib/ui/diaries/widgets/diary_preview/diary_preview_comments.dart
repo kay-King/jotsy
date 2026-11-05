@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/services/app_service.dart';
@@ -218,6 +219,7 @@ class _DiaryPreviewCommentsSectionState
             children: <Widget>[
               Expanded(
                 child: TextField(
+                  contextMenuBuilder: appTextContextMenuBuilder,
                   key: const ValueKey<String>('diary-comment-input'),
                   controller: _controller,
                   minLines: 1,
@@ -345,6 +347,7 @@ class _EditCommentDialogState extends State<_EditCommentDialog> {
     return AlertDialog(
       title: Text(l10n.diaryCommentsEdit),
       content: TextField(
+        contextMenuBuilder: appTextContextMenuBuilder,
         controller: _controller,
         autofocus: true,
         minLines: 1,

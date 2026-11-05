@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
@@ -193,6 +194,7 @@ class _AnniversaryEditPageState extends ConsumerState<AnniversaryEditPage> {
           children: <Widget>[
             CalendarOptionsFieldLabel(text: l10n.anniversaryFieldName),
             TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: _title,
               focusNode: _titleFocus,
               maxLength: AnniversaryDraft.maxTitleLength,
@@ -260,6 +262,7 @@ class _AnniversaryEditPageState extends ConsumerState<AnniversaryEditPage> {
             const SizedBox(height: AppSpacing.xl),
             CalendarOptionsFieldLabel(text: l10n.anniversaryFieldNote),
             TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: _note,
               maxLength: AnniversaryDraft.maxNoteLength,
               minLines: 2,

@@ -149,7 +149,8 @@ void main() {
         final version = await migrated
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 16);
+        // v14 库迁移后停在最新版 v17。
+        expect(version.read<int>('user_version'), 17);
       } finally {
         await migrated.close();
       }

@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import '../../../ai/controllers/ai_reply_flow.dart';
+import '../../../ai/models/ai_preference_parts.dart';
+import '../../../ai/providers/ai_providers.dart';
+import '../../../ai/providers/ai_records_providers.dart';
+
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -296,6 +301,26 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
   }
 
   /// 已拿到日记数据时的完整页面（首查返回前的入口数据与查询结果共用）。
+  /// “AI 回应”区与“更多 → AI 回应”是否出现：AI 可用且回应模块开启、日记
+  /// 不在回收站、私密日记只在用户允许时。分享长图期间回应区不显示（由
+  /// [_resolveAiReplies] 另外判断），“更多”里照常有。
+  bool _aiReplyAvailable(Diary diary) {
+    if (diary.isDeleted) return false;
+    if (!ref.watch(aiModuleAvailableProvider(AiModule.reply))) return false;
+    if (ref.watch(
+      aiPreferencesProvider.select((p) => p.privacy.allowPrivate),
+    )) {
+      return true;
+    }
+    final private = ref.watch(aiPrivateDiaryIdsProvider).value;
+    return private != null && !private.contains(widget.diaryId);
+  }
+
+  /// 分享长图期间（`_export.staticCover` 为 true，见
+  /// DiaryPreviewExportController）回应区不显示，避免截进长图。
+  String? _resolveAiReplies(Diary diary) =>
+      _aiReplyAvailable(diary) && !_export.staticCover ? widget.diaryId : null;
+
   Widget _buildDetailPage(DiaryWithTags detail) {
     _hadLoadedData = true;
     final capsuleState = TimeCapsuleState.fromFields(
@@ -360,6 +385,8 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
               : null,
           onOpenDiary: widget.onOpenDiary,
           onOpenImage: _openImageViewer,
+          aiRepliesFor: _resolveAiReplies(detail.diary),
+          onAiContinueChat: null,
           actions: DiaryPreviewActions(
             onOpenTypography: () => showDiaryTypographySheet(context),
             onEdit: _openEditor,
@@ -378,6 +405,9 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
               background: resolved.background,
               onDelete: _deleteDiary,
               notebooks: notebooks,
+              onAiReply: _aiReplyAvailable(detail.diary)
+                  ? () => requestAiReply(context, ref, diaryId: widget.diaryId)
+                  : null,
             ),
           ),
         ),

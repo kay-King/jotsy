@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/expressive_motion.dart';
@@ -60,6 +61,7 @@ class _ChapterTitleDialogState extends State<_ChapterTitleDialog> {
       content: SizedBox(
         width: 360,
         child: TextField(
+          contextMenuBuilder: appTextContextMenuBuilder,
           controller: _title,
           autofocus: true,
           maxLength: NotebookChapter.maxTitleLength,

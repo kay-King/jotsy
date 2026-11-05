@@ -72,6 +72,7 @@ class SettingsService {
     required String? diaryTemplatePrefsRaw,
     required String? diarySavedColorsRaw,
     required String? appFeaturesRaw,
+    required String? aiPrefsRaw,
     required String profileNickname,
     required String? profileAvatarPath,
     required String profileBio,
@@ -127,6 +128,7 @@ class SettingsService {
          diarySavedColorsRaw,
        ),
        appFeaturesRawNotifier = ValueNotifier<String?>(appFeaturesRaw),
+       aiPrefsRawNotifier = ValueNotifier<String?>(aiPrefsRaw),
        profileNicknameNotifier = ValueNotifier<String>(profileNickname),
        profileAvatarPathNotifier = ValueNotifier<String?>(profileAvatarPath),
        profileBioNotifier = ValueNotifier<String>(profileBio),
@@ -198,6 +200,12 @@ class SettingsService {
   /// 回滚）时立即重建。
   final ValueNotifier<String?> appFeaturesRawNotifier;
 
+  /// AI 助手的偏好（单个 JSON 字符串：各模块开关、人设、写作指令、关于我、
+  /// 输出、隐私、回顾与对话的设置）；解析与默认值由 `AiPreferences` 负责，
+  /// 服务层只保存原文。**不含任何密钥**：服务商与 API 密钥只在本机的
+  /// `AiProviderStore`，所以这一项可以随备份导出与“同步设置”同步。
+  final ValueNotifier<String?> aiPrefsRawNotifier;
+
   /// 时间线个人资料：昵称（空字符串表示未设置，展示时回退为“我”）与
   /// 头像文件路径（null 表示未设置，展示昵称首字）。头像文件只由
   /// ProfileAvatarStorageService 写进私有目录；备份只带路径字符串，文件
@@ -258,6 +266,7 @@ class SettingsService {
   static const _keyDiaryShareOptions = 'app.settings.diary_share_options';
   static const _keyDiaryExportOptions = 'app.settings.diary_export_options';
   static const _keyAppFeatures = 'app.settings.app_features';
+  static const _keyAiPrefs = 'app.settings.ai_prefs';
 
   static const _keyTagOrder = 'app.settings.tag_order';
   static const _keyTagPickerSort = 'app.settings.tag_picker_sort';
@@ -326,6 +335,7 @@ class SettingsService {
     final storedDiaryTemplatePrefs = prefs.get(_keyDiaryTemplatePrefs);
     final storedDiarySavedColors = prefs.get(_keyDiarySavedColors);
     final storedAppFeatures = prefs.get(_keyAppFeatures);
+    final storedAiPrefs = prefs.get(_keyAiPrefs);
     return SettingsService._(
       prefs: prefs,
       mode: mode,
@@ -371,6 +381,7 @@ class SettingsService {
           ? storedDiarySavedColors
           : null,
       appFeaturesRaw: storedAppFeatures is String ? storedAppFeatures : null,
+      aiPrefsRaw: storedAiPrefs is String ? storedAiPrefs : null,
       profileNickname: prefs.getString(_keyProfileNickname) ?? '',
       profileAvatarPath: prefs.getString(_keyProfileAvatarPath),
       profileBio: prefs.getString(_keyProfileBio) ?? '',
@@ -463,6 +474,7 @@ class SettingsService {
 
   String? get diarySavedColorsRaw => diarySavedColorsRawNotifier.value;
   String? get appFeaturesRaw => appFeaturesRawNotifier.value;
+  String? get aiPrefsRaw => aiPrefsRawNotifier.value;
 
   /// 时间线个人资料：昵称原文（空表示未设置）与头像文件路径（null 表示
   /// 未设置）。展示层负责回退（昵称 → “我”，头像 → 昵称首字）。
@@ -774,6 +786,18 @@ class SettingsService {
     }
     appFeaturesRawNotifier.value = normalized;
     await _writePreference(_prefs.setString(_keyAppFeatures, normalized));
+  }
+
+  /// 保存 AI 助手偏好；空值移除该键，回到默认。
+  Future<void> setAiPrefsRaw(String? value) async {
+    final normalized = value?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      aiPrefsRawNotifier.value = null;
+      await _writePreference(_prefs.remove(_keyAiPrefs));
+      return;
+    }
+    aiPrefsRawNotifier.value = normalized;
+    await _writePreference(_prefs.setString(_keyAiPrefs, normalized));
   }
 
   /// 保存颜色面板的“我的颜色”；空值移除该键（什么都没存）。

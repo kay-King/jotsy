@@ -188,6 +188,23 @@ ADD COLUMN capsule_locked_at INTEGER NULL
     await migrator.createIndex(idxDiaryCommentsDiaryId);
   }
 
+  /// v17 新增 AI 助手的对话、消息与结果表，与留言表同理：表已存在（降级
+  /// 后再升级）时保留其中的记录；索引先删再建，保证与生成的 schema 一致。
+  Future<void> _migrateAddAiTables(Migrator migrator) async {
+    await _createTableIfMissing(migrator, aiConversations);
+    await _createTableIfMissing(migrator, aiMessages);
+    await _createTableIfMissing(migrator, aiResults);
+    for (final index in <Index>[
+      idxAiConversationsUpdated,
+      idxAiMessagesConversation,
+      idxAiResultsDiary,
+      idxAiResultsKind,
+    ]) {
+      await migrator.drop(index);
+      await migrator.createIndex(index);
+    }
+  }
+
   /// v16 补齐这天的心情表（上游 v14 的内容）。
   ///
   /// 版本号与上游错位：本地 v14 是留言表（上游 v16 才有），本地 v15 已有

@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/core/services/diary_font_storage_service.dart';
 import 'package:node_diary/core/services/settings_service.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/ai/models/ai_preference_parts.dart';
+import 'package:node_diary/ui/ai/providers/ai_providers.dart';
 import 'package:node_diary/ui/diaries/providers/diary_typography_provider.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_font_choices.dart';
 import 'package:node_diary/ui/diaries/widgets/diary_mobile_toolbar.dart';
@@ -52,9 +54,15 @@ class SettingsEditorSection extends ConsumerWidget {
                     final hiddenItems = decodeDiaryToolbarHiddenItems(
                       toolbarHiddenItemsRaw,
                     );
+                    // AI 写作不可用时预览里不显示它（与编辑页工具栏一致）。
+                    final aiWriting = ref.watch(
+                      aiModuleAvailableProvider(AiModule.writing),
+                    );
                     final enabledOrder = filterEnabledDiaryToolbarOrder(
                       order,
-                      hiddenItems,
+                      aiWriting
+                          ? hiddenItems
+                          : {...hiddenItems, DiaryToolbarItem.ai},
                     );
                     final preview = enabledOrder
                         .take(4)
@@ -113,6 +121,7 @@ class SettingsEditorSection extends ConsumerWidget {
                                               return DiaryToolbarOrderPage(
                                                 settingsService:
                                                     settingsService,
+                                                aiAvailable: aiWriting,
                                               );
                                             },
                                           ),

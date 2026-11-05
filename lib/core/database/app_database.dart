@@ -40,6 +40,9 @@ part 'app_database_notebook_entry_ops.dart';
 part 'app_database_notebook_stats_ops.dart';
 part 'app_database_day_mood_schema.dart';
 part 'app_database_day_mood_ops.dart';
+part 'app_database_ai_schema.dart';
+part 'app_database_ai_ops.dart';
+part 'app_database_ai_context_ops.dart';
 
 @DriftDatabase(
   tables: <Type>[
@@ -53,6 +56,9 @@ part 'app_database_day_mood_ops.dart';
     DiaryNotebooks,
     DiaryComments,
     DayMoods,
+    AiConversations,
+    AiMessages,
+    AiResults,
   ],
 )
 class AppDatabase extends _$AppDatabase
@@ -71,6 +77,8 @@ class AppDatabase extends _$AppDatabase
         _AppDatabaseNotebookStatsOps,
         _AppDatabaseDiaryCommentOps,
         _AppDatabaseDayMoodOps,
+        _AppDatabaseAiOps,
+        _AppDatabaseAiContextOps,
         _AppDatabaseMigrations {
   AppDatabase() : super(_openConnection());
 
@@ -85,7 +93,7 @@ class AppDatabase extends _$AppDatabase
   static String newBusinessId() => _newBusinessUuid();
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -125,6 +133,11 @@ class AppDatabase extends _$AppDatabase
       // 本地 v14 的留言表与 v15 的 parent_id 列已存在，无需重复处理。
       if (from < 16) {
         await _migrateAddDayMoods(m);
+      }
+      // v17 AI 助手的三张表只存日记的业务 id、不改日记表，同样排在 v1
+      // 分支之前。
+      if (from < 17) {
+        await _migrateAddAiTables(m);
       }
       if (from < 2) {
         await _migrateDiariesAddBusinessId();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/theme/app_spacing.dart';
@@ -161,6 +162,7 @@ class _DeviceCodeDialogState extends State<_DeviceCodeDialog> {
                   Semantics(
                     label: l10n.cloudBackupDeviceCodeLabel,
                     child: SelectableText(
+                      contextMenuBuilder: appTextContextMenuBuilder,
                       authorization.userCode,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineMedium?.copyWith(
@@ -299,6 +301,7 @@ class _CodePasteDialogState extends State<_CodePasteDialog> {
             ),
             const SizedBox(height: AppSpacing.m),
             TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: _code,
               enabled: !_exchanging,
               autocorrect: false,

@@ -1,5 +1,5 @@
 // 设置 → 功能管理：整体开关日历、探索两个页面（纪念日随日历放在其下），
-// 以及日记本、日记模板、时间胶囊、侧滑归档几项功能。侧滑归档只在手机上有
+// 以及日记本、日记模板、时间胶囊、AI 助手、侧滑归档几项功能。侧滑归档只在手机上有
 // （桌面卡片没有左滑，用右键菜单），桌面不显示这一行。
 //
 // 输入：`appFeaturesProvider`（当前开关）、`settingsServiceProvider`
@@ -129,6 +129,12 @@ class AppFeaturesPage extends ConsumerWidget {
                 subtitle: l10n.settingsFeaturesTimeCapsulesSubtitle,
                 value: features.timeCapsules,
                 onChanged: writer((v) => features.copyWith(timeCapsules: v)),
+              ),
+              SettingsSwitchTile(
+                title: l10n.settingsFeaturesAi,
+                subtitle: l10n.settingsFeaturesAiSubtitle,
+                value: features.ai,
+                onChanged: writer((v) => features.copyWith(ai: v)),
               ),
               if (!AppPlatform.isDesktop)
                 SettingsSwitchTile(

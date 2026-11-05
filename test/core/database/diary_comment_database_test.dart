@@ -115,8 +115,8 @@ void main() {
       final file = await v13DatabaseFile(keepCommentsTable: false);
       final migrated = AppDatabase.forTesting(NativeDatabase(file));
       try {
-        // #84 把 schema 升到 v15，migrated.schemaVersion 取的是代码里的最新版。
-        expect(migrated.schemaVersion, 16);
+        // v17 加 AI 三张表，migrated.schemaVersion 取的是代码里的最新版。
+        expect(migrated.schemaVersion, 17);
         final diaries = await migrated.select(migrated.diaries).get();
         expect(diaries.single.title, '升级前的日记');
         expect(await migrated.countDiaryComments(diaries.single.diaryId), 0);
@@ -128,8 +128,8 @@ void main() {
         final version = await migrated
             .customSelect('PRAGMA user_version')
             .getSingle();
-        // #84 把 schema 升到 v15，v13 库迁移后停在最新版 v15。
-        expect(version.read<int>('user_version'), 16);
+        // v13 库迁移后停在最新版 v17（v14 留言表与 v17 AI 表都已建好）。
+        expect(version.read<int>('user_version'), 17);
       } finally {
         await migrated.close();
       }
@@ -149,8 +149,8 @@ void main() {
           final version = await migrated
               .customSelect('PRAGMA user_version')
               .getSingle();
-          // #84 把 schema 升到 v15，v13 库迁移后停在最新版 v15（v14 留言表仍在）。
-          expect(version.read<int>('user_version'), 16);
+          // v13 库迁移后停在最新版 v17（v14 留言表仍在，v17 AI 表已建好）。
+          expect(version.read<int>('user_version'), 17);
         } finally {
           await migrated.close();
         }

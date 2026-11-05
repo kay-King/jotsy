@@ -5,6 +5,7 @@ import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../../core/database/diary_blocks/diary_blocks_schema.dart';
@@ -49,6 +50,8 @@ class DiaryTemplateEditorContentTab extends ConsumerStatefulWidget {
     DiaryToolbarItem.attachment,
     DiaryToolbarItem.recording,
     DiaryToolbarItem.currentTime,
+    // 模板正文不发给 AI。
+    DiaryToolbarItem.ai,
   };
 
   @override
@@ -151,6 +154,7 @@ class _DiaryTemplateEditorContentTabState
             AppSpacing.s,
           ),
           child: TextField(
+            contextMenuBuilder: appTextContextMenuBuilder,
             controller: widget.controller.titlePattern,
             focusNode: _titleFocus,
             style: titleStyle,

@@ -18,6 +18,7 @@ import 'package:node_diary/ui/diaries/widgets/diary_callout_block/diary_callout_
 import 'package:node_diary/ui/diaries/widgets/diary_toggle_block/diary_toggle_block.dart';
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
 import 'package:node_diary/ui/widgets/expressive_state_blend.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 /// 工具按钮的可见尺寸；触控区经 padded tapTargetSize 扩到
 /// [kDiaryToolbarButtonExtent]。「更多」按钮复用同一尺寸。
@@ -94,6 +95,7 @@ bool isDiaryToolbarItemActive(DiaryToolbarItem item, EditorState editorState) {
     DiaryToolbarItem.attachment ||
     DiaryToolbarItem.currentTime ||
     DiaryToolbarItem.recording ||
+    DiaryToolbarItem.ai ||
     DiaryToolbarItem.table ||
     DiaryToolbarItem.divider ||
     DiaryToolbarItem.toggleList ||
@@ -230,9 +232,17 @@ Widget buildDiaryToolbarItemButton(
   String? currentTimeFormatPattern,
   VoidCallback? onRecordingPressed,
   bool recordingOpen = false,
+  // AI 写作面板：给出时工具栏出现 AI 按钮（见 DiaryToolbarItem.ai）。
+  VoidCallback? onAiPressed,
+  bool aiOpen = false,
   void Function(DiaryMediaKind)? onMediaPressed,
   DiaryMediaKind? activeMediaKind,
   bool mediaImportBusy = false,
+  // 能拍摄的平台上图片 / 视频按钮先弹来源菜单（见 DiaryToolbarMediaSourceButton）：
+  // 给出时点按改为开合菜单，不再直接打开选择器；[mediaMenuOpen] 为菜单正
+  // 开着，按钮与面板开着时一样显示选中态。
+  VoidCallback? onMediaButtonPressed,
+  bool mediaMenuOpen = false,
 }) {
   final l10n = context.l10n;
 
@@ -269,6 +279,7 @@ Widget buildDiaryToolbarItemButton(
     _ => null,
   };
   if (mediaKind != null) {
+    final menuButton = onMediaButtonPressed != null;
     return _DiaryToolbarButton(
       tooltip: item.label(l10n),
       icon: (context, foreground) {
@@ -287,9 +298,13 @@ Widget buildDiaryToolbarItemButton(
               : colors.onSurface,
         );
       },
-      onPressed: mediaImportBusy || recordingOpen || onMediaPressed == null
+      editorState: menuButton ? editorState : null,
+      isActive: menuButton ? () => mediaMenuOpen : null,
+      onPressed: mediaImportBusy || recordingOpen
           ? null
-          : () => onMediaPressed(mediaKind),
+          : menuButton
+          ? onMediaButtonPressed
+          : (onMediaPressed == null ? null : () => onMediaPressed(mediaKind)),
     );
   }
 
@@ -389,6 +404,16 @@ Widget buildDiaryToolbarItemButton(
             : foreground,
       ),
       onPressed: mediaImportBusy ? null : onRecordingPressed,
+    ),
+    // v0.11.0 新增：AI 写作（形态仿录音；面板开着时图标取主色）。
+    DiaryToolbarItem.ai => _DiaryToolbarButton(
+      tooltip: item.label(l10n),
+      icon: (context, foreground) => FaIcon(
+        item.iconData,
+        size: 14,
+        color: aiOpen ? Theme.of(context).colorScheme.primary : foreground,
+      ),
+      onPressed: mediaImportBusy ? null : onAiPressed,
     ),
     // v0.10.0 新增：表格 / 折叠块 / 提示块（实现见各模块的 helper）。
     DiaryToolbarItem.table => _DiaryToolbarButton(
@@ -611,6 +636,7 @@ Future<void> _editDiaryLink(
     builder: (BuildContext context) => AlertDialog(
       title: Text(l10n.autoT0024),
       content: TextField(
+        contextMenuBuilder: appTextContextMenuBuilder,
         controller: controller,
         autofocus: true,
         keyboardType: TextInputType.url,

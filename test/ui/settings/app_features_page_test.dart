@@ -186,9 +186,9 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // 功能管理里 7 个开关（桌面/时间线/日记本/纪念日/模板/时间胶囊/侧滑归档；
-      // 探索与日历已并进首页，不再有开关）。
-      expect(find.byType(SettingsSwitchTile), findsNWidgets(7));
+      // 功能管理里 8 个开关（桌面/时间线/日记本/纪念日/模板/时间胶囊/AI 助手/
+      // 侧滑归档；探索与日历已并进首页，不再有开关）。
+      expect(find.byType(SettingsSwitchTile), findsNWidgets(8));
     });
   }
 

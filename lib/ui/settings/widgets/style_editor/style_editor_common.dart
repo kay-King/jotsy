@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/style_library/saved_style.dart';
@@ -186,6 +187,7 @@ class _StyleNameDialogState extends State<_StyleNameDialog> {
     return AlertDialog(
       title: Text(widget.title),
       content: TextField(
+        contextMenuBuilder: appTextContextMenuBuilder,
         controller: _controller,
         autofocus: true,
         maxLength: SavedStyles.maxNameLength,

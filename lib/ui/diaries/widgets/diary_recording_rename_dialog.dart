@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 /// 录音重命名弹窗，录音面板与正文播放器共用。
 ///
@@ -45,6 +46,7 @@ class _RecordingRenameDialogState extends State<_RecordingRenameDialog> {
     return AlertDialog(
       title: Text(l10n.recordingRename),
       content: TextField(
+        contextMenuBuilder: appTextContextMenuBuilder,
         controller: _controller,
         autofocus: true,
         maxLength: 30,

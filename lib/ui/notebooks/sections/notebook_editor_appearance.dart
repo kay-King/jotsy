@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import '../../../app/theme/app_spacing.dart';
 import '../../calendar/widgets/calendar_options_controls.dart';
@@ -66,6 +67,7 @@ class NotebookEditorTextFields extends StatelessWidget {
             children: <Widget>[
               CalendarOptionsFieldLabel(text: l10n.notebookNameLabel),
               TextField(
+                contextMenuBuilder: appTextContextMenuBuilder,
                 controller: controller.name,
                 focusNode: nameFocus,
                 maxLength: NotebookEditorController.maxNameLength,
@@ -75,6 +77,7 @@ class NotebookEditorTextFields extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               CalendarOptionsFieldLabel(text: l10n.notebookDescriptionLabel),
               TextField(
+                contextMenuBuilder: appTextContextMenuBuilder,
                 controller: controller.description,
                 maxLength: 120,
                 minLines: 2,

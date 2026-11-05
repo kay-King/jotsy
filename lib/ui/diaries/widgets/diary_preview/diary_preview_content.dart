@@ -1,5 +1,6 @@
 import 'dart:ui' as ui show Image;
 
+import '../../../ai/sections/ai_replies_section.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,6 +81,8 @@ class DiaryPreviewContent extends ConsumerWidget {
     this.onOpenNotebook,
     this.showComments = true,
     this.onOpenDiary,
+    this.aiRepliesFor,
+    this.onAiContinueChat,
   });
 
   final DiaryWithTags detail;
@@ -124,6 +127,14 @@ class DiaryPreviewContent extends ConsumerWidget {
   /// 点按日记链接（`diary://` 行内链接 / 日记卡片 / 反向链接）：按业务 id
   /// 打开那篇日记；null 时不可点按。
   final ValueChanged<String>? onOpenDiary;
+
+  /// 留言区之后的“AI 回应”：这篇日记的业务 id；null 时不显示（AI 不可用、
+  /// 回应模块关闭、日记在回收站、私密日记未允许、截取分享长图时；设置页
+  /// 预览不传）。
+  final String? aiRepliesFor;
+
+  /// 回应卡片上的“继续聊聊”；对话模块不在本分片，为 null。
+  final VoidCallback? onAiContinueChat;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -287,6 +298,18 @@ class DiaryPreviewContent extends ConsumerWidget {
                 if (showComments) ...<Widget>[
                   const SizedBox(height: 24),
                   DiaryPreviewCommentsSection(diaryId: diary.diaryId),
+                ],
+                // AI 回应：留言区之后（任务要求），回应模块关闭时不占位。
+                if (aiRepliesFor != null) ...<Widget>[
+                  const SizedBox(height: 28),
+                  AiRepliesSection(
+                    key: ValueKey<String>('ai_replies_$aiRepliesFor'),
+                    diaryId: aiRepliesFor!,
+                    textColor:
+                        resolved.bodyColor ??
+                        Theme.of(context).colorScheme.onSurface,
+                    onContinueChat: onAiContinueChat,
+                  ),
                 ],
                 // 反向链接：提到这篇的日记（没有时不占位）。
                 DiaryBacklinksSection(

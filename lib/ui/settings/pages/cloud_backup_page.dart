@@ -15,6 +15,7 @@ import '../../widgets/app_top_bar.dart';
 import '../../widgets/delayed_loading_gate.dart';
 import '../../widgets/delayed_loading_indicator.dart';
 import '../controllers/cloud_backup_controller.dart';
+import '../widgets/cloud_backup_state_builder.dart';
 import '../controllers/cloud_backup_failure.dart';
 import '../widgets/cloud_backup_labels.dart';
 import '../widgets/cloud_backup_provider_sheet.dart';
@@ -147,6 +148,7 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage>
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final service = ref.watch(cloudBackupServiceProvider).value;
     return ListView(
       padding: const EdgeInsets.fromLTRB(0, AppSpacing.m, 0, AppSpacing.xxl),
       children: <Widget>[
@@ -176,10 +178,23 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage>
                     color: colorScheme.onSurface,
                   ),
                   title: Text(cloudBackupTargetName(l10n, target)),
-                  subtitle: Text(
-                    cloudBackupTargetSummary(l10n, target),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        cloudBackupTargetSummary(l10n, target),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      // 开着自动备份时多一行上次结果；失败要在这里就看得见，
+                      // 不必点进每个位置。
+                      if (service != null && target.options.autoBackup)
+                        CloudAutoBackupTileStatus(
+                          service: service,
+                          targetId: target.id,
+                        ),
+                    ],
                   ),
                   trailing: const FaIcon(FontAwesomeIcons.angleRight, size: 14),
                   onTap: () => _open(target),

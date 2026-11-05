@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:node_diary/ui/widgets/delayed_loading_gate.dart';
 import 'package:node_diary/ui/widgets/expressive_icon_swap.dart';
 import 'package:node_diary/ui/widgets/expressive_loading_indicator.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 import 'publish_panel_tile.dart';
 
@@ -43,6 +44,7 @@ class PublishResolvableField extends StatelessWidget {
           SizedBox(width: leadingGap),
           Expanded(
             child: TextField(
+              contextMenuBuilder: appTextContextMenuBuilder,
               controller: controller,
               maxLines: 1,
               style: theme.textTheme.bodyMedium,

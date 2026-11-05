@@ -4,9 +4,12 @@ import 'dart:convert';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:node_diary/core/database/diary_blocks/diary_blocks_appflowy.dart';
 import 'package:node_diary/core/database/diary_blocks/diary_blocks_schema.dart';
 import 'package:node_diary/core/database/file_embed_codec.dart';
+import 'package:node_diary/core/services/app_platform.dart';
+import 'package:node_diary/core/services/diary_camera_capture_service.dart';
 import 'package:node_diary/core/services/diary_media_storage_service.dart';
 import 'package:node_diary/core/services/diary_video_gallery_service.dart';
 import 'package:node_diary/ui/diaries/models/image_insertion.dart';
@@ -16,10 +19,23 @@ typedef DiaryMediaPicker = Future<List<PlatformFile>?> Function(DiaryMediaKind);
 typedef DiaryMediaImporter =
     Future<DiaryFileAttachment> Function(PlatformFile, DiaryMediaKind);
 
-enum DiaryMediaImportOutcome { inserted, cancelled, failed, busy, unsupported }
+enum DiaryMediaImportOutcome {
+  inserted,
+  cancelled,
+  failed,
+  busy,
+  unsupported,
 
-/// 编排系统选文件 → 私有目录复制 → 正文插入；不构建 UI，不保存数据库。
-/// 页面退出或正文编辑器状态更换会使当前操作失效，并清理尚未提交的文件。
+  /// 拍照 / 录像：没有相机权限（用户拒绝，或之前选了“不再询问”）。
+  cameraPermissionDenied,
+
+  /// 拍照 / 录像：设备没有相机或可用的相机应用。
+  cameraUnavailable,
+}
+
+/// 编排系统选文件（或系统相机拍摄）→ 私有目录复制 → 正文插入；不构建 UI，
+/// 不保存数据库。页面退出或正文编辑器状态更换会使当前操作失效，并清理尚未
+/// 提交的文件。
 ///
 /// AppFlowy 迁移说明：
 /// - 插入经已迁移的 [insertDiaryImages] / [insertDiaryMediaBlocks]（以
@@ -32,11 +48,16 @@ enum DiaryMediaImportOutcome { inserted, cancelled, failed, busy, unsupported }
 class DiaryMediaImportController extends ChangeNotifier {
   DiaryMediaImportController({
     DiaryMediaPicker? picker,
+    DiaryMediaPicker? capturer,
     DiaryMediaImporter? importer,
   }) : _picker = picker ?? _pickFiles,
+       _capturer = capturer ?? DiaryCameraCaptureService.capture,
        _importer = importer ?? _importFile;
 
   final DiaryMediaPicker _picker;
+
+  /// 拍照 / 录像的文件来源（默认交给系统相机，见 [captureAndInsert]）。
+  final DiaryMediaPicker _capturer;
   final DiaryMediaImporter _importer;
   DiaryMediaKind? _activeKind;
   bool _disposed = false;
@@ -134,9 +155,16 @@ class DiaryMediaImportController extends ChangeNotifier {
         );
       }
       debugPrint('Diary media import failed: $error\n$stackTrace');
-      return current
-          ? DiaryMediaImportOutcome.failed
-          : DiaryMediaImportOutcome.cancelled;
+      if (!current) return DiaryMediaImportOutcome.cancelled;
+      if (error is PlatformException) {
+        if (error.code == 'camera_permission_denied') {
+          return DiaryMediaImportOutcome.cameraPermissionDenied;
+        }
+        if (error.code == 'camera_unavailable') {
+          return DiaryMediaImportOutcome.cameraUnavailable;
+        }
+      }
+      return DiaryMediaImportOutcome.failed;
     } finally {
       for (final file in imported) {
         try {
@@ -175,6 +203,27 @@ class DiaryMediaImportController extends ChangeNotifier {
     }
     transaction.afterSelection = selection;
     await editorState.apply(transaction);
+  }
+
+  /// 用系统相机拍一张照片（[kind] 为图片）或一段视频（[kind] 为视频）插入
+  /// 光标处：与选文件同一条链路（复制到私有目录、失败回滚、清理暂存），
+  /// 只是文件来源换成相机。附件没有拍摄入口；不支持拍摄的平台返回
+  /// unsupported（入口本应已隐藏）。
+  Future<DiaryMediaImportOutcome> captureAndInsert({
+    required EditorState editorState,
+    required DiaryMediaKind kind,
+    required bool Function() isCurrent,
+  }) async {
+    if (kind == DiaryMediaKind.attachment ||
+        !AppPlatform.supportsCameraCapture) {
+      return DiaryMediaImportOutcome.unsupported;
+    }
+    return pickAndInsert(
+      editorState: editorState,
+      kind: kind,
+      isCurrent: isCurrent,
+      picker: _capturer,
+    );
   }
 
   static Future<List<PlatformFile>?> _pickFiles(DiaryMediaKind kind) async {

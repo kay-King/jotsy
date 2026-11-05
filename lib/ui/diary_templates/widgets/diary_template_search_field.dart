@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 /// 模板面板的搜索框：放大镜 + “搜索模板”占位，有字时右侧出现清空按钮。
 ///
@@ -25,6 +26,7 @@ class DiaryTemplateSearchField extends StatelessWidget {
     final l10n = context.l10n;
     final iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
     return SearchBar(
+      contextMenuBuilder: appTextContextMenuBuilder,
       controller: controller,
       focusNode: focusNode,
       hintText: l10n.diaryTemplatePickerSearchHint,

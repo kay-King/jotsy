@@ -25,6 +25,8 @@ import 'package:node_diary/ui/home/widgets/home_hint_visibility_scope.dart';
 import '../../../app/theme/expressive_motion.dart';
 import '../../../core/services/settings_service.dart';
 import '../../../core/services/tag_order_codec.dart';
+import '../../ai/pages/ai_hub_page.dart';
+import '../../ai/providers/ai_providers.dart';
 import '../../notebooks/controllers/notebook_lock_flow.dart';
 import '../../notebooks/controllers/notebook_membership_ops.dart';
 import '../../notebooks/models/notebook_scope_resolver.dart';
@@ -544,6 +546,21 @@ class _DiariesPage extends ConsumerState<DiariesPage>
                                                   _controller.openViewOptions,
                                               onOpenSearchPage:
                                                   _controller.openSearchPage,
+                                              onOpenAi:
+                                                  ref.watch(
+                                                    aiHubAvailableProvider,
+                                                  )
+                                                  ? () => unawaited(
+                                                      Navigator.of(
+                                                        context,
+                                                      ).push<void>(
+                                                        MaterialPageRoute<void>(
+                                                          builder: (_) =>
+                                                              const AiHubPage(),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : null,
                                               searchHint:
                                                   currentNotebook == null
                                                   ? null

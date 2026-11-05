@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:node_diary/l10n/app_localizations.dart';
 import 'package:node_diary/core/services/app_service.dart';
+import 'package:node_diary/ui/settings/controllers/cloud_backup_auto_scheduler.dart';
 import 'package:node_diary/ui/diaries/pages/diaries_page.dart';
 import 'package:node_diary/ui/diaries/pages/timeline_page.dart';
 import 'package:node_diary/ui/diaries/controllers/diary_create_entry_flow.dart';
@@ -125,6 +126,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   bool _barHideOnScrollEnabled = false;
   final HomeBarScrollHider _barScrollHider = HomeBarScrollHider();
 
+  /// 网盘自动备份：冷启动、切到后台与前台定时检查（见
+  /// [CloudBackupAutoScheduler]），全程静默。
+  late final CloudBackupAutoScheduler _cloudAutoBackup;
+
   @override
   void initState() {
     super.initState();
@@ -150,6 +155,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         await runAutoUpdateCheck(context, ref);
       }
     })..start();
+    _cloudAutoBackup = CloudBackupAutoScheduler(() => runCloudAutoBackups(ref))
+      ..start();
   }
 
   @override
@@ -174,6 +181,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   void dispose() {
+    _cloudAutoBackup.dispose();
     _updateAutoChecker.dispose();
     widget.homeHintVisibleListenable.removeListener(_handleHomeHintVisibility);
     _pagePosition.dispose();

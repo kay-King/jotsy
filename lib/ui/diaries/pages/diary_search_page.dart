@@ -25,6 +25,7 @@ import 'diary_preview_page.dart';
 import '../../../app/theme/expressive_motion.dart';
 import '../../widgets/route_entrance_waiter.dart';
 import 'package:node_diary/ui/widgets/image_viewer_hero.dart';
+import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.dart';
 
 /// 日记搜索页（独立覆盖层）。
 ///
@@ -796,6 +797,7 @@ class _SearchInputBar extends StatelessWidget {
             Expanded(
               child: selectedTags.isEmpty && scopeChip == null
                   ? TextField(
+                      contextMenuBuilder: appTextContextMenuBuilder,
                       controller: searchController,
                       focusNode: searchFocusNode,
                       autofocus: autofocus,
@@ -855,6 +857,7 @@ class _SearchInputBar extends StatelessWidget {
                                 return KeyEventResult.ignored;
                               },
                               child: TextField(
+                                contextMenuBuilder: appTextContextMenuBuilder,
                                 controller: searchController,
                                 focusNode: searchFocusNode,
                                 autofocus: autofocus,

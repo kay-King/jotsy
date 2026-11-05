@@ -43,6 +43,7 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
                 overflow: layout.overflow,
                 expanded: _moreExpanded,
                 recordingOpen: widget.recordingOpen,
+                aiOpen: widget.aiOpen,
                 onPressed: _toggleMore,
               ),
             ),
@@ -98,6 +99,31 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
         tooltip: item.label(context.l10n),
         onPressed: () => _handleCodeBlockTool(fromMore: inMorePanel),
       );
+    } else if (_cameraKindFor(item) case final kind?) {
+      // 能拍摄时图片 / 视频先选来源；按钮本身（停用、导入中的加载图标）
+      // 照旧由 buildDiaryToolbarItemButton 画，点按改为开合菜单。
+      final mediaImportController = widget.mediaImportController;
+      final onMediaPressed = widget.onMediaPressed;
+      tool = DiaryToolbarMediaSourceButton(
+        kind: kind,
+        onPickFromLibrary: () => onMediaPressed?.call(kind),
+        onCapture: () => widget.onCameraPressed!(kind),
+        builder: (context, onPressed, menuOpen) => buildDiaryToolbarItemButton(
+          context,
+          item,
+          widget.editorState,
+          currentTimeFormatPattern: widget.currentTimeFormatPattern,
+          onRecordingPressed: widget.onRecordingPressed,
+          recordingOpen: widget.recordingOpen,
+          onAiPressed: widget.onAiPressed,
+          aiOpen: widget.aiOpen,
+          onMediaPressed: onMediaPressed,
+          activeMediaKind: mediaImportController?.activeKind,
+          mediaImportBusy: mediaImportController?.isBusy ?? false,
+          onMediaButtonPressed: onPressed,
+          mediaMenuOpen: menuOpen,
+        ),
+      );
     } else {
       final mediaImportController = widget.mediaImportController;
       tool = buildDiaryToolbarItemButton(
@@ -107,6 +133,8 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
         currentTimeFormatPattern: widget.currentTimeFormatPattern,
         onRecordingPressed: widget.onRecordingPressed,
         recordingOpen: widget.recordingOpen,
+        onAiPressed: widget.onAiPressed,
+        aiOpen: widget.aiOpen,
         onMediaPressed: widget.onMediaPressed,
         activeMediaKind: mediaImportController?.activeKind,
         mediaImportBusy: mediaImportController?.isBusy ?? false,
@@ -117,5 +145,16 @@ extension _DiaryFloatingToolbarBar on _DiaryFloatingToolbarState {
       height: kDiaryToolbarButtonExtent,
       child: Center(child: tool),
     );
+  }
+
+  /// 图片 / 视频工具在能拍摄时（给了 [DiaryFloatingToolbar.onCameraPressed]）
+  /// 对应的媒体类型；其余工具为 null。
+  DiaryMediaKind? _cameraKindFor(DiaryToolbarItem item) {
+    if (widget.onCameraPressed == null) return null;
+    return switch (item) {
+      DiaryToolbarItem.image => DiaryMediaKind.image,
+      DiaryToolbarItem.video => DiaryMediaKind.video,
+      _ => null,
+    };
   }
 }
