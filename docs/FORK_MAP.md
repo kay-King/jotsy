@@ -5,14 +5,16 @@
 > **活文档**：每次改动顺手更新这里。改了一个页面的文件，就把对应行改对；新增了功能，就在对应表里加一行；从上游合进来的东西，把对应行划掉或改成“已与上游一致”。
 >
 > **只列清单，不动手改**：疑似冗余只列出收益与风险，改回原版是下一步、要用户点头。
+>
+> **修正记录（2026-11-07）**：初版把 AI 等上游功能误列在「自加新功能」里。本次修正把原 ③ 拆成 ③a「已合上游功能」与 ③b「真正自加功能」，逐项按 git 历史核对（方法见 §0）；新增 §1.2「改与没改总览」与 §1.3「按功能域分类」；§6.1 逐字节相同数 96→95（增量组复核为 7 个，原记 8 个）；另订正两处小项（§2.1「批量操作事务化」无依据、§5.2 `salt_switch.dart` 应为 ①）与一处概念勘误（v19 提交信息称“#93 首页布局自定义”不准确：上游没有首页布局自定义；fork 的桌面布局只是借用了上游探索页布局系统（`ExploreLayout`/`ExploreModuleConfig`）的模块系统模式）。
 
 ## 0. 基线与口径（先读这节，不然数字会对不上）
 
 - **基线**：`git diff upstream/main...HEAD`（三点式），合并基 `b6959397`（上游 PR #72），HEAD `36cbf65e`（样式编辑器 v5–v8，2026-11-07）。上游 main 当时已是 v0.12.0+25、数据库 v18。
 - **口径 A（三点 diff vs 合并基）**：fork 自分叉点以来做了什么。共 **792 个文件，+111,507 / −24,267 行**（新增 320、修改 437、删除 35）。本文的四类统计用口径 A。
-- **口径 B（fork HEAD vs 上游 main 逐文件比对）**：现在合上游还剩多少真实差异。结果出人意料：**96 个文件与上游逐字节相同**（见 §6.1）——fork 当初改造着合进来的 v0.10.0/v0.11.0 功能，很多已被上游原样收编，整理时可直接划掉。
+- **口径 B（fork HEAD vs 上游 main 逐文件比对）**：现在合上游还剩多少真实差异。结果出人意料：**95 个文件与上游逐字节相同**（见 §6.1）——fork 当初改造着合进来的 v0.10.0/v0.11.0 功能，很多已被上游原样收编，整理时可直接划掉。
 - **一个结构性事实**：合并基 `b6959397` 里既没有 `lib/core/services/lan_sync/`（上游 v0.11.0 有 76 个文件），也没有 `lib/ui/diaries/widgets/diary_editor/`（上游 v0.11.0 有 40 个文件）。这两个目录是分叉之后上游新增的，fork 从未取过（局域网同步是用户决定不做；Quill 编辑器在 AppFlowy 迁移时被 fork 自己的实现取代）。所以三点 diff 里看不到它们；拿 fork 树直接对上游 v0.11.0 树比（两点式）是 **1701 个文件、+66,137 / −206,986**，差额主要就是这两块“上游有、fork 没有”的内容。
-- **分类方法**：每个文件按主导性质单归一类，混合文件在清单里注明次要性质。测试文件（224 个）只统计、不逐项分类。
+- **分类方法**：每个文件按主导性质单归一类，混合文件在清单里注明次要性质。测试文件（224 个）只统计、不逐项分类。2026-11-07 修正：③ 拆成 ③a「已合上游功能」（功能本身是上游的，fork 从上游合进来，哪怕实现是改造着合或平行实现）与 ③b「真正自加功能」（上游 v0.11.0/v0.12.0 里没有，fork 自己原创的）；判定依据是 `git log`（引入提交是上游合并提交还是 fork 主题提交）+ 上游 tag（`v0.11.0`/`v0.12.0` 有无同名/同功能文件）+ §6.1 的逐字节相同清单；拿不准的标「待核实」（本次 0 项）。
 
 ## 1. 总览：四类统计
 
@@ -20,58 +22,155 @@
 |---|---|---|
 | ① 纯样式/主题 | 只改颜色、间距、字号、图标、控件外观，不改逻辑 | **约 119** |
 | ② 布局调整 | 页面结构、导航、排列、Tab 合并/分组方式变了 | **约 24** |
-| ③ 自加新功能 | fork 自己加的，原版没有（或 fork 版与上游平行实现且差异大） | **约 326** |
+| ③a 已合上游功能 | 功能是上游的，fork 从上游合进来（改造着合或平行实现） | **约 237**（逐项核对） |
+| ③b 真正自加功能 | 上游没有，fork 自己原创的 | **约 48**（逐项核对） |
 | ④ 疑似冗余 | 逻辑与原版完全一样、只是换了写法/换名/挪位（能直接改回原版的见 §6 细分，真能直接改回的其实很少） | **约 83** |
 | 不计入四类 | 生成文件（`app_database.g.dart`、l10n 生成文件 ×3、`pubspec.lock`）、文档（`AGENTS.md`、`DESIGN.md`）、`pubspec.yaml`、已删文件 | 约 19 |
 
 分片明细（口径 A）：
 
-| 范围 | 文件数 | ① | ② | ③ | ④ |
-|---|---|---|---|---|---|
-| `lib/ui/diaries/`（日记列表/预览/编辑器/时间线/卡片等） | 194（新增 63、修改 128、删除 3） | 31 | 8 | 100 | 55 |
-| `lib/ui/settings/`、`home/`、`notebooks/`、`explore/`、`widgets/`、`diary_templates/`、`calendar/`、`anniversaries/` | 188（新增 51、修改 129、删除 8） | 80 | 16 | 61 | 28 |
-| `lib/core/`、`lib/ui/ai/`、`lib/app/`、`lib/l10n/`、`android/`、`pubspec.*`、文档 | 181（新增 115、修改 66） | 8 | 0 | 约 165 | 约 0（严格口径） |
-| 测试 `test/`（只统计） | 224（`test/ui/` 168、`test/core/` 35、`test/preview/` 12、`test/support/` 8、`test/app/` 1） | — | — | — | — |
-| 其余（`lib/utils/`、`ios/`、`.gitignore`、`.github/workflows/`、`macos/`） | 5 | — | — | — | — |
-| **合计** | **792** | **约 119** | **约 24** | **约 326** | **约 83** |
+| 范围 | 文件数 | ① | ② | ③（约数） | 其中 ③a | 其中 ③b | ④ |
+|---|---|---|---|---|---|---|---|
+| `lib/ui/diaries/`（日记列表/预览/编辑器/时间线/卡片等） | 194（新增 63、修改 128、删除 3） | 31 | 8 | 100 | 78 | 13 | 55 |
+| `lib/ui/settings/`、`home/`、`notebooks/`、`explore/`、`widgets/`、`diary_templates/`、`calendar/`、`anniversaries/` | 188（新增 51、修改 129、删除 8） | 80 | 16 | 61 | 27 | 27 | 28 |
+| `lib/core/`、`lib/ui/ai/`、`lib/app/`、`lib/l10n/`、`android/`、`pubspec.*`、文档 | 181（新增 115、修改 66） | 8 | 0 | 约 165 | 132 | 8 | 约 0（严格口径） |
+| 测试 `test/`（只统计） | 224（`test/ui/` 168、`test/core/` 35、`test/preview/` 12、`test/support/` 8、`test/app/` 1） | — | — | — | — | — | — |
+| 其余（`lib/utils/`、`ios/`、`.gitignore`、`.github/workflows/`、`macos/`） | 5 | — | — | — | — | — | — |
+| **合计** | **792** | **约 119** | **约 24** | **约 326** | **约 237** | **约 48** | **约 83** |
 
-> 注：边界文件按主导性质计数，个别文件在 ①/②/③ 之间可能有一两处主观出入；④ 的细分见 §6——三个分片对 ④ 的判定口径不同，§6 会讲清楚。
+> 注：边界文件按主导性质计数，个别文件在 ①/②/③ 之间可能有一两处主观出入；④ 的细分见 §6——三个分片对 ④ 的判定口径不同，§6 会讲清楚。③a/③b 是逐项核对数（§2 表所列文件）；③a+③b=约 285，与 ③ 约数 326 差约 41——差额是未逐项列入 §2 表的成组行附带文件与 core 区基础设施（逐项核对时重归为 ④-M/①/不计入），见 §1.2。
 
 ### 1.1 各类一句话画像
 
 - **① 纯样式（约 119）**：Salt 主题是最大头——页面底 `#FAFBFC`、卡片纯白、Salt 蓝 `#0470E6`、分组白卡+卡内蓝组标题、平铺行（不要灰色长条行）、行首图标深黑 20、标题字重 w400、自绘 Salt 风控件（`lib/ui/widgets/salt_switch.dart` 等）。集中在 `lib/ui/settings/`（45 个）和 `lib/ui/diaries/models/diary_card_style/`、`diary_preview_style/`。
 - **② 布局调整（约 24）**：首页合并 v4、样式编辑器 v5–v8（药丸+滑杆行、直角满宽面板、底部 tab）、探索页删除并进首页、筛选从顶栏搬进 BottomSheet、Dismissible→自研侧滑。集中在 `lib/ui/home/` 与样式编辑器外壳。
-- **③ 自加新功能（约 326）**：AI 助手全套、增量备份、拍照/录像、文字选区菜单、时间线 Moments 页、简洁编辑器、日记留言、笔记本嵌套、暖阳/备忘预设、心情色板、个人资料、桌面布局、那年今日/情绪趋势页、画廊 v2。集中在 `lib/ui/ai/`（60 个全新增）、`lib/core/services/ai/`（15 个全新增）、`lib/ui/diaries/`（100 个）。
-- **④ 疑似冗余（约 83）**：大头是 50 个 Quill→AppFlowy 迁移适配文件——逻辑与原版等价，但**不可单独改回**（调用方已不再传 Quill 对象，改回即编译失败）。真正能直接改回原版的是 §6.1 的 96 个“与上游逐字节相同”文件（口径 B，含 ④ 之外的已合上游代码）。
+- **③a 已合上游功能（约 237，逐项核对）**：AI 助手全套（#133）、增量备份（#141）、拍照/录像（#145）、这天照片视频（#140）、文字选区菜单（#146）、日记留言（#95）、笔记本嵌套（#84）、快速滚动条（#92）、首行缩进（#91/#122）、表格/折叠/提示块/日记链接（v0.10.0 #90）、模板时间格式与首页多选（小功能批）。集中在 `lib/ui/ai/`（60 个）、`lib/core/services/ai/`（15 个）、`lib/ui/diaries/`（78 个）。
+- **③b 真正自加功能（约 48，逐项核对）**：时间线 Moments 页、简洁编辑器、首页合并 v4（桌面四区块 + 布局模型）、暖阳/备忘预设、心情色板自定义、个人资料、画廊 v2、左侧边栏、日历上下滑手势、那年今日/情绪趋势页。集中在 `lib/ui/home/`（桌面 9 个）、`lib/ui/diaries/`（时间线 8 个 + 简洁编辑器 3 个）、`lib/ui/explore/`（画廊 v2 与趋势页 10 个）。
+- **④ 疑似冗余（约 83）**：大头是 50 个 Quill→AppFlowy 迁移适配文件——逻辑与原版等价，但**不可单独改回**（调用方已不再传 Quill 对象，改回即编译失败）。真正能直接改回原版的是 §6.1 的 95 个“与上游逐字节相同”文件（口径 B，含 ④ 之外的已合上游代码）。
+
+### 1.2 改与没改总览
+
+用户最关心的两个问题先放这里回答：哪些完全没动，哪些改了、改到什么程度。基线与口径同 §0（合并基 `b6959397`，三点式 diff，HEAD `36cbf65e`）。
+
+**没改①——完全没动的文件（1244 个）**：在合并基里有、在 diff 里没出现。按目录汇总：
+
+| 目录 | 文件数 | 说明 |
+|---|---|---|
+| `test/` | 328 | 近六成测试没动（动的是 224 个，见 §1） |
+| `lib/ui/diaries/` | 175 | 日记模块近半数文件没动 |
+| `lib/core/services/` | 103 | 大量服务没动 |
+| `docs/` | 90 | 上游文档基本没动 |
+| `assets/` | 88 | 资源文件没动 |
+| `lib/ui/settings/` | 58 | 过半设置文件没动 |
+| `lib/ui/widgets/` | 53 | 多数共用控件没动 |
+| `lib/ui/notebooks/` | 46 | 多数笔记本文件没动 |
+| `ios/` | 45 | iOS 工程没动 |
+| `lib/ui/calendar/` | 44 | 日历多数文件没动 |
+| `lib/ui/diary_templates/` | 37 | 模板多数文件没动 |
+| `android/`、`macos/` | 各 27 | 平台工程基本没动（android 仅 6 个文件在 diff 里） |
+| `lib/ui/anniversaries/`、`lib/ui/home/`、`windows/` | 各 18 | 纪念日、首页、Windows 基本没动 |
+| `lib/core/database/` | 11 | 数据库少数文件没动（多数在 diff 里） |
+| `linux/` | 10 | Linux 工程没动 |
+| `lib/utils/` | 9 | 工具函数基本没动 |
+| `lib/app/`、根目录文件、`web/` | 各 7 | 应用装配少数文件、根目录配置、Web 没动 |
+| `tool/` | 6 | 开发脚本没动 |
+| `.github/` | 5 | CI 配置多数没动（fork 只改了构建工作流） |
+| `lib/ui/explore/` | 3 | 探索页几乎全改了（只剩 3 个没动） |
+| `.vscode/`、`integration_test/`、`lib/l10n/`、`lib/main.dart` | 各 1 | — |
+| **合计** | **1244** | 合并基 1716 个文件 − 动过 472 个（修改 437 + 删除 35） |
+
+**没改②——合进来但没改过的文件（95 个）**：在 diff 里（相对合并基是新增或修改），但现在与上游 main 逐字节相同（§6.1 全清单）。大头是 AI 服务 15 个、AI 界面 27 个、增量备份 7 个、云备份目标/配置 10 个、选区菜单 6 个、快滚条 5 个、云备份控制器 5 个、数据库 5 个、块文档 5 个。这是「没改」的第二档：fork 当初改造着合进来的 v0.10.0/v0.11.0 功能，后来被上游原样收编，未来合上游时这 95 个文件零工作量。
+
+**改的——792 个 diff 文件里的其余 697 个**（792 − 95）：
+
+| 类 | 文件数 | 改的程度（一句话） |
+|---|---|---|
+| ① 纯样式/主题 | 约 119 | 只改颜色值、间距、字号、图标：Salt 蓝盖在上游底子上，逻辑一行没动 |
+| ② 布局调整 | 约 24 | 重写了页面结构与导航：首页合并、样式编辑器重建、探索页删除并进首页 |
+| ③a 已合上游功能 | 约 237 | 改造着合：功能是上游的，fork 按自家结构改写实现（部分与上游逐字节相同，见没改②） |
+| ③b 真正自加功能 | 约 48 | 全新写的：上游没有，fork 从零实现 |
+| ④ 疑似冗余 | 约 83 | 逻辑与原版等价、只换写法：50 个是 AppFlowy 迁移适配（不可单独改回），其余见 §6 |
+| 未逐项（分片统计口径余量） | 约 41 | 在分片 ③ 约数里、未逐项列入 §2 表的成组行附带文件与 core 区基础设施 |
+| 测试 `test/` | 224 | 随功能改的测试，不逐项分类 |
+| 其他（生成文件/文档/pubspec 等） | 约 16 | 不计入四类 |
+| **合计** | **792** | = 没改② 95 + 真改 697；其中产品代码 552 = ① 119 + ② 24 + ③a 237 + ③b 48 + ④ 83 + 未逐项 41 |
+
+**数字兜底**：合并基 1716 = 没改① 1244 + 动过 472（修改 437 + 删除 35）；472 + fork 新增 320 = diff 792；792 = 没改② 95 + 真改 697；真改 697 = 产品代码（552 − 95 = 457）+ 测试 224 + 其他 16。
+
+### 1.3 按功能域分类
+
+这一节与 §1.2「改与没改总览」、§2「按页面/功能清单」是同一份事实、三种切法：§1.2 按改没改分，§2 按页面分，本节按功能域分。每组标改了还是没改，改了的注明属于前面哪一类（①/②/③a/③b/④）；归属与 §2 各表一致，拿不准的标「待核实」（本节 0 项）。
+
+**主题方面**
+
+| 功能域 | 改/没改 | 改了什么（一句话） | 类 |
+|---|---|---|---|
+| Salt 主题/种子色/配色 | 改了 | 种子色锁 Salt 蓝、底 #FAFBFC、卡片纯白、圆角收小、字重 w400 | ① |
+| 日记卡片样式（模型+预设） | 改了 | 模型删 light/dark 双值；暖阳/备忘预设 fork 原创、杂志重调 | ① 为主 + ③b |
+| 预览页样式（模型） | 改了 | 删 seedColor/纸张色，加着色强度/纸面染色、心情色板 | ① |
+| 导航栏样式（模型） | 改了 | 删 custom 字段、topBarHairline 默认改 true、指示器色改 primaryContainer | ① |
+| 样式编辑器 4 页 | 改了 | v5–v8 阅读软件式重建；预设列表 fork 新写 | ② 为主 + ③b |
+| 正文字体/排版 | 改了 | 排版页、卡片字体换皮；首行缩进滑块属上游 #91/#122；字体导入服务本身没改 | ① + ③a |
+| 代码块样式 | 改了 | 预览改 AppFlowy Document（平行实现）；配色主题 | ①/② + ③a |
+| 心情颜色 | 改了 | fork 自写心情符号+颜色自定义（单 JSON 键）；上游色板不可编辑符号/颜色 | ③b |
+
+**功能方面**
+
+| 功能域 | 改/没改 | 改了什么（一句话） | 类 |
+|---|---|---|---|
+| 日记增删改查 | 改了 | 多选 #129+#132、侧滑归档 #89、留言接线 #95；左侧边栏、卡片 maxImages 9 是 fork 的 | ③a 为主 + ③b |
+| 编辑器（AppFlowy 富文本） | 改了 | 上游 v0.10.0 迁移、fork 改造着合；AI/拍照/选区/表格等上游功能；简洁编辑器 fork 原创 | ④-M + ③a + ③b |
+| 备份与恢复 | 改了 | 增量 #141、备份服务多处与上游相同；media_index fork 重写；BackupPayload 缺 dayMoods（已知缺口） | ③a 为主 + ③b |
+| AI 助手 | 改了 | #133 全套（42 文件与上游相同、其余改造着合）；上限 fork 低于上游 | ③a |
+| 日记留言 | 改了 | #95 全套；留言开关 fork 加的；v18（mood/images）未合 | ③a + ③b（开关） |
+| 时间线 Moments | 改了 | fork 原创整页（封面+头像+九宫格+条目菜单） | ③b |
+| 相册/画廊 | 改了 | 画廊 v2（年/月/日、音频/视频）fork 原创；这天照片视频 #140 上游 | ③b + ③a |
+| 日历 | 改了 | 上下滑手势 fork 原创；其余（心情打点、节假日）沿用上游 | ③b + ① |
+| 探索 | 改了 | 探索页删除并进首页；那年今日/趋势页 fork 原创；概况卡/AI 卡平行实现 | ② + ③b + ③a |
+| 搜索 | 改了 | 搜留言 #95；其余搜索逻辑沿用上游 | ③a |
+| 标签 | 改了 | 批量打标签 #129+#132；标签管理页 Salt 化 | ③a + ① |
+| 笔记本（含嵌套/智能本） | 改了 | 嵌套 #84、未收录 #88（fork 平行实现）；智能本规则仅注释差 | ③a + ④ |
+| 模板 | 改了 | 时间格式 2af21a47、变量条；内容 tab 平行实现；其余小改 | ③a + ① |
+| 设置 | 改了 | 分组白卡 Salt 化；AI/备份接线；个人资料、心情色板 fork 原创；更新日志平行实现 | ①/② + ③a + ③b |
+| 纪念日 | 改了（极小） | 仅 2 文件各 3–4 行图标/间距 | ① |
+| 导出 | 改了 | PDF 重写 AppFlowy 直渲；留言段 #95；导出对齐 #172 未合 | ④-M + ③a |
+| 导入（其他应用） | 改了 | #90 导入，fork 走 Delta 路线（上游 JournalBlockWriter） | ③a（主） |
+| 应用内更新 | 改了（极小） | 仅 1 文件 +2 行（接选区菜单） | ③a |
+| 时间胶囊 | 没改 | 沿用上游（模型/封存/解封未动） | — |
+| 分享 | 没改 | 沿用上游（分享控制器等未动） | — |
+| 定位/天气 | 没改 | 沿用上游（服务未动；fork 未配 key，功能默认不可用） | — |
+| 设备验证/上锁日记本 | 没改 | 沿用上游（验证服务未动；仅云备份授权弹窗 1 文件在 diff 里，属备份域） | — |
+| 局域网同步 | 未合入 | fork 没有（用户决定不做）；上游 v0.11.0 有 76 文件 | — |
+| 应用锁 | 未合入 | fork 没有；上游 v0.12.0 #167/#180 新增，待合 | — |
 
 ## 2. 按页面 / 功能的清单
 
-符号：① 纯样式 ② 布局调整 ③ 新功能 ④ 疑似冗余。只列本范围（口径 A）的文件；“牵连”指共用状态 / 设置项 / 控件 / 数据库表，牵连的页面不能单独改。
+符号：① 纯样式 ② 布局调整 ③a 已合上游功能 / ③b 真正自加功能 ④ 疑似冗余。只列本范围（口径 A）的文件；“牵连”指共用状态 / 设置项 / 控件 / 数据库表，牵连的页面不能单独改。
 
-### 2.1 日记列表页（`lib/ui/diaries/pages/diaries_page.dart`，② 为主，混合 ③）
+### 2.1 日记列表页（`lib/ui/diaries/pages/diaries_page.dart`，② 为主，混合 ③a）
 
 | 文件 | 类 | 说明 |
 |---|---|---|
 | `pages/diaries_page.dart` | ② | +377/−447（1049→979 行），逻辑抽到控制器 |
-| `controllers/diaries_page_controller.dart` | ③ | 批量操作事务化 |
-| `controllers/diaries_notebook_scope_controller.dart` | ③ | 未收录入口 + 多选复位 |
-| `controllers/diaries_notebook_membership_controller.dart` | ③ | 日记本成员操作 |
-| `controllers/diaries_select_all_controller.dart` | ③ 新增 | 全选常驻多选 |
-| `controllers/diaries_tag_batch_controller.dart` | ③ 新增 | 批量打标签 |
-| `controllers/diary_list_transition_coordinator.dart` | ③ | `_HideBatch` 批量隐藏 |
+| `controllers/diaries_page_controller.dart` | ③a | 多选批量操作（上游 #129+#132） |
+| `controllers/diaries_notebook_scope_controller.dart` | ③a | 未收录入口 + 多选复位 |
+| `controllers/diaries_notebook_membership_controller.dart` | ③a | 日记本成员操作 |
+| `controllers/diaries_select_all_controller.dart` | ③a 新增 | 全选常驻多选 |
+| `controllers/diaries_tag_batch_controller.dart` | ③a 新增 | 批量打标签 |
+| `controllers/diary_list_transition_coordinator.dart` | ③a | `_HideBatch` 批量隐藏 |
 | `sections/diary_head_section.dart` | ② | 多选顶栏 + 抽屉/AI 入口 |
-| `sections/diaries_list_section.dart` | ③ | 留言数接线 |
+| `sections/diaries_list_section.dart` | ③a | 留言数接线 |
 | `sections/diary_view_options_sheet.dart` | ① | Salt 分段 + 收紧 |
-| `sections/diary_tag_batch_sheet.dart` | ③ 新增 | 批量标签面板 |
-| `widgets/diary_notebook_drawer.dart` | ③ 新增（491 行） | 左侧边栏（日记本树 + 标签筛选） |
+| `sections/diary_tag_batch_sheet.dart` | ③a 新增 | 批量标签面板 |
+| `widgets/diary_notebook_drawer.dart` | ③b 新增（491 行） | 左侧边栏（日记本树 + 标签筛选） |
 | `widgets/diary_filter_sheet.dart` | ② 新增 | 筛选从顶栏搬进 BottomSheet |
-| `widgets/diaries_fast_scroller.dart` | ③ 新增 | 快速滚动条（见 §5.4） |
-| `viewmodels/diary_timeline_index.dart` | ③ 新增 | 快滚条数据（气泡标签与分段刻度） |
-| `viewmodels/diary_selection_summary.dart` | ③ 新增 | 多选顶栏派生状态 |
-| `providers/diary_timeline_provider.dart` | ③ 新增 | `watchDiaryTimeline` |
-| `providers/diary_filters.dart` | ③ | `timelineKey` |
+| `widgets/diaries_fast_scroller.dart` | ③a 新增 | 快速滚动条（见 §5.4） |
+| `viewmodels/diary_timeline_index.dart` | ③a 新增 | 快滚条数据（气泡标签与分段刻度） |
+| `viewmodels/diary_selection_summary.dart` | ③a 新增 | 多选顶栏派生状态 |
+| `providers/diary_timeline_provider.dart` | ③a 新增 | `watchDiaryTimeline` |
+| `providers/diary_filters.dart` | ③a | `timelineKey` |
 | `widgets/diary_swipe_action_item.dart` | ② | Dismissible→自研侧滑（AGENTS.md §6 规定：只经此组件，禁止改回 Dismissible） |
-| `widgets/diary_swipe_action_background.dart` | ③ 新增 | 侧滑背景 |
+| `widgets/diary_swipe_action_background.dart` | ③a 新增 | 侧滑背景 |
 
 **牵连**：时间线页（共用 `pagedDiariesProvider` 与 `diaryTimelineProvider`）、搜索/归档页（共用 `DiariesListSection` + `DiaryCard`）、预览页（翻页顺序来自同一查询）。
 
@@ -79,73 +178,73 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/diary_preview_page.dart` | ③ | +12：`diary://` 点按开新预览 |
+| `pages/diary_preview_page.dart` | ③a | +12：`diary://` 点按开新预览 |
 | `widgets/diary_preview/diary_appflowy_preview.dart` | ④-M 新增（1387 行） | 替代 Quill 预览渲染（迁移适配，不可单独改回） |
 | `widgets/diary_preview/diary_preview_body.dart` | ④-M | 预览正文 |
-| `widgets/diary_preview/diary_preview_content.dart` | ③ | 留言区 + AI 回应 + 标题分隔线 |
-| `widgets/diary_preview/diary_preview_view.dart` | ④-M 为主 + ③ | Quill→`EditorState` 绑定、`_toggleTodo` 走 transaction；AI 回应入口 |
+| `widgets/diary_preview/diary_preview_content.dart` | ③a（主） | 留言区 + AI 回应 + 标题分隔线 |
+| `widgets/diary_preview/diary_preview_view.dart` | ④-M 为主 + ③a | Quill→`EditorState` 绑定、`_toggleTodo` 走 transaction；AI 回应入口 |
 | `widgets/diary_preview/diary_preview_header.dart` | ① | 标题分隔线 |
-| `widgets/diary_preview/diary_preview_pager.dart` | ③ | `onOpenDiary` 透传 |
+| `widgets/diary_preview/diary_preview_pager.dart` | ③a | `onOpenDiary` 透传 |
 | `widgets/diary_preview/diary_preview_top_bar.dart` | ① | FaIcon→Material Icons |
-| `widgets/diary_preview/diary_preview_actions_sheet.dart` | ③ | AI 回应菜单项 |
-| `widgets/diary_preview/diary_preview_comments.dart` | ③ 新增（375 行） | 留言区 |
-| `widgets/diary_preview/diary_backlinks.dart` | ③ 新增（205 行） | 反向链接 |
+| `widgets/diary_preview/diary_preview_actions_sheet.dart` | ③a | AI 回应菜单项 |
+| `widgets/diary_preview/diary_preview_comments.dart` | ③a 新增（375 行） | 留言区 |
+| `widgets/diary_preview/diary_backlinks.dart` | ③a 新增（205 行） | 反向链接 |
 | `controllers/diary_preview_navigation.dart` | ④-E 新增（14 行） | `openDiaryPreviewById` 小 helper（见 §6.3） |
-| `controllers/diary_edit_entry_flow.dart` | ③ 新增 | 编辑入口含简洁/完整选择 |
+| `controllers/diary_edit_entry_flow.dart` | ③b 新增 | 编辑入口含简洁/完整选择 |
 
 **牵连**：留言表（`providers/diary_comment_providers.dart`，§2.7）、编辑器页（`openDiaryEditorForDetail` 返回后刷新）、时间线页（点条目进预览）、卡片/链接（`diary://` 来源）。
 
-### 2.3 编辑器页（`lib/ui/diaries/pages/edit_diary_page.dart`，③ 为主，混合 ④-M）
+### 2.3 编辑器页（`lib/ui/diaries/pages/edit_diary_page.dart`，③a 为主，混合 ④-M）
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/edit_diary_page.dart` | ③ | +812/−161（1375→2026 行） |
+| `pages/edit_diary_page.dart` | ③a | +812/−161（1375→2026 行） |
 | `controllers/edit_diary_controller.dart` | ④-M | `replaceContentController`→`replaceEditorState` |
-| `controllers/edit_diary_media_controller.dart` | ③ | 拍照/录像 + 这天照片插入 |
-| `controllers/edit_diary_persistence_controller.dart` | ③ | 返回先收 AI 面板 |
+| `controllers/edit_diary_media_controller.dart` | ③a | 拍照/录像 + 这天照片插入 |
+| `controllers/edit_diary_persistence_controller.dart` | ③a | 返回先收 AI 面板 |
 | `controllers/edit_diary_recording_controller.dart` | ④-M | 录音 |
 | `controllers/edit_diary_template_flow.dart` | ④-M | 模板套用 |
-| `controllers/edit_diary_ai_flow.dart` | ③ 新增（240 行） | AI 写入流程（part of 编辑页） |
-| `controllers/diary_ai_editing.dart` | ③ 新增（570 行） | AI 唯一正文写入出口 |
-| `controllers/diary_editor_controller.dart` | ③ 新增（167 行） | AI 用薄 wrapper |
-| `controllers/diary_editor_selection.dart` | ③ 新增 | 选区菜单剪贴板 |
-| `controllers/diary_embed_editing.dart` + `diary_embed_keys.dart` | ③ 新增 | 嵌入块退格/Delete 两段删除 |
-| `controllers/diary_paragraph_indent_editing.dart` | ③ 新增 | 首行缩进（上游 #122） |
-| `controllers/diary_text_process_flow.dart` | ③ 新增 | Android 文字处理 |
+| `controllers/edit_diary_ai_flow.dart` | ③a 新增（240 行） | AI 写入流程（part of 编辑页） |
+| `controllers/diary_ai_editing.dart` | ③a 新增（570 行） | AI 唯一正文写入出口 |
+| `controllers/diary_editor_controller.dart` | ③a 新增（167 行） | AI 用薄 wrapper |
+| `controllers/diary_editor_selection.dart` | ③a 新增 | 选区菜单剪贴板 |
+| `controllers/diary_embed_editing.dart` + `diary_embed_keys.dart` | ③a 新增 | 嵌入块退格/Delete 两段删除 |
+| `controllers/diary_paragraph_indent_editing.dart` | ③a 新增 | 首行缩进（上游 #122） |
+| `controllers/diary_text_process_flow.dart` | ③a 新增 | Android 文字处理 |
 | `controllers/diary_code_block_editing.dart`、`diary_caret_follow_controller.dart`、`diary_code_language_tracker.dart`、`diary_todo_autosave_controller.dart` | ④-M | 代码块/光标跟随/待办自动保存 |
-| `controllers/diary_media_import_controller.dart` | ③（含迁移） | 相机拍摄 |
+| `controllers/diary_media_import_controller.dart` | ③a（含迁移） | 相机拍摄 |
 | `controllers/diary_image_embed_actions.dart` | ④-M | 按偏移→按 `Node` |
-| `controllers/diary_video_player_controller.dart` | ③ | `content://` 视频 |
-| `widgets/diary_toolbar_config.dart` | ③（含迁移） | +591/−235：AI/表格/分隔线/折叠/提示块新工具项 + AppFlowy 重写 |
-| `widgets/diary_mobile_toolbar.dart`、`diary_floating_toolbar*.dart`、`diary_toolbar_media_button.dart` | ④-M 为主 + ③ | 工具栏（+AI/相机） |
+| `controllers/diary_video_player_controller.dart` | ③a | `content://` 视频 |
+| `widgets/diary_toolbar_config.dart` | ③a（含迁移） | +591/−235：AI/表格/分隔线/折叠/提示块新工具项 + AppFlowy 重写 |
+| `widgets/diary_mobile_toolbar.dart`、`diary_floating_toolbar*.dart`、`diary_toolbar_media_button.dart` | ④-M 为主 + ③a | 工具栏（+AI/相机） |
 | `widgets/diary_color_panel/*` | ④-M | 颜色面板 |
 | `widgets/diary_code_block/*` | ④-M | 代码块（见 §6.4） |
-| `widgets/diary_mention/*` | ③ 新增 | @提及 + `/` 菜单 + `diary://`/`notebook://` |
-| `widgets/diary_link_card/*` | ③ 新增（5 文件） | 链接卡片 |
-| `widgets/diary_toggle_block/*` | ③ 新增（3 文件） | 折叠块 |
-| `widgets/diary_callout_block/*` | ③ 新增 | 提示块 |
-| `models/diary_table_block.dart` + `diary_divider_block.dart` | ③ 新增 | 表格块/分隔线块 |
-| `viewmodels/diary_first_line_indent.dart` | ③ 新增 | 首行缩进 |
-| `widgets/diary_editor_selection_menu_items.dart` + `diary_selection_toolbar_overlay.dart` | ③ 新增 | 手机选区菜单 |
-| `widgets/diary_trailing_line_tap.dart` | ③ 新增 | 末行点按 |
-| `widgets/diary_armed_embed_frame.dart` | ③ 新增 | 嵌入块选中框 |
+| `widgets/diary_mention/*` | ③a 新增 | @提及 + `/` 菜单 + `diary://`/`notebook://` |
+| `widgets/diary_link_card/*` | ③a 新增（5 文件） | 链接卡片 |
+| `widgets/diary_toggle_block/*` | ③a 新增（3 文件） | 折叠块 |
+| `widgets/diary_callout_block/*` | ③a 新增 | 提示块 |
+| `models/diary_table_block.dart` + `diary_divider_block.dart` | ③a 新增 | 表格块/分隔线块 |
+| `viewmodels/diary_first_line_indent.dart` | ③a 新增 | 首行缩进 |
+| `widgets/diary_editor_selection_menu_items.dart` + `diary_selection_toolbar_overlay.dart` | ③a 新增 | 手机选区菜单 |
+| `widgets/diary_trailing_line_tap.dart` | ③a 新增 | 末行点按 |
+| `widgets/diary_armed_embed_frame.dart` | ③a 新增 | 嵌入块选中框 |
 | `widgets/diary_quote_bar.dart` | ① 新增 | 替代写死亮青 `#00BCF0` |
-| `widgets/diary_image_options_menu.dart` | ④-M + ③ | +AI 看图说话 |
+| `widgets/diary_image_options_menu.dart` | ④-M + ③a | +AI 看图说话 |
 | `widgets/diary_image_embed_builder.dart`、`diary_video_embed_builder.dart`、`diary_audio_embed_builder.dart`、`diary_attachment_embed_builder.dart`、`diary_divider_embed_builder.dart` | ④-M | 嵌入块渲染器 |
 | `widgets/diary_playback_interaction_guard.dart` | ④-M | 播放交互守卫 |
 | `models/` 下 `image_insertion.dart`、`media_insertion.dart`、`recording_insertion.dart`、`diary_image_embed_data.dart`、`diary_playback_gestures.dart`、`diary_text_colors.dart`、`diary_toolbar_time_format.dart` | ④-M | 插入/颜色/时间（Quill→AppFlowy） |
 
 **牵连**：预览页（同一块文档 schema，编辑后预览刷新）、发布页（`publish_diary_preview.dart` ④-M，共用 `DiaryAppFlowyPreview`）、这天照片（`diary_day_photos_*` 插入链路）、草稿（`new_diary_draft.dart` ③，`simpleComposer` 标记）。
 
-### 2.4 时间线页（Moments，③ 新增整页）
+### 2.4 时间线页（Moments，③b 新增整页）
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/timeline_page.dart` | ③ 新增（493 行） | 朋友圈式：封面+头像+昵称+简介+分页，复用 `pagedDiariesProvider` |
-| `widgets/diary_timeline/diary_timeline_item.dart`、`diary_timeline_grid.dart`（九宫格）、`diary_timeline_avatar.dart`、`diary_timeline_text.dart` | ③ 新增 | 时间线条目 |
-| `providers/diary_profile_provider.dart` | ③ 新增（137 行） | 昵称默认“我” |
-| `sections/diary_timeline_entry_menu_sheet.dart` | ③ 新增 | 条目菜单（编辑/查看/删除，软删+4 秒撤销） |
-| `viewmodels/diary_card_media_summary.dart` | ③ | `maxImages` 4→9 + `totalCount` 徽章 |
+| `pages/timeline_page.dart` | ③b 新增（493 行） | 朋友圈式：封面+头像+昵称+简介+分页，复用 `pagedDiariesProvider` |
+| `widgets/diary_timeline/diary_timeline_item.dart`、`diary_timeline_grid.dart`（九宫格）、`diary_timeline_avatar.dart`、`diary_timeline_text.dart` | ③b 新增 | 时间线条目 |
+| `providers/diary_profile_provider.dart` | ③b 新增（137 行） | 昵称默认“我” |
+| `sections/diary_timeline_entry_menu_sheet.dart` | ③b 新增 | 条目菜单（编辑/查看/删除，软删+4 秒撤销） |
+| `viewmodels/diary_card_media_summary.dart` | ③b | `maxImages` 4→9 + `totalCount` 徽章 |
 
 **牵连**：日记页（`diary_view_preferences.dart` ②：`timeline` 布局值已移除，旧值回退列表；时间线视图移入独立页）、个人资料（设置页 `profile_page.dart` + 桌面页共用 `diary_profile_provider`）、预览页（点条目进入）、卡片（九宫格取前 9 张与 `maxImages=9` 绑定）。
 
@@ -155,11 +254,11 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/diary_day_photo_preview_page.dart` | ③ 新增（352 行） | 这天照片预览页 |
-| `controllers/diary_day_photos_controller.dart` | ③ | 视频权限/计数/封面 |
-| `widgets/diary_day_photos/diary_day_photo_tile.dart` | ③ | +206/−182：视频时长 + Hero 预览重写 |
-| `widgets/diary_day_photos/diary_day_photo_badges.dart`、`diary_day_photo_preview_items.dart` | ③ 新增 | 徽章/预览项 |
-| `widgets/diary_day_photos/diary_day_photos_sheet.dart`、`diary_day_photos_limited_hint.dart`、`diary_day_photos_sheet_states.dart`、`diary_day_photos_strip.dart` | ③ | 视频授权与插入 |
+| `pages/diary_day_photo_preview_page.dart` | ③a 新增（352 行） | 这天照片预览页 |
+| `controllers/diary_day_photos_controller.dart` | ③a | 视频权限/计数/封面 |
+| `widgets/diary_day_photos/diary_day_photo_tile.dart` | ③a | +206/−182：视频时长 + Hero 预览重写 |
+| `widgets/diary_day_photos/diary_day_photo_badges.dart`、`diary_day_photo_preview_items.dart` | ③a 新增 | 徽章/预览项 |
+| `widgets/diary_day_photos/diary_day_photos_sheet.dart`、`diary_day_photos_limited_hint.dart`、`diary_day_photos_sheet_states.dart`、`diary_day_photos_strip.dart` | ③a | 视频授权与插入 |
 
 **牵连**：编辑器页（插入链路）、视频播放器（`diary_video_player_controller.dart` 的 `content://` + `diary_video_controls.dart` ③，共用进度条）。
 
@@ -167,16 +266,16 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `widgets/diary_card/diary_card.dart` | ③ | 留言数 + 媒体徽章 + 底栏封面 |
+| `widgets/diary_card/diary_card.dart` | ③a（主）+ ③b（次） | 留言数（上游 #95）+ 媒体徽章与底栏封面（为暖阳/备忘预设加的，fork） |
 | `widgets/diary_card/diary_card_content.dart` | ② | `_bottom` 通栏封面 + 暖阳配色 |
 | `widgets/diary_card/diary_card_blocks.dart` | ② | 日期块兜底/行内日期/页脚开关 |
 | `widgets/diary_card/diary_card_lines.dart` | ① | +302/−133，按预设重写行排布 |
 | `widgets/diary_card/diary_card_cover.dart` | ① | 拼贴最多 3 张 |
 | `widgets/diary_card/diary_card_cover_placeholder.dart` | ① | 封面占位 |
-| `widgets/diary_card/diary_card_comment_count.dart` | ③ 新增 | 留言数角标 |
+| `widgets/diary_card/diary_card_comment_count.dart` | ③a 新增 | 留言数角标 |
 | `models/diary_card_style/*`（9 文件） | ① | `diary_card_style_presets.dart` 新增暖阳 `_warm` + 备忘 `_memo` 预设与杂志重调；`diary_card_color_spec.dart` 删 light/dark 双值、加 `warm` 源；`diary_card_meta_style.dart` 加 `bigDate`/`inlineDate`/`mediaBadge`/`dateAccent`；其余为默认值/枚举/JSON |
 | `viewmodels/diary_card_appearance.dart`、`diary_card_colors.dart`（暖阳陶土橘 `#C47030`）、`diary_card_date_formatter.dart`（备忘用 `dateTime` 格式）、`diary_card_resolved_style.dart`、`diary_card_shadows.dart`（投影 0.6→0.15） | ① | 卡片外观解析 |
-| `viewmodels/diary_card_media_summary.dart` | ③ | 媒体摘要 |
+| `viewmodels/diary_card_media_summary.dart` | ③b | 媒体摘要（已在 §2.4 计一次，不重复计） |
 
 **牵连**：`DiariesListSection` 是 `DiaryCard` 唯一调用方，日记页/搜索页/归档页都经它渲染；样式模型同时被设置页样式编辑器（§2.9）读写。**注意**：`diary_card_color_spec.dart` 删 light/dark 后，旧存档里的深色值读取时被丢弃（`diary_card_style_json.dart` 同步删了 `_argb`/`_hex` 辅助函数）。
 
@@ -184,9 +283,9 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/diary_search_page.dart` | ③ | +180：搜留言开关 + “留言匹配”分组，去重后用 `DiariesListSection` 复用渲染 |
-| `providers/diary_comment_providers.dart` | ③ 新增（62 行） | 留言 provider |
-| `pages/archived_diaries_page.dart` | ③ | +12/−4：`swipeArchive` 功能开关 + 留言数 |
+| `pages/diary_search_page.dart` | ③a | +180：搜留言开关 + “留言匹配”分组，去重后用 `DiariesListSection` 复用渲染 |
+| `providers/diary_comment_providers.dart` | ③a 新增（62 行） | 留言 provider |
+| `pages/archived_diaries_page.dart` | ③a | +12/−4：`swipeArchive` 功能开关 + 留言数 |
 | `controllers/archived_diaries_controller.dart` | ④-C | 仅 1 行注释改动（见 §6.3） |
 | `pages/diary_drafts_page.dart` | ④-C | 仅 1 行注释改动（见 §6.3） |
 | `sections/diary_draft_picker_sheet.dart` | ① | 图标 16→20 |
@@ -197,14 +296,14 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `pages/publish_diary_page.dart` | ③ | +71：发表后自动 AI 回应 + AI 建议 |
+| `pages/publish_diary_page.dart` | ③a | +71：发表后自动 AI 回应 + AI 建议 |
 | `widgets/publish_diary_preview.dart` | ④-M | 发布预览 |
 | `widgets/publish_panel/publish_tag_row.dart` | ② | 三态部分选中 |
 | `widgets/publish_panel/publish_mood_energy_sections.dart` | ① | SaltSwitch |
-| `widgets/publish_panel/publish_resolvable_field.dart`、`publish_tag_search_bar.dart` | ③ | 各 +2 行接 `appTextContextMenuBuilder` |
-| `pages/simple_composer_page.dart` | ③ 新增（391 行） | 简洁编辑器 |
-| `controllers/simple_composer_controller.dart` | ③ 新增（252 行） | 简洁编辑器控制器 |
-| `widgets/simple_composer_image_grid.dart` | ③ 新增 | 简洁编辑器图片格 |
+| `widgets/publish_panel/publish_resolvable_field.dart`、`publish_tag_search_bar.dart` | ③a | 各 +2 行接 `appTextContextMenuBuilder` |
+| `pages/simple_composer_page.dart` | ③b 新增（391 行） | 简洁编辑器 |
+| `controllers/simple_composer_controller.dart` | ③b 新增（252 行） | 简洁编辑器控制器 |
+| `widgets/simple_composer_image_grid.dart` | ③b 新增 | 简洁编辑器图片格 |
 
 **牵连**：写同一张 `diaries` 表（`metadata.simpleComposer: true`，`new_diary_draft.dart` ③加标记字段）、与富文本草稿同表、编辑入口经 `diary_edit_entry_flow.dart` 分流（简洁/完整选择）。
 
@@ -215,7 +314,7 @@
 | `models/diary_preview_style/*`（5 文件） | ① | `diary_preview_page_style.dart` 删 `seedColor`/`paperLight…` 改 `colorIntensity`/`tintPaper`；`diary_preview_title_style.dart` 删 `colorLight/Dark` 改 `divider`/`bodyGap`；`diary_preview_style_enums.dart` 加 `DiaryPreviewColorIntensity`；`diary_preview_presets.dart` 心情预设加 `tintPaper`；`diary_preview_style_limits.dart` 加 `titleBodyGap` 范围 |
 | `viewmodels/diary_preview_resolved_style.dart` | ① | 心情色板/强度/纸面染色 |
 | `viewmodels/diary_text_appearance.dart` | ① | 正文字体显式 `HarmonyOSSansSC`，与 UI 系统字体解耦 |
-| `widgets/diary_typography_metrics_editor.dart` | ③ | 首行缩进滑块 |
+| `widgets/diary_typography_metrics_editor.dart` | ③a | 首行缩进滑块 |
 | `widgets/diary_typography_preview.dart` | ④-M | Quill 控制器→AppFlowy 预览 |
 
 **牵连**：设置页样式编辑器（`lib/ui/settings/sections/diary_preview_style/`）读写同一模型；旧存档的 `colorLight`/`Dark`、`seedColor` 等键读取时被丢弃。
@@ -227,19 +326,19 @@
 | `settings/pages/settings_page.dart` | ② | 377 行：两张分组大卡（界面组/内容组，组标题卡内蓝字）取代“一项一张卡摞满屏”；图标 FA→Material outlined；新增个人资料、AI 设置入口 |
 | `settings/pages/appearance_language_page.dart` | ② | 新增“首页布局”分组 + 语言行 padding 4→2、字重 w600→w400 |
 | `settings/sections/settings_theme_section.dart` | ① | 199 行：删调色板选择器，主题色锁 Salt 蓝 |
-| `settings/sections/settings_editor_section.dart` | ③ | AI 写作不可用时工具栏隐藏 AI 项（`aiModuleAvailableProvider`），传 `aiAvailable` 给工具栏排序页 |
-| `settings/pages/diary_toolbar_order_page.dart` | ③ | AI 项显隐与拖拽拼回逻辑 + 文本菜单 import（与上游 tip-diff 360 行，双方改法分叉大，见 §7） |
+| `settings/sections/settings_editor_section.dart` | ③a | AI 写作不可用时工具栏隐藏 AI 项（`aiModuleAvailableProvider`），传 `aiAvailable` 给工具栏排序页 |
+| `settings/pages/diary_toolbar_order_page.dart` | ③a（主） | AI 项显隐与拖拽拼回逻辑 + 文本菜单 import（与上游 tip-diff 360 行，双方改法分叉大，见 §7） |
 | `settings/pages/diary_typography_page.dart` | ① | 仅两处 padding/字阶微调 |
 | `settings/pages/app_features_page.dart` | ② | 结构重组：新增桌面/时间线开关，纪念日从“日历下嵌套 Reveal”改平级，新增日记留言（`comments`）、AI 助手（`ai`）、侧滑归档（`swipeArchive`，仅手机）三行；删 `settings_reveal.dart` 嵌套 |
-| `settings/pages/profile_page.dart` + `settings/controllers/profile_page_controller.dart` | ③ 新增（265 行） | 昵称/简介/头像/封面（FilePicker→私有目录→设置键落盘→删旧文件） |
-| `settings/pages/mood_options_page.dart` + `settings/models/mood_palette.dart`（③，新增 227 行）+ `settings/widgets/mood_color_picker.dart`（③，新增 151 行） | ③ | 心情符号+颜色自定义，存单 JSON 键 `app.settings.mood_palette`，旧 `mood_options` 键只迁移读一次 |
+| `settings/pages/profile_page.dart` + `settings/controllers/profile_page_controller.dart` | ③b 新增（265 行） | 昵称/简介/头像/封面（FilePicker→私有目录→设置键落盘→删旧文件） |
+| `settings/pages/mood_options_page.dart` + `settings/models/mood_palette.dart`（③b，新增 227 行）+ `settings/widgets/mood_color_picker.dart`（③b，新增 151 行） | ③b | 心情符号+颜色自定义，存单 JSON 键 `app.settings.mood_palette`，旧 `mood_options` 键只迁移读一次 |
 | `settings/pages/tag_management_page.dart` | ① | 列表整体装进分组白卡、SaltSwitch、图标 FA→Material |
 | `settings/pages/data_management_page.dart` | ① | 仅行首图标 16→20、深色、行距 4→2 |
 | `settings/pages/data_privacy_page.dart` | ① | 同上 + `SwitchListTile`→`ListTile`+`SaltSwitch` |
 | `settings/pages/cloud_backup_page.dart` | ① | 图标 16→20 + 自动备份时多一行上次结果 |
-| `settings/pages/cloud_backup_target_page.dart` | ③ | 增量备份入口、`List<CloudBackupEntry>`→`CloudBackupListing`、配置表单收进分组白卡 |
+| `settings/pages/cloud_backup_target_page.dart` | ③a | 增量备份入口、`List<CloudBackupEntry>`→`CloudBackupListing`、配置表单收进分组白卡 |
 | `settings/pages/about_page.dart` | ① | `Divider`→`SettingsCardGroupDivider`、`_SectionCard` 去阴影描边改纯白扁平卡、行首图标 18→20 深色 + 新增“更新日志”入口 |
-| `settings/pages/changelog_page.dart` + `settings/models/changelog_entry.dart` + `changelog_entries.dart` + `changelog_entries_legacy.dart` | ③ 新增 | 手写双语条目 + 展开/收起卡片（与上游平行实现，见 §7） |
+| `settings/pages/changelog_page.dart` + `settings/models/changelog_entry.dart` + `changelog_entries.dart` + `changelog_entries_legacy.dart` | ③a 新增（平行实现） | 手写双语条目 + 展开/收起卡片（与上游平行实现，见 §7） |
 | `settings/widgets/release_notes_view.dart` | ④ | 与上游逐字节相同（§6.1） |
 
 **牵连**：设置首页改分组结构要同步改全部子页入口；功能管理页改开关即改底栏 Tab 列表（`home/models/home_tab.dart`、`home_page_controller.dart`、`home_page.dart`）；心情色板格式改动要同步日历聚合、探索趋势、预览页配色三处消费方；云备份页牵连 controllers 全套（§6.1，实为上游代码）+ `home_page.dart`（自动调度在首页启动）。
@@ -250,13 +349,13 @@
 |---|---|---|
 | `settings/widgets/style_editor/style_editor_scaffold.dart` | ② | 787 行（+644/−143）：v5–v8 阅读软件式重建——默认只看全屏预览、点空白处才呼出顶栏/底栏；顶部悬浮 32 白圆按钮、底部 48 高直角满宽 tab（图标在上文字在下）、设置面板矮面板≤屏幕 30%、字号×0.85。新增 `tabIcons` 参数。**4 个样式页全部依赖它，改外壳即改 4 页** |
 | `settings/widgets/style_editor/style_editor_common.dart` | ② | 456 行（+424/−32）：新增 `StylePillGroup`（药丸分段）、`StyleSliderRow`（带步进按钮的滑杆行）、`StyleEditorMergedTab`（合并 tab）、`StyleEditorFirstGroupScope`/`StyleEditorEmbeddedScope`（面板内首组贴顶/紧凑模式）。**全部样式 tab 页的控件都走这里；同时 `settings_card_group.dart` 读它的 EmbeddedScope 做面板内紧凑模式——样式编辑器与全站设置卡是双向牵连** |
-| `settings/widgets/style_editor/style_preset_list.dart` | ③ 新增（43 行） | 药丸组（Salt 蓝底白字选中态），`StylePresetOption` 砍掉 `icon`/`description` 字段，取代上游 `style_preset_grid.dart`（fork 已删） |
+| `settings/widgets/style_editor/style_preset_list.dart` | ③b 新增（43 行） | 药丸组（Salt 蓝底白字选中态），`StylePresetOption` 砍掉 `icon`/`description` 字段，取代上游 `style_preset_grid.dart`（fork 已删） |
 | `settings/widgets/style_editor/style_library_tab.dart` | ① | 仅小改 |
 | `settings/widgets/settings_card_group.dart` | ② | 样式编辑器面板与全站设置页的共用底座 |
 | `settings/widgets/settings_option_tiles.dart` | ① | SaltSwitch + w400 |
 | `diary_card_style_page.dart` + 11 个 section（`color`/`content`/`cover`/`date`/`layout`/`order`/`presets`/`text`/`texture_tab`/`labels`/`preview`） | ② 为主，section 多为 ① | tab 从 8 个合并为大类 + `tabIcons`；section 多为控件换皮（`SettingsSliderTile`→`StyleSliderRow`、`ExpressiveIconChoiceRow`→`StylePillGroup`）；`labels.dart` 加 memo/暖阳预设名、封面 `bottom` 位置、色源 `custom`→`warm`；`preview.dart` 预览工具条重写为药丸组 |
 | `diary_preview_style_page.dart` + 8 个 section（`body`/`cover`/`labels`/`meta`/`page`/`paging`/`preview`/`title`） | ② 为主，section 全 ① | tab 合并 + `tabIcons`；`page_tab` 删自定义色种子分支、`title_tab` 滑杆/分段换药丸、`labels.dart` 删 `custom` 种子/纸张、新增着色强度三档 |
-| `diary_code_block_style_page.dart` + 4 个 section（`display`/`font`/`theme_tab`/`preview`） | ②（页）/ ①（section）/ ③（`preview.dart`） | 页仅加 `tabIcons` + 亮度按钮参数简化；`preview.dart`（fork 145 / tip 185）：Quill 预览控制器→AppFlowy `Document`，fork 自家改法与上游分叉 |
+| `diary_code_block_style_page.dart` + 4 个 section（`display`/`font`/`theme_tab`/`preview`） | ②（页）/ ①（section）/ ③a（`preview.dart`，平行实现） | 页仅加 `tabIcons` + 亮度按钮参数简化；`preview.dart`（fork 145 / tip 185）：Quill 预览控制器→AppFlowy `Document`，fork 自家改法与上游分叉 |
 | `home_bar_style_page.dart` + 7 个 section（`common`/`floating`/`items`/`labels`/`material`/`outline`/`preview_toolbar`） | ②（页）/ ①（section） | `tabIcons` + 材质/悬浮 tab 合并为 `StyleEditorMergedTab`；section 删自定义 tint/线色分支、按钮组换药丸 |
 
 **已删（fork 删除，上游 tip 仍保留）**：`style_color_dialog.dart`（262 行）、`style_custom_color_tile.dart`（90 行）——自定义取色入口被砍（与暖阳 `warm` 色源取代 `custom` 呼应）；`style_preset_grid.dart`（148 行）——被 `style_preset_list.dart` 取代。合上游时这三处会冲突：上游仍在用它们，fork 的 labels/common 已不再引用。
@@ -267,30 +366,30 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `home/pages/desktop_page.dart` | ③ 新增（494 行） | 题头（日期+问候+总览数）→写点什么→快捷入口 6 格（2 行 3 格：时间线/相册/日历/标签/那年今日/情绪趋势）→最近记录 3 条；四区块顺序/显隐可配（`DesktopLayout`）；数据复用探索页 `ExplorePageController` + `exploreDiariesProvider`。牵连中心 |
-| `home/sections/desktop_header.dart`（③，109 行）、`desktop_recent.dart`（③，200 行）、`desktop_tiles.dart`（③，181 行）、`desktop_write_button.dart`（③）、`home/widgets/desktop_card.dart`（③，38 行） | ③ | 四个区块的拆分实现 |
-| `home/models/desktop_layout/desktop_layout.dart`（③，187 行）+ `desktop_layout_code.dart`（③，26 行）+ `home/providers/desktop_layout_provider.dart`（③，42 行） | ③ | 单 JSON 键 `desktopLayoutRaw` 持久化 + 同步 Notifier（防首帧闪烁） |
+| `home/pages/desktop_page.dart` | ③b 新增（494 行） | 题头（日期+问候+总览数）→写点什么→快捷入口 6 格（2 行 3 格：时间线/相册/日历/标签/那年今日/情绪趋势）→最近记录 3 条；四区块顺序/显隐可配（`DesktopLayout`）；数据复用探索页 `ExplorePageController` + `exploreDiariesProvider`。牵连中心 |
+| `home/sections/desktop_header.dart`（③b，109 行）、`desktop_recent.dart`（③b，200 行）、`desktop_tiles.dart`（③b，181 行）、`desktop_write_button.dart`（③b）、`home/widgets/desktop_card.dart`（③b，38 行） | ③b | 四个区块的拆分实现 |
+| `home/models/desktop_layout/desktop_layout.dart`（③b，187 行）+ `desktop_layout_code.dart`（③b，26 行）+ `home/providers/desktop_layout_provider.dart`（③b，42 行） | ③b | 单 JSON 键 `desktopLayoutRaw` 持久化 + 同步 Notifier（防首帧闪烁）；模块系统模式借自上游探索页布局系统（`ExploreLayout`/`ExploreModuleConfig`），用到首页四区块是 fork 原创 |
 | `home/pages/home_page.dart` | ② | 底栏 5→3（桌面/日记/设置；日历/探索并进桌面，时间线新增）、`HomeTab.desktop`/`timeline`、Tab 请求改为 `(int, HomeTab)`、冷启动挂 `CloudBackupAutoScheduler` |
 | `home/models/home_tab.dart`（②，30 行）、`home/controllers/home_page_controller.dart`（②，38 行）、`home/providers/home_tab_request_provider.dart`（②，28 行） | ② | 底栏 Tab 定义、跨页切 Tab 请求、返回键行为；与 `notebook_navigation.dart`（④）绑定 |
-| `home/pages/home_page_chrome.dart`（①，13 行）、`home/widgets/home_bar/home_create_fab.dart`（③，新增） | ①/③ | FAB 长文案胶囊→浅紫圆角方钮+深紫铅笔图标 |
+| `home/pages/home_page_chrome.dart`（①，13 行）、`home/widgets/home_bar/home_create_fab.dart`（③a，新增；上游内联 FAB 的抽取） | ①/③a | FAB 长文案胶囊→浅紫圆角方钮+深紫铅笔图标 |
 | `home/widgets/home_bar/home_floating_bar.dart`（①，5 行）、`home_nav_destination.dart`（①，6 行） | ① | 仅微调 |
 | `home/models/home_bar_style/*`（6 文件） | ① | 见 §2.11 末尾 |
 
 ### 2.13 笔记本页
 
-**嵌套 cluster（③，全部 fork-only，10 个文件互相牵连，不能单独改/单独回滚）**：
+**嵌套 cluster（③a，功能属上游 #84/#88、fork 平行实现，10 个文件互相牵连，不能单独改/单独回滚）**：
 
 | 文件 | 说明 |
 |---|---|
-| `notebooks/models/notebook_tree.dart`（③，新增 87 行） | 防环/子孙/祖先纯数据结构 |
-| `notebooks/controllers/notebook_editor_controller.dart`（③） | +`parentId` 字段，智能本恒 null |
-| `notebooks/sections/notebook_editor_parent.dart`（③） | fork 版父本选择器（与上游平行实现，见 §7） |
-| `notebooks/pages/notebook_contents_page.dart`（③） | 面包屑 `NotebookBreadcrumb` + 子本列表 |
-| `notebooks/sections/notebook_contents_nesting.dart`（③，新增 154 行） | 嵌套内容区 |
-| `notebooks/models/notebook_scope_resolver.dart`（③） | +`descendantIds` |
-| `notebooks/providers/home_notebook_scope_provider.dart`（③） | 首页本子范围 |
-| `notebooks/providers/notebook_providers.dart`（③） | 父本篇数含后代 + 新增 `unfiledDiaryCountProvider` |
-| `notebooks/sections/notebook_shelf_sheet.dart`（③，54 行） | 书架新增“未收录”行 |
+| `notebooks/models/notebook_tree.dart`（③a，平行实现，新增 87 行） | 防环/子孙/祖先纯数据结构 |
+| `notebooks/controllers/notebook_editor_controller.dart`（③a） | +`parentId` 字段，智能本恒 null |
+| `notebooks/sections/notebook_editor_parent.dart`（③a，平行实现） | fork 版父本选择器（与上游平行实现，见 §7） |
+| `notebooks/pages/notebook_contents_page.dart`（③a，平行实现） | 面包屑 `NotebookBreadcrumb` + 子本列表 |
+| `notebooks/sections/notebook_contents_nesting.dart`（③a，平行实现，新增 154 行） | 嵌套内容区 |
+| `notebooks/models/notebook_scope_resolver.dart`（③a，平行实现） | +`descendantIds` |
+| `notebooks/providers/home_notebook_scope_provider.dart`（③a） | 首页本子范围 |
+| `notebooks/providers/notebook_providers.dart`（③a，平行实现） | 父本篇数含后代 + 新增 `unfiledDiaryCountProvider` |
+| `notebooks/sections/notebook_shelf_sheet.dart`（③a，54 行） | 书架新增“未收录”行 |
 
 其余 ①（各 2–10 行）：`notebooks_page.dart`（FA plus→Material add）、`notebook_add_diaries_page.dart`、`notebook_action_sheets.dart`、`notebook_chapter_dialogs.dart`、`notebook_editor_appearance`/`behavior`/`rules`、`notebook_quick_create_dialog.dart`、`notebook_rule_date_editor.dart`、`notebook_rule_sheets.dart`。`notebooks/controllers/notebook_navigation.dart` 是 ④（见 §6.2）。
 
@@ -299,14 +398,14 @@
 | 文件 | 类 | 说明 |
 |---|---|---|
 | `explore/pages/explore_page.dart` | ② | **删除 316 行**：整页删除，功能并进首页；上游 tip 仍保留此页，合上游时是结构冲突点 |
-| `explore/pages/explore_memory_page.dart` | ③ 新增 | 那年今日页（概况卡 + 那年今日 + AI 洞察卡组合） |
-| `explore/pages/explore_insight_page.dart` | ③ 新增 | 情绪与精力趋势页（复用 `ExploreInsightCard`） |
-| `explore/sections/explore_overview_card.dart` | ③ | fork 简化概况卡（与上游平行实现，见 §7） |
-| `explore/sections/explore_ai_insight_card.dart` | ③ | fork 版 AI 卡（上游有自己的 AI 卡） |
-| `explore/controllers/explore_writing_stats_builder.dart` | ③ 新增（49 行） | 概况卡三行聚合 |
-| `explore/models/explore_view_data.dart` | ③ | +`ExploreWritingStats` |
-| `explore/pages/explore_media_gallery_page.dart`（③，fork 475 / tip 578）+ `gallery_filter_bar.dart`（③，245 行）+ `gallery_layout_sheet.dart`（③，216 行）+ `gallery_media_tile.dart`（③） | ③ | 画廊 v2（年/月/日分组、列数持久化、分类筛选、音频/视频） |
-| `explore/controllers/explore_content_extractor.dart`（③，135 行）+ `explore_media_gallery_controller.dart`（③，33 行）+ `explore_page_controller.dart`（③）+ `explore/providers/explore_providers.dart`（③） | ③ | 媒体从“仅图片”扩展到图片/音频/视频（`ExploreMediaSource` typed 元组） |
+| `explore/pages/explore_memory_page.dart` | ③b 新增 | 那年今日页（概况卡 + 那年今日 + AI 洞察卡组合） |
+| `explore/pages/explore_insight_page.dart` | ③b 新增 | 情绪与精力趋势页（复用 `ExploreInsightCard`） |
+| `explore/sections/explore_overview_card.dart` | ③a（平行实现） | fork 简化概况卡（与上游平行实现，见 §7） |
+| `explore/sections/explore_ai_insight_card.dart` | ③a（平行实现） | fork 版 AI 卡（上游有自己的 AI 卡） |
+| `explore/controllers/explore_writing_stats_builder.dart` | ③a 新增（49 行，平行实现） | 概况卡三行聚合 |
+| `explore/models/explore_view_data.dart` | ③a（平行实现） | +`ExploreWritingStats` |
+| `explore/pages/explore_media_gallery_page.dart`（③b，fork 475 / tip 578）+ `gallery_filter_bar.dart`（③b，245 行）+ `gallery_layout_sheet.dart`（③b，216 行）+ `gallery_media_tile.dart`（③b） | ③b | 画廊 v2（年/月/日分组、列数持久化、分类筛选、音频/视频） |
+| `explore/controllers/explore_content_extractor.dart`（③b，135 行）+ `explore_media_gallery_controller.dart`（③b，33 行）+ `explore_page_controller.dart`（③b，主）+ `explore/providers/explore_providers.dart`（③b，主） | ③b | 媒体从“仅图片”扩展到图片/音频/视频（`ExploreMediaSource` typed 元组） |
 | `explore/widgets/explore_shared_widgets.dart` | ① | 共用卡片/标题样式重刷 |
 | 删除且上游也删（④，§6.1）：`explore_content_section.dart`、`explore_media_gallery_card.dart`、`explore_stats_card.dart`、`explore_tag_cloud_card.dart` | ④ | 删除动作本身不是 fork 定制 |
 
@@ -314,18 +413,18 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `diary_templates/controllers/diary_template_editor_controller.dart` | ③ | fork 仅 27 行——Quill→AppFlowy 主干是上游已合代码，fork 只剩事务流订阅 + `diaryBlocksToQuillOps` 转换 |
-| `diary_templates/sections/diary_template_editor_content_tab.dart` | ③ | AppFlowy 编辑器 + 变量插入 + 工具栏高度预算（与上游分叉，见 §7） |
-| `diary_templates/models/diary_template_variables.dart` | ③ | 时间变量带格式 `{{时间:HH:mm}}`，全角冒号兼容 |
-| `diary_templates/viewmodels/diary_template_variable_values.dart` | ③ | `formatDiaryTemplateMoment` 图案校验（tip-diff 仅 3 行，见 §6.2） |
-| `diary_templates/widgets/diary_template_variable_bar.dart` | ③ | 12 小时制格式行 + `_VariableTile` 抽取 |
+| `diary_templates/controllers/diary_template_editor_controller.dart` | ③a（主；实质是迁移适配，见注） | fork 仅 27 行——Quill→AppFlowy 主干是上游已合代码，fork 只剩事务流订阅 + `diaryBlocksToQuillOps` 转换（注：这 27 行实质是为保 Quill 兼容做的迁移适配，④-M 性质；因功能本体属上游模板编辑器，仍归 ③a） |
+| `diary_templates/sections/diary_template_editor_content_tab.dart` | ③a（主，平行实现） | AppFlowy 编辑器 + 变量插入 + 工具栏高度预算（与上游分叉，见 §7） |
+| `diary_templates/models/diary_template_variables.dart` | ③a | 时间变量带格式 `{{时间:HH:mm}}`，全角冒号兼容 |
+| `diary_templates/viewmodels/diary_template_variable_values.dart` | ③a | `formatDiaryTemplateMoment` 图案校验（tip-diff 仅 3 行，见 §6.2） |
+| `diary_templates/widgets/diary_template_variable_bar.dart` | ③a | 12 小时制格式行 + `_VariableTile` 抽取 |
 | `diary_templates/sections/diary_template_auto_apply_groups.dart`、`diary_template_editor_settings_tab.dart`、`diary_templates_settings_group.dart`、`widgets/diary_template_search_field.dart`、`diary_template_tags_field.dart` | ① | 图标/SaltSwitch/文本菜单等小改 |
 | `diary_templates/viewmodels/diary_template_labels.dart` | ④ | 与上游逐字节相同（§6.1） |
-| `calendar/controllers/calendar_page_controller.dart` + `calendar/pages/calendar_page.dart` | ③ | 上下滑 300px/s 切月/年视图（成对，不能单改） |
+| `calendar/controllers/calendar_page_controller.dart` + `calendar/pages/calendar_page.dart` | ③b | 上下滑 300px/s 切月/年视图（成对，不能单改） |
 | `calendar/calendar_day_actions_sheet.dart`、`calendar_day_heading.dart`、`calendar_header.dart`、`calendar_options_controls.dart` | ① | 图标/字重/开关换皮 |
 | `anniversaries/anniversary_edit_page.dart`、`anniversary_diary_picker.dart` | ① | 各 3–4 行小改 |
 
-### 2.16 AI 助手（`lib/ui/ai/` 60 文件全新增 + `lib/core/services/ai/` 15 文件全新增）
+### 2.16 AI 助手（`lib/ui/ai/` 60 文件全新增 + `lib/core/services/ai/` 15 文件全新增）——③a，上游 v0.11.0 #133
 
 | 分组 | 文件数 | 说明 |
 |---|---|---|
@@ -348,15 +447,15 @@
 | 分组 | 文件数 | 说明 |
 |---|---|---|
 | `services/ai/` | 15 | 见 §2.16，全部与上游逐字节相同 |
-| `services/cloud_backup*` | 24 | 网盘 7 目标 + 增量 12 + 服务/模型/配置 5；其中增量 8 个与上游逐字节相同（§6.1），10 个修改文件含 `cloud_backup_service.dart`（与上游仅 3 行差，见 §6.2） |
-| `services/` 根目录其他 | 24 | `backup_*` 6、`journal_import_*` 3、`day_photo_*` 2、`app_*` 3、`settings_service*` 2、`data_archive`、`diary_camera`、`diary_media_storage`、`diary_typography`、`http_cancel_token`、`profile_avatar`/`cover`、`text_process_actions` |
-| 新增 fork-only 服务 | — | `cloud_backup_media_index.dart`（219 行，网盘备份内重写的媒体索引，见 §6.2）、`profile_avatar_storage_service.dart`、`profile_cover_storage_service.dart`（各 65 行，个人资料头像/封面存储） |
+| `services/cloud_backup*` | 24 | ③a（主）：网盘 7 目标 + 增量 12 + 服务/模型/配置 5；其中增量 7 个与上游逐字节相同（§6.1，2026-11-07 复核修正，原记 8 个），10 个修改文件含 `cloud_backup_service.dart`（与上游仅 3 行差，见 §6.2）；另 `cloud_backup_media_index.dart` 归 ③b（见下行） |
+| `services/` 根目录其他 | 24 | ③a（主）：`backup_*` 6、`journal_import_*` 3、`day_photo_*` 2、`app_*` 3、`settings_service*` 2、`data_archive`、`diary_camera`、`diary_media_storage`、`diary_typography`、`http_cancel_token`、`text_process_actions`；其中 `app_features.dart`、`settings_service.dart`、`settings_service_backup.dart` 归 ③b（主）（fork 功能接线，见 §2.17 核对），`profile_avatar`/`cover` 存储服务归 ③b |
+| 新增 fork-only 服务 | — | ③b：`cloud_backup_media_index.dart`（219 行，网盘备份内重写的媒体索引，见 §6.2）、`profile_avatar_storage_service.dart`、`profile_cover_storage_service.dart`（各 65 行，个人资料头像/封面存储） |
 
 **牵连与缺口**：`BackupPayload` 有 `diaryComments` 但**无 `dayMoods`**；`backup_merge.dart` 里 `diaryComments`/`dayMoods` 出现 0 次——合并模式会静默丢弃载荷里的留言与心情（只有完整恢复 `writeDatabase` 会写留言）。上游有 `_prepareDiaryComments` / `_mergeDayMoods` / 计数回填。**这是已知旧缺口，合 v0.12.0（#154 留言图片）时顺带修**（见 §7）。另：`settings_service.dart`（+226/−23）新增画廊列数/分组、个人资料、心情色板、桌面布局、`aiPrefsRaw` 等设置键；`backup_settings.dart` 同步新增上述键的导出/恢复（+72 行）。
 
 ### 2.18 数据库（`lib/core/database/` 35 文件）
 
-根目录 25 个（schema/ops/迁移/编解码，新增 8、修改 17）+ `diary_blocks/` 10 个（块文档 9 + `diary_list_style`，全新增）。变迁表见 §4。
+根目录 25 个（schema/ops/迁移/编解码，新增 8、修改 17）+ `diary_blocks/` 10 个（块文档 9 + `diary_list_style`，全新增）。变迁表见 §4。本节表文件全部属 ③a（AI 三表 #133、日记留言 #95、笔记本 `parent_id` #84、这天的心情 v0.10.0）。
 
 **共用表（改动会牵连的功能）**：
 - `diaries`：几乎全部功能（列表/搜索/探索/日历/归档/导出/备份/同步口径/私密排除）。牵连点：`diary_scope_sql.dart`（私密递归 CTE + `DiaryUnfiledScope`）、`diary_list_queries.dart`（时间轴）、`diary_writes.dart`（`hardDeleteDiary` 删 AI 回应）、`diary_queries.dart`（`getDiaryImageSourceRefs`）。
@@ -369,13 +468,13 @@
 
 | 文件 | 类 | 说明 |
 |---|---|---|
-| `lib/app/node_diary_app.dart` | ③ | 应用装配 |
+| `lib/app/node_diary_app.dart` | ③b（主） | 应用装配（fork 功能接线） |
 | `lib/app/theme/`（6 文件：`theme`、`theme_color_schemes`、`expressive_controls`/`surfaces`、`app_effects`、`app_radii`） | ① | Salt 蓝 `#0470E6`、底 `#FAFBFC`、卡片纯白、圆角收小（`app_radii` card 16 vs 上游 24） |
 | `lib/l10n/app_en.arb`、`app_zh.arb` + 生成文件 ×3 | — | ARB 3108 条（上游约 3950 条；fork 独有 187 键，多为桌面/更新日志） |
 | `pubspec.yaml` | — | 版本 0.10.0+22；依赖：`provider ^6.1.5` 新增、AppFlowy 编辑器 git 版 + `keyboard_height_plugin` override；仍用 `flutter_quill`（PDF/导入/编解码桥接）；`archive ^3.6.1` / `xml ^6.6.1` / `drift ^2.32.0`（上游已是 `archive ^4.6.0` / `xml ^7.0.1` / `drift ^2.35.3`，见 §7） |
-| `android/`（6 文件） | ③ 为主 | `DiaryCameraCapture.kt` + `diary_camera_paths.xml`（与上游逐字节相同）+ 相机权限（fork 独有）；`AndroidManifest` 上游多 LAN 组播/扫码权限，fork 多相机权限与相册 `PICK` intent；`MainActivity.kt` 上游多预测返回与 LAN 通道，fork 多相机通道 |
+| `android/`（6 文件） | ③a（主）+ ③b（次） | `DiaryCameraCapture.kt` + `diary_camera_paths.xml`（与上游逐字节相同）+ 相机权限（fork 独有）；`AndroidManifest` 上游多 LAN 组播/扫码权限，fork 多相机权限与相册 `PICK` intent；`MainActivity.kt` 上游多预测返回与 LAN 通道，fork 多相机通道 |
 | `DESIGN.md`、`AGENTS.md` | — | 文档（fork 改动记录） |
-| `.github/workflows/build-apk.yml` | ③ | fork 签名构建（68 行，上游另有 `ci.yml`/`release-apk.yml`/`download-stats.yml`） |
+| `.github/workflows/build-apk.yml` | ③b | fork 签名构建（68 行，上游另有 `ci.yml`/`release-apk.yml`/`download-stats.yml`） |
 
 ## 3. 能一起改的分组
 
@@ -386,18 +485,18 @@
 | A. Salt 主题皮 | 只换颜色/间距/字号/图标，不改逻辑。77 个文件 tip-diff ≤ 30 行，都是薄薄一层 Salt 皮盖在上游底子上 | `lib/app/theme/*`、`lib/ui/widgets/salt_switch.dart`、各页 ① 文件（图标 16→20、开关换 SaltSwitch、字重 w500→w400、padding 收紧） |
 | B. 样式编辑器外壳 + 控件 | 外壳、共用控件、预设列表三件套一起改 | `style_editor_scaffold.dart`、`style_editor_common.dart`、`style_preset_list.dart`（§5.1） |
 | C. 样式编辑器 4 个页 | 卡片/预览/代码块/导航栏各页的 tab 与 section（共用 B 的组件） | §2.11 各页（改一页的 tab 不影响其他页，但改 B 会影响全部） |
-| D. 首页桌面四区块 | 题头/写点什么/快捷入口/最近记录 + 桌面布局模型 | `desktop_page.dart`、`desktop_header.dart`、`desktop_recent.dart`、`desktop_tiles.dart`、`desktop_write_button.dart`、`desktop_layout/*`、`desktop_layout_provider.dart` |
-| E. 笔记本嵌套 cluster | 10 个文件一体（§2.13） | `notebook_tree.dart`、`notebook_editor_controller.dart`、`notebook_editor_parent.dart`、`notebook_contents_page.dart`、`notebook_contents_nesting.dart`、`notebook_scope_resolver.dart`、`home_notebook_scope_provider.dart`、`notebook_providers.dart`、`notebook_shelf_sheet.dart` |
-| F. 时间线 Moments 页 | 整页 + 条目组件 + 个人资料 provider | `timeline_page.dart`、`diary_timeline/*`、`diary_profile_provider.dart`、`diary_timeline_entry_menu_sheet.dart` |
-| G. AI 助手 | UI 全套 + 服务 + 三张表（但大文件与上游分叉，见 §2.16 注意） | `lib/ui/ai/*`、`lib/core/services/ai/*`、`app_database_ai_*` |
-| H. 增量备份 | 增量扫描/打包/状态 + 媒体索引 + 备份服务 | `cloud_backup_incremental*.dart`、`cloud_backup_media_index.dart`、`cloud_backup_service_incremental.dart`、`backup_archive_io.dart` |
-| I. 日记卡片渲染 | 卡片组件 + 样式模型 + 预设（改一处影响列表/搜索/归档/日历四处，见 §5.10） | `widgets/diary_card/*`、`models/diary_card_style/*`、`diary_card_appearance.dart` 等 |
-| J. 简洁编辑器 | 简洁编辑器三件套 + 编辑入口分流 | `simple_composer_page.dart`、`simple_composer_controller.dart`、`simple_composer_image_grid.dart`、`diary_edit_entry_flow.dart` |
-| K. 这天照片视频 | 预览页 + 控制器 + 贴条/面板 | `diary_day_photo_preview_page.dart`、`diary_day_photos_controller.dart`、`diary_day_photos/*` |
-| L. 模板变量与时间格式 | 变量解析 + 取值 + 变量栏 | `diary_template_variables.dart`、`diary_template_variable_values.dart`、`diary_template_variable_bar.dart` |
-| M. 日历月/年视图 | 控制器 + 页面成对 | `calendar_page_controller.dart`、`calendar_page.dart` |
-| N. 选区菜单（本体是上游代码，别碰） | 消费方每处只加一行 `contextMenuBuilder`；本体 6 个文件与上游逐字节相同 | `lib/ui/widgets/text_selection_menu/*`（§6.1） |
-| O. 快速滚动条（本体是上游代码，别碰） | 消费方只复用 `FastScroller`；本体 5 个文件与上游逐字节相同 | `lib/ui/widgets/fast_scroller/*`（§6.1） |
+| D. 首页桌面四区块（③b） | 题头/写点什么/快捷入口/最近记录 + 桌面布局模型 | `desktop_page.dart`、`desktop_header.dart`、`desktop_recent.dart`、`desktop_tiles.dart`、`desktop_write_button.dart`、`desktop_layout/*`、`desktop_layout_provider.dart` |
+| E. 笔记本嵌套 cluster（③a，平行实现） | 10 个文件一体（§2.13） | `notebook_tree.dart`、`notebook_editor_controller.dart`、`notebook_editor_parent.dart`、`notebook_contents_page.dart`、`notebook_contents_nesting.dart`、`notebook_scope_resolver.dart`、`home_notebook_scope_provider.dart`、`notebook_providers.dart`、`notebook_shelf_sheet.dart` |
+| F. 时间线 Moments 页（③b） | 整页 + 条目组件 + 个人资料 provider | `timeline_page.dart`、`diary_timeline/*`、`diary_profile_provider.dart`、`diary_timeline_entry_menu_sheet.dart` |
+| G. AI 助手（③a） | UI 全套 + 服务 + 三张表（但大文件与上游分叉，见 §2.16 注意） | `lib/ui/ai/*`、`lib/core/services/ai/*`、`app_database_ai_*` |
+| H. 增量备份（③a；`cloud_backup_media_index.dart` 另属 ③b） | 增量扫描/打包/状态 + 媒体索引 + 备份服务 | `cloud_backup_incremental*.dart`、`cloud_backup_media_index.dart`、`cloud_backup_service_incremental.dart`、`backup_archive_io.dart` |
+| I. 日记卡片渲染（① + ③a/③b 混合） | 卡片组件 + 样式模型 + 预设（改一处影响列表/搜索/归档/日历四处，见 §5.10） | `widgets/diary_card/*`、`models/diary_card_style/*`、`diary_card_appearance.dart` 等 |
+| J. 简洁编辑器（③b） | 简洁编辑器三件套 + 编辑入口分流 | `simple_composer_page.dart`、`simple_composer_controller.dart`、`simple_composer_image_grid.dart`、`diary_edit_entry_flow.dart` |
+| K. 这天照片视频（③a） | 预览页 + 控制器 + 贴条/面板 | `diary_day_photo_preview_page.dart`、`diary_day_photos_controller.dart`、`diary_day_photos/*` |
+| L. 模板变量与时间格式（③a） | 变量解析 + 取值 + 变量栏 | `diary_template_variables.dart`、`diary_template_variable_values.dart`、`diary_template_variable_bar.dart` |
+| M. 日历月/年视图（③b 手势 + ①） | 控制器 + 页面成对 | `calendar_page_controller.dart`、`calendar_page.dart` |
+| N. 选区菜单（③a，本体是上游代码，别碰） | 消费方每处只加一行 `contextMenuBuilder`；本体 6 个文件与上游逐字节相同 | `lib/ui/widgets/text_selection_menu/*`（§6.1） |
+| O. 快速滚动条（③a，本体是上游代码，别碰） | 消费方只复用 `FastScroller`；本体 5 个文件与上游逐字节相同 | `lib/ui/widgets/fast_scroller/*`（§6.1） |
 
 ## 4. 数据库变迁（fork v14→v17；上游已到 v18）
 
@@ -418,7 +517,7 @@
 ## 5. 牵连总图（不能单独改的节点）
 
 1. **样式编辑器外壳 + 共用控件**：`style_editor_scaffold.dart` + `style_editor_common.dart` —— 4 个样式页 + 全部样式 tab + `style_preset_list.dart` + `settings_card_group.dart`（面板紧凑模式）。动一处，4 页 + 全站设置卡联动。
-2. **设置卡片组 + Salt 开关**：`settings_card_group.dart`（②）——设置首页、全部子设置页、笔记本编辑器各 section、云备份目标页、标签页、心情页都在用；改卡片留白/标题样式 = 全站联动。`salt_switch.dart`（③，`lib/ui/widgets/salt_switch.dart`）——设置开关、数据与隐私、云备份表单、模板设置组、日历选项、编辑/发布/搜索页都在用；换外观即全站开关变。
+2. **设置卡片组 + Salt 开关**：`settings_card_group.dart`（②）——设置首页、全部子设置页、笔记本编辑器各 section、云备份目标页、标签页、心情页都在用；改卡片留白/标题样式 = 全站联动。`salt_switch.dart`（①，`lib/ui/widgets/salt_switch.dart`）——设置开关、数据与隐私、云备份表单、模板设置组、日历选项、编辑/发布/搜索页都在用；换外观即全站开关变。
 3. **底栏 Tab 四件套**：`home_tab.dart` + `home_tab_request_provider.dart` + `home_page_controller.dart` + `home_page.dart` ——底栏 Tab 定义、跨页切 Tab 请求（桌面快捷入口、笔记本跳转、预览页日记本胶囊）、返回键行为；与 `notebook_navigation.dart`（④）绑定。
 4. **日记页快速滚动条链路**：`diaries_fast_scroller.dart` → `FastScroller`（`lib/ui/widgets/fast_scroller/`）→ `diary_timeline_index.dart` → `diary_timeline_provider.dart`（`watchDiaryTimeline`）→ `pagedDiariesProvider`。位置一律按“第几篇”换算；替换 `pagedDiariesProvider` 且会滚动长列表的测试须同时替换 `diaryTimelineProvider`，不打开真实数据库。
 5. **桌面布局读写两端**：`desktop_layout` 模型 + provider + `desktop_page.dart` + `desktop_layout_page.dart` ——首页区块顺序/显隐的读写两端。
@@ -434,15 +533,15 @@
 
 结论先行：**严格口径下（vs 合并基，逻辑全同、只换写法/换名/挪位）真正能直接改回原版的文件很少**。三个分片的判定汇总如下，分四档，收益最大的在前。
 
-### 6.1 第一档：已与上游逐字节相同（96 个文件）——改回 = 不用改，已是上游版
+### 6.1 第一档：已与上游逐字节相同（95 个文件）——改回 = 不用改，已是上游版
 
-逐文件 `git diff upstream/main HEAD -- <文件>` 行数为 0。这些是 fork 当初改造着合进来的 v0.10.0/v0.11.0 功能、后来被上游原样收编的。**整理时可直接划掉；未来合上游时这 96 个文件零工作量。**
+逐文件 `git diff upstream/main HEAD -- <文件>` 行数为 0。这些是 fork 当初改造着合进来的 v0.10.0/v0.11.0 功能、后来被上游原样收编的。**整理时可直接划掉；未来合上游时这 95 个文件零工作量。**
 
 | 分组 | 文件（举例，完整清单见下） | 数量 |
 |---|---|---|
 | `lib/core/services/ai/` | 15 个客户端/预设/用量等，全部 | 15 |
 | `lib/ui/ai/` | controllers 9 + viewmodels 7 + models 5 + widgets 4 + pages 1 + providers 1 | 27 |
-| `lib/core/services/cloud_backup*` | 增量 8 个（`cloud_backup_incremental*.dart`） | 8 |
+| `lib/core/services/cloud_backup*` | 增量 7 个（`cloud_backup_incremental*.dart`，2026-11-07 复核修正） | 7 |
 | `lib/core/database/` | AI/心情 schema+ops、batch_writes 等 | 5 |
 | `lib/core/database/diary_blocks/` | 5 个 | 5 |
 | `lib/core/services/` 修改后相同 | `backup_zip_writer.dart`、`cloud_backup_aliyun/baidu/dropbox/google_drive/onedrive`、`cloud_backup_models.dart`、`cloud_backup_settings_service.dart`、`cloud_backup_target.dart`、`cloud_backup_webdav.dart` | 10 |
@@ -455,11 +554,11 @@
 | `lib/ui/widgets/text_selection_menu/` | 全套 6 个：`app_text_context_menu.dart`、`app_text_context_menu_panel.dart`、`app_text_menu_action.dart`、`app_text_selection_layout.dart`、`app_text_selection_toolbar.dart`、`app_text_toolbar_buttons.dart` | 6 |
 | `lib/ui/widgets/` | `desktop_horizontal_scroll.dart`、`select_all_button.dart` | 2 |
 | `lib/ui/diary_templates/viewmodels/` | `diary_template_labels.dart` | 1 |
-| **合计** | | **96** |
+| **合计** | | **95** |
 
 > 迷惑性案例：`cloud_backup_controller.dart` 相对合并基有 176 行 diff（`_run`/`_runResult`/`_progress`/`CloudBackupHost` 被抽成 mixin 并改名 `_host`→`host`、`_service()`→`service()`），但那是**上游自己的重构**，fork 只是原样合进来了。不要误判为 fork 改动。
 
-**收益**：未来合上游时这 96 文件零工作量；清单可直接划掉。**风险**：无。唯一注意：`cloud_backup_*` 目标文件相同，说明 fork 当初的改动已被上游原样采纳。
+**收益**：未来合上游时这 95 文件零工作量；清单可直接划掉。**风险**：无。唯一注意：`cloud_backup_*` 目标文件相同，说明 fork 当初的改动已被上游原样采纳。
 
 另外 4 个文件是“上游也删了”（fork 与上游 tip 都没有，删除动作本身不是 fork 定制）：`explore/sections/explore_content_section.dart`、`explore_media_gallery_card.dart`、`explore_stats_card.dart`、`explore_tag_cloud_card.dart`。只有 `explore_page.dart` 上游 tip 还保留（fork 删了，见 §2.14）。
 
@@ -501,7 +600,7 @@
 - **渲染器/工具栏**：`widgets/diary_preview/diary_appflowy_preview.dart`（新增 1387 行，替代 Quill 预览）、`widgets/diary_preview/diary_preview_body.dart`、`widgets/diary_preview/diary_preview_view.dart`、`widgets/publish_diary_preview.dart`、`widgets/diary_typography_preview.dart`、`widgets/diary_mobile_toolbar.dart`、`widgets/diary_floating_toolbar.dart`、`diary_floating_toolbar_bar.dart`、`diary_floating_toolbar_code.dart`、`widgets/diary_toolbar_more_button.dart`、`widgets/diary_toolbar_panel_reserve.dart`、`widgets/diary_playback_interaction_guard.dart`、`widgets/diary_image_embed_builder.dart`、`diary_video_embed_builder.dart`、`diary_audio_embed_builder.dart`、`diary_attachment_embed_builder.dart`、`diary_divider_embed_builder.dart`、`widgets/diary_color_panel/diary_color_panel.dart`、`diary_color_custom_picker.dart`、`diary_toolbar_color_button.dart`、`widgets/diary_image_options_menu.dart`。
 - **导出**：`export/diary_export_pdf.dart`（`flutter_quill_to_pdf` 插件 → 自研渲染器）、`export/diary_export_pdf_appflowy.dart`（新增 643 行）、删除 `export/diary_export_pdf_heading.dart`（75 行，标题逻辑并入新渲染器）、`export/diary_export_pdf_inline.dart`（`DiaryPdfInlineSource` 整类删除，插件适配层不再需要）。
 
-**改回收益/风险（适用于全部 50 个）**：收益为零——上游原版是 Quill 实现，fork 的编辑器/预览/导出已整体迁到 AppFlowy，单文件改回即编译失败（类型 `QuillController`/`Block`/`Delta` 在调用方已不存在）。只有在“整个 AppFlowy 迁移回滚”时才有意义，那不在本次任务范围。真正能降低未来合流成本的只有 §6.1 的 96 个已相同文件和 §6.2–6.3 的小项。
+**改回收益/风险（适用于全部 50 个）**：收益为零——上游原版是 Quill 实现，fork 的编辑器/预览/导出已整体迁到 AppFlowy，单文件改回即编译失败（类型 `QuillController`/`Block`/`Delta` 在调用方已不存在）。只有在“整个 AppFlowy 迁移回滚”时才有意义，那不在本次任务范围。真正能降低未来合流成本的只有 §6.1 的 95 个已相同文件和 §6.2–6.3 的小项。
 
 **明确不等价、不可改回的（抽查结论，防误判）**：`content_codec.dart`（fork Delta 路线 vs 上游 AppFlowy Document 路线，270 行差）、`legacy_content_codec.dart`（117 行差）、`diary_blocks_codec.dart`（97 行差：上游多表格/标注/折叠/链接卡片处理 + `diary_blocks_table.dart`，fork 无此文件）、`diary_blocks_schema.dart`（101 行差：上游多 `callout`/`toggle_list`/`table`/`link_card`）、`diary_list_scope.dart`（89 行差：上游 `subNotebookIds`/`subPredicates` + `UnfiledScope`，fork `descendantIds`/`effectiveIds`，同功能不同设计）、`app_platform.dart`（fork 37 行最小版 vs 上游 122 行完整版，fork 是子集）、`settings_service.dart`（399 行差）、`app_features.dart`（102 行差）、`journal_import_html/markdown.dart`（218/186 行差：上游 `JournalBlockWriter` + 表格/链接处理，fork `JournalDeltaWriter`）、`diary_typography.dart`（55 行差）、`app_database_notebook_ops.dart`（152 行差）、`ai_chat_page.dart`/`ai_model_sheets.dart`/`ai_page_scaffold.dart`（见 §2.16）。
 
@@ -531,11 +630,11 @@
 
 1. **改动先查清单**：改一个页面/功能前，先看 §2 对应行的“牵连”列，牵连的页面要一起回归；改 §5 里的牵连节点前，先评估联动范围。
 2. **改完更新文档**：改了一个页面的文件，就把 §2 对应行改对（文件增删、分类变化）；新增了功能，在 §2 对应表里加一行、在 §3 里决定进哪个组；从上游合进来的东西，把 §6.1/§6.2 对应行划掉或改成“已与上游一致”；删了文件，在对应行标注“已删”。
-3. **分类口径不变**：① 只改外观、② 改结构、③ 新功能、④ 逻辑等价。混合文件按主导性质归一类，正文注明次要性质。
+3. **分类口径不变**：① 只改外观、② 改结构、③ 新功能（分 ③a 已合上游、③b 真正自加，按功能来源判定，依据是 git 历史 + 上游 tag）、④ 逻辑等价。混合文件按主导性质归一类，正文注明次要性质；改了功能域归属要同步改 §1.3 对应行。
 4. **冗余只列不擅自改**：§6 的项目改回原版前要用户点头；§6.4（迁移适配）与 §7.1（平行实现）不要单文件硬改。
 5. **版本号与数据库**：`pubspec.yaml` 版本与 §4 的数据库版本表同步更新；`if (from < N)` 的版本门按 fork 已有用户库的实际版本链保留（§4 的错位不要“顺手修掉”）。
 6. **定期复核**：每次合上游大版本后，重新跑一次 `git diff upstream/main...HEAD --stat` 与逐文件 tip-diff，更新 §1 的数字与 §6.1 的“已相同”清单（只会越来越多）。
 
 ---
 
-*初版：2026-11-07，基线 HEAD `36cbf65e`（样式编辑器 v5–v8），合并基 `b6959397`。下次更新时把这行改成新的 HEAD 与日期。*
+*初版：2026-11-07，基线 HEAD `36cbf65e`（样式编辑器 v5–v8），合并基 `b6959397`。2026-11-07 修正：③ 拆为 ③a/③b（逐项核对）、新增 §1.2/§1.3、§6.1 逐字节相同数 96→95。下次更新时把这行改成新的 HEAD 与日期。*
