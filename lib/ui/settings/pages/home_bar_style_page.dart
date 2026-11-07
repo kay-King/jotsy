@@ -75,17 +75,30 @@ class _HomeBarStylePageState extends State<HomeBarStylePage> {
       listenable: _controller,
       isDefault: () => _controller.style.isDefault,
       onReset: _reset,
+      // 底部导航只留 4 个分类：材质与悬浮都是底栏的表面样式，拼在一起，
+      // 选项一个不少，只是换分组。
       tabs: <String>[
         l10n.homeBarStyleTabPresets,
         l10n.homeBarStyleTabMaterial,
-        l10n.homeBarStyleTabFloating,
         l10n.homeBarStyleTabItems,
         l10n.homeBarStyleTabBehavior,
       ],
+      // 底部导航图标（Material outlined）：预设调色板、材质分层、
+      // 项目列表、行为手势；图标在上、文字在下。
+      tabIcons: const <IconData>[
+        Icons.palette_outlined,
+        Icons.layers_outlined,
+        Icons.list_outlined,
+        Icons.touch_app_outlined,
+      ],
       tabViews: () => <Widget>[
         HomeBarStylePresetsTab(controller: _controller),
-        HomeBarStyleMaterialTab(controller: _controller),
-        HomeBarStyleFloatingTab(controller: _controller),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            HomeBarStyleMaterialTab(controller: _controller),
+            HomeBarStyleFloatingTab(controller: _controller),
+          ],
+        ),
         HomeBarStyleItemsTab(controller: _controller),
         HomeBarStyleBehaviorTab(controller: _controller),
       ],

@@ -5,7 +5,7 @@ import '../../../diaries/models/diary_preview_style/diary_preview_presets.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_settings.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
 import '../../../widgets/expressive_icon_choice_row.dart';
-import '../../widgets/style_editor/style_preset_grid.dart';
+import '../../widgets/style_editor/style_preset_list.dart';
 
 // 预览页样式设置的文案与图标映射：枚举 → 本地化标签 / 图标。只做映射，
 // 不含状态。
@@ -22,39 +22,13 @@ String diaryPreviewPresetName(AppLocalizations l10n, DiaryPreviewPresetId id) =>
       DiaryPreviewPresetId.immersive => l10n.diaryPreviewStylePresetImmersive,
     };
 
-String _presetDescription(AppLocalizations l10n, DiaryPreviewPresetId id) =>
-    switch (id) {
-      DiaryPreviewPresetId.classic => l10n.diaryPreviewStylePresetClassicDesc,
-      DiaryPreviewPresetId.paper => l10n.diaryPreviewStylePresetPaperDesc,
-      DiaryPreviewPresetId.magazine => l10n.diaryPreviewStylePresetMagazineDesc,
-      DiaryPreviewPresetId.minimal => l10n.diaryPreviewStylePresetMinimalDesc,
-      DiaryPreviewPresetId.night => l10n.diaryPreviewStylePresetNightDesc,
-      DiaryPreviewPresetId.journal => l10n.diaryPreviewStylePresetJournalDesc,
-      DiaryPreviewPresetId.mood => l10n.diaryPreviewStylePresetMoodDesc,
-      DiaryPreviewPresetId.immersive =>
-        l10n.diaryPreviewStylePresetImmersiveDesc,
-    };
-
-FaIconData _presetIcon(DiaryPreviewPresetId id) => switch (id) {
-  DiaryPreviewPresetId.classic => FontAwesomeIcons.bookOpenReader,
-  DiaryPreviewPresetId.paper => FontAwesomeIcons.scroll,
-  DiaryPreviewPresetId.magazine => FontAwesomeIcons.newspaper,
-  DiaryPreviewPresetId.minimal => FontAwesomeIcons.feather,
-  DiaryPreviewPresetId.night => FontAwesomeIcons.moon,
-  DiaryPreviewPresetId.journal => FontAwesomeIcons.bookBookmark,
-  DiaryPreviewPresetId.mood => FontAwesomeIcons.faceSmile,
-  DiaryPreviewPresetId.immersive => FontAwesomeIcons.expand,
-};
-
 List<StylePresetOption<DiaryPreviewPresetId>> diaryPreviewPresetOptions(
   AppLocalizations l10n,
 ) => <StylePresetOption<DiaryPreviewPresetId>>[
   for (final id in DiaryPreviewPresetId.values)
     StylePresetOption<DiaryPreviewPresetId>(
       id: id,
-      icon: _presetIcon(id),
       name: diaryPreviewPresetName(l10n, id),
-      description: _presetDescription(l10n, id),
     ),
 ];
 

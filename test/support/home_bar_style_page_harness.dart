@@ -65,6 +65,28 @@ Future<(SettingsService, AppLocalizations)> pumpHomeBarStylePage(
 HomeBarSettings storedHomeBarSettings(SettingsService settings) =>
     HomeBarSettings.decode(settings.homeBarStyleRaw);
 
+/// 控制条默认隐藏：点预览顶部空白处叫出来（已显示时不再点）。
+/// 顶部几像素是画框顶缘的留白，不会点中底栏项等可交互元素。
+Future<void> showHomeBarStyleControls(
+  WidgetTester tester, {
+  AppLocalizations? l10n,
+}) async {
+  final resolvedL10n =
+      l10n ?? AppLocalizations.of(tester.element(find.byType(Scaffold).first));
+  if (find
+      .byTooltip(resolvedL10n.styleEditorSettingsTitle)
+      .hitTestable()
+      .evaluate()
+      .isEmpty) {
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    // 点预览顶部中央的空白条：控制条隐藏时预览从屏幕顶开始，
+    // 顶部几像素在各预览里都是留白（卡片列表上方留白、预览页标题上方、
+    // 代码块内边距、导航栏画框顶缘），不会点中可交互元素。
+    await tester.tapAt(Offset(size.width / 2, 5));
+    await tester.pumpAndSettle();
+  }
+}
+
 /// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
 /// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
 Future<void> openHomeBarStyleTab(
@@ -72,6 +94,7 @@ Future<void> openHomeBarStyleTab(
   String label, {
   AppLocalizations? l10n,
 }) async {
+  await showHomeBarStyleControls(tester, l10n: l10n);
   final resolvedL10n =
       l10n ?? AppLocalizations.of(tester.element(find.byType(Scaffold).first));
   // 注意：find.byTooltip 是懒求值的，ensureVisible 会重新求值；
@@ -121,6 +144,7 @@ Future<Finder> openHomeBarStyleMenu(
   WidgetTester tester,
   AppLocalizations l10n,
 ) async {
+  await showHomeBarStyleControls(tester, l10n: l10n);
   await tester.tap(find.byTooltip(l10n.homeBarStyleTitle));
   await tester.pumpAndSettle();
   return find.widgetWithText(MenuItemButton, l10n.commonReset);

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../app/theme/seeded_theme_cache.dart';
 import '../../../../app/theme/expressive_surfaces.dart';
@@ -9,6 +8,7 @@ import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../diaries/sections/diaries_list_section.dart';
 import '../../../diaries/sections/diary_head_section.dart';
 import '../../../widgets/expressive_button_group.dart';
+import '../../widgets/style_editor/style_editor_common.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 
 /// 卡片样式的实时预览：顶部工具条（[DiaryCardStylePreviewToolbar]）切换列表/
@@ -147,22 +147,57 @@ class DiaryCardStylePreviewToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(child: Center(child: _modeSegments(context))),
-        _brightnessButton(context),
-      ],
+    // Stack 居中：分段轨道贴工具条正中、明暗按钮贴右，两者互不挤。
+    // 以前是 Row[Expanded(居中分段)， 月亮]：月亮占右边 32px，
+    // 分段的居中基准是「工具条再减月亮」，整体向左偏约 16px。
+    // 脚手架顶栏左右对称（菜单 + 间距 44、间距 + 设置 44），
+    // 工具条正中就是屏幕正中。
+    //
+    // 分段轨道不撑满全宽：封顶 200（窄屏下由 LayoutBuilder 收紧），
+    // 轨道右缘与明暗按钮之间至少留 12 的缝：聊天软件压缩后近白缝隙
+    // （#FAFBFC 与纯白只差 5 个色阶）会被抹掉，间距要靠空间撑出来。
+    // 封顶按工具条宽算：轨道右缘 = 正中 + 宽/2，明暗按钮左缘 =
+    // 工具条宽 − 32，宽 ≤ 工具条宽 − 88 时缝 ≥ 12。
+    // dense 模式按钮按内容定宽，内容超宽时由 FittedBox 整体缩小
+    // （组件文档的既定做法），标签不省略、窄屏也不溢出。
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        var maxCenterWidth = constraints.maxWidth - 88;
+        if (maxCenterWidth > 200) maxCenterWidth = 200;
+        if (maxCenterWidth < 0) maxCenterWidth = 0;
+        return Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxCenterWidth),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _modeSegments(context),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: StylePreviewBrightnessButton(controller: controller),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  /// 列表/瀑布流分段：白底圆角轨道 + 轻微阴影，选中段 Salt 蓝。
+  /// 列表/瀑布流分段：白底圆角轨道 + 轻微阴影，选中段 Salt 蓝。不要加
+  /// 描边：和圆按钮一样，白底 + 柔和阴影就够辨认边缘，描边会让顶栏
+  /// 发灰、显小气。轨道用 [ExpressiveButtonGroup] 的 dense 模式
+  /// （36 高）：顶栏里最显大的就是它，收矮后顶栏行高只剩 40；字号收一档。
   Widget _modeSegments(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const <BoxShadow>[
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: Color(0x14000000),
             blurRadius: 10,
@@ -180,60 +215,23 @@ class DiaryCardStylePreviewToolbar extends StatelessWidget {
           ),
         ),
         child: ExpressiveButtonGroup<DiaryCardMode>(
+          dense: true,
           minSegmentWidth: 64,
           segments: <ButtonSegment<DiaryCardMode>>[
             // 只放文字：预览顶栏与明暗按钮同行，窄屏大字号下带图标
             // 的“Waterfall”会折行。
             ButtonSegment<DiaryCardMode>(
               value: DiaryCardMode.list,
-              label: Text(l10n.autoT0146),
+              label: Text(l10n.autoT0146, style: const TextStyle(fontSize: 13)),
             ),
             ButtonSegment<DiaryCardMode>(
               value: DiaryCardMode.waterfall,
-              label: Text(l10n.autoT0147),
+              label: Text(l10n.autoT0147, style: const TextStyle(fontSize: 13)),
             ),
           ],
           selected: <DiaryCardMode>{controller.mode},
           onSelectionChanged: (Set<DiaryCardMode> selection) =>
               controller.mode = selection.single,
-        ),
-      ),
-    );
-  }
-
-  /// 预览明暗切换：白底圆、无边框、轻微阴影，与左上角菜单按钮同式；
-  /// 只换预览的明暗（[controller.previewBrightness]），不改应用主题。
-  Widget _brightnessButton(BuildContext context) {
-    final l10n = context.l10n;
-    final brightness =
-        controller.previewBrightness ?? Theme.of(context).brightness;
-    final isLight = brightness == Brightness.light;
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        child: IconButton(
-          tooltip: isLight
-              ? l10n.styleEditorPreviewDark
-              : l10n.styleEditorPreviewLight,
-          onPressed: () => controller.previewBrightness = isLight
-              ? Brightness.dark
-              : Brightness.light,
-          icon: FaIcon(
-            isLight ? FontAwesomeIcons.moon : FontAwesomeIcons.sun,
-            size: 18,
-          ),
         ),
       ),
     );

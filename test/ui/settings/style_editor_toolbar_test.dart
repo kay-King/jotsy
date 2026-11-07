@@ -53,6 +53,20 @@ Future<AppLocalizations> _pumpPage(
   return AppLocalizations.of(tester.element(find.byType(Scaffold).first));
 }
 
+/// 顶栏默认隐藏：点预览顶部空白处叫出来（已显示时不再点）。
+/// 顶部几像素在各预览里都是留白，不会点中可交互元素。
+Future<void> _showControls(WidgetTester tester, AppLocalizations l10n) async {
+  if (find
+      .byTooltip(l10n.styleEditorSettingsTitle)
+      .hitTestable()
+      .evaluate()
+      .isEmpty) {
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    await tester.tapAt(Offset(size.width / 2, 5));
+    await tester.pumpAndSettle();
+  }
+}
+
 Future<void> _toggleBrightnessRepeatedly(
   WidgetTester tester, {
   required AppLocalizations l10n,
@@ -124,6 +138,8 @@ void main() {
           brightness: brightness,
           size: size,
         );
+        // 列表/瀑布流切换在顶部工具条里，先叫出控制条。
+        await _showControls(tester, l10n);
         final group = find.descendant(
           of: find.byType(DiaryCardStylePreviewToolbar),
           matching: find.byType(ExpressiveButtonGroup<DiaryCardMode>),
@@ -175,6 +191,7 @@ void main() {
           brightness: brightness,
           size: size,
         );
+        await _showControls(tester, l10n);
         await _toggleBrightnessRepeatedly(
           tester,
           l10n: l10n,
@@ -194,6 +211,7 @@ void main() {
           brightness: brightness,
           size: size,
         );
+        await _showControls(tester, l10n);
         await _toggleBrightnessRepeatedly(
           tester,
           l10n: l10n,

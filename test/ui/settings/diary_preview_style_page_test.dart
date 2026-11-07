@@ -14,6 +14,7 @@ import 'package:node_diary/ui/diaries/widgets/diary_preview/diary_preview_conten
 import 'package:node_diary/ui/settings/pages/diary_preview_style_page.dart';
 import 'package:node_diary/ui/settings/sections/settings_diary_preview_style_tile.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
+import 'package:node_diary/ui/settings/widgets/style_editor/style_editor_common.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/expressive_test_theme.dart';
@@ -72,6 +73,24 @@ Future<(SettingsService, AppLocalizations)> _pumpPage(
 DiaryPreviewSettings _stored(SettingsService settings) =>
     DiaryPreviewSettings.decode(settings.diaryPreviewStyleRaw);
 
+/// 控制条默认隐藏：点预览顶部空白处叫出来（已显示时不再点）。
+/// 顶部几像素是标题上方的留白，正文编辑器会认领页面中部的点按，
+/// 不能点中部（待办、图片等可交互元素也在正文里）。
+Future<void> _showControls(WidgetTester tester, AppLocalizations l10n) async {
+  if (find
+      .byTooltip(l10n.styleEditorSettingsTitle)
+      .hitTestable()
+      .evaluate()
+      .isEmpty) {
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    // 点预览顶部中央的空白条：控制条隐藏时预览从屏幕顶开始，
+    // 顶部几像素在各预览里都是留白（卡片列表上方留白、预览页标题上方、
+    // 代码块内边距、导航栏画框顶缘），不会点中可交互元素。
+    await tester.tapAt(Offset(size.width / 2, 5));
+    await tester.pumpAndSettle();
+  }
+}
+
 /// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
 /// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
 Future<void> _openTab(
@@ -79,6 +98,7 @@ Future<void> _openTab(
   String label,
   AppLocalizations l10n,
 ) async {
+  await _showControls(tester, l10n);
   final button = find.byTooltip(l10n.styleEditorSettingsTitle);
   expect(button, findsOneWidget, reason: '样式设置按钮');
   await tester.tap(button);
@@ -109,6 +129,7 @@ Future<void> _closeSheet(WidgetTester tester, AppLocalizations l10n) async {
 
 /// 打开左上角悬浮菜单，返回其中“重置”菜单项的 Finder。
 Future<Finder> _openMenu(WidgetTester tester, AppLocalizations l10n) async {
+  await _showControls(tester, l10n);
   await tester.tap(find.byTooltip(l10n.diaryPreviewStyleTitle));
   await tester.pumpAndSettle();
   return find.widgetWithText(MenuItemButton, l10n.commonReset);
@@ -147,22 +168,20 @@ Future<void> _dismissSnackBars(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('shows a full-screen preview with seven settings sections', (
+  testWidgets('shows a full-screen preview with four settings sections', (
     tester,
   ) async {
     final (_, l10n) = await _pumpPage(tester);
     expect(find.byType(DiaryPreviewContent), findsWidgets);
-    // 七个分类收进右上角「样式设置」整页：打开后七个区块标题都在。
+    // 四个分类收进右上角「样式设置」整页：打开后四个区块标题都在。
+    await _showControls(tester, l10n);
     await tester.tap(find.byTooltip(l10n.styleEditorSettingsTitle));
     await tester.pumpAndSettle();
     for (final label in <String>[
       l10n.diaryPreviewStyleTabPresets,
       l10n.diaryPreviewStyleTabPage,
-      l10n.diaryPreviewStyleTabCover,
       l10n.diaryPreviewStyleTabTitle,
-      l10n.diaryPreviewStyleTabMeta,
       l10n.diaryPreviewStyleTabBody,
-      l10n.diaryPreviewStyleTabPaging,
     ]) {
       await tester.scrollUntilVisible(
         find.text(label),
@@ -192,7 +211,8 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryPreviewStyleTabMeta, l10n);
+    // 信息选项并进了「标题」分类。
+    await _openTab(tester, l10n.diaryPreviewStyleTabTitle, l10n);
     await _tapVisible(
       tester,
       find.widgetWithText(
@@ -208,7 +228,8 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryPreviewStyleTabPaging, l10n);
+    // 翻页选项并进了「正文」分类。
+    await _openTab(tester, l10n.diaryPreviewStyleTabBody, l10n);
     await _tapVisible(
       tester,
       find.widgetWithText(
@@ -283,6 +304,8 @@ void main() {
     }
     await gesture.up();
     await tester.pumpAndSettle();
+    // 页码指示在顶部工具条里，控制条默认隐藏时语义不可见：先叫出来再断言。
+    await _showControls(tester, l10n);
     expect(
       find.bySemanticsLabel(l10n.diaryPreviewStyleSampleOf(2, 3)),
       findsOneWidget,
@@ -295,11 +318,11 @@ void main() {
     final (settings, l10n) = await _pumpPage(tester);
     await _openTab(tester, l10n.diaryPreviewStyleTabPage, l10n);
     final finder = find.widgetWithText(
-      SettingsSliderTile,
+      StyleSliderRow,
       l10n.diaryPreviewStylePadding,
     );
     await _scrollTo(tester, finder);
-    final tile = tester.widget<SettingsSliderTile>(finder);
+    final tile = tester.widget<StyleSliderRow>(finder);
     tile.onChanged!(30);
     await tester.pump();
     expect(settings.diaryPreviewStyleRaw, isNull);
@@ -423,11 +446,8 @@ void main() {
       for (final label in <String>[
         l10n.diaryPreviewStyleTabPresets,
         l10n.diaryPreviewStyleTabPage,
-        l10n.diaryPreviewStyleTabCover,
         l10n.diaryPreviewStyleTabTitle,
-        l10n.diaryPreviewStyleTabMeta,
         l10n.diaryPreviewStyleTabBody,
-        l10n.diaryPreviewStyleTabPaging,
       ]) {
         await _openTab(tester, label, l10n);
         await tester.drag(find.byType(Scaffold).last, const Offset(0, -2000));

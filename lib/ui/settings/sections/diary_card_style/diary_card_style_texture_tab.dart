@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../diaries/viewmodels/diary_card_colors.dart';
-import '../../../widgets/expressive_button_group.dart';
-import '../../../widgets/expressive_icon_choice_row.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/diary_card_color_tile.dart';
 import '../../widgets/settings_card_group.dart';
@@ -35,7 +34,7 @@ class DiaryCardStyleTextureTab extends StatelessWidget {
       required DiaryCardRange range,
       required DiaryCardSurfaceStyle Function(double) apply,
     }) {
-      return SettingsSliderTile(
+      return StyleSliderRow(
         title: title,
         value: value,
         min: range.min,
@@ -79,8 +78,7 @@ class DiaryCardStyleTextureTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryCardStyleAccentBar,
-              child: ExpressiveButtonGroup<DiaryCardAccentBar>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryCardAccentBar>(
                 segments: <ButtonSegment<DiaryCardAccentBar>>[
                   ButtonSegment<DiaryCardAccentBar>(
                     value: DiaryCardAccentBar.none,
@@ -126,11 +124,20 @@ class DiaryCardStyleTextureTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryCardStyleShadow,
-              child: ExpressiveIconChoiceRow<DiaryCardShadowStyle>(
-                choices: diaryCardShadowChoices(l10n),
-                selected: surface.shadow,
-                onSelected: (DiaryCardShadowStyle v) =>
-                    controller.commit(withSurface(surface.copyWith(shadow: v))),
+              child: StylePillGroup<DiaryCardShadowStyle>(
+                segments: <ButtonSegment<DiaryCardShadowStyle>>[
+                  for (final choice in diaryCardShadowChoices(l10n))
+                    ButtonSegment<DiaryCardShadowStyle>(
+                      value: choice.value,
+                      icon: FaIcon(choice.icon, size: 14),
+                      label: Text(choice.label),
+                    ),
+                ],
+                selected: <DiaryCardShadowStyle>{surface.shadow},
+                onSelectionChanged: (Set<DiaryCardShadowStyle> value) =>
+                    controller.commit(
+                      withSurface(surface.copyWith(shadow: value.single)),
+                    ),
               ),
             ),
             if (surface.shadow == DiaryCardShadowStyle.custom)

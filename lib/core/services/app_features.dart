@@ -1,7 +1,7 @@
 // 功能管理开关（设置 → 功能管理）。
 //
 // 职责：描述用户可整体关闭的功能——桌面 Tab、时间线 Tab、日记本、纪念日、
-// 日记模板、时间胶囊、侧滑归档、AI 助手——是否开启；AI 助手默认关闭（让
+// 日记模板、时间胶囊、日记留言、侧滑归档、AI 助手——是否开启；AI 助手默认关闭（让
 // 初始界面简洁，AI 还需要用户自己的接口），其余默认开启。关闭只是在各处隐藏入口与
 // 展示，数据一律保留，重新开启即恢复原样。
 //
@@ -23,6 +23,7 @@ class AppFeatures {
     this.anniversaries = true,
     this.templates = true,
     this.timeCapsules = true,
+    this.comments = true,
     this.swipeArchive = true,
     this.ai = false,
   });
@@ -48,6 +49,10 @@ class AppFeatures {
   /// 时间胶囊。
   final bool timeCapsules;
 
+  /// 日记留言：重读日记时在末尾写下回应，正文保持原样。关闭后预览页
+  /// 留言区、卡片留言数与留言搜索入口都隐藏，留言数据保留。
+  final bool comments;
+
   /// 侧滑归档：日记列表左滑卡片归档、归档页左滑取消归档（只在手机上有这个
   /// 手势，桌面用右键菜单）。关闭后仍可长按多选或在预览页里归档。
   final bool swipeArchive;
@@ -68,6 +73,7 @@ class AppFeatures {
   static const _keyAnniversaries = 'anniversaries';
   static const _keyTemplates = 'templates';
   static const _keyTimeCapsules = 'timeCapsules';
+  static const _keyComments = 'comments';
   static const _keySwipeArchive = 'swipeArchive';
   static const _keyAi = 'ai';
 
@@ -96,6 +102,7 @@ class AppFeatures {
       anniversaries: read(_keyAnniversaries, defaults.anniversaries),
       templates: read(_keyTemplates, defaults.templates),
       timeCapsules: read(_keyTimeCapsules, defaults.timeCapsules),
+      comments: read(_keyComments, defaults.comments),
       swipeArchive: read(_keySwipeArchive, defaults.swipeArchive),
       ai: read(_keyAi, defaults.ai),
     );
@@ -112,6 +119,7 @@ class AppFeatures {
       _keyAnniversaries: anniversaries,
       _keyTemplates: templates,
       _keyTimeCapsules: timeCapsules,
+      _keyComments: comments,
       _keySwipeArchive: swipeArchive,
       _keyAi: ai,
     });
@@ -124,6 +132,7 @@ class AppFeatures {
     bool? anniversaries,
     bool? templates,
     bool? timeCapsules,
+    bool? comments,
     bool? swipeArchive,
     bool? ai,
   }) {
@@ -134,6 +143,7 @@ class AppFeatures {
       anniversaries: anniversaries ?? this.anniversaries,
       templates: templates ?? this.templates,
       timeCapsules: timeCapsules ?? this.timeCapsules,
+      comments: comments ?? this.comments,
       swipeArchive: swipeArchive ?? this.swipeArchive,
       ai: ai ?? this.ai,
     );
@@ -148,6 +158,7 @@ class AppFeatures {
       other.anniversaries == anniversaries &&
       other.templates == templates &&
       other.timeCapsules == timeCapsules &&
+      other.comments == comments &&
       other.swipeArchive == swipeArchive &&
       other.ai == ai;
 
@@ -159,6 +170,7 @@ class AppFeatures {
     anniversaries,
     templates,
     timeCapsules,
+    comments,
     swipeArchive,
     ai,
   );
@@ -168,5 +180,5 @@ class AppFeatures {
       'AppFeatures(desktop: $desktop, timeline: $timeline, '
       'notebooks: $notebooks, anniversaries: $anniversaries, '
       'templates: $templates, timeCapsules: $timeCapsules, '
-      'swipeArchive: $swipeArchive, ai: $ai)';
+      'comments: $comments, swipeArchive: $swipeArchive, ai: $ai)';
 }

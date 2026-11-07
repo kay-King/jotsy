@@ -31,6 +31,7 @@ import '../../controllers/diary_todo_autosave_controller.dart';
 import '../../models/diary_preview_result.dart';
 import '../../models/time_capsule.dart';
 import '../../pages/locked_diary_page.dart';
+import '../../providers/diary_comment_providers.dart';
 import '../../providers/diary_detail_provider.dart';
 import '../../providers/diary_preview_style_provider.dart';
 import '../../sections/diary_typography_sheet.dart';
@@ -385,6 +386,7 @@ class _DiaryPreviewViewState extends ConsumerState<DiaryPreviewView> {
               : null,
           onOpenDiary: widget.onOpenDiary,
           onOpenImage: _openImageViewer,
+          showComments: ref.watch(diaryCommentsEnabledProvider),
           aiRepliesFor: _resolveAiReplies(detail.diary),
           onAiContinueChat: null,
           actions: DiaryPreviewActions(

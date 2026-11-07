@@ -53,7 +53,7 @@ class DiaryCodeBlockStyleDisplayTab extends StatelessWidget {
         ),
         SettingsCardGroup(
           children: <Widget>[
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.codeBlockRadiusTitle,
               value: style.radius,
               min: DiaryCodeBlockStyle.minRadius,

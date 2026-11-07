@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../../app/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../widgets/expressive_menu/expressive_menu.dart';
 import '../../../diaries/models/style_library/saved_style.dart';
@@ -12,7 +11,7 @@ import '../../../diaries/models/style_library/style_code.dart';
 import '../../controllers/style_editor_controller.dart';
 import '../settings_card_group.dart';
 import 'style_editor_common.dart';
-import 'style_preset_grid.dart';
+import 'style_preset_list.dart';
 
 /// 样式编辑页的“预设”标签页：内置风格、我的样式（保存 / 重命名 / 删除）与
 /// 样式码分享导入。会整体替换当前样式的操作都给撤销提示。
@@ -178,8 +177,8 @@ class StyleLibraryTab<S, L extends StyleLibrary<S, L>, P>
           title: l10n.styleEditorPresetsTitle,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.m),
-              child: StylePresetGrid<P>(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: StylePresetList<P>(
                 options: presets,
                 selected: matchingPreset,
                 onSelected: (id) => _applyPreset(context, id),

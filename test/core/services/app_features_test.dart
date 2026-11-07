@@ -59,7 +59,9 @@ void main() {
         'anniversaries',
         'templates',
         'timeCapsules',
+        'comments',
         'swipeArchive',
+        'ai',
       ]);
       expect(AppFeatures.decode(raw), features);
     });

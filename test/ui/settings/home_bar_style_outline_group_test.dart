@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_settings.dart';
 import 'package:node_diary/ui/home/models/home_bar_style/home_bar_style.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
-import 'package:node_diary/ui/widgets/expressive_button_group.dart';
+import 'package:node_diary/ui/settings/widgets/style_editor/style_editor_common.dart';
 
 import '../../support/home_bar_style_page_harness.dart';
 
@@ -13,13 +13,13 @@ const _glass = HomeBarSettings(
 /// 颜色来源按钮组里的某个选项；[index] 0 为底栏描边、1 为顶栏分隔线。
 Finder _lineColorOption(String label, {int index = 0}) => find
     .descendant(
-      of: find.byType(ExpressiveButtonGroup<HomeBarLineColor>).at(index),
+      of: find.byType(StylePillGroup<HomeBarLineColor>).at(index),
       matching: find.text(label),
     )
     .first;
 
 Finder _slider(String title) =>
-    find.widgetWithText(SettingsSliderTile, title).first;
+    find.widgetWithText(StyleSliderRow, title).first;
 
 void main() {
   testWidgets('the outline group is hidden in solid and shown in glass', (
@@ -33,7 +33,7 @@ void main() {
     await tapHomeBarOption(
       tester,
       find.descendant(
-        of: find.byType(ExpressiveButtonGroup<HomeBarMaterial>),
+        of: find.byType(StylePillGroup<HomeBarMaterial>),
         matching: find.text(l10n.homeBarStyleMaterialGlass),
       ),
     );
@@ -72,7 +72,7 @@ void main() {
     expect(tester.widget<SettingsChoiceTile>(colorRow.first).nested, isTrue);
     expect(
       tester
-          .widget<SettingsSliderTile>(_slider(l10n.homeBarStyleLineWidth).first)
+          .widget<StyleSliderRow>(_slider(l10n.homeBarStyleLineWidth).first)
           .nested,
       isTrue,
     );
@@ -146,10 +146,10 @@ void main() {
     expect(inHomeBarOptions(l10n.homeBarStyleTopBarHairline), findsOneWidget);
     await scrollToHomeBarOption(
       tester,
-      find.byType(ExpressiveButtonGroup<HomeBarLineColor>).at(1),
+      find.byType(StylePillGroup<HomeBarLineColor>).at(1),
     );
     expect(
-      find.byType(ExpressiveButtonGroup<HomeBarLineColor>),
+      find.byType(StylePillGroup<HomeBarLineColor>),
       findsNWidgets(2),
     );
     expect(tester.takeException(), isNull);
@@ -198,7 +198,7 @@ void main() {
 
     final width = _slider(l10n.homeBarStyleLineWidth);
     await scrollToHomeBarOption(tester, width);
-    final widthTile = tester.widget<SettingsSliderTile>(width);
+    final widthTile = tester.widget<StyleSliderRow>(width);
     expect(widthTile.min, HomeBarStyleLimits.lineWidth.min);
     expect(widthTile.max, HomeBarStyleLimits.lineWidth.max);
     expect(find.text(l10n.diaryCardStyleValueDp('1.0')), findsOneWidget);
@@ -212,13 +212,13 @@ void main() {
     expect(storedHomeBarSettings(settings).current.borderLine.width, 2.0);
 
     final opacity = find.widgetWithText(
-      SettingsSliderTile,
+      StyleSliderRow,
       l10n.homeBarStyleOpacity,
     );
     // 第一个“不透明度”是玻璃底色的，描边的在后面。
     final lineOpacity = opacity.at(1);
     await scrollToHomeBarOption(tester, lineOpacity);
-    final opacityTile = tester.widget<SettingsSliderTile>(lineOpacity);
+    final opacityTile = tester.widget<StyleSliderRow>(lineOpacity);
     expect(opacityTile.min, HomeBarStyleLimits.lineOpacity.min);
     opacityTile.onChanged!(0.85);
     await tester.pump();

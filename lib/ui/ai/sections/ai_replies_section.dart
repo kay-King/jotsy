@@ -33,6 +33,7 @@ import '../providers/ai_records_providers.dart';
 import '../widgets/ai_error_view.dart';
 import '../widgets/ai_markdown_view.dart';
 import '../widgets/ai_persona_avatar.dart';
+import '../../diaries/providers/diary_comment_providers.dart';
 
 class AiRepliesSection extends ConsumerWidget {
   const AiRepliesSection({
@@ -239,9 +240,8 @@ class _ReplyCardState extends ConsumerState<_ReplyCard> {
     final row = widget.row;
     final prefs = ref.watch(aiPreferencesProvider);
     final persona = aiReplyPersonaOf(l10n, prefs, row);
-    // fork 的留言没有功能开关（上游 `diaryCommentsEnabledProvider` 读
-    // `AppFeatures.comments`，fork 没这一项）：留言区常开，这里恒为 true。
-    const comments = true;
+    // 「存为留言」入口只在留言功能开着时出现。
+    final comments = ref.watch(diaryCommentsEnabledProvider);
     final long = row.content.length > _foldChars;
     final body = theme.textTheme.bodyMedium?.copyWith(
       color: widget.textColor,

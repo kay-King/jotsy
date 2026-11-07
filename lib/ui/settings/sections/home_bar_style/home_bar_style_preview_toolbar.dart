@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
+import '../../widgets/style_editor/style_editor_common.dart';
 
 /// 预览工具条：只有预览明暗切换（导航栏没有需要在预览里切换的布局）。
 class HomeBarStylePreviewToolbar extends StatelessWidget {
@@ -12,27 +11,14 @@ class HomeBarStylePreviewToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final brightness =
-        controller.previewBrightness ?? Theme.of(context).brightness;
-    final isLight = brightness == Brightness.light;
+    // 与其它三页统一：白底圆 32px 明暗按钮，不用 IconButton.filledTonal
+    //（MD3 色调按钮，48px、带色调底色，和顶栏其它白圆按钮不统一）。
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
       child: Row(
         children: <Widget>[
           const Spacer(),
-          IconButton.filledTonal(
-            tooltip: isLight
-                ? l10n.styleEditorPreviewDark
-                : l10n.styleEditorPreviewLight,
-            onPressed: () => controller.previewBrightness = isLight
-                ? Brightness.dark
-                : Brightness.light,
-            icon: FaIcon(
-              isLight ? FontAwesomeIcons.moon : FontAwesomeIcons.sun,
-              size: 16,
-            ),
-          ),
+          StylePreviewBrightnessButton(controller: controller),
         ],
       ),
     );

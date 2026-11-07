@@ -69,6 +69,13 @@ class _DiaryCodeBlockStylePageState extends State<DiaryCodeBlockStylePage> {
         l10n.codeBlockStyleTabDisplay,
         l10n.codeBlockStyleTabFont,
       ],
+      // 底部导航图标（Material outlined）：主题色轮、显示眼睛、字体；
+      // 图标在上、文字在下。
+      tabIcons: const <IconData>[
+        Icons.color_lens_outlined,
+        Icons.visibility_outlined,
+        Icons.font_download_outlined,
+      ],
       tabViews: () => <Widget>[
         DiaryCodeBlockStyleThemeTab(controller: _controller),
         DiaryCodeBlockStyleDisplayTab(controller: _controller),
@@ -76,7 +83,7 @@ class _DiaryCodeBlockStylePageState extends State<DiaryCodeBlockStylePage> {
       ],
       // 预览只有一个明暗按钮，放进标题栏，不单独占一行挤占预览。
       actionsBuilder: (_) => <Widget>[
-        StylePreviewBrightnessButton(controller: _controller, inAppBar: true),
+        StylePreviewBrightnessButton(controller: _controller),
       ],
       previewBuilder:
           ({required bool showToolbar, required double bottomPadding}) =>

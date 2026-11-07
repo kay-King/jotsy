@@ -90,23 +90,42 @@ class _DiaryPreviewStylePageState extends State<DiaryPreviewStylePage> {
       listenable: _controller,
       isDefault: () => _controller.style.isDefault,
       onReset: _reset,
+      // 底部导航只留 4 个分类：意思相近的拼在一起（页面+头图、标题+信息、
+      // 正文+翻页），选项一个不少，只是换分组。
       tabs: <String>[
         l10n.diaryPreviewStyleTabPresets,
         l10n.diaryPreviewStyleTabPage,
-        l10n.diaryPreviewStyleTabCover,
         l10n.diaryPreviewStyleTabTitle,
-        l10n.diaryPreviewStyleTabMeta,
         l10n.diaryPreviewStyleTabBody,
-        l10n.diaryPreviewStyleTabPaging,
+      ],
+      // 底部导航图标（Material outlined）：预设调色板、页面网页、
+      // 标题、正文笔记；图标在上、文字在下。
+      tabIcons: const <IconData>[
+        Icons.palette_outlined,
+        Icons.web_outlined,
+        Icons.title_outlined,
+        Icons.notes_outlined,
       ],
       tabViews: () => <Widget>[
         DiaryPreviewStylePresetsTab(controller: _controller),
-        DiaryPreviewStylePageTab(controller: _controller),
-        DiaryPreviewStyleCoverTab(controller: _controller),
-        DiaryPreviewStyleTitleTab(controller: _controller),
-        DiaryPreviewStyleMetaTab(controller: _controller),
-        DiaryPreviewStyleBodyTab(controller: _controller),
-        DiaryPreviewStylePagingTab(controller: _controller),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryPreviewStylePageTab(controller: _controller),
+            DiaryPreviewStyleCoverTab(controller: _controller),
+          ],
+        ),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryPreviewStyleTitleTab(controller: _controller),
+            DiaryPreviewStyleMetaTab(controller: _controller),
+          ],
+        ),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryPreviewStyleBodyTab(controller: _controller),
+            DiaryPreviewStylePagingTab(controller: _controller),
+          ],
+        ),
       ],
       toolbarBuilder: (_) => DiaryPreviewStylePreviewToolbar(
         controller: _controller,

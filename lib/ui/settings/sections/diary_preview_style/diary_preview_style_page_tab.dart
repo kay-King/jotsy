@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
 import '../../../diaries/viewmodels/diary_preview_resolved_style.dart';
 import '../../../widgets/color_swatch_button.dart';
-import '../../../widgets/expressive_button_group.dart';
-import '../../../widgets/expressive_icon_choice_row.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -49,21 +48,35 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleColorSeed,
               subtitle: l10n.diaryPreviewStyleSeedHint,
-              child: ExpressiveIconChoiceRow<DiaryPreviewColorSeed>(
-                choices: diaryPreviewSeedChoices(l10n),
-                selected: page.colorSeed,
-                onSelected: (DiaryPreviewColorSeed seed) =>
-                    commit(page.copyWith(colorSeed: seed)),
+              child: StylePillGroup<DiaryPreviewColorSeed>(
+                segments: <ButtonSegment<DiaryPreviewColorSeed>>[
+                  for (final choice in diaryPreviewSeedChoices(l10n))
+                    ButtonSegment<DiaryPreviewColorSeed>(
+                      value: choice.value,
+                      icon: FaIcon(choice.icon),
+                      label: Text(choice.label),
+                    ),
+                ],
+                selected: <DiaryPreviewColorSeed>{page.colorSeed},
+                onSelectionChanged: (Set<DiaryPreviewColorSeed> v) =>
+                    commit(page.copyWith(colorSeed: v.single)),
               ),
             ),
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleColorIntensity,
               subtitle: l10n.diaryPreviewStyleColorIntensityHint,
-              child: ExpressiveIconChoiceRow<DiaryPreviewColorIntensity>(
-                choices: diaryPreviewIntensityChoices(l10n),
-                selected: page.colorIntensity,
-                onSelected: (DiaryPreviewColorIntensity intensity) =>
-                    commit(page.copyWith(colorIntensity: intensity)),
+              child: StylePillGroup<DiaryPreviewColorIntensity>(
+                segments: <ButtonSegment<DiaryPreviewColorIntensity>>[
+                  for (final choice in diaryPreviewIntensityChoices(l10n))
+                    ButtonSegment<DiaryPreviewColorIntensity>(
+                      value: choice.value,
+                      icon: FaIcon(choice.icon),
+                      label: Text(choice.label),
+                    ),
+                ],
+                selected: <DiaryPreviewColorIntensity>{page.colorIntensity},
+                onSelectionChanged: (Set<DiaryPreviewColorIntensity> v) =>
+                    commit(page.copyWith(colorIntensity: v.single)),
               ),
             ),
             SettingsSwitchTile(
@@ -93,7 +106,7 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
         SettingsCardGroup(
           title: l10n.diaryPreviewStyleLayoutGroup,
           children: <Widget>[
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.diaryPreviewStylePadding,
               value: page.horizontalPadding,
               min: DiaryPreviewStyleLimits.horizontalPadding.min,
@@ -112,7 +125,7 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
               onChanged: (bool v) => commit(page.copyWith(limitWidth: v)),
             ),
             if (page.limitWidth)
-              SettingsSliderTile(
+              StyleSliderRow(
                 title: l10n.diaryPreviewStyleContentWidth,
                 value: page.contentWidth,
                 min: DiaryPreviewStyleLimits.contentWidth.min,
@@ -131,7 +144,7 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleTopBarGroup,
-              child: ExpressiveButtonGroup<DiaryPreviewTopBarMode>(
+              child: StylePillGroup<DiaryPreviewTopBarMode>(
                 segments: <ButtonSegment<DiaryPreviewTopBarMode>>[
                   ButtonSegment<DiaryPreviewTopBarMode>(
                     value: DiaryPreviewTopBarMode.floating,
@@ -149,8 +162,7 @@ class DiaryPreviewStylePageTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleTopBarTitle,
-              child: ExpressiveButtonGroup<DiaryPreviewTopBarTitle>(
-                minSegmentWidth: 64,
+              child: StylePillGroup<DiaryPreviewTopBarTitle>(
                 segments: <ButtonSegment<DiaryPreviewTopBarTitle>>[
                   ButtonSegment<DiaryPreviewTopBarTitle>(
                     value: DiaryPreviewTopBarTitle.label,

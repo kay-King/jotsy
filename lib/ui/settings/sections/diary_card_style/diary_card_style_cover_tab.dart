@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
-import '../../../widgets/expressive_button_group.dart';
-import '../../../widgets/expressive_icon_choice_row.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -37,7 +36,7 @@ class DiaryCardStyleCoverTab extends StatelessWidget {
       String Function(double)? label,
       String? subtitle,
     }) {
-      return SettingsSliderTile(
+      return StyleSliderRow(
         title: title,
         subtitle: subtitle,
         value: value,
@@ -53,11 +52,21 @@ class DiaryCardStyleCoverTab extends StatelessWidget {
     final modeChildren = <Widget>[
       SettingsChoiceTile(
         title: l10n.diaryCardStyleCoverPosition,
-        child: ExpressiveIconChoiceRow<DiaryCardCoverPosition>(
-          choices: diaryCardCoverPositionChoices(l10n, controller.mode),
-          selected: position,
-          onSelected: (DiaryCardCoverPosition value) =>
-              controller.commitMode((s) => s.copyWith(coverPosition: value)),
+        child: StylePillGroup<DiaryCardCoverPosition>(
+          segments: <ButtonSegment<DiaryCardCoverPosition>>[
+            for (final choice in diaryCardCoverPositionChoices(
+              l10n,
+              controller.mode,
+            ))
+              ButtonSegment<DiaryCardCoverPosition>(
+                value: choice.value,
+                icon: FaIcon(choice.icon, size: 14),
+                label: Text(choice.label),
+              ),
+          ],
+          selected: <DiaryCardCoverPosition>{position},
+          onSelectionChanged: (Set<DiaryCardCoverPosition> value) => controller
+              .commitMode((s) => s.copyWith(coverPosition: value.single)),
         ),
       ),
       if (side) ...<Widget>[
@@ -70,11 +79,18 @@ class DiaryCardStyleCoverTab extends StatelessWidget {
         ),
         SettingsChoiceTile(
           title: l10n.diaryCardStyleCoverShape,
-          child: ExpressiveIconChoiceRow<DiaryCardCoverShape>(
-            choices: diaryCardCoverShapeChoices(l10n),
-            selected: m.coverShape,
-            onSelected: (DiaryCardCoverShape value) =>
-                controller.commitMode((s) => s.copyWith(coverShape: value)),
+          child: StylePillGroup<DiaryCardCoverShape>(
+            segments: <ButtonSegment<DiaryCardCoverShape>>[
+              for (final choice in diaryCardCoverShapeChoices(l10n))
+                ButtonSegment<DiaryCardCoverShape>(
+                  value: choice.value,
+                  icon: FaIcon(choice.icon, size: 14),
+                  label: Text(choice.label),
+                ),
+            ],
+            selected: <DiaryCardCoverShape>{m.coverShape},
+            onSelectionChanged: (Set<DiaryCardCoverShape> value) => controller
+                .commitMode((s) => s.copyWith(coverShape: value.single)),
           ),
         ),
         if (m.coverShape != DiaryCardCoverShape.circle)
@@ -163,8 +179,7 @@ class DiaryCardStyleCoverTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleCoverFallback,
-              child: ExpressiveButtonGroup<DiaryCardCoverFallback>(
-                minSegmentWidth: 88,
+              child: StylePillGroup<DiaryCardCoverFallback>(
                 segments: <ButtonSegment<DiaryCardCoverFallback>>[
                   ButtonSegment<DiaryCardCoverFallback>(
                     value: DiaryCardCoverFallback.none,

@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../pages/diary_typography_page.dart';
 import '../../widgets/settings_card_group.dart';
@@ -66,8 +65,7 @@ class DiaryPreviewStyleBodyTab extends StatelessWidget {
             if (body.showLastEdited)
               SettingsChoiceTile(
                 title: l10n.diaryPreviewStyleEditedFormat,
-                child: ExpressiveButtonGroup<DiaryPreviewEditedFormat>(
-                  minSegmentWidth: 72,
+                child: StylePillGroup<DiaryPreviewEditedFormat>(
                   segments: <ButtonSegment<DiaryPreviewEditedFormat>>[
                     ButtonSegment<DiaryPreviewEditedFormat>(
                       value: DiaryPreviewEditedFormat.precise,
@@ -116,8 +114,7 @@ class DiaryPreviewStyleBodyTab extends StatelessWidget {
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleLongImage,
               subtitle: l10n.diaryPreviewStyleLongImageSubtitle,
-              child: ExpressiveButtonGroup<DiaryPreviewLongImageMode>(
-                minSegmentWidth: 96,
+              child: StylePillGroup<DiaryPreviewLongImageMode>(
                 segments: <ButtonSegment<DiaryPreviewLongImageMode>>[
                   ButtonSegment<DiaryPreviewLongImageMode>(
                     value: DiaryPreviewLongImageMode.fold,

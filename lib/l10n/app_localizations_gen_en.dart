@@ -3425,6 +3425,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryCardStyleTabTexture => 'Finish';
 
   @override
+  String get diaryCardStyleTabAppearance => 'Appearance';
+
+  @override
   String get styleEditorPresetsTitle => 'Built-in styles';
 
   @override
@@ -8483,6 +8486,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsFeaturesTimeCapsulesSubtitle =>
       'Write to the future; opens only when it\'s due';
+
+  @override
+  String get settingsFeaturesComments => 'Comments';
+
+  @override
+  String get settingsFeaturesCommentsSubtitle =>
+      'Leave notes at the end of a diary when you reread it; the entry stays as written';
 
   @override
   String get settingsFeaturesSwipeArchive => 'Swipe to archive';

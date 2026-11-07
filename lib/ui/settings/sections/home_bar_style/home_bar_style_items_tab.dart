@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -38,8 +37,7 @@ class HomeBarStyleItemsTab extends StatelessWidget {
               children: <Widget>[
                 SettingsChoiceTile(
                   title: l10n.homeBarStyleLabels,
-                  child: ExpressiveButtonGroup<HomeBarLabelMode>(
-                    minSegmentWidth: 88,
+                  child: StylePillGroup<HomeBarLabelMode>(
                     segments: <ButtonSegment<HomeBarLabelMode>>[
                       ButtonSegment<HomeBarLabelMode>(
                         value: HomeBarLabelMode.always,
@@ -94,8 +92,7 @@ class HomeBarStyleItemsTab extends StatelessWidget {
               children: <Widget>[
                 SettingsChoiceTile(
                   title: l10n.homeBarStyleIndicator,
-                  child: ExpressiveButtonGroup<HomeBarIndicator>(
-                    minSegmentWidth: 72,
+                  child: StylePillGroup<HomeBarIndicator>(
                     segments: <ButtonSegment<HomeBarIndicator>>[
                       ButtonSegment<HomeBarIndicator>(
                         value: HomeBarIndicator.capsule,

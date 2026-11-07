@@ -179,22 +179,28 @@ class DiaryCardLines {
             textAlign: resolved.centered ? TextAlign.center : null,
             style: timeStyle,
           );
-    // 日期 + 标签 + 时间同行：各段都可收缩（日期与时间单行省略、标签
-    // 单行富文本省略），窄屏 / 大字号 / 长标签名也不会横向溢出。
+    // 日期 + 标签 + 时间同行：日期与时间优先完整显示，标签先收缩。
+    // 三段都必须是有界 flex（flex > 0，松散适配）：flex 为 0 的子项拿
+    // 到无界宽度约束，Text 永远不省略、窄列直接溢出。各段按内容取宽、
+    // 超出各自份额才省略，窄屏 / 大字号 / 长标签名也不会横向溢出。
+    // 份额按 3:2:2 分：日期最长（眉线格式约 7 字）、时间次之，标签拿
+    // 剩下的宽度收缩省略；没有标签时日期与时间按 3:2 分。
     // 附加信息（地点、电量、字数等）不进同一行——它们是复杂小部件
     // （如电量指示器是内部 Row），在 Row 里分不到足够宽度会溢出；
     // 它们另起一个 Wrap，可换行。
     final gap = SizedBox(width: 8 * resolved.metaScale);
     final Widget metaRow = Row(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (dateWidget != null) Flexible(child: dateWidget),
+        if (dateWidget != null)
+          Flexible(flex: 3, fit: FlexFit.loose, child: dateWidget),
         if (tagsWidget != null) ...[
           if (dateWidget != null) gap,
-          Flexible(flex: 2, child: tagsWidget),
+          Flexible(flex: 2, fit: FlexFit.loose, child: tagsWidget),
         ],
         if (timeText != null) ...[
           if (dateWidget != null || tagsWidget != null) gap,
-          Flexible(child: timeText),
+          Flexible(flex: 2, fit: FlexFit.loose, child: timeText),
         ],
       ],
     );

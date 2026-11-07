@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../diaries/models/style_library/style_json.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
-import '../../widgets/settings_option_tiles.dart';
+import '../../widgets/style_editor/style_editor_common.dart';
 
 /// 导航栏样式各标签页共用的数值滑块行：拖动中经 `previewWith` 只改草稿
 /// （预览即时重绘、不写盘），松手经 `commitWith` 写入。
@@ -22,7 +22,7 @@ Widget homeBarSlider({
 }) {
   double normalize(double raw) =>
       snap == null ? raw.roundToDouble() : snap(raw);
-  return SettingsSliderTile(
+  return StyleSliderRow(
     title: title,
     nested: nested,
     value: value,

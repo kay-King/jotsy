@@ -5582,6 +5582,12 @@ abstract class AppLocalizations {
   /// **'Finish'**
   String get diaryCardStyleTabTexture;
 
+  /// Diary card style settings: the merged “Appearance” tab (text, color and finish).
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get diaryCardStyleTabAppearance;
+
   /// Diary card style settings: group title of the built-in presets.
   ///
   /// In en, this message translates to:
@@ -13933,6 +13939,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write to the future; opens only when it\'s due'**
   String get settingsFeaturesTimeCapsulesSubtitle;
+
+  /// Features page: title of the comments switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get settingsFeaturesComments;
+
+  /// Features page: subtitle of the comments switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave notes at the end of a diary when you reread it; the entry stays as written'**
+  String get settingsFeaturesCommentsSubtitle;
 
   /// Features page: title of the swipe-to-archive switch (phones only).
   ///

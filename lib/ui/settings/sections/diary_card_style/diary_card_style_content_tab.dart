@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -38,7 +37,7 @@ class DiaryCardStyleContentTab extends StatelessWidget {
       required DiaryCardRange range,
       required DiaryCardModeStyle Function(DiaryCardModeStyle, int) apply,
     }) {
-      return SettingsSliderTile(
+      return StyleSliderRow(
         title: title,
         value: value.toDouble(),
         min: range.min,
@@ -82,8 +81,7 @@ class DiaryCardStyleContentTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleTagStyle,
-              child: ExpressiveButtonGroup<DiaryCardTagStyle>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryCardTagStyle>(
                 segments: <ButtonSegment<DiaryCardTagStyle>>[
                   ButtonSegment<DiaryCardTagStyle>(
                     value: DiaryCardTagStyle.chip,
@@ -105,8 +103,7 @@ class DiaryCardStyleContentTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStylePinnedBadge,
-              child: ExpressiveButtonGroup<DiaryCardPinnedBadge>(
-                minSegmentWidth: 96,
+              child: StylePillGroup<DiaryCardPinnedBadge>(
                 segments: <ButtonSegment<DiaryCardPinnedBadge>>[
                   ButtonSegment<DiaryCardPinnedBadge>(
                     value: DiaryCardPinnedBadge.standard,
@@ -151,7 +148,7 @@ class DiaryCardStyleContentTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleIndicatorStyle,
-              child: ExpressiveButtonGroup<DiaryCardIndicatorStyle>(
+              child: StylePillGroup<DiaryCardIndicatorStyle>(
                 segments: <ButtonSegment<DiaryCardIndicatorStyle>>[
                   ButtonSegment<DiaryCardIndicatorStyle>(
                     value: DiaryCardIndicatorStyle.stamp,
@@ -213,8 +210,7 @@ class DiaryCardStyleContentTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleMetaPosition,
-              child: ExpressiveButtonGroup<DiaryCardMetaPosition>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryCardMetaPosition>(
                 segments: <ButtonSegment<DiaryCardMetaPosition>>[
                   ButtonSegment<DiaryCardMetaPosition>(
                     value: DiaryCardMetaPosition.eyebrow,

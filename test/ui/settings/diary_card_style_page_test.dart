@@ -12,8 +12,10 @@ import 'package:node_diary/ui/diaries/sections/diaries_list_section.dart';
 import 'package:node_diary/ui/diaries/sections/diary_head_section.dart';
 import 'package:node_diary/ui/diaries/viewmodels/diary_card_view_data.dart';
 import 'package:node_diary/ui/settings/pages/diary_card_style_page.dart';
+import 'package:node_diary/ui/settings/sections/diary_card_style/diary_card_style_layout_tab.dart';
 import 'package:node_diary/ui/settings/sections/diary_card_style/diary_card_style_preview.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
+import 'package:node_diary/ui/settings/widgets/style_editor/style_editor_common.dart';
 import 'package:node_diary/ui/widgets/triple_bar_drag_handle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -74,43 +76,46 @@ Future<(SettingsService, AppLocalizations)> _pumpPage(
 DiaryCardStyleSettings _stored(SettingsService settings) =>
     DiaryCardStyleSettings.decode(settings.diaryCardStyleRaw);
 
+/// 控制条默认隐藏：点预览顶部空白处叫出来（已显示时不再点）。
+/// 顶部几像素是卡片列表上方的留白，不会点中可交互元素。
+Future<void> _showControls(WidgetTester tester, AppLocalizations l10n) async {
+  if (find
+      .byTooltip(l10n.styleEditorSettingsTitle)
+      .hitTestable()
+      .evaluate()
+      .isEmpty) {
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    await tester.tapAt(Offset(size.width / 2, 5));
+    await tester.pumpAndSettle();
+  }
+}
+
 /// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
-/// 尝试滚动到 [label] 对应的分类区块；小屏上找不到滚动容器时跳过（只验证无异常）。
+/// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
 Future<void> _openTab(
   WidgetTester tester,
   String label,
   AppLocalizations l10n,
 ) async {
+  await _showControls(tester, l10n);
   final button = find.byTooltip(l10n.styleEditorSettingsTitle);
-  await tester.ensureVisible(button);
-  await tester.pumpAndSettle();
+  expect(button, findsOneWidget, reason: '样式设置按钮');
   await tester.tap(button);
   await tester.pumpAndSettle();
-  expect(find.byType(Scaffold), findsWidgets);
+  // 滚动到目标分类区块（ListView 懒构建）：dragUntilVisible 会自动找到
+  // 可滚动的祖先，不用手动指定 scrollable。
   final sectionHeader = find.text(label);
-  if (sectionHeader.evaluate().isNotEmpty) {
+  if (sectionHeader.evaluate().isEmpty) {
+    await tester.dragUntilVisible(
+      sectionHeader,
+      find.byType(Scaffold).last,
+      const Offset(0, -200),
+    );
+    await tester.pumpAndSettle();
+  } else {
     await tester.ensureVisible(sectionHeader);
     await tester.pumpAndSettle();
-    return;
   }
-  // 标签不在树里：尝试在选项页的滚动容器里滚动查找。
-  final scrollables = find.descendant(
-    of: find.byType(Scaffold).last,
-    matching: find.byType(Scrollable),
-  );
-  if (scrollables.evaluate().isNotEmpty) {
-    try {
-      await tester.scrollUntilVisible(
-        sectionHeader,
-        200,
-        scrollable: scrollables.first,
-      );
-      await tester.pumpAndSettle();
-    } catch (_) {
-      // 小屏上滚动容器可能不可用，跳过（只验证页面无异常）。
-    }
-  }
-  expect(tester.takeException(), isNull);
 }
 
 /// 关掉选项整页：直接 Navigator.pop 回到全屏预览。
@@ -123,6 +128,7 @@ Future<void> _closeSheet(WidgetTester tester, AppLocalizations l10n) async {
 
 /// 打开左上角悬浮菜单，返回其中“重置”菜单项的 Finder。
 Future<Finder> _openMenu(WidgetTester tester, AppLocalizations l10n) async {
+  await _showControls(tester, l10n);
   await tester.tap(find.byTooltip(l10n.diaryCardStyleTitle));
   await tester.pumpAndSettle();
   return find.widgetWithText(MenuItemButton, l10n.commonReset);
@@ -152,27 +158,23 @@ Future<void> _dismissSnackBars(WidgetTester tester) async {
 void main() {
   setUp(DiaryCardViewData.debugClearCache);
 
-  testWidgets('shows a full-screen preview with nine category sections', (
+  testWidgets('shows a full-screen preview with four category sections', (
     tester,
   ) async {
     final (_, l10n) = await _pumpPage(tester);
     expect(find.byType(DiariesListSection), findsOneWidget);
-    // 打开右上角「样式设置」：9 个分类按区块上下排列在选项整页里。
+    // 打开右上角「样式设置」：4 个分类按区块上下排列在选项整页里。
+    await _showControls(tester, l10n);
     final button = find.byTooltip(l10n.styleEditorSettingsTitle);
     await tester.tap(button);
     await tester.pumpAndSettle();
-    // 逐个滚动查找 9 个分类区块标题（ListView 懒加载，不可见的需要滚出来）。
+    // 逐个滚动查找 4 个分类区块标题（ListView 懒加载，不可见的需要滚出来）。
     final scrollable = find.byType(Scrollable).first;
     for (final label in <String>[
       l10n.diaryCardStyleTabPresets,
       l10n.diaryCardStyleTabLayout,
-      l10n.diaryCardStyleTabCover,
       l10n.diaryCardStyleTabContent,
-      l10n.diaryCardStyleTabDate,
-      l10n.diaryCardStyleTabOrder,
-      l10n.diaryCardStyleTabText,
-      l10n.diaryCardStyleTabColor,
-      l10n.diaryCardStyleTabTexture,
+      l10n.diaryCardStyleTabAppearance,
     ]) {
       await tester.scrollUntilVisible(
         find.text(label),
@@ -238,7 +240,8 @@ void main() {
     tester,
   ) async {
     final (_, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabDate, l10n);
+    // 日期选项并进了「内容」分类。
+    await _openTab(tester, l10n.diaryCardStyleTabContent, l10n);
     for (final label in <String>[
       l10n.diaryCardStyleDateFull,
       l10n.diaryCardStyleFooterRelative,
@@ -259,9 +262,14 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
-    await _openTab(tester, l10n.diaryCardStyleTabOrder, l10n);
+    // 排序选项并进了「布局」分类。
+    await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
     // 拖动“标题”行（第二行）的手柄（拿起即拖动，不经过长按）到“标签”下方。
+    // 合并后排序排在布局下方：先把手柄滚进可视区再拖，否则手势落在屏外、
+    // 拖动不生效。
     final handle = find.byType(TripleBarDragHandle).at(1);
+    await tester.ensureVisible(handle);
+    await tester.pumpAndSettle();
     final gesture = await tester.startGesture(tester.getCenter(handle));
     await tester.pump();
     for (var i = 0; i < 6; i++) {
@@ -288,8 +296,12 @@ void main() {
     // 新版顶部工具栏（列表/瀑布流分段 + 明暗按钮）存在。
     expect(find.byType(DiaryCardStylePreviewToolbar), findsOneWidget);
     expect(find.byType(TabBarView), findsNothing);
-    // 分类收进「样式设置」整页：主页面上不再直接显示分类名。
-    expect(find.text(l10n.diaryCardStyleTabPresets), findsNothing);
+    // 分类收进「样式设置」整页与底部导航：主页面上不直接显示分类名
+    // （底部导航默认隐藏，只在树里）。
+    expect(
+      find.text(l10n.diaryCardStyleTabPresets).hitTestable(),
+      findsNothing,
+    );
     await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
     // 选项整页是 Navigator 推入的整页，不再是 BottomSheet。
     expect(find.byType(Scaffold), findsWidgets);
@@ -301,8 +313,8 @@ void main() {
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
     await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
-    final tile = tester.widget<SettingsSliderTile>(
-      find.widgetWithText(SettingsSliderTile, l10n.diaryCardStyleCornerRadius),
+    final tile = tester.widget<StyleSliderRow>(
+      find.widgetWithText(StyleSliderRow, l10n.diaryCardStyleCornerRadius),
     );
     tile.onChanged!(7);
     await tester.pump();
@@ -443,6 +455,8 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await _pumpPage(tester);
+    // 列表/瀑布流切换在顶部工具条里，先叫出控制条。
+    await _showControls(tester, l10n);
     await tester.tap(find.text(l10n.autoT0147));
     await tester.pumpAndSettle();
     expect(
@@ -452,7 +466,15 @@ void main() {
       DiaryLayoutMode.waterfall,
     );
     await _openTab(tester, l10n.diaryCardStyleTabLayout, l10n);
-    expect(find.text(l10n.diaryCardStyleWaterfallGroup), findsOneWidget);
+    // 布局分类里布局与封面两个 tab 各有一个“仅瀑布流”模式分组，标题相同：
+    // 只断言布局 tab 里的那一个。
+    expect(
+      find.descendant(
+        of: find.byType(DiaryCardStyleLayoutTab),
+        matching: find.text(l10n.diaryCardStyleWaterfallGroup),
+      ),
+      findsOneWidget,
+    );
     await _tapVisible(tester, find.text(l10n.diaryCardStyleColumnsValue(3)));
     expect(_stored(settings).current.waterfall.columns, 3);
     expect(_stored(settings).current.list, DiaryCardModeStyle.listDefaults);
@@ -465,6 +487,8 @@ void main() {
     Brightness previewBrightness() =>
         Theme.of(tester.element(find.byType(DiariesListSection))).brightness;
     expect(previewBrightness(), Brightness.light);
+    // 明暗按钮在顶部工具条里，先叫出控制条。
+    await _showControls(tester, l10n);
     await tester.tap(find.byTooltip(l10n.styleEditorPreviewDark));
     await tester.pumpAndSettle();
     expect(previewBrightness(), Brightness.dark);
@@ -483,13 +507,8 @@ void main() {
       for (final label in <String>[
         l10n.diaryCardStyleTabPresets,
         l10n.diaryCardStyleTabLayout,
-        l10n.diaryCardStyleTabCover,
         l10n.diaryCardStyleTabContent,
-        l10n.diaryCardStyleTabDate,
-        l10n.diaryCardStyleTabOrder,
-        l10n.diaryCardStyleTabText,
-        l10n.diaryCardStyleTabColor,
-        l10n.diaryCardStyleTabTexture,
+        l10n.diaryCardStyleTabAppearance,
       ]) {
         await _openTab(tester, label, l10n);
         await tester.drag(

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
 import '../../../diaries/viewmodels/diary_card_date_formatter.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../../widgets/expressive_choice_tile.dart';
-import '../../../widgets/expressive_icon_choice_row.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -62,8 +61,7 @@ class DiaryPreviewStyleMetaTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleMetaPosition,
-              child: ExpressiveButtonGroup<DiaryPreviewMetaPosition>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryPreviewMetaPosition>(
                 segments: <ButtonSegment<DiaryPreviewMetaPosition>>[
                   ButtonSegment<DiaryPreviewMetaPosition>(
                     value: DiaryPreviewMetaPosition.aboveTitle,
@@ -85,11 +83,18 @@ class DiaryPreviewStyleMetaTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleMetaLayout,
-              child: ExpressiveIconChoiceRow<DiaryPreviewMetaLayout>(
-                choices: diaryPreviewMetaLayoutChoices(l10n),
-                selected: meta.layout,
-                onSelected: (DiaryPreviewMetaLayout layout) =>
-                    commit(meta.copyWith(layout: layout)),
+              child: StylePillGroup<DiaryPreviewMetaLayout>(
+                segments: <ButtonSegment<DiaryPreviewMetaLayout>>[
+                  for (final choice in diaryPreviewMetaLayoutChoices(l10n))
+                    ButtonSegment<DiaryPreviewMetaLayout>(
+                      value: choice.value,
+                      icon: FaIcon(choice.icon),
+                      label: Text(choice.label),
+                    ),
+                ],
+                selected: <DiaryPreviewMetaLayout>{meta.layout},
+                onSelectionChanged: (Set<DiaryPreviewMetaLayout> v) =>
+                    commit(meta.copyWith(layout: v.single)),
               ),
             ),
           ],
@@ -196,7 +201,7 @@ class DiaryPreviewStyleMetaTab extends StatelessWidget {
               ),
               SettingsChoiceTile(
                 title: l10n.diaryCardStyleDateSource,
-                child: ExpressiveButtonGroup<DiaryCardDateSource>(
+                child: StylePillGroup<DiaryCardDateSource>(
                   segments: <ButtonSegment<DiaryCardDateSource>>[
                     ButtonSegment<DiaryCardDateSource>(
                       value: DiaryCardDateSource.created,
@@ -224,8 +229,7 @@ class DiaryPreviewStyleMetaTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleTagStyle,
-              child: ExpressiveButtonGroup<DiaryCardTagStyle>(
-                minSegmentWidth: 72,
+              child: StylePillGroup<DiaryCardTagStyle>(
                 segments: <ButtonSegment<DiaryCardTagStyle>>[
                   ButtonSegment<DiaryCardTagStyle>(
                     value: DiaryCardTagStyle.chip,
@@ -247,7 +251,7 @@ class DiaryPreviewStyleMetaTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleChipStyle,
-              child: ExpressiveButtonGroup<DiaryPreviewChipStyle>(
+              child: StylePillGroup<DiaryPreviewChipStyle>(
                 segments: <ButtonSegment<DiaryPreviewChipStyle>>[
                   ButtonSegment<DiaryPreviewChipStyle>(
                     value: DiaryPreviewChipStyle.chip,

@@ -131,6 +131,12 @@ class AppFeaturesPage extends ConsumerWidget {
                 onChanged: writer((v) => features.copyWith(timeCapsules: v)),
               ),
               SettingsSwitchTile(
+                title: l10n.settingsFeaturesComments,
+                subtitle: l10n.settingsFeaturesCommentsSubtitle,
+                value: features.comments,
+                onChanged: writer((v) => features.copyWith(comments: v)),
+              ),
+              SettingsSwitchTile(
                 title: l10n.settingsFeaturesAi,
                 subtitle: l10n.settingsFeaturesAiSubtitle,
                 value: features.ai,

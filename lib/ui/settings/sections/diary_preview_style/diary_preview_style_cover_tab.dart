@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
-import '../../../widgets/expressive_button_group.dart';
-import '../../../widgets/expressive_icon_choice_row.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -36,17 +35,24 @@ class DiaryPreviewStyleCoverTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleCoverMode,
-              child: ExpressiveIconChoiceRow<DiaryPreviewCoverMode>(
-                choices: diaryPreviewCoverModeChoices(l10n),
-                selected: cover.mode,
-                onSelected: (DiaryPreviewCoverMode mode) =>
-                    commit(cover.copyWith(mode: mode)),
+              child: StylePillGroup<DiaryPreviewCoverMode>(
+                segments: <ButtonSegment<DiaryPreviewCoverMode>>[
+                  for (final choice in diaryPreviewCoverModeChoices(l10n))
+                    ButtonSegment<DiaryPreviewCoverMode>(
+                      value: choice.value,
+                      icon: FaIcon(choice.icon),
+                      label: Text(choice.label),
+                    ),
+                ],
+                selected: <DiaryPreviewCoverMode>{cover.mode},
+                onSelectionChanged: (Set<DiaryPreviewCoverMode> v) =>
+                    commit(cover.copyWith(mode: v.single)),
               ),
             ),
             if (!hidden) ...<Widget>[
               SettingsChoiceTile(
                 title: l10n.diaryPreviewStyleCoverFit,
-                child: ExpressiveButtonGroup<DiaryPreviewCoverFit>(
+                child: StylePillGroup<DiaryPreviewCoverFit>(
                   segments: <ButtonSegment<DiaryPreviewCoverFit>>[
                     ButtonSegment<DiaryPreviewCoverFit>(
                       value: DiaryPreviewCoverFit.contain,
@@ -62,7 +68,7 @@ class DiaryPreviewStyleCoverTab extends StatelessWidget {
                       commit(cover.copyWith(fit: v.single)),
                 ),
               ),
-              SettingsSliderTile(
+              StyleSliderRow(
                 title: l10n.diaryPreviewStyleCoverHeight,
                 value: cover.height,
                 min: DiaryPreviewStyleLimits.coverHeight.min,
@@ -73,7 +79,7 @@ class DiaryPreviewStyleCoverTab extends StatelessWidget {
                 onChangeEnd: (double v) => commit(cover.copyWith(height: v)),
               ),
               if (cover.mode == DiaryPreviewCoverMode.inset)
-                SettingsSliderTile(
+                StyleSliderRow(
                   title: l10n.diaryPreviewStyleCoverRadius,
                   value: cover.radius,
                   min: DiaryPreviewStyleLimits.coverRadius.min,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_reveal.dart';
@@ -139,8 +138,7 @@ class _GlassOptions extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(16),
-              child: ExpressiveButtonGroup<HomeBarFabPlacement>(
-                minSegmentWidth: 96,
+              child: StylePillGroup<HomeBarFabPlacement>(
                 segments: <ButtonSegment<HomeBarFabPlacement>>[
                   ButtonSegment<HomeBarFabPlacement>(
                     value: HomeBarFabPlacement.above,

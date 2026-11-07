@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../diaries/viewmodels/diary_card_colors.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/diary_card_color_tile.dart';
 import '../../widgets/settings_card_group.dart';
@@ -34,7 +33,7 @@ class DiaryCardStyleTextTab extends StatelessWidget {
       required DiaryCardRange range,
       required DiaryCardTypography Function(double) apply,
     }) {
-      return SettingsSliderTile(
+      return StyleSliderRow(
         title: title,
         value: value,
         min: range.min,
@@ -59,8 +58,7 @@ class DiaryCardStyleTextTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleTitleWeight,
-              child: ExpressiveButtonGroup<DiaryCardTitleWeight>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryCardTitleWeight>(
                 segments: <ButtonSegment<DiaryCardTitleWeight>>[
                   ButtonSegment<DiaryCardTitleWeight>(
                     value: DiaryCardTitleWeight.regular,
@@ -92,8 +90,7 @@ class DiaryCardStyleTextTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleLineHeight,
-              child: ExpressiveButtonGroup<DiaryCardLineHeight>(
-                minSegmentWidth: 80,
+              child: StylePillGroup<DiaryCardLineHeight>(
                 segments: <ButtonSegment<DiaryCardLineHeight>>[
                   ButtonSegment<DiaryCardLineHeight>(
                     value: DiaryCardLineHeight.compact,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/expressive_surfaces.dart';
+import 'style_editor/style_editor_common.dart';
 
 /// 设置页统一分组卡片组件。
 ///
@@ -31,6 +32,13 @@ class SettingsCardGroup extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    // 嵌进底部矮面板（compact）时卡内上下留白再收 2px：选项行离卡边更近，
+    // 面板内容一眼看完；只在面板里生效，整页设置不受影响。
+    final compact = StyleEditorEmbeddedScope.compactOf(context);
+    // 面板里第一个分组贴掉顶部留白（[StyleEditorFirstGroupScope]）：
+    // 卡片上内边距与标题上内边距都清零，标题贴着面板标题。只在底部
+    // 矮面板（compact）里生效；整页设置与其它分组不动。
+    final topFlush = compact && StyleEditorFirstGroupScope.of(context);
 
     return Padding(
       padding: padding,
@@ -67,8 +75,11 @@ class SettingsCardGroup extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadii.card),
               clipBehavior: Clip.antiAlias,
               // 卡内上下留白，首尾行不贴卡边（照 IdeaMemo 分组卡的透气感）。
+              // topFlush 时只留底边：面板里第一个分组的标题贴着面板标题。
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: topFlush
+                    ? EdgeInsets.only(bottom: compact ? 6 : 8)
+                    : EdgeInsets.symmetric(vertical: compact ? 6 : 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -77,7 +88,9 @@ class SettingsCardGroup extends StatelessWidget {
                     // 与下方第一行之间不画线，靠留白分层。
                     if (title != null)
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        padding: topFlush
+                            ? const EdgeInsets.fromLTRB(16, 0, 16, 4)
+                            : const EdgeInsets.fromLTRB(16, 8, 16, 4),
                         child: Text(
                           title!,
                           style: textTheme.titleMedium?.copyWith(
@@ -129,14 +142,17 @@ class SettingsCardGroupDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    // Salt 风分组内不画分割线（照 IdeaMemo 设置页），只保留 1px 的
-    // 节奏间距。
+    // 样式编辑页（面板与整页）里行与行之间画细分割线（阅读软件风）；
+    // 其它设置页保持 Salt 风不画线，只留节奏间距。
+    final inStyleEditor = StyleEditorEmbeddedScope.of(context);
     return Padding(
       padding: EdgeInsetsDirectional.only(start: indent, end: 16),
       child: Divider(
         height: 1,
         thickness: 0.6,
-        color: colorScheme.outlineVariant.withValues(alpha: 0),
+        color: inStyleEditor
+            ? colorScheme.outlineVariant
+            : colorScheme.outlineVariant.withValues(alpha: 0),
       ),
     );
   }

@@ -79,6 +79,8 @@ abstract final class DiaryCardPresets {
   /// （2026-10-25 用户拿另一款日记 App 对比后定：竖版通栏大图 +
   /// 大字 + 宽松间距更高级；封面高 200、标题 1.1 倍、正文全字号，
   /// 是之前默认改版那一版的样子，现在收进杂志预设，经典小图保留。）
+  /// 通栏封面按 16:9 左右给高度（列表 200、瀑布流 180）：卡片通栏很宽，
+  /// 封面太矮会被裁成细条，竖图内容全丢了，只剩一条横幅。
   static const _magazine = DiaryCardStyle(
     surface: DiaryCardSurfaceStyle(
       cornerRadius: 20,
@@ -93,7 +95,7 @@ abstract final class DiaryCardPresets {
     meta: DiaryCardMetaStyle(dateFormat: DiaryCardDateFormat.full),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 160,
+      coverHeight: 200,
       coverDivider: false,
       coverGap: 14,
       paddingH: 18,
@@ -104,7 +106,7 @@ abstract final class DiaryCardPresets {
     ),
     waterfall: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 144,
+      coverHeight: 180,
       coverDivider: false,
       coverGap: 10,
       paddingH: 14,
@@ -155,6 +157,8 @@ abstract final class DiaryCardPresets {
   );
 
   /// 画廊：照片优先。列表为多图拼贴的通栏封面，瀑布流以封面作卡片背景。
+  /// 列表通栏封面按 16:9 左右给高度（200）：卡片通栏很宽，封面太矮
+  /// 会被裁成细条；瀑布流是背景模式，高度是卡片最小高度，不动。
   static const _gallery = DiaryCardStyle(
     surface: DiaryCardSurfaceStyle(
       cornerRadius: 22,
@@ -163,7 +167,7 @@ abstract final class DiaryCardPresets {
     content: DiaryCardContentStyle(collage: true),
     list: DiaryCardModeStyle(
       coverPosition: DiaryCardCoverPosition.top,
-      coverHeight: 160,
+      coverHeight: 200,
       coverDivider: false,
       coverGap: 14,
       paddingH: 16,

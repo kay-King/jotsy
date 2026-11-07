@@ -200,11 +200,16 @@ class DiaryPreviewStylePreviewToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
+    // Stack 居中：页码点贴工具条正中、明暗按钮贴右，两者互不挤。
+    // 以前是 Row[Expanded(页码点)， 月亮]：页码点被 Expanded 压在
+    // 左边、月亮又占右边 32px；脚手架顶栏左右对称（菜单 + 间距 44、
+    // 间距 + 设置 44），工具条正中就是屏幕正中。
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: <Widget>[
-          Expanded(
+          Center(
             child: ValueListenableBuilder<int>(
               valueListenable: page,
               builder: (BuildContext context, int current, Widget? child) {
@@ -236,7 +241,10 @@ class DiaryPreviewStylePreviewToolbar extends StatelessWidget {
               },
             ),
           ),
-          StylePreviewBrightnessButton(controller: controller),
+          Align(
+            alignment: Alignment.centerRight,
+            child: StylePreviewBrightnessButton(controller: controller),
+          ),
         ],
       ),
     );

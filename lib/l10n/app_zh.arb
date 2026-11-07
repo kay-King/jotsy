@@ -4395,6 +4395,10 @@
   "@diaryCardStyleTabTexture": {
     "description": "日记卡片样式设置页：标签页“质感”。"
   },
+  "diaryCardStyleTabAppearance": "外观",
+  "@diaryCardStyleTabAppearance": {
+    "description": "日记卡片样式设置页：合并后的标签页“外观”（字体、色彩、质感）。"
+  },
   "styleEditorPresetsTitle": "内置风格",
   "@styleEditorPresetsTitle": {
     "description": "日记卡片样式设置页：内置预设分组标题。"
@@ -10737,6 +10741,14 @@
   "settingsFeaturesTimeCapsulesSubtitle": "写给未来，到期才能打开",
   "@settingsFeaturesTimeCapsulesSubtitle": {
     "description": "功能管理页：时间胶囊开关的说明。"
+  },
+  "settingsFeaturesComments": "留言",
+  "@settingsFeaturesComments": {
+    "description": "功能管理页：日记留言开关的标题。"
+  },
+  "settingsFeaturesCommentsSubtitle": "重读日记时在末尾写下回应，正文保持原样",
+  "@settingsFeaturesCommentsSubtitle": {
+    "description": "功能管理页：日记留言开关的说明。"
   },
   "settingsFeaturesSwipeArchive": "侧滑归档",
   "@settingsFeaturesSwipeArchive": {

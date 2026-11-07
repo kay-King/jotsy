@@ -15,6 +15,7 @@ import 'package:node_diary/ui/settings/sections/diary_code_block_style/diary_cod
 import 'package:node_diary/ui/settings/sections/diary_code_block_style/diary_code_theme_card.dart';
 import 'package:node_diary/ui/settings/sections/settings_editor_section.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
+import 'package:node_diary/ui/settings/widgets/style_editor/style_editor_common.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../support/diary_drafts_harness.dart';
@@ -66,9 +67,27 @@ Future<SettingsService> _pump(
 DiaryCodeBlockStyle _stored(SettingsService settings) =>
     DiaryCodeBlockStyle.decode(settings.diaryCodeBlockStyleRaw);
 
+/// 控制条默认隐藏：点预览顶部空白处叫出来（已显示时不再点）。
+/// 代码块预览包着 IgnorePointer，任意空白点都直达脚手架的点按切换。
+Future<void> _showControls(WidgetTester tester, AppLocalizations l10n) async {
+  if (find
+      .byTooltip(l10n.styleEditorSettingsTitle)
+      .hitTestable()
+      .evaluate()
+      .isEmpty) {
+    final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+    // 点预览顶部中央的空白条：控制条隐藏时预览从屏幕顶开始，
+    // 顶部几像素在各预览里都是留白（卡片列表上方留白、预览页标题上方、
+    // 代码块内边距、导航栏画框顶缘），不会点中可交互元素。
+    await tester.tapAt(Offset(size.width / 2, 5));
+    await tester.pumpAndSettle();
+  }
+}
+
 /// 点右上角「样式设置」按钮：打开选项整页，所有分类按区块上下排列。
 /// 打开后滚动到 [label] 对应的分类区块（ListView 懒构建，目标可能还没进树）。
 Future<void> _openTab(WidgetTester tester, String label) async {
+  await _showControls(tester, _l10n);
   final button = find.byTooltip(_l10n.styleEditorSettingsTitle);
   await tester.ensureVisible(button);
   await tester.pumpAndSettle();
@@ -117,6 +136,7 @@ Future<void> _closeSheet(WidgetTester tester) async {
 
 /// 打开左上角悬浮菜单，返回其中"重置"菜单项的 Finder。
 Future<Finder> _openMenu(WidgetTester tester) async {
+  await _showControls(tester, _l10n);
   await tester.tap(find.byTooltip(_l10n.codeBlockStyleTitle));
   await tester.pumpAndSettle();
   return find.widgetWithText(MenuItemButton, _l10n.commonReset);
@@ -199,7 +219,7 @@ void main() {
     final settings = await _pump(tester);
     await _openTab(tester, _l10n.codeBlockStyleTabFont);
     final slider = find.descendant(
-      of: find.widgetWithText(SettingsSliderTile, _l10n.codeBlockFontSizeTitle),
+      of: find.widgetWithText(StyleSliderRow, _l10n.codeBlockFontSizeTitle),
       matching: find.byType(Slider),
     );
     await _reveal(tester, slider);
@@ -211,8 +231,8 @@ void main() {
     await tester.pump();
     expect(settings.diaryCodeBlockStyleRaw, isNull);
     final dragging = tester
-        .widget<SettingsSliderTile>(
-          find.widgetWithText(SettingsSliderTile, _l10n.codeBlockFontSizeTitle),
+        .widget<StyleSliderRow>(
+          find.widgetWithText(StyleSliderRow, _l10n.codeBlockFontSizeTitle),
         )
         .value;
     expect(dragging, greaterThan(DiaryCodeBlockStyle.defaultFontScale));

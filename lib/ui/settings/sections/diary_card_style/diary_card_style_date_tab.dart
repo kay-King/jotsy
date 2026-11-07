@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../diaries/viewmodels/diary_card_date_formatter.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../../widgets/expressive_choice_tile.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
@@ -113,7 +112,7 @@ class DiaryCardStyleDateTab extends StatelessWidget {
               ),
               SettingsChoiceTile(
                 title: l10n.diaryCardStyleDateSource,
-                child: ExpressiveButtonGroup<DiaryCardDateSource>(
+                child: StylePillGroup<DiaryCardDateSource>(
                   segments: <ButtonSegment<DiaryCardDateSource>>[
                     ButtonSegment<DiaryCardDateSource>(
                       value: DiaryCardDateSource.created,

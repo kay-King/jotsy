@@ -12,13 +12,13 @@ import 'package:node_diary/ui/settings/pages/home_bar_style_page.dart';
 import 'package:node_diary/ui/settings/sections/settings_home_bar_style_tile.dart';
 import 'package:node_diary/ui/settings/widgets/settings_option_tiles.dart';
 import 'package:node_diary/ui/widgets/bottom_nav.dart';
-import 'package:node_diary/ui/widgets/expressive_button_group.dart';
+import 'package:node_diary/ui/settings/widgets/style_editor/style_editor_common.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/home_bar_style_page_harness.dart';
 
 Finder _materialOption(String label) => find.descendant(
-  of: find.byType(ExpressiveButtonGroup<HomeBarMaterial>),
+  of: find.byType(StylePillGroup<HomeBarMaterial>),
   matching: find.text(label),
 );
 
@@ -37,16 +37,15 @@ const _glassCustom = HomeBarSettings(
 );
 
 void main() {
-  testWidgets('shows a miniature home preview with five floating tab buttons', (
+  testWidgets('shows a miniature home preview with four floating tab buttons', (
     tester,
   ) async {
     final (_, l10n) = await pumpHomeBarStylePage(tester);
-    // 新 UI：五个分类在「样式设置」整页里按区块上下排列（懒构建，逐个滚动验证）。
+    // 新 UI：四个分类在「样式设置」整页里按区块上下排列（懒构建，逐个滚动验证）。
     await openHomeBarStyleTab(tester, l10n.homeBarStyleTabPresets);
     for (final label in <String>[
       l10n.homeBarStyleTabPresets,
       l10n.homeBarStyleTabMaterial,
-      l10n.homeBarStyleTabFloating,
       l10n.homeBarStyleTabItems,
       l10n.homeBarStyleTabBehavior,
     ]) {
@@ -179,11 +178,11 @@ void main() {
     final (settings, l10n) = await pumpHomeBarStylePage(tester);
     await openHomeBarStyleTab(tester, l10n.homeBarStyleTabItems);
     final finder = find.widgetWithText(
-      SettingsSliderTile,
+      StyleSliderRow,
       l10n.homeBarStyleIconSize,
     );
     await scrollToHomeBarOption(tester, finder);
-    final tile = tester.widget<SettingsSliderTile>(finder);
+    final tile = tester.widget<StyleSliderRow>(finder);
     tile.onChanged!(24);
     await tester.pump();
     expect(settings.homeBarStyleRaw, isNull);
@@ -228,11 +227,11 @@ void main() {
       HomeBarIndicator.block,
     );
     final padding = find.widgetWithText(
-      SettingsSliderTile,
+      StyleSliderRow,
       l10n.homeBarStyleBlockPadding,
     );
     await scrollToHomeBarOption(tester, padding);
-    final tile = tester.widget<SettingsSliderTile>(padding);
+    final tile = tester.widget<StyleSliderRow>(padding);
     expect(tile.nested, isTrue);
     tile.onChanged!(10);
     await tester.pump();
@@ -253,7 +252,8 @@ void main() {
     tester,
   ) async {
     final (settings, l10n) = await pumpHomeBarStylePage(tester);
-    await openHomeBarStyleTab(tester, l10n.homeBarStyleTabFloating);
+    // 悬浮已并进材质分类：从材质分类打开，悬浮那组选项还在里面。
+    await openHomeBarStyleTab(tester, l10n.homeBarStyleTabMaterial);
     expect(
       inHomeBarOptions(l10n.homeBarStyleFloatingSolidHint),
       findsOneWidget,
@@ -410,7 +410,6 @@ void main() {
         for (final label in <String>[
           l10n.homeBarStyleTabPresets,
           l10n.homeBarStyleTabMaterial,
-          l10n.homeBarStyleTabFloating,
           l10n.homeBarStyleTabItems,
           l10n.homeBarStyleTabBehavior,
         ]) {

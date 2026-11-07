@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_code_block/diary_code_block_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_code_block_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -27,8 +26,7 @@ class DiaryCodeBlockStyleThemeTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.codeBlockBrightnessTitle,
-              child: ExpressiveButtonGroup<DiaryCodeBrightness>(
-                minSegmentWidth: 72,
+              child: StylePillGroup<DiaryCodeBrightness>(
                 segments: <ButtonSegment<DiaryCodeBrightness>>[
                   ButtonSegment<DiaryCodeBrightness>(
                     value: DiaryCodeBrightness.system,

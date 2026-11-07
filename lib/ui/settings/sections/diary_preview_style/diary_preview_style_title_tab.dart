@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -42,7 +41,7 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
                 value: title.showUntitled,
                 onChanged: (bool v) => commit(title.copyWith(showUntitled: v)),
               ),
-              SettingsSliderTile(
+              StyleSliderRow(
                 title: l10n.diaryPreviewStyleTitleScale,
                 value: title.scale,
                 min: DiaryPreviewStyleLimits.titleScale.min,
@@ -54,8 +53,7 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
               ),
               SettingsChoiceTile(
                 title: l10n.diaryPreviewStyleTitleWeight,
-                child: ExpressiveButtonGroup<DiaryPreviewTitleWeight>(
-                  minSegmentWidth: 64,
+                child: StylePillGroup<DiaryPreviewTitleWeight>(
                   segments: <ButtonSegment<DiaryPreviewTitleWeight>>[
                     for (final (weight, label)
                         in <(DiaryPreviewTitleWeight, String)>[
@@ -88,7 +86,7 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
               ),
               SettingsChoiceTile(
                 title: l10n.diaryPreviewStyleTitleAlign,
-                child: ExpressiveButtonGroup<DiaryPreviewAlign>(
+                child: StylePillGroup<DiaryPreviewAlign>(
                   segments: <ButtonSegment<DiaryPreviewAlign>>[
                     ButtonSegment<DiaryPreviewAlign>(
                       value: DiaryPreviewAlign.start,
@@ -120,7 +118,7 @@ class DiaryPreviewStyleTitleTab extends StatelessWidget {
                 value: title.divider,
                 onChanged: (bool v) => commit(title.copyWith(divider: v)),
               ),
-              SettingsSliderTile(
+              StyleSliderRow(
                 title: l10n.diaryPreviewStyleTitleBodyGap,
                 subtitle: l10n.diaryPreviewStyleTitleBodyGapSubtitle,
                 value: title.bodyGap,

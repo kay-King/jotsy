@@ -2,6 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/services/app_service.dart';
+import '../../settings/providers/app_features_provider.dart';
+
+/// 留言功能是否开启（设置 → 功能管理，默认开）。各处只读这一项决定
+/// 留言区、留言数与 AI 回应保存入口是否出现；数据一律保留，重新开启
+/// 即恢复原样。
+final diaryCommentsEnabledProvider = Provider<bool>(
+  (Ref ref) => ref.watch(appFeaturesProvider.select((f) => f.comments)),
+);
 
 /// 某篇日记的留言列表（按时间升序）：预览页留言区订阅；写入与删除经
 /// 数据库 watch 实时推送，不读整库。

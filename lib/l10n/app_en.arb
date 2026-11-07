@@ -4395,6 +4395,10 @@
   "@diaryCardStyleTabTexture": {
     "description": "Diary card style settings: the “Finish” tab."
   },
+  "diaryCardStyleTabAppearance": "Appearance",
+  "@diaryCardStyleTabAppearance": {
+    "description": "Diary card style settings: the merged “Appearance” tab (text, color and finish)."
+  },
   "styleEditorPresetsTitle": "Built-in styles",
   "@styleEditorPresetsTitle": {
     "description": "Diary card style settings: group title of the built-in presets."
@@ -10737,6 +10741,14 @@
   "settingsFeaturesTimeCapsulesSubtitle": "Write to the future; opens only when it's due",
   "@settingsFeaturesTimeCapsulesSubtitle": {
     "description": "Features page: subtitle of the time capsules switch."
+  },
+  "settingsFeaturesComments": "Comments",
+  "@settingsFeaturesComments": {
+    "description": "Features page: title of the comments switch."
+  },
+  "settingsFeaturesCommentsSubtitle": "Leave notes at the end of a diary when you reread it; the entry stays as written",
+  "@settingsFeaturesCommentsSubtitle": {
+    "description": "Features page: subtitle of the comments switch."
   },
   "settingsFeaturesSwipeArchive": "Swipe to archive",
   "@settingsFeaturesSwipeArchive": {

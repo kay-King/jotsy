@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -53,8 +52,7 @@ class HomeBarStyleMaterialTab extends StatelessWidget {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: ExpressiveButtonGroup<HomeBarMaterial>(
-                        minSegmentWidth: 96,
+                      child: StylePillGroup<HomeBarMaterial>(
                         segments: <ButtonSegment<HomeBarMaterial>>[
                           for (final material in HomeBarMaterial.values)
                             ButtonSegment<HomeBarMaterial>(
@@ -150,8 +148,7 @@ class _GlassOptions extends StatelessWidget {
         SettingsChoiceTile(
           nested: true,
           title: l10n.homeBarStyleTint,
-          child: ExpressiveButtonGroup<HomeBarTint>(
-            minSegmentWidth: 72,
+          child: StylePillGroup<HomeBarTint>(
             segments: <ButtonSegment<HomeBarTint>>[
               ButtonSegment<HomeBarTint>(
                 value: HomeBarTint.neutral,

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
 import '../../../diaries/viewmodels/diary_card_colors.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/diary_card_color_tile.dart';
 import '../../widgets/settings_card_group.dart';
@@ -43,7 +42,7 @@ class DiaryCardStyleColorTab extends StatelessWidget {
                 withSurface(surface.copyWith(background: spec)),
               ),
             ),
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.diaryCardStyleOpacity,
               value: surface.opacity,
               min: DiaryCardStyleLimits.opacity.min,
@@ -80,8 +79,7 @@ class DiaryCardStyleColorTab extends StatelessWidget {
               ),
               SettingsChoiceTile(
                 title: l10n.diaryCardStyleGradientDirection,
-                child: ExpressiveButtonGroup<DiaryCardGradientDirection>(
-                  minSegmentWidth: 80,
+                child: StylePillGroup<DiaryCardGradientDirection>(
                   segments: <ButtonSegment<DiaryCardGradientDirection>>[
                     ButtonSegment<DiaryCardGradientDirection>(
                       value: DiaryCardGradientDirection.vertical,

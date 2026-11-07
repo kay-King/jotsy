@@ -3061,6 +3061,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get diaryCardStyleTabTexture => '质感';
 
   @override
+  String get diaryCardStyleTabAppearance => '外观';
+
+  @override
   String get styleEditorPresetsTitle => '内置风格';
 
   @override
@@ -7617,6 +7620,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsFeaturesTimeCapsulesSubtitle => '写给未来，到期才能打开';
+
+  @override
+  String get settingsFeaturesComments => '留言';
+
+  @override
+  String get settingsFeaturesCommentsSubtitle => '重读日记时在末尾写下回应，正文保持原样';
 
   @override
   String get settingsFeaturesSwipeArchive => '侧滑归档';

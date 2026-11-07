@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_card_style/diary_card_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_card_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -31,7 +30,7 @@ class DiaryCardStyleLayoutTab extends StatelessWidget {
       required DiaryCardRange range,
       required DiaryCardModeStyle Function(DiaryCardModeStyle, double) apply,
     }) {
-      return SettingsSliderTile(
+      return StyleSliderRow(
         title: title,
         value: value,
         min: range.min,
@@ -48,7 +47,7 @@ class DiaryCardStyleLayoutTab extends StatelessWidget {
         SettingsCardGroup(
           title: l10n.diaryCardStyleSharedGroup,
           children: <Widget>[
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.diaryCardStyleCornerRadius,
               value: style.surface.cornerRadius,
               min: DiaryCardStyleLimits.cornerRadius.min,
@@ -68,7 +67,7 @@ class DiaryCardStyleLayoutTab extends StatelessWidget {
             ),
             SettingsChoiceTile(
               title: l10n.diaryCardStyleTextAlign,
-              child: ExpressiveButtonGroup<DiaryCardTextAlign>(
+              child: StylePillGroup<DiaryCardTextAlign>(
                 segments: <ButtonSegment<DiaryCardTextAlign>>[
                   ButtonSegment<DiaryCardTextAlign>(
                     value: DiaryCardTextAlign.start,
@@ -104,7 +103,7 @@ class DiaryCardStyleLayoutTab extends StatelessWidget {
             if (controller.mode == DiaryCardMode.waterfall)
               SettingsChoiceTile(
                 title: l10n.diaryCardStyleColumns,
-                child: ExpressiveButtonGroup<int>(
+                child: StylePillGroup<int>(
                   segments: <ButtonSegment<int>>[
                     for (
                       var count = DiaryCardStyleLimits.columns.min.round();

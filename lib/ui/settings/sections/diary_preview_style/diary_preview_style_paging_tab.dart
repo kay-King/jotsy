@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../diaries/models/diary_preview_style/diary_preview_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/diary_preview_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
@@ -43,8 +42,7 @@ class DiaryPreviewStylePagingTab extends StatelessWidget {
               SettingsChoiceTile(
                 title: l10n.diaryPreviewStyleSwipeSensitivity,
                 subtitle: l10n.diaryPreviewStyleSensitivityHint,
-                child: ExpressiveButtonGroup<DiaryPreviewSwipeSensitivity>(
-                  minSegmentWidth: 72,
+                child: StylePillGroup<DiaryPreviewSwipeSensitivity>(
                   segments: <ButtonSegment<DiaryPreviewSwipeSensitivity>>[
                     ButtonSegment<DiaryPreviewSwipeSensitivity>(
                       value: DiaryPreviewSwipeSensitivity.sensitive,
@@ -81,8 +79,7 @@ class DiaryPreviewStylePagingTab extends StatelessWidget {
           children: <Widget>[
             SettingsChoiceTile(
               title: l10n.diaryPreviewStyleTransition,
-              child: ExpressiveButtonGroup<DiaryPreviewPageTransition>(
-                minSegmentWidth: 72,
+              child: StylePillGroup<DiaryPreviewPageTransition>(
                 segments: <ButtonSegment<DiaryPreviewPageTransition>>[
                   ButtonSegment<DiaryPreviewPageTransition>(
                     value: DiaryPreviewPageTransition.slide,

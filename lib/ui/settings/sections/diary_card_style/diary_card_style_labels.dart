@@ -24,35 +24,6 @@ String diaryCardPresetName(AppLocalizations l10n, DiaryCardPresetId id) =>
       DiaryCardPresetId.warm => l10n.diaryCardStylePresetWarm,
     };
 
-String diaryCardPresetDescription(
-  AppLocalizations l10n,
-  DiaryCardPresetId id,
-) => switch (id) {
-  DiaryCardPresetId.classic => l10n.diaryCardStylePresetClassicDesc,
-  DiaryCardPresetId.compact => l10n.diaryCardStylePresetCompactDesc,
-  DiaryCardPresetId.magazine => l10n.diaryCardStylePresetMagazineDesc,
-  DiaryCardPresetId.minimal => l10n.diaryCardStylePresetMinimalDesc,
-  DiaryCardPresetId.gallery => l10n.diaryCardStylePresetGalleryDesc,
-  DiaryCardPresetId.sticky => l10n.diaryCardStylePresetStickyDesc,
-  DiaryCardPresetId.journal => l10n.diaryCardStylePresetJournalDesc,
-  DiaryCardPresetId.mood => l10n.diaryCardStylePresetMoodDesc,
-  DiaryCardPresetId.memo => l10n.diaryCardStylePresetMemoDesc,
-  DiaryCardPresetId.warm => l10n.diaryCardStylePresetWarmDesc,
-};
-
-FaIconData diaryCardPresetIcon(DiaryCardPresetId id) => switch (id) {
-  DiaryCardPresetId.classic => FontAwesomeIcons.solidNewspaper,
-  DiaryCardPresetId.compact => FontAwesomeIcons.barsStaggered,
-  DiaryCardPresetId.magazine => FontAwesomeIcons.bookOpen,
-  DiaryCardPresetId.minimal => FontAwesomeIcons.feather,
-  DiaryCardPresetId.gallery => FontAwesomeIcons.images,
-  DiaryCardPresetId.sticky => FontAwesomeIcons.noteSticky,
-  DiaryCardPresetId.journal => FontAwesomeIcons.bookBookmark,
-  DiaryCardPresetId.mood => FontAwesomeIcons.faceSmile,
-  DiaryCardPresetId.memo => FontAwesomeIcons.lightbulb,
-  DiaryCardPresetId.warm => FontAwesomeIcons.sun,
-};
-
 /// 当前样式的显示名：内置预设名、我的样式名，或“自定义”。
 String diaryCardStyleDisplayName(
   AppLocalizations l10n,

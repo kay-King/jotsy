@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/models/home_bar_style/home_bar_style.dart';
-import '../../../widgets/expressive_button_group.dart';
 import '../../controllers/home_bar_style_editor_controller.dart';
 import '../../widgets/settings_card_group.dart';
 import '../../widgets/settings_option_tiles.dart';
 import '../../widgets/settings_reveal.dart';
+import '../../widgets/style_editor/style_editor_common.dart';
 import 'home_bar_style_common.dart';
 import 'home_bar_style_labels.dart';
 
@@ -118,8 +118,7 @@ class _LineOptions extends StatelessWidget {
         SettingsChoiceTile(
           nested: true,
           title: l10n.homeBarStyleLineColor,
-          child: ExpressiveButtonGroup<HomeBarLineColor>(
-            minSegmentWidth: 72,
+          child: StylePillGroup<HomeBarLineColor>(
             segments: <ButtonSegment<HomeBarLineColor>>[
               for (final color in HomeBarLineColor.values)
                 ButtonSegment<HomeBarLineColor>(

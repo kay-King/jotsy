@@ -24,10 +24,9 @@ import '../widgets/style_editor/style_editor_scaffold.dart';
 /// 设置 → 外观与语言 → 日记卡片样式。
 ///
 /// 页面壳层：上方实时预览，下方按标签页分组调整（预设、布局、封面、内容、
-/// 日期、排序、字体、色彩、质感）；布局与三档面板见 [StyleEditorScaffold]。
-/// 预览顶部的工具条切换列表 / 瀑布流与明暗。状态与写入由
-/// [DiaryCardStyleEditorController] 负责，改动即时生效、无需保存；右上角
-/// “重置”回到默认样式并提供撤销。
+/// 外观）；布局与三档面板见 [StyleEditorScaffold]。预览顶部的工具条切换
+/// 列表 / 瀑布流与明暗。状态与写入由 [DiaryCardStyleEditorController] 负责，
+/// 改动即时生效、无需保存；右上角“重置”回到默认样式并提供撤销。
 class DiaryCardStylePage extends StatefulWidget {
   const DiaryCardStylePage({
     super.key,
@@ -87,27 +86,44 @@ class _DiaryCardStylePageState extends State<DiaryCardStylePage> {
       listenable: _controller,
       isDefault: () => _controller.style.isDefault,
       onReset: _reset,
+      // 底部导航只留 4 个分类：意思相近的拼在一起（布局+排序+封面、
+      // 内容+日期、字体+色彩+质感=外观），选项一个不少，只是换分组。
       tabs: <String>[
         l10n.diaryCardStyleTabPresets,
         l10n.diaryCardStyleTabLayout,
-        l10n.diaryCardStyleTabCover,
         l10n.diaryCardStyleTabContent,
-        l10n.diaryCardStyleTabDate,
-        l10n.diaryCardStyleTabOrder,
-        l10n.diaryCardStyleTabText,
-        l10n.diaryCardStyleTabColor,
-        l10n.diaryCardStyleTabTexture,
+        l10n.diaryCardStyleTabAppearance,
+      ],
+      // 底部导航图标（Material outlined）：预设调色板、布局仪表盘、
+      // 内容文章、外观风格；图标在上、文字在下。
+      tabIcons: const <IconData>[
+        Icons.palette_outlined,
+        Icons.dashboard_outlined,
+        Icons.article_outlined,
+        Icons.style_outlined,
       ],
       tabViews: () => <Widget>[
         DiaryCardStylePresetsTab(controller: _controller),
-        DiaryCardStyleLayoutTab(controller: _controller),
-        DiaryCardStyleCoverTab(controller: _controller),
-        DiaryCardStyleContentTab(controller: _controller),
-        DiaryCardStyleDateTab(controller: _controller),
-        DiaryCardStyleOrderTab(controller: _controller),
-        DiaryCardStyleTextTab(controller: _controller),
-        DiaryCardStyleColorTab(controller: _controller),
-        DiaryCardStyleTextureTab(controller: _controller),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryCardStyleLayoutTab(controller: _controller),
+            DiaryCardStyleOrderTab(controller: _controller),
+            DiaryCardStyleCoverTab(controller: _controller),
+          ],
+        ),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryCardStyleContentTab(controller: _controller),
+            DiaryCardStyleDateTab(controller: _controller),
+          ],
+        ),
+        StyleEditorMergedTab(
+          children: <Widget>[
+            DiaryCardStyleTextTab(controller: _controller),
+            DiaryCardStyleColorTab(controller: _controller),
+            DiaryCardStyleTextureTab(controller: _controller),
+          ],
+        ),
       ],
       toolbarBuilder: (_) =>
           DiaryCardStylePreviewToolbar(controller: _controller),

@@ -67,7 +67,7 @@ class DiaryCodeBlockStyleFontTab extends ConsumerWidget {
         ),
         SettingsCardGroup(
           children: <Widget>[
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.codeBlockFontSizeTitle,
               value: style.fontScale,
               min: DiaryCodeBlockStyle.minFontScale,
@@ -84,7 +84,7 @@ class DiaryCodeBlockStyleFontTab extends ConsumerWidget {
               onChangeEnd: (double v) =>
                   controller.commitWith((s) => s.copyWith(fontScale: v)),
             ),
-            SettingsSliderTile(
+            StyleSliderRow(
               title: l10n.codeBlockLineHeightTitle,
               value: style.lineHeight,
               min: DiaryCodeBlockStyle.minLineHeight,
