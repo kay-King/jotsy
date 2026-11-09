@@ -297,6 +297,31 @@ jobs:
             echo "artifact_name=release-apks-${safe_ref}" >> "$GITHUB_OUTPUT"
           fi
 
+      # 每个 APK 必须同时带 v1 / v2 / v3 签名：鸿蒙与部分华为安装器只认 v1 证书，
+      # 缺了就报“该安装包未包含任何证书”（签名方案见 android/app/build.gradle.kts）。
+      # apksigner 只在 minSdk < 24 时才检查 v1，minSdk 24 的包默认总报 v1 false，
+      # 所以用 --min-sdk-version 23 强制校验。（上游 PR #207，2026-11-09 改造着合）
+      - name: Verify APK signature schemes
+        run: |
+          apksigner="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name apksigner | sort -V | tail -n 1)"
+          if [[ -z "$apksigner" ]]; then
+            echo "::error::apksigner not found under $ANDROID_HOME/build-tools"
+            exit 1
+          fi
+          for apk in release-artifacts/*.apk; do
+            # 完全没有 v1 签名时 apksigner 在这里就失败（Missing META-INF/MANIFEST.MF）。
+            if ! report="$("$apksigner" verify --verbose --min-sdk-version 23 "$apk")"; then
+              echo "::error::$apk failed apksigner verify"
+              exit 1
+            fi
+            for scheme in 'v1 scheme (JAR signing)' 'v2 scheme (APK Signature Scheme v2)' 'v3 scheme (APK Signature Scheme v3)'; do
+              if ! grep -Fqx "Verified using ${scheme}: true" <<< "$report"; then
+                echo "::error::$apk is not signed with ${scheme}"
+                exit 1
+              fi
+            done
+          done
+
       # 应用内更新清单：版本（含构建号）、各 ABI 安装包的大小与 SHA-256、中英文
       # 更新说明。应用经镜像读取 releases/latest/download/jotsy-update.json，一个
       # 小请求拿全信息（国内网络下 api.github.com 常不可用或被限流），见
