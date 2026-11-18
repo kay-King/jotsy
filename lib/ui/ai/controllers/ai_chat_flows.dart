@@ -12,6 +12,7 @@ import 'package:node_diary/ui/widgets/text_selection_menu/app_text_context_menu.
 import '../../../core/database/app_database.dart';
 import '../../../core/services/app_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/date_picker_range.dart';
 import '../../home/widgets/home_hint_visibility_scope.dart';
 import '../models/ai_chat_scope.dart';
 import '../widgets/ai_dialogs.dart';
@@ -123,7 +124,7 @@ Future<AiChatScope?> showAiChatScopeSheet(
   final range = await showDateRangePicker(
     context: context,
     helpText: context.l10n.aiChatRangeTitle,
-    firstDate: DateTime(1970),
+    firstDate: DatePickerRange.firstDate,
     lastDate: DateTime(now.year + 1, 12, 31),
     initialDateRange: current.kind == AiChatScopeKind.range
         ? DateTimeRange(start: current.start!, end: current.end!)

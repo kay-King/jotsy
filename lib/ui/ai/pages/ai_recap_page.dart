@@ -14,6 +14,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../utils/date_picker_range.dart';
 import '../../diaries/pages/diary_preview_page.dart';
 import '../../notebooks/models/notebook_scope_resolver.dart';
 import '../../notebooks/providers/notebook_insights_providers.dart';
@@ -133,7 +134,7 @@ class _AiRecapPageState extends ConsumerState<AiRecapPage> {
     final picked = await showDateRangePicker(
       context: context,
       helpText: context.l10n.aiRecapCustomRange,
-      firstDate: DateTime(1970),
+      firstDate: DatePickerRange.firstDate,
       lastDate: DateTime(now.year + 1, 12, 31),
       initialDateRange: current == null
           ? DateTimeRange(

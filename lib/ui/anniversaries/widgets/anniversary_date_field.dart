@@ -5,6 +5,7 @@ import 'package:node_diary/l10n/app_localizations.dart';
 
 import '../../../app/theme/app_radii.dart';
 import '../../../app/theme/app_spacing.dart';
+import '../../../utils/date_picker_range.dart';
 import '../viewmodels/anniversary_rule.dart';
 
 /// 编辑页的日期选择行：点按打开系统日期选择器。
@@ -20,9 +21,6 @@ class AnniversaryDateField extends StatelessWidget {
     this.showLunar = true,
   });
 
-  static final DateTime firstDate = DateTime(1900);
-  static final DateTime lastDate = DateTime(2100, 12, 31);
-
   final DateTime date;
   final ValueChanged<DateTime> onChanged;
   final bool showLunar;
@@ -32,8 +30,8 @@ class AnniversaryDateField extends StatelessWidget {
     final picked = await showDatePicker(
       context: context,
       initialDate: date,
-      firstDate: firstDate,
-      lastDate: lastDate,
+      firstDate: DatePickerRange.firstDate,
+      lastDate: DatePickerRange.lastDate,
       locale: Localizations.localeOf(context),
       helpText: l10n.anniversaryFieldDate,
       cancelText: l10n.commonCancel,
